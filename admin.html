@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BV Jewelry | Admin Panel</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111111; color: #f5f5f7; }
+        .glass-panel { background: #1c1c1e; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
+        
+        .input-field { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
+        .input-field:focus { border-color: #c5a059; }
+        .file-input { padding: 8px; font-size: 12px; cursor: pointer; }
+        select.input-field option { background-color: #1c1c1e; color: #f5f5f7; }
+        
+        .btn-primary { background: #c5a059; color: #000; font-weight: 600; padding: 12px 20px; border-radius: 8px; transition: opacity 0.3s; cursor: pointer; text-align: center; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; font-weight: 500; padding: 8px 16px; border-radius: 8px; transition: 0.3s; cursor: pointer; text-align: center; font-size: 13px;}
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 500; padding: 8px 16px; border-radius: 8px; transition: 0.3s; cursor: pointer; text-align: center; font-size: 13px;}
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+        
+        .admin-sidebar { position: fixed; inset-y: 0; left: -100%; z-index: 50; transition: 0.4s; width: 280px; }
+        .admin-sidebar.open { left: 0; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; display: none; }
+        .sidebar-overlay.active { display: block; }
+        
+        @media (min-width: 1024px) {
+            .admin-sidebar { position: static; width: 260px; margin: 16px; border-radius: 16px; }
+            .sidebar-overlay { display: none !important; }
+            .mobile-header { display: none !important; }
+        }
+        
+        .table-container { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        th, td { white-space: nowrap; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #c5a059; color: #000; padding: 12px 24px; border-radius: 8px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 9999; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        
+        .builder-section { border-left: 2px solid #c5a059; padding-left: 1rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col lg:flex-row relative">
+
+    <div id="toastMessage" class="toast">Збережено успішно!</div>
+
+    <div id="loginScreen" class="fixed inset-0 bg-[#111111] z-[100] flex items-center justify-center p-4 transition-opacity duration-500">
+        <div class="glass-panel p-8 w-full max-w-sm text-center shadow-2xl">
+            <h1 class="text-3xl font-serif mb-2 text-[#c5a059]">BV Admin</h1>
+            <p class="text-gray-500 text-sm mb-8">Логін: admin / Пароль: admin</p>
+            <form id="loginForm" class="flex flex-col gap-5 text-left">
+                <div><label class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 block">Логін (Email)</label><input type="text" id="username" class="input-field" required></div>
+                <div><label class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 block">Пароль</label><input type="password" id="password" class="input-field" required></div>
+                <button type="submit" class="btn-primary w-full mt-2">Увійти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mobile-header flex justify-between items-center p-4 glass-panel m-4 mb-0 lg:hidden z-30">
+        <h2 class="text-xl font-serif text-[#c5a059]">BV Admin</h2>
+        <button onclick="toggleAdminMenu()" class="text-white p-2"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminMenu()"></div>
+
+    <aside id="sidebar" class="admin-sidebar glass-panel flex flex-col h-full lg:h-[calc(100vh-32px)]">
+        <div class="p-6 border-b border-white/10 text-center hidden lg:block">
+            <h2 class="text-xl font-serif text-[#c5a059]">BV Jewelry</h2>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Control Panel</p>
+        </div>
+        <nav class="flex-1 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+            <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn w-full text-left px-4 py-3 rounded-lg bg-white/5 text-[#c5a059] font-medium transition text-sm">🛒 Замовлення</button>
+            <button onclick="switchTab('products')" id="tab-products" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">📦 Товари</button>
+            <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">🗂 Категорії</button>
+            <button onclick="switchTab('home-visuals')" id="tab-home-visuals" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">🖼 Головна (Банери)</button>
+            <button onclick="switchTab('exclusive')" id="tab-exclusive" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">💎 Ексклюзив</button>
+            <button onclick="switchTab('builder')" id="tab-builder" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">🎨 Конструктор та Кольори</button>
+            <button onclick="switchTab('price-builder')" id="tab-price-builder" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">📋 Редактор Прайсу</button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">⚙️ Налаштування</button>
+        </nav>
+        <div class="p-4 border-t border-white/10 space-y-2">
+            <a href="index.html" target="_blank" class="block w-full text-center py-2 text-xs bg-white/5 rounded-lg text-gray-300 hover:text-[#c5a059] transition">Перейти на сайт ↗</a>
+            <button onclick="logout()" class="w-full py-2 text-xs text-red-400 hover:text-red-300 transition">Вийти з панелі</button>
+        </div>
+    </aside>
+
+    <main id="mainContent" class="flex-1 p-4 overflow-y-auto h-full custom-scrollbar">
+        
+        <section id="content-orders" class="tab-content h-full">
+            <h2 class="text-2xl font-semibold mb-6">Управління замовленнями</h2>
+            <div class="glass-panel">
+                <div class="table-container border-none border-b border-white/10 rounded-b-none">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-white/5 uppercase text-[10px] text-gray-400 tracking-wider">
+                            <tr>
+                                <th class="p-4">ID / Дата</th>
+                                <th class="p-4">Клієнт</th>
+                                <th class="p-4">Товари</th>
+                                <th class="p-4">Сума</th>
+                                <th class="p-4">Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-products" class="tab-content h-full hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-semibold">Управління товарами</h2>
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <input type="text" id="prodSearch" onkeyup="searchProducts()" placeholder="Пошук..." class="input-field py-2 flex-grow sm:w-64">
+                    <button onclick="openProductModal()" class="btn-primary whitespace-nowrap">+ Додати товар</button>
+                </div>
+            </div>
+            <div class="glass-panel">
+                <div class="table-container border-none border-b border-white/10 rounded-b-none">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-white/5 uppercase text-[10px] text-gray-400 tracking-wider">
+                            <tr>
+                                <th class="p-4">Фото</th>
+                                <th class="p-4">Назва / ID</th>
+                                <th class="p-4">Категорія</th>
+                                <th class="p-4">Ціна</th>
+                                <th class="p-4">Статус</th>
+                                <th class="p-4">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+                <div class="p-4 text-sm text-gray-400 flex justify-between">
+                    <span id="pageInfo">Показано 0</span>
+                    <div class="flex gap-2">
+                        <button onclick="changePage(-1)" class="btn-secondary" id="btnPrevPage">Попередня</button>
+                        <button onclick="changePage(1)" class="btn-secondary" id="btnNextPage">Наступна</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-builder" class="tab-content hidden h-full">
+            <h2 class="text-2xl font-semibold mb-6">Конструктор Сторінок та Кольори</h2>
+            <div class="glass-panel p-6 mb-6">
+                <label class="text-[10px] uppercase text-gray-400 block mb-1">Оберіть сторінку для редагування</label>
+                <select id="builder-page-select" class="input-field" onchange="loadPageBuilderForm()">
+                    <option value="home_hero">Головна: Обкладинка (Hero)</option>
+                    <option value="about">Історія Atelier (Про нас)</option>
+                    <option value="warranty">Гарантія та Якість</option>
+                    <option value="terms">Умови та Доставка</option>
+                    <option value="reviews">Відгуки клієнтів</option>
+                </select>
+            </div>
+            <div id="builder-form-container" class="glass-panel p-6"></div>
+        </section>
+
+        <section id="content-categories" class="tab-content hidden h-full">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-semibold">Структура Категорій</h2>
+                <button onclick="openCategoryModal()" class="btn-primary w-full sm:w-auto">+ Головна Категорія</button>
+            </div>
+            <div class="glass-panel p-6">
+                <div id="categoriesListContainer" class="flex flex-col gap-4"></div>
+            </div>
+        </section>
+
+        <section id="content-home-visuals" class="tab-content hidden h-full">
+            <h2 class="text-2xl font-semibold mb-6">Головна (Слайдер Банерів)</h2>
+            <div class="glass-panel p-6 mb-6">
+                <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Налаштування розміру всіх банерів</h3>
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="w-full sm:w-1/2">
+                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Глобальні Пропорції</label>
+                        <select id="set-banner-ratio" class="input-field">
+                            <option value="3/1">Панорамний (3:1) - Стандарт</option>
+                            <option value="21/9">Широкоформатний кіно (21:9)</option>
+                            <option value="16/9">Класичний екран (16:9)</option>
+                            <option value="3/2">Високий журнал (3:2)</option>
+                        </select>
+                    </div>
+                    <button onclick="saveSiteSettings()" class="btn-primary w-full sm:w-auto">Застосувати розмір</button>
+                </div>
+            </div>
+            <div class="glass-panel p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059]">Банери в ротації</h3>
+                    <button onclick="openBannerModal()" class="text-xs text-blue-400 hover:text-white">+ Додати Банер</button>
+                </div>
+                <div id="bannersListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+        </section>
+
+        <section id="content-exclusive" class="tab-content hidden h-full pb-20">
+            <h2 class="text-2xl font-semibold mb-6">Сторінка "Ексклюзив"</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-panel p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059]">Етапи створення</h3>
+                        <button onclick="openProcessModal()" class="text-xs text-blue-400 hover:text-white transition">+ Додати етап</button>
+                    </div>
+                    <div id="exclusiveProcessList" class="flex flex-col gap-4"></div>
+                </div>
+                <div class="glass-panel p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059]">Кнопки "Матеріали"</h3>
+                        <button onclick="openMaterialModal()" class="text-xs text-blue-400 hover:text-white transition">+ Додати кнопку</button>
+                    </div>
+                    <div id="exclusiveMaterialsList" class="flex flex-col gap-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-price-builder" class="tab-content hidden h-full">
+            <h2 class="text-2xl font-semibold mb-6">Редактор Прайс-листа</h2>
+            <div class="glass-panel p-6">
+                <p class="text-xs text-gray-400 mb-6">Тут ви можете змінювати категорії послуг та ціни на ремонт (формат JSON).</p>
+                <textarea id="price-json-editor" class="input-field h-[60vh] font-mono text-xs" spellcheck="false"></textarea>
+                <button onclick="savePriceList()" class="btn-primary mt-4">Зберегти Прайс</button>
+            </div>
+        </section>
+
+        <section id="content-settings" class="tab-content hidden h-full">
+            <h2 class="text-2xl font-semibold mb-6">Глобальні Налаштування</h2>
+            <div class="glass-panel p-6 mb-6">
+                <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Курс золота (ГРН)</h3>
+                <input type="number" id="set-gold-rate" class="input-field text-lg font-bold text-[#c5a059] w-full sm:w-1/3">
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-panel p-6">
+                    <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Контакти</h3>
+                    <div class="flex flex-col gap-4">
+                        <input type="text" id="set-phone" class="input-field" placeholder="Телефон">
+                        <input type="text" id="set-tg" class="input-field" placeholder="Telegram Link">
+                        <input type="text" id="set-inst" class="input-field" placeholder="Instagram Link">
+                    </div>
+                </div>
+                <div class="glass-panel p-6">
+                    <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Адреси</h3>
+                    <div class="flex flex-col gap-4">
+                        <input type="text" id="set-addr1" class="input-field" placeholder="Адреса 1">
+                        <input type="text" id="set-addr2" class="input-field" placeholder="Адреса 2">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-right"><button onclick="saveSiteSettings()" class="btn-primary">Зберегти глобальні</button></div>
+        </section>
+
+    </main>
+
+    <div id="productModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4">
+        <div class="glass-panel p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold" id="prodModalTitle">Додати товар</h3>
+                <button type="button" onclick="closeProductModal()" class="text-gray-400 text-3xl leading-none hover:text-white">&times;</button>
+            </div>
+            <form id="productForm" class="flex flex-col gap-4">
+                <input type="hidden" id="prod-id">
+                <input type="hidden" id="prod-imgBase64"> 
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва (UA)</label><input type="text" id="prod-name" class="input-field" required></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва (EN)</label><input type="text" id="prod-name-en" class="input-field"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Артикул</label><input type="text" id="prod-sku" class="input-field" required></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Матеріал</label><input type="text" id="prod-variant" class="input-field" required></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Розміри</label><input type="text" id="prod-sizes" class="input-field" placeholder="15.5, 16.0"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Категорія</label><select id="prod-category" class="input-field" required onchange="updateSubcatOptions()"></select></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Підкатегорія</label><select id="prod-subcategory" class="input-field"></select></div>
+                </div>
+
+                <div class="bg-white/5 p-4 rounded-lg border border-white/10 mb-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-b border-white/10 pb-4">
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Тип ціноутворення</label>
+                            <select id="prod-price-type" class="input-field font-semibold bg-[#1a1a1a]" onchange="togglePriceMode()">
+                                <option value="manual">Фіксована ціна</option>
+                                <option value="auto">Авто-розрахунок</option>
+                            </select>
+                        </div>
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Акційна ціна (ГРН)</label><input type="number" id="prod-discount" class="input-field"></div>
+                    </div>
+                    <div id="price-mode-manual" class="grid grid-cols-1 gap-4">
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Ціна (ГРН)</label><input type="number" id="prod-price" class="input-field"></div>
+                    </div>
+                    <div id="price-mode-auto" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Вага (Грам)</label><input type="number" step="0.01" id="prod-weight" class="input-field" oninput="previewAutoPrice()"></div>
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Робота (ГРН)</label><input type="number" id="prod-work-cost" class="input-field" oninput="previewAutoPrice()"></div>
+                        <div class="md:col-span-2 text-right text-xs text-gray-400 mt-1">Разом: <span id="auto-price-preview" class="font-bold text-[#c5a059] text-sm ml-2">0 ₴</span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Статус</label><select id="prod-status" class="input-field"><option value="in-stock">В наявності</option><option value="out-stock">Немає</option><option value="pre-order">Під замовлення</option></select></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Мітка</label><select id="prod-badge" class="input-field"><option value="none">Без мітки</option><option value="new">Новинка</option><option value="exclusive">Ексклюзив</option><option value="sale">Sale</option></select></div>
+                </div>
+                
+                <div class="bg-white/5 p-4 rounded-lg border border-white/10">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-1">Фото товару</label>
+                    <input type="file" id="prod-img-file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'prodPreview', 'prod-imgBase64', 1)">
+                    <img id="prodPreview" class="h-32 w-32 object-cover rounded mt-2 hidden mx-auto border border-white/20">
+                </div>
+                
+                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис (UA)</label><textarea id="prod-desc" class="input-field h-20 resize-none"></textarea></div>
+                
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="closeProductModal()" class="flex-1 border border-white/10 rounded-lg text-sm text-gray-300 py-2">Скасувати</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти товар</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="catModalTitle">Додати Категорію</h3><form id="categoryForm" class="flex flex-col gap-4"><input type="hidden" id="cat-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ. без пробілів)</label><input type="text" id="cat-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва (UA)</label><input type="text" id="cat-name" class="input-field" required></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeCategoryModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+    <div id="level3Modal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="level3ModalTitle">Додати Під-підкатегорію</h3><form id="level3Form" class="flex flex-col gap-4"><input type="hidden" id="l3-parent-id"><input type="hidden" id="l3-sub-id"><input type="hidden" id="l3-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ)</label><input type="text" id="l3-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="l3-name" class="input-field" required></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeLevel3Modal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+    <div id="bannerModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-lg"><h3 class="text-lg font-semibold mb-4" id="bannerModalTitle">Банер</h3><form id="bannerForm" class="flex flex-col gap-4"><input type="hidden" id="banner-id"><input type="hidden" id="banner-img"> <div class="bg-white/5 p-4 rounded-lg"><input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'bannerPreview', 'banner-img', 2)"><img id="bannerPreview" class="w-full aspect-[21/9] object-cover rounded mt-2 hidden border border-white/20"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (catalog.html#sale)</label><input type="text" id="banner-link" class="input-field"></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeBannerModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+    <div id="processModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-lg"><h3 class="text-lg font-semibold mb-4" id="processModalTitle">Етап створення</h3><form id="processForm" class="flex flex-col gap-4" onsubmit="event.preventDefault(); saveProcessStep();"><input type="hidden" id="process-id"><input type="hidden" id="process-img"> <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="process-title" class="input-field" required></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис</label><textarea id="process-desc" class="input-field h-24 resize-none" required></textarea></div><div class="bg-white/5 p-4 rounded-lg"><input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'processPreview', 'process-img', 1)"><img id="processPreview" class="w-full aspect-[4/3] object-cover rounded mt-2 hidden border border-white/20"></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeProcessModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+    <div id="materialModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="materialModalTitle">Кнопка матеріалу</h3><form id="materialForm" class="flex flex-col gap-4" onsubmit="event.preventDefault(); saveMaterialOption();"><input type="hidden" id="material-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ)</label><input type="text" id="material-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Текст на кнопці</label><input type="text" id="material-label" class="input-field" required></div><div class="flex items-center gap-2 mt-2"><input type="checkbox" id="material-selected" class="w-4 h-4 accent-[#c5a059]"><label for="material-selected" class="text-[11px] text-gray-300">Вибрана за замовчуванням</label></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeMaterialModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'sb_secret_sT3umq1sRCFrcuQUsLDSdw_KX1-fNfB'; 
+        const supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV'; 
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let categories = [];
+        let products = [];
+        let banners = [];
+        let siteSettings = {};
+        let exclusiveProcess = [];
+        let exclusiveMaterials = [];
+        let pagesContentDB = {};
+        let priceListDB = [];
+        let ordersList = [];
+
+        let currentPage = 1;
+        const itemsPerPage = 15;
+        let filteredProducts = [];
+
+        function showNotification(msg) {
+            const toast = document.getElementById('toastMessage');
+            toast.innerText = msg; toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        function handleImageUpload(event, previewId, targetInputId, maxMb) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > maxMb * 1024 * 1024) return alert(`Файл занадто великий! Макс: ${maxMb}MB.`);
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById(previewId);
+                if(preview) { preview.src = e.target.result; preview.style.display = 'block'; preview.classList.remove('hidden'); }
+                const targetEl = document.getElementById(targetInputId);
+                if(targetEl) targetEl.value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- ХМАРНА АВТОРИЗАЦІЯ ---
+        if (sessionStorage.getItem('isAdminAuth') === 'true') {
+            document.getElementById('loginScreen').classList.add('hidden');
+            loadAllData();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            
+            // Заглушка для швидкого входу (тимчасова, поки не створиш адміна в Supabase)
+            if (u === 'admin' && p === 'admin') {
+                sessionStorage.setItem('isAdminAuth', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadAllData();
+                return;
+            }
+
+            // Реальна авторизація через Supabase Auth
+            const { data, error } = await _supabase.auth.signInWithPassword({ email: u, password: p });
+            if (error) return alert('Помилка входу: ' + error.message);
+            
+            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
+            if (profile && profile.role === 'admin') {
+                sessionStorage.setItem('isAdminAuth', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadAllData();
+            } else {
+                alert('У вас немає доступу до панелі адміністратора!');
+                await _supabase.auth.signOut();
+            }
+        });
+
+        // --- УНІВЕРСАЛЬНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ В ХМАРУ ---
+        async function saveToCloudStorage(key, value) {
+            await _supabase.from('site_storage').upsert([{ key: key, value: value }]);
+        }
+
+        async function loadAllData() {
+            // 1. Завантаження замовлень
+            const { data: ords } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
+            if(ords) ordersList = ords;
+            renderOrders();
+
+            // 2. Завантаження товарів
+            const { data: prods } = await _supabase.from('products').select('*');
+            if(prods) products = prods;
+            filteredProducts = [...products];
+            
+            // 3. Завантаження налаштувань сайту
+            const { data: storage } = await _supabase.from('site_storage').select('*');
+            if(storage) {
+                storage.forEach(item => {
+                    if (item.key === 'bv_categories_tree') categories = item.value;
+                    if (item.key === 'bv_banners') banners = item.value;
+                    if (item.key === 'bv_settings') siteSettings = item.value;
+                    if (item.key === 'bv_pages_content') pagesContentDB = item.value;
+                    if (item.key === 'bv_price_list') priceListDB = item.value;
+                    if (item.key === 'bv_exclusive_process') exclusiveProcess = item.value;
+                    if (item.key === 'bv_exclusive_materials') exclusiveMaterials = item.value;
+                });
+            }
+
+            // Рендер інтерфейсу
+            populateCategorySelects();
+            renderProducts();
+            renderCategoriesTree();
+            renderBannersAdmin();
+            renderExclusiveProcessAdmin();
+            renderExclusiveMaterialsAdmin();
+            populateSettings();
+            document.getElementById('price-json-editor').value = JSON.stringify(priceListDB, null, 4);
+        }
+
+        function toggleAdminMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.remove('bg-white/5', 'text-[#c5a059]'); btn.classList.add('text-gray-400'); });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById('tab-' + tabName).classList.add('bg-white/5', 'text-[#c5a059]');
+            document.getElementById('tab-' + tabName).classList.remove('text-gray-400');
+            document.getElementById('content-' + tabName).classList.remove('hidden');
+            if(tabName === 'builder') loadPageBuilderForm();
+            if(tabName === 'orders') loadAllData(); // Оновлюємо замовлення при переході
+            if(window.innerWidth < 1024) toggleAdminMenu();
+        }
+
+        // --- ЗАМОВЛЕННЯ ---
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            if(ordersList.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Замовлень поки немає.</td></tr>';
+            
+            ordersList.forEach(o => {
+                const date = new Date(o.created_at).toLocaleString('uk-UA');
+                const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.title} (${i.variant}) x${i.qty}</div>`).join('');
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
+                        <td class="p-3"><div class="font-bold text-[#c5a059] text-base">#${o.id}</div><div class="text-[10px] text-gray-500 mt-1">${date}</div></td>
+                        <td class="p-3 text-xs text-white">${o.user_email}</td>
+                        <td class="p-3">${itemsHtml}</td>
+                        <td class="p-3 font-semibold text-white">${o.total_price} ₴</td>
+                        <td class="p-3">
+                            <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
+                                <option value="pending" ${o.status==='pending'?'selected':''}>Очікує</option>
+                                <option value="accepted" ${o.status==='accepted'?'selected':''}>В обробці</option>
+                                <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено</option>
+                                <option value="completed" ${o.status==='completed'?'selected':''}>Виконано</option>
+                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateOrderStatus(id, newStatus) {
+            const { error } = await _supabase.from('orders').update({status: newStatus}).eq('id', id);
+            if (error) return alert("Помилка оновлення: " + error.message);
+            showNotification('Статус замовлення змінено!');
+        }
+
+        // --- ТОВАРИ ---
+        function populateCategorySelects() {
+            const catSelect = document.getElementById('prod-category');
+            catSelect.innerHTML = '<option value="" disabled selected>Виберіть...</option>';
+            categories.forEach(c => catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+        }
+
+        function updateSubcatOptions() {
+            const catId = document.getElementById('prod-category').value;
+            const subSelect = document.getElementById('prod-subcategory');
+            subSelect.innerHTML = '';
+            const parent = categories.find(c => c.id === catId);
+            if(parent && parent.subcategories && parent.subcategories.length > 0) {
+                parent.subcategories.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+            } else {
+                subSelect.innerHTML = '<option value="none">Немає</option>';
+            }
+        }
+
+        function searchProducts() {
+            const term = document.getElementById('prodSearch').value.toLowerCase();
+            filteredProducts = products.filter(p => p.name.toLowerCase().includes(term) || (p.sku && p.sku.toLowerCase().includes(term)));
+            currentPage = 1; renderProducts();
+        }
+
+        function changePage(dir) { currentPage += dir; renderProducts(); }
+
+        function renderProducts() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            const total = filteredProducts.length;
+            const totalPages = Math.ceil(total / itemsPerPage) || 1;
+            if(currentPage < 1) currentPage = 1;
+            if(currentPage > totalPages) currentPage = totalPages;
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const currentBatch = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+            document.getElementById('pageInfo').innerText = `Показано ${startIndex + (total>0?1:0)}-${startIndex + currentBatch.length} з ${total}`;
+            if(total === 0) return tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Порожньо.</td></tr>';
+            
+            currentBatch.forEach(p => {
+                const pName = categories.find(c => c.id === p.category)?.name || p.category;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 border-b border-white/5">
+                        <td class="p-3"><img src="${p.img || p.image}" class="w-10 h-10 object-cover rounded border border-white/10"></td>
+                        <td class="p-3 font-medium min-w-[140px] text-xs"><span class="text-[10px] text-gray-500 block mb-1">Арт: ${p.sku || p.id}</span>${p.name}</td>
+                        <td class="p-3 text-gray-400 text-xs">${pName}</td>
+                        <td class="p-3 text-[#c5a059] text-xs font-semibold">${p.price} ₴</td>
+                        <td class="p-3 text-xs"><span class="${p.status === 'out-stock' ? 'text-red-500' : 'text-green-500'}">${p.status === 'out-stock' ? 'Немає' : 'Є'}</span></td>
+                        <td class="p-3"><button onclick="openProductModal('${p.id}')" class="text-blue-400 text-xs mr-3 font-semibold">Ред</button><button onclick="deleteProduct('${p.id}')" class="text-red-500 text-xs font-semibold">Видал</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function togglePriceMode() {
+            const type = document.getElementById('prod-price-type').value;
+            if (type === 'auto') {
+                document.getElementById('price-mode-manual').classList.add('hidden');
+                document.getElementById('price-mode-auto').classList.remove('hidden');
+                previewAutoPrice();
+            } else {
+                document.getElementById('price-mode-auto').classList.add('hidden');
+                document.getElementById('price-mode-manual').classList.remove('hidden');
+            }
+        }
+
+        function previewAutoPrice() {
+            const weight = parseFloat(document.getElementById('prod-weight').value) || 0;
+            const work = parseFloat(document.getElementById('prod-work-cost').value) || 0;
+            const rate = Number(siteSettings.goldRate) || 0;
+            document.getElementById('auto-price-preview').innerText = Math.round((weight * rate) + work) + ' ₴';
+        }
+
+        function openProductModal(id = null) {
+            document.getElementById('productForm').reset(); 
+            document.getElementById('prodPreview').style.display = 'none'; 
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prodModalTitle').innerText = 'Додати товар';
+            updateSubcatOptions();
+            
+            if(id) {
+                const p = products.find(prod => prod.id === id);
+                document.getElementById('prod-id').value = p.id; 
+                document.getElementById('prod-name').value = p.name; 
+                document.getElementById('prod-name-en').value = p.nameEN || ''; 
+                document.getElementById('prod-sku').value = p.sku || p.id; 
+                document.getElementById('prod-variant').value = p.variant || '';
+                document.getElementById('prod-sizes').value = p.sizes ? p.sizes.join(', ') : '';
+                document.getElementById('prod-category').value = p.category; 
+                updateSubcatOptions(); 
+                setTimeout(() => document.getElementById('prod-subcategory').value = p.subcategory || 'none', 50);
+                
+                document.getElementById('prod-status').value = p.status || 'in-stock'; 
+                document.getElementById('prod-badge').value = p.badge || 'none'; 
+                
+                document.getElementById('prod-price-type').value = p.priceType || 'manual';
+                document.getElementById('prod-price').value = p.price || '';
+                document.getElementById('prod-weight').value = p.weight || '';
+                document.getElementById('prod-work-cost').value = p.workCost || '';
+                togglePriceMode();
+                
+                document.getElementById('prod-discount').value = p.discount || ''; 
+                document.getElementById('prod-imgBase64').value = p.img || p.image; 
+                if(p.img || p.image) { document.getElementById('prodPreview').src = p.img || p.image; document.getElementById('prodPreview').style.display = 'block'; }
+                document.getElementById('prod-desc').value = p.desc || ''; 
+                document.getElementById('prodModalTitle').innerText = 'Редагувати товар';
+            }
+            document.getElementById('productModal').classList.remove('hidden'); 
+            setTimeout(() => document.getElementById('productModal').classList.remove('opacity-0'), 10);
+        }
+
+        function closeProductModal() { document.getElementById('productModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('productModal').classList.add('hidden'), 300); }
+
+        document.getElementById('productForm').onsubmit = async (e) => {
+            e.preventDefault(); 
+            const idInput = document.getElementById('prod-id').value;
+            const priceType = document.getElementById('prod-price-type').value;
+            let finalPrice = priceType === 'auto' 
+                ? Math.round(((Number(document.getElementById('prod-weight').value)||0) * (Number(siteSettings.goldRate)||0)) + (Number(document.getElementById('prod-work-cost').value)||0))
+                : (Number(document.getElementById('prod-price').value)||0);
+
+            const prodData = {
+                id: idInput || 'prod_' + Date.now(),
+                sku: document.getElementById('prod-sku').value,
+                name: document.getElementById('prod-name').value,
+                nameEN: document.getElementById('prod-name-en').value,
+                variant: document.getElementById('prod-variant').value,
+                sizes: document.getElementById('prod-sizes').value.split(',').map(s=>s.trim()).filter(s=>s),
+                category: document.getElementById('prod-category').value,
+                subcategory: document.getElementById('prod-subcategory').value,
+                status: document.getElementById('prod-status').value,
+                badge: document.getElementById('prod-badge').value,
+                priceType: priceType,
+                weight: Number(document.getElementById('prod-weight').value)||0,
+                workCost: Number(document.getElementById('prod-work-cost').value)||0,
+                price: finalPrice,
+                discount: document.getElementById('prod-discount').value ? Number(document.getElementById('prod-discount').value) : null,
+                img: document.getElementById('prod-imgBase64').value,
+                desc: document.getElementById('prod-desc').value
+            };
+
+            // Зберігаємо товар у Supabase
+            const { error } = await _supabase.from('products').upsert(prodData);
+            if (error) return alert("Помилка збереження товару: " + error.message);
+
+            if (idInput) { const i = products.findIndex(p => p.id === idInput); if(i !== -1) products[i] = prodData; } 
+            else { products.unshift(prodData); }
+
+            filteredProducts = [...products];
+            renderProducts(); 
+            closeProductModal();
+            showNotification('Товар збережено в хмару!');
+        };
+
+        async function deleteProduct(id) {
+            if(confirm('Видалити цей товар з бази?')) {
+                await _supabase.from('products').delete().eq('id', id);
+                products = products.filter(p => p.id !== id);
+                filteredProducts = [...products];
+                renderProducts();
+                showNotification('Товар видалено');
+            }
+        }
+
+        // --- КАТЕГОРІЇ ---
+        function openLevel3Modal(parentId, subId) {
+            document.getElementById('level3Form').reset();
+            document.getElementById('l3-parent-id').value = parentId;
+            document.getElementById('l3-sub-id').value = subId;
+            document.getElementById('level3Modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('level3Modal').classList.remove('opacity-0'), 10);
+        }
+        function closeLevel3Modal() { document.getElementById('level3Modal').classList.add('opacity-0'); setTimeout(() => document.getElementById('level3Modal').classList.add('hidden'), 300); }
+        
+        document.getElementById('level3Form').onsubmit = async (e) => {
+            e.preventDefault();
+            const parentId = document.getElementById('l3-parent-id').value;
+            const subId = document.getElementById('l3-sub-id').value;
+            const newId = document.getElementById('l3-id').value.toLowerCase();
+            const name = document.getElementById('l3-name').value;
+            
+            const parent = categories.find(c => c.id === parentId);
+            const sub = parent.subcategories.find(s => s.id === subId);
+            if(!sub.subcategories) sub.subcategories = [];
+            
+            if(sub.subcategories.find(s => s.id === newId)) return alert('Такий ID вже є!');
+            sub.subcategories.push({ id: newId, name: name });
+            
+            await saveToCloudStorage('bv_categories_tree', categories);
+            renderCategoriesTree(); closeLevel3Modal(); showNotification('Додано!');
+        };
+        async function deleteLevel3(parentId, subId, l3Id) {
+            if(confirm('Видалити під-підкатегорію?')) {
+                const sub = categories.find(c => c.id === parentId).subcategories.find(s => s.id === subId);
+                sub.subcategories = sub.subcategories.filter(l => l.id !== l3Id);
+                await saveToCloudStorage('bv_categories_tree', categories);
+                renderCategoriesTree(); showNotification('Видалено');
+            }
+        }
+        
+        function renderCategoriesTree() {
+            const container = document.getElementById('categoriesListContainer');
+            container.innerHTML = '';
+            categories.forEach(c => {
+                let subHtml = '';
+                if(c.subcategories && c.subcategories.length > 0) {
+                    c.subcategories.forEach(sub => {
+                        let level3Html = '';
+                        if(sub.subcategories && sub.subcategories.length > 0) {
+                            sub.subcategories.forEach(l3 => {
+                                level3Html += `
+                                    <div class="flex justify-between items-center py-1 mt-1 ml-6 pl-4 border-l border-white/10 group">
+                                        <div class="text-xs text-gray-400">↳ ${l3.name}</div>
+                                        <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                            <button onclick="deleteLevel3('${c.id}', '${sub.id}', '${l3.id}')" class="text-red-500 text-[10px]">Видал</button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                        subHtml += `
+                            <div class="py-2 border-b border-white/5 ml-4 pl-4 border-l-2 border-white/10 group">
+                                <div class="flex justify-between items-center">
+                                    <div><span class="text-xs text-[#c5a059] mr-2">${sub.id}</span> <span class="text-sm">${sub.name}</span></div>
+                                    <div class="opacity-0 group-hover:opacity-100 transition flex gap-2">
+                                        <button onclick="openLevel3Modal('${c.id}', '${sub.id}')" class="text-green-400 text-xs">+ Під-підкат</button>
+                                        <button onclick="deleteSubCategory('${c.id}', '${sub.id}')" class="text-red-500 text-xs">Видал</button>
+                                    </div>
+                                </div>
+                                ${level3Html}
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML += `
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="font-semibold text-white"><span class="text-xs text-gray-500 mr-2">${c.id}</span> ${c.name}</div>
+                            <div class="flex gap-3">
+                                <button onclick="openSubCategoryModal('${c.id}')" class="text-green-400 text-xs">+ Підкатегорія</button>
+                                <button onclick="deleteCategory('${c.id}')" class="text-red-500 text-xs">Видал</button>
+                            </div>
+                        </div>
+                        ${subHtml ? `<div>${subHtml}</div>` : '<div class="text-xs text-gray-500 ml-5 mt-2">Немає підкатегорій</div>'}
+                    </div>
+                `;
+            });
+        }
+
+        function openCategoryModal(id = null) {
+            document.getElementById('categoryForm').reset();
+            document.getElementById('cat-old-id').value = '';
+            document.getElementById('catModalTitle').innerText = 'Додати категорію';
+            if (id) {
+                const c = categories.find(cat => cat.id === id);
+                document.getElementById('cat-old-id').value = c.id;
+                document.getElementById('cat-id').value = c.id;
+                document.getElementById('cat-name').value = c.name;
+                document.getElementById('catModalTitle').innerText = 'Редагувати';
+            }
+            document.getElementById('categoryModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('categoryModal').classList.remove('opacity-0'), 10);
+        }
+        function closeCategoryModal() { document.getElementById('categoryModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('categoryModal').classList.add('hidden'), 300); }
+
+        document.getElementById('categoryForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const oldId = document.getElementById('cat-old-id').value;
+            const newId = document.getElementById('cat-id').value.toLowerCase();
+            const name = document.getElementById('cat-name').value;
+
+            if (oldId) {
+                const c = categories.find(cat => cat.id === oldId);
+                c.id = newId; c.name = name;
+            } else {
+                if(categories.find(c => c.id === newId)) return alert('ID вже існує!');
+                categories.push({ id: newId, name: name, subcategories: [] });
+            }
+            await saveToCloudStorage('bv_categories_tree', categories);
+            renderCategoriesTree(); populateCategorySelects(); closeCategoryModal(); showNotification('Збережено');
+        };
+
+        async function deleteCategory(id) {
+            if(confirm('Видалити категорію?')) {
+                categories = categories.filter(c => c.id !== id);
+                await saveToCloudStorage('bv_categories_tree', categories);
+                renderCategoriesTree(); populateCategorySelects(); showNotification('Видалено');
+            }
+        }
+
+        function openSubCategoryModal(parentId, subId = null) {
+            document.getElementById('subCategoryForm').reset();
+            document.getElementById('subcat-parent-id').value = parentId;
+            document.getElementById('subcat-old-id').value = '';
+            document.getElementById('subCatModalTitle').innerText = 'Додати підкатегорію';
+            if (subId) {
+                const parent = categories.find(c => c.id === parentId);
+                const sub = parent.subcategories.find(s => s.id === subId);
+                document.getElementById('subcat-old-id').value = sub.id;
+                document.getElementById('subcat-id').value = sub.id;
+                document.getElementById('subcat-name').value = sub.name;
+                document.getElementById('subCatModalTitle').innerText = 'Редагувати';
+            }
+            document.getElementById('subCategoryModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('subCategoryModal').classList.remove('opacity-0'), 10);
+        }
+        function closeSubCategoryModal() { document.getElementById('subCategoryModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('subCategoryModal').classList.add('hidden'), 300); }
+
+        async function deleteSubCategory(parentId, subId) {
+            if(confirm('Видалити підкатегорію?')) {
+                const parent = categories.find(c => c.id === parentId);
+                parent.subcategories = parent.subcategories.filter(s => s.id !== subId);
+                await saveToCloudStorage('bv_categories_tree', categories);
+                renderCategoriesTree(); showNotification('Видалено');
+            }
+        }
+
+        // --- БАНЕРИ ---
+        function renderBannersAdmin() {
+            const list = document.getElementById('bannersListContainer');
+            list.innerHTML = '';
+            let ratio = siteSettings.bannerRatio || '3/1';
+
+            banners.forEach((b, index) => {
+                list.innerHTML += `
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col gap-3 relative group">
+                        <div class="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-[10px] font-bold z-10 text-[#c5a059]">№ ${index + 1}</div>
+                        <img src="${b.img}" class="w-full object-cover rounded border border-white/20" style="aspect-ratio: ${ratio};">
+                        <div class="text-xs text-gray-400 mt-2 truncate">Лінк: ${b.link || 'Немає'}</div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="openBannerModal(${b.id})" class="flex-1 btn-secondary text-xs py-1">Ред</button>
+                            <button onclick="deleteBanner(${b.id})" class="flex-1 btn-danger text-xs py-1">Видалити</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openBannerModal(id = null) {
+            document.getElementById('bannerForm').reset();
+            document.getElementById('bannerPreview').style.display = 'none';
+            document.getElementById('banner-id').value = '';
+            document.getElementById('banner-img').value = '';
+            document.getElementById('bannerModalTitle').innerText = 'Додати Банер';
+            
+            if(id) {
+                const b = banners.find(ban => ban.id === id);
+                document.getElementById('banner-id').value = b.id;
+                document.getElementById('banner-img').value = b.img;
+                document.getElementById('banner-link').value = b.link || '';
+                document.getElementById('bannerPreview').src = b.img;
+                let ratio = siteSettings.bannerRatio || '3/1';
+                document.getElementById('bannerPreview').style.aspectRatio = ratio;
+                document.getElementById('bannerPreview').style.display = 'block';
+                document.getElementById('bannerModalTitle').innerText = 'Редагувати Банер';
+            }
+            document.getElementById('bannerModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('bannerModal').classList.remove('opacity-0'), 10);
+        }
+        function closeBannerModal() { document.getElementById('bannerModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('bannerModal').classList.add('hidden'), 300); }
+
+        document.getElementById('bannerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const idInput = document.getElementById('banner-id').value;
+            const imgData = document.getElementById('banner-img').value;
+            if(!imgData) return alert('Будь ласка, завантажте фото!');
+
+            const bData = { id: idInput ? parseInt(idInput) : Date.now(), img: imgData, link: document.getElementById('banner-link').value };
+            if(idInput) { const idx = banners.findIndex(b => b.id === parseInt(idInput)); if(idx !== -1) banners[idx] = bData; } 
+            else { banners.push(bData); }
+            
+            await saveToCloudStorage('bv_banners', banners);
+            renderBannersAdmin(); closeBannerModal(); showNotification('Збережено!');
+        };
+
+        async function deleteBanner(id) {
+            if(confirm('Видалити цей банер?')) {
+                banners = banners.filter(b => b.id !== id);
+                await saveToCloudStorage('bv_banners', banners);
+                renderBannersAdmin(); showNotification('Видалено');
+            }
+        }
+
+        // --- ЕКСКЛЮЗИВ ---
+        function renderExclusiveProcessAdmin() {
+            const list = document.getElementById('exclusiveProcessList');
+            list.innerHTML = '';
+            exclusiveProcess.forEach((step, index) => {
+                list.innerHTML += `
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col md:flex-row gap-4 items-center relative">
+                        <div class="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-[10px] font-bold z-10 text-[#c5a059]">Крок ${index + 1}</div>
+                        <img src="${step.img}" class="w-full md:w-32 aspect-[4/3] object-cover rounded border border-white/20">
+                        <div class="flex-grow w-full">
+                            <h4 class="font-serif text-lg mb-1">${step.title}</h4>
+                            <p class="text-xs text-gray-400 line-clamp-2">${step.desc}</p>
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                            <button onclick="openProcessModal(${step.id})" class="flex-1 btn-secondary text-xs px-4">Ред</button>
+                            <button onclick="deleteProcessStep(${step.id})" class="flex-1 btn-danger text-xs px-4">Видалити</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openProcessModal(id = null) {
+            document.getElementById('processForm').reset();
+            document.getElementById('processPreview').style.display = 'none';
+            document.getElementById('process-id').value = '';
+            document.getElementById('process-img').value = '';
+            document.getElementById('processModalTitle').innerText = 'Додати етап';
+            
+            if(id) {
+                const step = exclusiveProcess.find(s => s.id === id);
+                document.getElementById('process-id').value = step.id;
+                document.getElementById('process-title').value = step.title;
+                document.getElementById('process-desc').value = step.desc;
+                document.getElementById('process-img').value = step.img;
+                document.getElementById('processPreview').src = step.img;
+                document.getElementById('processPreview').style.display = 'block';
+                document.getElementById('processModalTitle').innerText = 'Редагувати етап';
+            }
+            document.getElementById('processModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('processModal').classList.remove('opacity-0'), 10);
+        }
+        function closeProcessModal() { document.getElementById('processModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('processModal').classList.add('hidden'), 300); }
+
+        async function saveProcessStep() {
+            const idInput = document.getElementById('process-id').value;
+            const imgData = document.getElementById('process-img').value;
+            if(!imgData) return alert('Завантажте фото!');
+
+            const stepData = { id: idInput ? parseInt(idInput) : Date.now(), title: document.getElementById('process-title').value, desc: document.getElementById('process-desc').value, img: imgData };
+            if(idInput) { const idx = exclusiveProcess.findIndex(s => s.id === parseInt(idInput)); if(idx !== -1) exclusiveProcess[idx] = stepData; } 
+            else { exclusiveProcess.push(stepData); }
+            
+            await saveToCloudStorage('bv_exclusive_process', exclusiveProcess);
+            renderExclusiveProcessAdmin(); closeProcessModal(); showNotification('Збережено!');
+        }
+
+        async function deleteProcessStep(id) {
+            if(confirm('Видалити цей етап?')) {
+                exclusiveProcess = exclusiveProcess.filter(s => s.id !== id);
+                await saveToCloudStorage('bv_exclusive_process', exclusiveProcess);
+                renderExclusiveProcessAdmin(); showNotification('Видалено');
+            }
+        }
+
+        function renderExclusiveMaterialsAdmin() {
+            const list = document.getElementById('exclusiveMaterialsList');
+            list.innerHTML = '';
+            exclusiveMaterials.forEach((mat) => {
+                list.innerHTML += `
+                    <div class="bg-white/5 p-3 rounded-lg border ${mat.selected ? 'border-[#c5a059]' : 'border-white/10'} flex justify-between items-center relative">
+                        <div>
+                            <span class="text-sm font-medium ${mat.selected ? 'text-[#c5a059]' : 'text-white'}">${mat.label}</span>
+                            <span class="text-[10px] text-gray-500 ml-2">ID: ${mat.id}</span>
+                            ${mat.selected ? '<span class="text-[9px] bg-[#c5a059]/20 text-[#c5a059] px-2 py-0.5 rounded ml-2 uppercase tracking-wider">За замовчуванням</span>' : ''}
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openMaterialModal('${mat.id}')" class="text-blue-400 text-xs px-2 hover:underline">Ред</button>
+                            <button onclick="deleteMaterialOption('${mat.id}')" class="text-red-500 text-xs px-2 hover:underline">Видал</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openMaterialModal(id = null) {
+            document.getElementById('materialForm').reset();
+            document.getElementById('material-old-id').value = '';
+            document.getElementById('materialModalTitle').innerText = 'Додати матеріал';
+            if(id) {
+                const mat = exclusiveMaterials.find(m => m.id === id);
+                document.getElementById('material-old-id').value = mat.id;
+                document.getElementById('material-id').value = mat.id;
+                document.getElementById('material-label').value = mat.label;
+                document.getElementById('material-selected').checked = mat.selected;
+                document.getElementById('materialModalTitle').innerText = 'Редагувати матеріал';
+            }
+            document.getElementById('materialModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('materialModal').classList.remove('opacity-0'), 10);
+        }
+        function closeMaterialModal() { document.getElementById('materialModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('materialModal').classList.add('hidden'), 300); }
+
+        async function saveMaterialOption() {
+            const oldId = document.getElementById('material-old-id').value;
+            const newId = document.getElementById('material-id').value.toLowerCase();
+            const isSelected = document.getElementById('material-selected').checked;
+            
+            if(isSelected) exclusiveMaterials.forEach(m => m.selected = false);
+
+            const matData = { id: newId, label: document.getElementById('material-label').value, selected: isSelected };
+            
+            if (oldId) {
+                const idx = exclusiveMaterials.findIndex(m => m.id === oldId);
+                if(idx !== -1) exclusiveMaterials[idx] = matData;
+            } else {
+                if(exclusiveMaterials.find(m => m.id === newId)) return alert('Такий ID вже існує!');
+                exclusiveMaterials.push(matData);
+            }
+            
+            if(!exclusiveMaterials.find(m => m.selected) && exclusiveMaterials.length > 0) { exclusiveMaterials[0].selected = true; }
+
+            await saveToCloudStorage('bv_exclusive_materials', exclusiveMaterials);
+            renderExclusiveMaterialsAdmin();
+            closeMaterialModal();
+            showNotification('Кнопку збережено!');
+        }
+
+        async function deleteMaterialOption(id) {
+            if(confirm('Видалити цю кнопку з форми?')) {
+                exclusiveMaterials = exclusiveMaterials.filter(m => m.id !== id);
+                if(!exclusiveMaterials.find(m => m.selected) && exclusiveMaterials.length > 0) { exclusiveMaterials[0].selected = true; }
+                await saveToCloudStorage('bv_exclusive_materials', exclusiveMaterials);
+                renderExclusiveMaterialsAdmin();
+                showNotification('Кнопку видалено');
+            }
+        }
+
+        // --- КОНСТРУКТОР СТОРІНОК ---
+        function loadPageBuilderForm() {
+            const pageId = document.getElementById('builder-page-select').value;
+            const container = document.getElementById('builder-form-container');
+            const data = pagesContentDB[pageId] || {title: '', content: '', subtitle: '', titleColor: '#ffffff', subColor: '#cccccc', heroBg: '', heroOpacity: 0.4};
+
+            if(pageId === 'home_hero') {
+                container.innerHTML = `
+                    <div class="builder-section">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Головний заголовок Hero</label>
+                                <input type="text" id="bld-hero-title" class="input-field" value="${data.title || ''}">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Колір заголовка</label>
+                                <input type="color" id="bld-hero-title-color" class="input-field h-[46px] p-1 cursor-pointer" value="${data.titleColor || '#ffffff'}">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Підзаголовок Hero</label>
+                                <input type="text" id="bld-hero-sub" class="input-field" value="${data.subtitle || ''}">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Колір підзаголовка</label>
+                                <input type="color" id="bld-hero-sub-color" class="input-field h-[46px] p-1 cursor-pointer" value="${data.subColor || '#cccccc'}">
+                            </div>
+                        </div>
+
+                        <div class="border-t border-white/10 pt-4 mt-4 mb-4">
+                            <h4 class="text-sm font-semibold text-[#c5a059] mb-3">Фонове зображення (Hero)</h4>
+                            <div class="grid grid-cols-1 gap-4 mb-4">
+                                <div>
+                                    <label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (URL) або завантаження файлу</label>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <input type="text" id="bld-hero-bg" class="input-field flex-grow" placeholder="https://..." value="${data.heroBg || siteSettings.heroBg || ''}">
+                                        <div class="relative overflow-hidden bg-white/10 hover:bg-white/20 transition border border-white/20 rounded-lg px-4 py-2 cursor-pointer whitespace-nowrap flex items-center justify-center">
+                                            <span class="text-xs text-blue-400 font-medium">📁 З файлу</span>
+                                            <input type="file" accept="image/png, image/jpeg, image/webp" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(event, 'heroPreview', 'bld-hero-bg', 3)">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-1/2">
+                                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Затемнення фону (0.0 - 1.0)</label>
+                                        <input type="number" step="0.1" min="0" max="1" id="bld-hero-opacity" class="input-field" value="${data.heroOpacity !== undefined ? data.heroOpacity : (siteSettings.heroOpacity !== undefined ? siteSettings.heroOpacity : 0.4)}">
+                                    </div>
+                                    <div class="w-1/2">
+                                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Прев'ю фону</label>
+                                        <img id="heroPreview" src="${data.heroBg || siteSettings.heroBg || ''}" class="h-16 w-full object-cover rounded border border-white/20 ${data.heroBg || siteSettings.heroBg ? '' : 'hidden'}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="saveBuilderData('${pageId}')" class="btn-primary w-full sm:w-auto">Зберегти налаштування Hero</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="builder-section">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Заголовок Сторінки</label>
+                                <input type="text" id="bld-page-title" class="input-field" value="${data.title || ''}">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Колір заголовка</label>
+                                <input type="color" id="bld-page-title-color" class="input-field h-[46px] p-1 cursor-pointer" value="${data.titleColor || '#ffffff'}">
+                            </div>
+                        </div>
+                        
+                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Контент (HTML підтримується)</label>
+                        <textarea id="bld-page-content" class="input-field h-[40vh] font-mono text-xs leading-relaxed mb-4" spellcheck="false">${data.content || ''}</textarea>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                             <div>
+                                <label class="text-[10px] uppercase text-gray-400 block mb-1">Колір тексту / підзаголовків на сторінці</label>
+                                <input type="color" id="bld-page-sub-color" class="input-field h-[46px] p-1 cursor-pointer" value="${data.subColor || '#cccccc'}">
+                            </div>
+                        </div>
+
+                        <button onclick="saveBuilderData('${pageId}')" class="btn-primary w-full sm:w-auto mt-4">Зберегти Сторінку</button>
+                    </div>
+                `;
+            }
+        }
+
+        async function saveBuilderData(pageId) {
+            if (!pagesContentDB[pageId]) pagesContentDB[pageId] = {};
+            
+            if(pageId === 'home_hero') {
+                pagesContentDB[pageId].title = document.getElementById('bld-hero-title').value;
+                pagesContentDB[pageId].titleColor = document.getElementById('bld-hero-title-color').value;
+                pagesContentDB[pageId].subtitle = document.getElementById('bld-hero-sub').value;
+                pagesContentDB[pageId].subColor = document.getElementById('bld-hero-sub-color').value;
+                pagesContentDB[pageId].heroBg = document.getElementById('bld-hero-bg').value;
+                pagesContentDB[pageId].heroOpacity = document.getElementById('bld-hero-opacity').value;
+            } else {
+                pagesContentDB[pageId].title = document.getElementById('bld-page-title').value;
+                pagesContentDB[pageId].titleColor = document.getElementById('bld-page-title-color').value;
+                pagesContentDB[pageId].content = document.getElementById('bld-page-content').value;
+                pagesContentDB[pageId].subColor = document.getElementById('bld-page-sub-color').value;
+            }
+            
+            await saveToCloudStorage('bv_pages_content', pagesContentDB);
+            showNotification('Сторінку/Налаштування оновлено!');
+        }
+
+        // --- ПРАЙС-БІЛДЕР ---
+        async function savePriceList() {
+            try {
+                const newJson = document.getElementById('price-json-editor').value;
+                priceListDB = JSON.parse(newJson);
+                await saveToCloudStorage('bv_price_list', priceListDB);
+                showNotification('Прайс-лист збережено в хмару!');
+            } catch (e) {
+                alert('Помилка в форматі JSON! Перевірте синтаксис (коми, лапки).');
+            }
+        }
+
+        // --- НАЛАШТУВАННЯ ---
+        function populateSettings() {
+            ['phone','tg','inst','addr1','addr2', 'gold-rate', 'banner-ratio'].forEach(k => {
+                const mapKey = k==='tg'?'tgLink':(k==='inst'?'instLink':(k==='gold-rate'?'goldRate':(k==='banner-ratio'?'bannerRatio':k)));
+                if(document.getElementById(`set-${k}`)) document.getElementById(`set-${k}`).value = siteSettings[mapKey] || (k==='banner-ratio'?'3/1':'');
+            });
+        }
+
+        async function saveSiteSettings() {
+            const oldRate = siteSettings.goldRate;
+            const newRate = document.getElementById('set-gold-rate').value;
+            const newRatio = document.getElementById('set-banner-ratio').value;
+
+            siteSettings = {
+                phone: document.getElementById('set-phone').value, 
+                tgLink: document.getElementById('set-tg').value,
+                instLink: document.getElementById('set-inst').value, 
+                addr1: document.getElementById('set-addr1').value,
+                addr2: document.getElementById('set-addr2').value,
+                goldRate: newRate,
+                bannerRatio: newRatio,
+                heroBg: siteSettings.heroBg,
+                heroOpacity: siteSettings.heroOpacity
+            };
+            
+            await saveToCloudStorage('bv_settings', siteSettings);
+            
+            if (oldRate !== newRate && newRate > 0) {
+                products.forEach(p => {
+                    if (p.priceType === 'auto') p.price = Math.round((Number(p.weight) * Number(newRate)) + Number(p.workCost));
+                });
+                
+                await _supabase.from('products').upsert(products);
+                filteredProducts = [...products];
+                renderProducts();
+            }
+            
+            renderBannersAdmin();
+            showNotification('Глобальні налаштування збережено');
+        }
+
+        function logout() { sessionStorage.removeItem('isAdminAuth'); location.reload(); }
+    </script>
+</body>
+</html>
