@@ -1,7 +1,7 @@
 // ==========================================
 // 0. ІНІЦІАЛІЗАЦІЯ БАЗИ ДАНИХ (SUPABASE)
 // ==========================================
-const supabaseUrl = 'https://sb_secret_sT3umq1sRCFrcuQUsLDSdw_KX1-fNfB.supabase.co'; 
+const supabaseUrl = 'https://trcjsnvcdonlzxprgdzd.supabase.co'; 
 const supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV'; 
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
