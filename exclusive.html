@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark" style="scroll-behavior: smooth;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <script>
+        (function initThemeBeforePaint() {
+            try {
+                const savedTheme = JSON.parse(localStorage.getItem('bv_theme'));
+                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <title>Замовити ексклюзив | BV Jewelry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Специфічні стилі ексклюзиву */
+        .arrow-indicator { animation: arrowFloat 2s infinite ease-in-out; stroke: var(--gold-muted); transition: 0.3s;}
+        @keyframes arrowFloat { 0%, 100% { transform: translateY(0); opacity: 0.3; } 50% { transform: translateY(15px); opacity: 1; } }
+        
+        .form-card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 32px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+        @media (max-width: 768px) { .form-card { padding: 24px; border-radius: 24px; } }
+        
+        .input-premium { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 16px 0; color: var(--text-main); font-size: 14px; outline: none; transition: 0.3s; border-radius: 0; }
+        .input-premium:focus { border-color: var(--gold-muted); box-shadow: 0 1px 0 var(--gold-muted); }
+        .input-premium::placeholder { color: var(--text-muted); opacity: 0.7; }
+        
+        .choice-btn { border: 1px solid var(--border); padding: 12px 24px; border-radius: 50px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; color: var(--text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.1em; }
+        .choice-btn.active { border-color: var(--gold-muted); color: var(--bg-body); background: var(--text-main); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+        /* Стилі для блоку демонстрації (Чергування) */
+        .process-step:nth-child(even) .process-img-wrap { order: 2; }
+        .process-step:nth-child(even) .process-text-wrap { order: 1; }
+        @media (max-width: 768px) {
+            .process-step:nth-child(even) .process-img-wrap { order: 1; }
+            .process-step:nth-child(even) .process-text-wrap { order: 2; }
+        }
+    </style>
+</head>
+<body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white">
+
+    <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="glass-panel p-8 w-full max-w-sm relative rounded-3xl shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none">&times;</button>
+            <h3 id="authTitle" class="text-2xl font-serif italic text-[var(--gold-muted)] mb-6 text-center">Вхід у кабінет</h3>
+            <form id="authForm" class="flex flex-col gap-4">
+                <input type="text" id="authUser" placeholder="Логін" class="auth-input" required>
+                <input type="password" id="authPass" placeholder="Пароль" class="auth-input" required>
+                <button type="submit" class="btn-primary py-4 rounded-xl mt-2 w-full text-sm tracking-widest uppercase text-[var(--bg-body)] active:scale-95 transition-transform" id="authSubmitBtn">Увійти</button>
+                <div class="text-center text-xs text-[var(--text-muted)] mt-4">
+                    Немає акаунта? <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline" id="authToggleLink">Зареєструватися</button>
+                </div>
+            </form>
+            <div id="profileView" class="hidden flex-col gap-4">
+                <div class="flex items-center justify-center mb-4"><div class="w-16 h-16 bg-[var(--gold-muted)] text-[var(--bg-body)] rounded-full flex items-center justify-center text-2xl font-bold uppercase shadow-lg" id="profAvatar">A</div></div>
+                <p class="text-center text-[var(--text-main)] mb-6">Вітаємо, <span id="profName" class="font-bold text-[var(--gold-muted)]"></span>!</p>
+                <button onclick="location.href='admin.html'" id="adminLinkBtn" class="btn-primary w-full py-4 rounded-xl hidden mb-2 uppercase tracking-widest text-xs text-[var(--bg-body)] active:scale-95 transition-transform">Увійти в Адмінку</button>
+                <button onclick="logoutUser()" class="w-full py-4 rounded-xl border border-red-500/50 text-red-500 hover:bg-red-500/10 transition uppercase tracking-widest text-xs font-bold active:scale-95">Вийти з акаунта</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()"></div>
+
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header"><h2 data-i18n="cart_title">Кошик</h2><button class="cart-close" id="cartClose" onclick="toggleCart()">×</button></div>
+        <div class="cart-body custom-scrollbar" id="cartBody"></div>
+        <div class="cart-footer"><div class="cart-subtotal"><span data-i18n="cart_subtotal">Підсумок:</span><span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span></div><button class="btn-checkout w-full bg-[var(--text-main)] text-[var(--bg-body)] py-4 rounded-xl font-bold uppercase tracking-widest mt-4 hover:opacity-90 active:scale-95 transition-all" data-i18n="cart_checkout">Оформити замовлення</button></div>
+    </div>
+
+    <div class="cart-drawer" id="favDrawer">
+        <div class="cart-header"><h2 data-i18n="fav_title">Улюблене</h2><button class="cart-close" onclick="toggleFavDrawer()">×</button></div>
+        <div class="cart-body custom-scrollbar" id="favBody"></div>
+    </div>
+
+    <header id="header">
+        <div class="header-left">
+            <button class="burger" id="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            <nav class="nav-left desktop-only">
+                <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors">Головна</a>
+                <div class="catalog-dropdown-wrapper group">
+                    <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='catalog.html'">
+                        <span data-i18n="m2">Каталог</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="mega-menu zlato-style">
+                        <div class="mega-col-1 zlato-categories" id="megaCol1"></div>
+                        <div class="mega-col-2 zlato-content" id="megaCol2"></div>
+                    </div>
+                </div>
+                <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
+                <div class="dropdown-wrapper group" style="padding: 20px 0; margin: -20px 0;">
+                    <button class="nav-link flex items-center gap-1 hover:text-[var(--gold-muted)] transition-colors"><span data-i18n="m3">Бренд</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                    <div class="dropdown-menu">
+                        <a href="info.html?p=about" class="dropdown-item" data-i18n="brand_about">Історія Atelier</a>
+                        <a href="info.html?p=warranty" class="dropdown-item" data-i18n="brand_warranty">Гарантія</a>
+                        <a href="info.html?p=terms" class="dropdown-item" data-i18n="brand_terms">Умови</a>
+                        <a href="info.html?p=reviews" class="dropdown-item" data-i18n="brand_reviews">Відгуки</a>
+                    </div>
+                </div>
+                <a href="exclusive.html" class="exclusive-nav-btn" data-i18n="m_atelier">Ексклюзив</a>
+            </nav>
+        </div>
+
+        <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
+
+        <div class="header-right">
+            <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center" onclick="window.toggleMobileSearch()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-5 h-5 active:scale-90 transition-transform"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <div class="search-box desktop-only group mr-4">
+                <input type="search" class="search-input" data-i18n-placeholder="search_ph" placeholder="Пошук..." onkeypress="if(event.key==='Enter') window.executeSearch(this.value)">
+                <svg class="search-icon group-focus-within:stroke-[var(--gold-muted)] transition-colors" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <a href="tel:+380634540901" class="header-phone-link desktop-only hover:text-[var(--gold-muted)] transition-colors">
+                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <span class="header-phone-text font-medium tracking-wide">+38 063 45 40 901</span>
+            </a>
+            <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
+            <div class="dropdown-wrapper lang-dropdown desktop-only">
+                <button class="lang-current"><img src="https://flagcdn.com/ua.svg" class="flag" id="currentFlag" alt=""><span id="currentLangLabel">UA</span></button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item w-full text-left" onclick="changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> UA</button>
+                    <button class="dropdown-item w-full text-left" onclick="changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> EN</button>
+                    <button class="dropdown-item w-full text-left" onclick="changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> RU</button>
+                    <button class="dropdown-item w-full text-left" onclick="changeLang('bg')"><img src="https://flagcdn.com/bg.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> BG</button>
+                </div>
+            </div>
+            <div class="dropdown-wrapper desktop-only">
+                <button class="icon-btn" onclick="openAuthModal()"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></button>
+            </div>
+            <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
+            </button>
+            <button onclick="toggleCart()" class="icon-btn desktop-only">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="cart-badge">0</span>
+            </button>
+        </div>
+        
+        <div id="mobSearchContainer" class="absolute top-[100%] left-0 w-full p-4 bg-[var(--bg-card)] border-b border-[var(--border)] shadow-xl hidden z-[4000]">
+            <div class="flex items-center bg-black/5 dark:bg-white/5 border border-[var(--border)] rounded-2xl px-4 py-3 focus-within:border-[var(--gold-muted)] transition-colors">
+                <input type="search" id="mobSearchOverlayInput" data-i18n-placeholder="search_ph" placeholder="Пошукаємо прикрасу?..." class="w-full bg-transparent outline-none text-[var(--text-main)] text-sm font-['Inter']">
+                <button onclick="window.executeSearch(document.getElementById('mobSearchOverlayInput').value)" class="text-[var(--gold-muted)] ml-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="side-menu" id="sideMenu"></nav>
+
+    <main class="pt-24 md:pt-32 pb-24 md:pb-20 overflow-x-hidden">
+        
+        <section class="max-w-4xl mx-auto px-4 md:px-6 mb-24 mt-8 md:mt-16 text-center relative z-10">
+            <h2 class="text-[var(--gold-muted)] font-serif italic text-xl md:text-2xl mb-4" data-i18n="m_atelier">Atelier: Ексклюзив</h2>
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-serif leading-tight mb-6 text-[var(--text-main)]">
+                Мистецтво за вашим <br class="hidden md:block"> <span class="italic text-[var(--gold-muted)]">ескізом</span>
+            </h1>
+            <p class="text-[var(--text-muted)] font-light leading-relaxed mb-12 max-w-lg mx-auto text-sm md:text-base">
+                Від першої ідеї до ідеального готового виробу у ваших руках. Ми створимо прикрасу, якої немає більше ні в кого у світі.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#order-form" class="bg-[var(--text-main)] text-[var(--bg-body)] py-4 px-10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[var(--gold-muted)] transition-colors shadow-lg active:scale-95">
+                    Створити шедевр
+                </a>
+                <a href="#process-section" class="border border-[var(--border)] text-[var(--text-main)] py-4 px-10 rounded-full text-xs font-bold uppercase tracking-widest hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] transition-colors active:scale-95">
+                    Як це працює
+                </a>
+            </div>
+        </section>
+
+        <section id="process-section" class="max-w-6xl mx-auto px-4 md:px-6 mb-32 scroll-mt-32">
+            <div class="text-center mb-16">
+                <span class="text-[10px] uppercase tracking-[3px] text-[var(--gold-muted)] font-bold block mb-2">Наш підхід</span>
+                <h2 class="font-serif text-3xl md:text-4xl text-[var(--text-main)]">Етапи створення</h2>
+            </div>
+            
+            <div id="processListContainer" class="flex flex-col gap-16 md:gap-32">
+                </div>
+        </section>
+
+        <section id="order-form" class="px-4 md:px-6 max-w-4xl mx-auto scroll-mt-24 md:scroll-mt-32 relative z-10">
+            <div class="form-card">
+                <h2 class="font-serif text-3xl md:text-4xl mb-2 text-center text-[var(--text-main)]" data-i18n="m_atelier">Замовити ексклюзив</h2>
+                <p class="text-center text-[var(--text-muted)] text-sm mb-10 max-w-lg mx-auto">Розкажіть нам про свою ідею, і наші ювеліри зв'яжуться з вами для обговорення деталей.</p>
+                
+                <form id="exclusiveForm" class="flex flex-col gap-8" onsubmit="event.preventDefault(); submitExclusiveOrder();">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] block mb-2">Ваше Ім'я *</label>
+                            <input type="text" id="exName" class="input-premium" placeholder="Наприклад: Олена" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] block mb-2">Контакт (TG/Viber/Телефон) *</label>
+                            <input type="text" id="exContact" class="input-premium" placeholder="+380..." required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] block mb-4">Наявність матеріалів</label>
+                        <div id="materialsContainer" class="flex flex-wrap gap-3">
+                            </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] block mb-2">Опис ідеї / Побажання *</label>
+                        <textarea id="exDesc" class="input-premium h-32 resize-none border" style="border-radius: 12px; padding: 16px; border: 1px solid var(--border);" placeholder="Опишіть, яку прикрасу ви хочете..." required></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] block mb-4">Додати ескіз або фото-приклад</label>
+                        <div class="relative group cursor-pointer">
+                            <input type="file" id="fileUpload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*" onchange="updateFileName(this)">
+                            <div class="border-2 border-dashed border-[var(--border)] rounded-2xl p-10 flex flex-col items-center justify-center gap-4 transition-colors group-hover:border-[var(--gold-muted)] bg-[rgba(255,255,255,0.02)] shadow-sm">
+                                <svg width="32" height="32" fill="none" stroke="var(--text-muted)" stroke-width="1.5" viewBox="0 0 24 24" class="group-hover:stroke-[var(--gold-muted)] transition-colors"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                <span id="fileNameDisplay" class="text-sm font-medium text-[var(--text-main)] transition-colors text-center">Натисніть або перетягніть файл сюди</span>
+                                <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">JPG, PNG до 5MB</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="mt-4 bg-[var(--gold-muted)] text-[#111] w-full py-5 rounded-2xl font-bold uppercase tracking-widest text-xs md:text-sm hover:opacity-90 transition-opacity shadow-[0_10px_30px_rgba(212,175,55,0.3)] active:scale-[0.98]">
+                        Відправити заявку майстру
+                    </button>
+                    
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span data-i18n="m1">Головна</span>
+        </a>
+        <a href="catalog.html" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="m2">Каталог</span>
+        </a>
+        <button onclick="window.toggleCart();" class="bottom-nav-item">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="cart-badge">0</span>
+            </div>
+            <span data-i18n="cart_title">Кошик</span>
+        </button>
+        <button onclick="window.toggleFavDrawer();" class="bottom-nav-item">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
+            </div>
+            <span data-i18n="fav_title">Улюблене</span>
+        </button>
+        <button onclick="window.openAuthModal();" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span data-i18n="login">Профіль</span>
+        </button>
+    </nav>
+
+    <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+            
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <div class="bv-logo mb-6 relative !static !transform-none !items-center md:!items-start !opacity-100">
+                    <span class="!text-3xl">BV</span><span class="!text-[8px] mt-1 font-['Montserrat'] font-bold tracking-widest">jewelry</span>
+                </div>
+                <p class="text-[12px] text-[var(--text-muted)] max-w-[220px] font-light leading-relaxed">
+                    Вишуканість у деталях. Формуємо сімейні цінності у дорогоцінних металах з 1984 року.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6" data-i18n="m2">Каталог</h4>
+                <a href="catalog.html#rings" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Каблучки</a>
+                <a href="catalog.html#earrings" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Сережки</a>
+                <a href="catalog.html#necklaces" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Ланцюжки</a>
+                <a href="catalog.html#bracelets" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] transition">Браслети</a>
+            </div>
+
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6">Клієнтам</h4>
+                <a href="services.html" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="m_price">Послуги та Прайс</a>
+                <a href="info.html?p=warranty" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="brand_warranty">Гарантія та якість</a>
+                <a href="info.html?p=terms" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="brand_terms">Оплата і доставка</a>
+                <a href="exclusive.html" class="text-[14px] text-[var(--gold-muted)] font-medium hover:text-[var(--text-main)] transition" data-i18n="m_atelier">Індивідуальне замовлення</a>
+            </div>
+
+            <div class="flex flex-col items-center md:items-end text-center md:text-right">
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6" data-i18n="m4">Контакти</h4>
+                <a href="tel:+380634540901" class="text-[15px] text-[var(--gold-muted)] font-medium mb-4 transition hover:opacity-80 tracking-wide phone-num">+38 063 45 40 901</a>
+                
+                <div class="flex flex-col gap-3 items-center md:items-end mb-6">
+                    <a href="https://share.google/R7G0tiXeqXrx98Uhi" target="_blank" class="addr-link-1 text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        <span class="addr-text-1">м. Ізмаїл, вул. Торгова, 68</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.48 1.02-.73 4-1.74 6.67-2.88 8.01-3.41 3.81-1.52 4.6-1.78 5.12-1.79.11 0 .37.03.54.17.14.12.18.28.2.4.02.07.02.15.02.24z"/></svg>
+                    </a>
+                    <a href="#" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 pt-8 border-t border-[var(--border)] flex flex-col items-center text-center gap-2 text-[13px] text-[var(--text-muted)] font-medium tracking-wide">
+            <p>© <span id="currentYear">2026</span> BV Jewelry. <span data-i18n="footer_rights">Всі права захищені.</span></p>
+            <p class="opacity-70"><span data-i18n="footer_dev">Developed by</span> Evgeny.Sychov</p>
+        </div>
+    </footer>
+    <div class="py-5 pb-24 md:pb-5 text-center text-xs bg-[var(--bg-card)] border-t border-[var(--border)] text-[var(--text-muted)] relative z-10">
+        © <span id="currentYear"></span> BV-Jewelry. Designed by Evgeny.Sychov
+    </div>
+
+    <script src="demo-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="main.js"></script>
+    <script>
+        let selectedMaterial = '';
+
+        // Оновлення імені файлу в формі
+        window.updateFileName = function(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files.length > 0) {
+                display.innerText = input.files[0].name;
+                display.classList.add('text-[var(--gold-muted)]');
+            } else {
+                display.innerText = 'Натисніть або перетягніть файл сюди';
+                display.classList.remove('text-[var(--gold-muted)]');
+            }
+        };
+
+        // Функція перемикання матеріалів
+        window.selectMaterial = function(id, btnElement) {
+            selectedMaterial = id;
+            document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        };
+
+        // Обробка форми
+        window.submitExclusiveOrder = function() {
+            const name = document.getElementById('exName').value;
+            const contact = document.getElementById('exContact').value;
+            const desc = document.getElementById('exDesc').value;
+            
+            if(!selectedMaterial) {
+                alert("Будь ласка, оберіть наявність матеріалів.");
+                return;
+            }
+
+            console.log("Відправка:", { name, contact, material: selectedMaterial, desc });
+            
+            alert('Дякуємо, ' + name + '! Вашу заявку збережено. Майстер зв\'яжеться з вами найближчим часом.');
+            document.getElementById('exclusiveForm').reset();
+            document.getElementById('fileNameDisplay').innerText = 'Натисніть або перетягніть файл сюди';
+            document.getElementById('fileNameDisplay').classList.remove('text-[var(--gold-muted)]');
+        };
+
+        // Ініціалізація сторінки з API (localStorage)
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Рендер блоку процесу (Чергування фото/текст)
+            const processData = API.get('bv_exclusive_process', []);
+            const processContainer = document.getElementById('processListContainer');
+            
+            if (processData.length > 0) {
+                processContainer.innerHTML = processData.map((step, index) => `
+                    <div class="process-step flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
+                        
+                        <div class="process-img-wrap w-full md:w-1/2 order-1 overflow-hidden rounded-[32px] shadow-2xl relative aspect-[4/3] md:aspect-[4/3]">
+                            <img src="${step.img}" alt="${step.title}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                            <div class="absolute inset-0 border border-white/10 rounded-[32px] pointer-events-none"></div>
+                        </div>
+
+                        <div class="process-text-wrap w-full md:w-1/2 order-2 flex flex-col justify-center px-2 md:px-0">
+                            <span class="text-[10px] md:text-xs uppercase tracking-widest text-[var(--gold-muted)] font-bold mb-3 block">Етап 0${index + 1}</span>
+                            <h3 class="text-3xl md:text-4xl lg:text-5xl font-serif mb-4 md:mb-6 text-[var(--text-main)]">${step.title}</h3>
+                            <p class="text-sm md:text-base text-[var(--text-muted)] font-light leading-relaxed max-w-md">${step.desc}</p>
+                        </div>
+
+                    </div>
+                `).join('');
+            }
+
+            // 2. Рендер кнопок матеріалів у форму
+            const materialsData = API.get('bv_exclusive_materials', []);
+            const matContainer = document.getElementById('materialsContainer');
+            
+            if (materialsData.length > 0) {
+                matContainer.innerHTML = materialsData.map(mat => `
+                    <button type="button" class="choice-btn flex-grow sm:flex-grow-0 ${mat.selected ? 'active' : ''}" onclick="selectMaterial('${mat.id}', this)">
+                        ${mat.label}
+                    </button>
+                `).join('');
+                
+                // Зберігаємо дефолтне значення
+                const defaultMat = materialsData.find(m => m.selected);
+                if(defaultMat) selectedMaterial = defaultMat.id;
+            }
+        });
+    </script>
+</body>
+</html>
