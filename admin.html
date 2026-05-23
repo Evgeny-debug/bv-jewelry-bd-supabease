@@ -446,33 +446,46 @@
 
         // --- ЗАМОВЛЕННЯ ---
         function renderOrders() {
-            const tbody = document.getElementById('ordersTableBody');
-            tbody.innerHTML = '';
-            if(ordersList.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Замовлень поки немає.</td></tr>';
-            
-            ordersList.forEach(o => {
-                const date = new Date(o.created_at).toLocaleString('uk-UA');
-                const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.title} (${i.variant}) x${i.qty}</div>`).join('');
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
-                        <td class="p-3"><div class="font-bold text-[#c5a059] text-base">#${o.id}</div><div class="text-[10px] text-gray-500 mt-1">${date}</div></td>
-                        <td class="p-3 text-xs text-white">${o.user_email}</td>
-                        <td class="p-3">${itemsHtml}</td>
-                        <td class="p-3 font-semibold text-white">${o.total_price} ₴</td>
-                        <td class="p-3">
-                            <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
-                                <option value="pending" ${o.status==='pending'?'selected':''}>Очікує</option>
-                                <option value="accepted" ${o.status==='accepted'?'selected':''}>В обробці</option>
-                                <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено</option>
-                                <option value="completed" ${o.status==='completed'?'selected':''}>Виконано</option>
-                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+    const tbody = document.getElementById('ordersTableBody');
+    tbody.innerHTML = '';
+    if(ordersList.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Замовлень поки немає.</td></tr>';
+    
+    ordersList.forEach(o => {
+        const date = new Date(o.created_at).toLocaleString('uk-UA');
+        const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.name} x${i.qty}</div>`).join('');
+        
+        // Розпаковуємо дані про доставку (якщо вони є)
+        const city = o.delivery_info ? o.delivery_info.city : 'Не вказано';
+        const branch = o.delivery_info ? o.delivery_info.branch : 'Не вказано';
+        const comment = o.comment ? `<div class="mt-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-1 rounded">Коментар: ${o.comment}</div>` : '';
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
+                <td class="p-3">
+                    <div class="font-bold text-[#c5a059] text-base">#${o.id}</div>
+                    <div class="text-[10px] text-gray-500 mt-1">${date}</div>
+                </td>
+                <td class="p-3 text-xs text-white">
+                    <div>Email: ${o.user_email || 'Гість'}</div>
+                    <div class="text-[#c5a059] font-bold">Тел: ${o.phone || 'Не вказано'}</div>
+                    <div class="text-gray-400 mt-1">м. ${city}, Відділ: ${branch}</div>
+                    ${comment}
+                </td>
+                <td class="p-3">${itemsHtml}</td>
+                <td class="p-3 font-semibold text-white">${o.total_price} ₴<br><span class="text-[10px] text-gray-500 uppercase">${o.payment_method === 'card' ? 'Картка' : 'Накладений'}</span></td>
+                <td class="p-3">
+                    <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
+                        <option value="pending" ${o.status==='pending'?'selected':''}>Нове 🔴</option>
+                        <option value="accepted" ${o.status==='accepted'?'selected':''}>В роботі 🟡</option>
+                        <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено 🔵</option>
+                        <option value="completed" ${o.status==='completed'?'selected':''}>Успіх 🟢</option>
+                        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано ⚫</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+    });
+}
 
         async function updateOrderStatus(id, newStatus) {
             const { error } = await _supabase.from('orders').update({status: newStatus}).eq('id', id);

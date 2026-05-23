@@ -262,38 +262,19 @@ window.clearEntireCart = function(force = false) {
     }
 };
 
-window.checkoutOrder = async function() {
-    const user = getCurrentUser();
-    if(!user) {
-        alert("Будь ласка, увійдіть в акаунт або зареєструйтесь для оформлення замовлення.");
-        return window.openAuthModal();
-    }
-
+window.checkoutOrder = function() {
     const cart = getCart();
-    if(cart.length === 0) return alert('Ваш кошик порожній!');
-
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const orderData = {
-        user_id: user.id,
-        items: cart,
-        total_price: total,
-        status: 'pending', 
-        user_email: user.username
-    };
-
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if(checkoutBtn) checkoutBtn.innerText = 'Оформлюємо...';
-
-    const { data, error } = await _supabase.from('orders').insert([orderData]);
-
-    if(error) {
-        alert('Помилка оформлення: ' + error.message);
-    } else {
-        alert('Замовлення успішно оформлено! Ви отримаєте сповіщення при зміні статусу.');
-        window.clearEntireCart(true); 
-        window.toggleCart();
+    
+    // Перевіряємо, чи не порожній кошик
+    if(cart.length === 0) {
+        return alert('Ваш кошик порожній!');
     }
-    if(checkoutBtn) checkoutBtn.innerText = 'Оформити замовлення';
+    
+    // Закриваємо шторку кошика
+    window.toggleCart();
+    
+    // Перенаправляємо клієнта на нову сторінку оформлення
+    window.location.href = 'checkout.html';
 };
 
 window.renderCart = function() {
