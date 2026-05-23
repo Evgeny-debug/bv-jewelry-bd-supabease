@@ -43,21 +43,10 @@
         .builder-section { border-left: 2px solid #c5a059; padding-left: 1rem; margin-bottom: 1.5rem; }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col lg:flex-row relative">
+<!-- ДОДАНО ПРИХОВУВАННЯ ТІЛА СТОРІНКИ ДО ПЕРЕВІРКИ -->
+<body class="h-screen overflow-hidden flex flex-col lg:flex-row relative" style="opacity: 0; transition: opacity 0.5s;">
 
     <div id="toastMessage" class="toast">Збережено успішно!</div>
-
-    <div id="loginScreen" class="fixed inset-0 bg-[#111111] z-[100] flex items-center justify-center p-4 transition-opacity duration-500">
-        <div class="glass-panel p-8 w-full max-w-sm text-center shadow-2xl">
-            <h1 class="text-3xl font-serif mb-2 text-[#c5a059]">BV Admin</h1>
-            <p class="text-gray-500 text-sm mb-8">Логін: admin / Пароль: admin</p>
-            <form id="loginForm" class="flex flex-col gap-5 text-left">
-                <div><label class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 block">Логін (Email)</label><input type="text" id="username" class="input-field" required></div>
-                <div><label class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 block">Пароль</label><input type="password" id="password" class="input-field" required></div>
-                <button type="submit" class="btn-primary w-full mt-2">Увійти</button>
-            </form>
-        </div>
-    </div>
 
     <div class="mobile-header flex justify-between items-center p-4 glass-panel m-4 mb-0 lg:hidden z-30">
         <h2 class="text-xl font-serif text-[#c5a059]">BV Admin</h2>
@@ -81,7 +70,7 @@
             <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 text-sm">⚙️ Налаштування</button>
         </nav>
         <div class="p-4 border-t border-white/10 space-y-2">
-            <a href="index.html" target="_blank" class="block w-full text-center py-2 text-xs bg-white/5 rounded-lg text-gray-300 hover:text-[#c5a059] transition">Перейти на сайт ↗</a>
+            <a href="index.html" class="block w-full text-center py-2 text-xs bg-white/5 rounded-lg text-gray-300 hover:text-[#c5a059] transition">Перейти на сайт ↗</a>
             <button onclick="logout()" class="w-full py-2 text-xs text-red-400 hover:text-red-300 transition">Вийти з панелі</button>
         </div>
     </aside>
@@ -250,6 +239,7 @@
 
     </main>
 
+    <!-- МОДАЛЬНІ ВІКНА -->
     <div id="productModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4">
         <div class="glass-panel p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex justify-between items-center mb-6">
@@ -326,7 +316,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabaseUrl = 'sb_secret_sT3umq1sRCFrcuQUsLDSdw_KX1-fNfB'; 
+        // БЕЗПЕЧНА ІНІЦІАЛІЗАЦІЯ (Тільки правильний URL та публічний ключ)
+        const supabaseUrl = 'https://trcjsnvcdonlzxprgdzd.supabase.co'; 
         const supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV'; 
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -364,39 +355,37 @@
             reader.readAsDataURL(file);
         }
 
-        // --- ХМАРНА АВТОРИЗАЦІЯ ---
-        if (sessionStorage.getItem('isAdminAuth') === 'true') {
-            document.getElementById('loginScreen').classList.add('hidden');
-            loadAllData();
-        }
+        // --- БЕЗПЕЧНА ПЕРЕВІРКА ПРАВ ДОСТУПУ ---
+        async function checkAdminAccess() {
+            // Перевіряємо, чи є взагалі активна сесія (чи зайшов користувач на сайті)
+            const { data: { session } } = await _supabase.auth.getSession();
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            
-            // Заглушка для швидкого входу (тимчасова, поки не створиш адміна в Supabase)
-            if (u === 'admin' && p === 'admin') {
-                sessionStorage.setItem('isAdminAuth', 'true');
-                document.getElementById('loginScreen').classList.add('hidden');
-                loadAllData();
+            if (!session) {
+                // Якщо не авторизований взагалі - повертаємо на головну
+                window.location.href = 'index.html';
                 return;
             }
 
-            // Реальна авторизація через Supabase Auth
-            const { data, error } = await _supabase.auth.signInWithPassword({ email: u, password: p });
-            if (error) return alert('Помилка входу: ' + error.message);
-            
-            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
+            // Перевіряємо роль у таблиці profiles
+            const { data: profile } = await _supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
             if (profile && profile.role === 'admin') {
-                sessionStorage.setItem('isAdminAuth', 'true');
-                document.getElementById('loginScreen').classList.add('hidden');
+                // Якщо адмін - показуємо сторінку і вантажимо дані
+                document.body.style.opacity = '1'; 
                 loadAllData();
             } else {
+                // Якщо звичайний юзер - виганяємо
                 alert('У вас немає доступу до панелі адміністратора!');
-                await _supabase.auth.signOut();
+                window.location.href = 'index.html';
             }
-        });
+        }
+
+        // Запускаємо перевірку одразу при відкритті сторінки
+        checkAdminAccess();
 
         // --- УНІВЕРСАЛЬНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ В ХМАРУ ---
         async function saveToCloudStorage(key, value) {
@@ -451,7 +440,7 @@
             document.getElementById('tab-' + tabName).classList.remove('text-gray-400');
             document.getElementById('content-' + tabName).classList.remove('hidden');
             if(tabName === 'builder') loadPageBuilderForm();
-            if(tabName === 'orders') loadAllData(); // Оновлюємо замовлення при переході
+            if(tabName === 'orders') loadAllData(); 
             if(window.innerWidth < 1024) toggleAdminMenu();
         }
 
@@ -1174,7 +1163,11 @@
             showNotification('Глобальні налаштування збережено');
         }
 
-        function logout() { sessionStorage.removeItem('isAdminAuth'); location.reload(); }
+        // --- БЕЗПЕЧНИЙ ВИХІД З АККАУНТУ ---
+        async function logout() { 
+            await _supabase.auth.signOut();
+            window.location.href = 'index.html'; 
+        }
     </script>
 </body>
 </html>
