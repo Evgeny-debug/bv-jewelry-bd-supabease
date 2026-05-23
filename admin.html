@@ -43,7 +43,6 @@
         .builder-section { border-left: 2px solid #c5a059; padding-left: 1rem; margin-bottom: 1.5rem; }
     </style>
 </head>
-<!-- ДОДАНО ПРИХОВУВАННЯ ТІЛА СТОРІНКИ ДО ПЕРЕВІРКИ -->
 <body class="h-screen overflow-hidden flex flex-col lg:flex-row relative" style="opacity: 0; transition: opacity 0.5s;">
 
     <div id="toastMessage" class="toast">Збережено успішно!</div>
@@ -293,8 +292,8 @@
                 </div>
                 
                 <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-1">Фото товару</label>
-                    <input type="file" id="prod-img-file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'prodPreview', 'prod-imgBase64', 1)">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-1">Фото товару <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: квадрат 1:1, до 2MB)</span></label>
+                    <input type="file" id="prod-img-file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'prodPreview', 'prod-imgBase64', 2)">
                     <img id="prodPreview" class="h-32 w-32 object-cover rounded mt-2 hidden mx-auto border border-white/20">
                 </div>
                 
@@ -310,13 +309,50 @@
 
     <div id="categoryModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="catModalTitle">Додати Категорію</h3><form id="categoryForm" class="flex flex-col gap-4"><input type="hidden" id="cat-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ. без пробілів)</label><input type="text" id="cat-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва (UA)</label><input type="text" id="cat-name" class="input-field" required></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeCategoryModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
     <div id="level3Modal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="level3ModalTitle">Додати Під-підкатегорію</h3><form id="level3Form" class="flex flex-col gap-4"><input type="hidden" id="l3-parent-id"><input type="hidden" id="l3-sub-id"><input type="hidden" id="l3-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ)</label><input type="text" id="l3-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="l3-name" class="input-field" required></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeLevel3Modal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
-    <div id="bannerModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-lg"><h3 class="text-lg font-semibold mb-4" id="bannerModalTitle">Банер</h3><form id="bannerForm" class="flex flex-col gap-4"><input type="hidden" id="banner-id"><input type="hidden" id="banner-img"> <div class="bg-white/5 p-4 rounded-lg"><input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'bannerPreview', 'banner-img', 2)"><img id="bannerPreview" class="w-full aspect-[21/9] object-cover rounded mt-2 hidden border border-white/20"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (catalog.html#sale)</label><input type="text" id="banner-link" class="input-field"></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeBannerModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
-    <div id="processModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-lg"><h3 class="text-lg font-semibold mb-4" id="processModalTitle">Етап створення</h3><form id="processForm" class="flex flex-col gap-4" onsubmit="event.preventDefault(); saveProcessStep();"><input type="hidden" id="process-id"><input type="hidden" id="process-img"> <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="process-title" class="input-field" required></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис</label><textarea id="process-desc" class="input-field h-24 resize-none" required></textarea></div><div class="bg-white/5 p-4 rounded-lg"><input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'processPreview', 'process-img', 1)"><img id="processPreview" class="w-full aspect-[4/3] object-cover rounded mt-2 hidden border border-white/20"></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeProcessModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
+    
+    <div id="bannerModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4">
+        <div class="glass-panel p-6 w-full max-w-lg">
+            <h3 class="text-lg font-semibold mb-4" id="bannerModalTitle">Банер</h3>
+            <form id="bannerForm" class="flex flex-col gap-4">
+                <input type="hidden" id="banner-id"><input type="hidden" id="banner-img"> 
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фонове зображення <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: до 3MB)</span></label>
+                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'bannerPreview', 'banner-img', 3)">
+                    <img id="bannerPreview" class="w-full aspect-[21/9] object-cover rounded mt-2 hidden border border-white/20">
+                </div>
+                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (catalog.html#sale)</label><input type="text" id="banner-link" class="input-field"></div>
+                <div class="flex gap-3 mt-2">
+                    <button type="button" onclick="closeBannerModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="processModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4">
+        <div class="glass-panel p-6 w-full max-w-lg">
+            <h3 class="text-lg font-semibold mb-4" id="processModalTitle">Етап створення</h3>
+            <form id="processForm" class="flex flex-col gap-4" onsubmit="event.preventDefault(); saveProcessStep();">
+                <input type="hidden" id="process-id"><input type="hidden" id="process-img"> 
+                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="process-title" class="input-field" required></div>
+                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис</label><textarea id="process-desc" class="input-field h-24 resize-none" required></textarea></div>
+                <div class="bg-white/5 p-4 rounded-lg">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фото етапу <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: 4:3, до 2MB)</span></label>
+                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'processPreview', 'process-img', 2)">
+                    <img id="processPreview" class="w-full aspect-[4/3] object-cover rounded mt-2 hidden border border-white/20">
+                </div>
+                <div class="flex gap-3 mt-2">
+                    <button type="button" onclick="closeProcessModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <div id="materialModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4"><div class="glass-panel p-6 w-full max-w-sm"><h3 class="text-lg font-semibold mb-4" id="materialModalTitle">Кнопка матеріалу</h3><form id="materialForm" class="flex flex-col gap-4" onsubmit="event.preventDefault(); saveMaterialOption();"><input type="hidden" id="material-old-id"><div><label class="text-[10px] uppercase text-gray-400 block mb-1">ID (Англ)</label><input type="text" id="material-id" class="input-field" required pattern="[a-zA-Z0-9_-]+"></div><div><label class="text-[10px] uppercase text-gray-400 block mb-1">Текст на кнопці</label><input type="text" id="material-label" class="input-field" required></div><div class="flex items-center gap-2 mt-2"><input type="checkbox" id="material-selected" class="w-4 h-4 accent-[#c5a059]"><label for="material-selected" class="text-[11px] text-gray-300">Вибрана за замовчуванням</label></div><div class="flex gap-3 mt-2"><button type="button" onclick="closeMaterialModal()" class="flex-1 btn-secondary py-2 text-sm">Скасувати</button><button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти</button></div></form></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // БЕЗПЕЧНА ІНІЦІАЛІЗАЦІЯ (Тільки правильний URL та публічний ключ)
         const supabaseUrl = 'https://trcjsnvcdonlzxprgdzd.supabase.co'; 
         const supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV'; 
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -341,10 +377,15 @@
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
-        function handleImageUpload(event, previewId, targetInputId, maxMb) {
+        function handleImageUpload(event, previewId, targetInputId, recommendedMb = 2) {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.size > maxMb * 1024 * 1024) return alert(`Файл занадто великий! Макс: ${maxMb}MB.`);
+            
+            // Якщо файл більший за рекомендований розмір — просто попереджаємо, але дозволяємо завантаження
+            if (file.size > recommendedMb * 1024 * 1024) {
+                alert(`Увага: розмір файлу перевищує рекомендовані ${recommendedMb}MB. Це може трохи сповільнити завантаження сайту, але ми його збережемо.`);
+            }
+            
             const reader = new FileReader();
             reader.onload = e => {
                 const preview = document.getElementById(previewId);
@@ -355,18 +396,14 @@
             reader.readAsDataURL(file);
         }
 
-        // --- БЕЗПЕЧНА ПЕРЕВІРКА ПРАВ ДОСТУПУ ---
         async function checkAdminAccess() {
-            // Перевіряємо, чи є взагалі активна сесія (чи зайшов користувач на сайті)
             const { data: { session } } = await _supabase.auth.getSession();
 
             if (!session) {
-                // Якщо не авторизований взагалі - повертаємо на головну
                 window.location.href = 'index.html';
                 return;
             }
 
-            // Перевіряємо роль у таблиці profiles
             const { data: profile } = await _supabase
                 .from('profiles')
                 .select('role')
@@ -374,36 +411,29 @@
                 .single();
 
             if (profile && profile.role === 'admin') {
-                // Якщо адмін - показуємо сторінку і вантажимо дані
                 document.body.style.opacity = '1'; 
                 loadAllData();
             } else {
-                // Якщо звичайний юзер - виганяємо
                 alert('У вас немає доступу до панелі адміністратора!');
                 window.location.href = 'index.html';
             }
         }
 
-        // Запускаємо перевірку одразу при відкритті сторінки
         checkAdminAccess();
 
-        // --- УНІВЕРСАЛЬНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ В ХМАРУ ---
         async function saveToCloudStorage(key, value) {
             await _supabase.from('site_storage').upsert([{ key: key, value: value }]);
         }
 
         async function loadAllData() {
-            // 1. Завантаження замовлень
             const { data: ords } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
             if(ords) ordersList = ords;
             renderOrders();
 
-            // 2. Завантаження товарів
             const { data: prods } = await _supabase.from('products').select('*');
             if(prods) products = prods;
             filteredProducts = [...products];
             
-            // 3. Завантаження налаштувань сайту
             const { data: storage } = await _supabase.from('site_storage').select('*');
             if(storage) {
                 storage.forEach(item => {
@@ -417,7 +447,6 @@
                 });
             }
 
-            // Рендер інтерфейсу
             populateCategorySelects();
             renderProducts();
             renderCategoriesTree();
@@ -444,48 +473,46 @@
             if(window.innerWidth < 1024) toggleAdminMenu();
         }
 
-        // --- ЗАМОВЛЕННЯ ---
         function renderOrders() {
-    const tbody = document.getElementById('ordersTableBody');
-    tbody.innerHTML = '';
-    if(ordersList.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Замовлень поки немає.</td></tr>';
-    
-    ordersList.forEach(o => {
-        const date = new Date(o.created_at).toLocaleString('uk-UA');
-        const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.name} x${i.qty}</div>`).join('');
-        
-        // Розпаковуємо дані про доставку (якщо вони є)
-        const city = o.delivery_info ? o.delivery_info.city : 'Не вказано';
-        const branch = o.delivery_info ? o.delivery_info.branch : 'Не вказано';
-        const comment = o.comment ? `<div class="mt-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-1 rounded">Коментар: ${o.comment}</div>` : '';
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            if(ordersList.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Замовлень поки немає.</td></tr>';
+            
+            ordersList.forEach(o => {
+                const date = new Date(o.created_at).toLocaleString('uk-UA');
+                const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.name} x${i.qty}</div>`).join('');
+                
+                const city = o.delivery_info ? o.delivery_info.city : 'Не вказано';
+                const branch = o.delivery_info ? o.delivery_info.branch : 'Не вказано';
+                const comment = o.comment ? `<div class="mt-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-1 rounded">Коментар: ${o.comment}</div>` : '';
 
-        tbody.innerHTML += `
-            <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
-                <td class="p-3">
-                    <div class="font-bold text-[#c5a059] text-base">#${o.id}</div>
-                    <div class="text-[10px] text-gray-500 mt-1">${date}</div>
-                </td>
-                <td class="p-3 text-xs text-white">
-                    <div>Email: ${o.user_email || 'Гість'}</div>
-                    <div class="text-[#c5a059] font-bold">Тел: ${o.phone || 'Не вказано'}</div>
-                    <div class="text-gray-400 mt-1">м. ${city}, Відділ: ${branch}</div>
-                    ${comment}
-                </td>
-                <td class="p-3">${itemsHtml}</td>
-                <td class="p-3 font-semibold text-white">${o.total_price} ₴<br><span class="text-[10px] text-gray-500 uppercase">${o.payment_method === 'card' ? 'Картка' : 'Накладений'}</span></td>
-                <td class="p-3">
-                    <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
-                        <option value="pending" ${o.status==='pending'?'selected':''}>Нове 🔴</option>
-                        <option value="accepted" ${o.status==='accepted'?'selected':''}>В роботі 🟡</option>
-                        <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено 🔵</option>
-                        <option value="completed" ${o.status==='completed'?'selected':''}>Успіх 🟢</option>
-                        <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано ⚫</option>
-                    </select>
-                </td>
-            </tr>
-        `;
-    });
-}
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
+                        <td class="p-3">
+                            <div class="font-bold text-[#c5a059] text-base">#${o.id}</div>
+                            <div class="text-[10px] text-gray-500 mt-1">${date}</div>
+                        </td>
+                        <td class="p-3 text-xs text-white">
+                            <div>Email: ${o.user_email || 'Гість'}</div>
+                            <div class="text-[#c5a059] font-bold">Тел: ${o.phone || 'Не вказано'}</div>
+                            <div class="text-gray-400 mt-1">м. ${city}, Відділ: ${branch}</div>
+                            ${comment}
+                        </td>
+                        <td class="p-3">${itemsHtml}</td>
+                        <td class="p-3 font-semibold text-white">${o.total_price} ₴<br><span class="text-[10px] text-gray-500 uppercase">${o.payment_method === 'card' ? 'Картка' : 'Накладений'}</span></td>
+                        <td class="p-3">
+                            <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
+                                <option value="pending" ${o.status==='pending'?'selected':''}>Нове 🔴</option>
+                                <option value="accepted" ${o.status==='accepted'?'selected':''}>В роботі 🟡</option>
+                                <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено 🔵</option>
+                                <option value="completed" ${o.status==='completed'?'selected':''}>Успіх 🟢</option>
+                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано ⚫</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
         async function updateOrderStatus(id, newStatus) {
             const { error } = await _supabase.from('orders').update({status: newStatus}).eq('id', id);
@@ -493,7 +520,6 @@
             showNotification('Статус замовлення змінено!');
         }
 
-        // --- ТОВАРИ ---
         function populateCategorySelects() {
             const catSelect = document.getElementById('prod-category');
             catSelect.innerHTML = '<option value="" disabled selected>Виберіть...</option>';
@@ -636,7 +662,6 @@
                 desc: document.getElementById('prod-desc').value
             };
 
-            // Зберігаємо товар у Supabase
             const { error } = await _supabase.from('products').upsert(prodData);
             if (error) return alert("Помилка збереження товару: " + error.message);
 
@@ -659,7 +684,6 @@
             }
         }
 
-        // --- КАТЕГОРІЇ ---
         function openLevel3Modal(parentId, subId) {
             document.getElementById('level3Form').reset();
             document.getElementById('l3-parent-id').value = parentId;
@@ -812,7 +836,6 @@
             }
         }
 
-        // --- БАНЕРИ ---
         function renderBannersAdmin() {
             const list = document.getElementById('bannersListContainer');
             list.innerHTML = '';
@@ -878,7 +901,6 @@
             }
         }
 
-        // --- ЕКСКЛЮЗИВ ---
         function renderExclusiveProcessAdmin() {
             const list = document.getElementById('exclusiveProcessList');
             list.innerHTML = '';
@@ -1015,7 +1037,6 @@
             }
         }
 
-        // --- КОНСТРУКТОР СТОРІНОК ---
         function loadPageBuilderForm() {
             const pageId = document.getElementById('builder-page-select').value;
             const container = document.getElementById('builder-form-container');
@@ -1047,7 +1068,7 @@
                             <h4 class="text-sm font-semibold text-[#c5a059] mb-3">Фонове зображення (Hero)</h4>
                             <div class="grid grid-cols-1 gap-4 mb-4">
                                 <div>
-                                    <label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (URL) або завантаження файлу</label>
+                                    <label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (URL) або завантаження файлу <span class="normal-case">(Рекомендовано: до 3MB)</span></label>
                                     <div class="flex flex-col sm:flex-row gap-2">
                                         <input type="text" id="bld-hero-bg" class="input-field flex-grow" placeholder="https://..." value="${data.heroBg || siteSettings.heroBg || ''}">
                                         <div class="relative overflow-hidden bg-white/10 hover:bg-white/20 transition border border-white/20 rounded-lg px-4 py-2 cursor-pointer whitespace-nowrap flex items-center justify-center">
@@ -1123,7 +1144,6 @@
             showNotification('Сторінку/Налаштування оновлено!');
         }
 
-        // --- ПРАЙС-БІЛДЕР ---
         async function savePriceList() {
             try {
                 const newJson = document.getElementById('price-json-editor').value;
@@ -1135,7 +1155,6 @@
             }
         }
 
-        // --- НАЛАШТУВАННЯ ---
         function populateSettings() {
             ['phone','tg','inst','addr1','addr2', 'gold-rate', 'banner-ratio'].forEach(k => {
                 const mapKey = k==='tg'?'tgLink':(k==='inst'?'instLink':(k==='gold-rate'?'goldRate':(k==='banner-ratio'?'bannerRatio':k)));
@@ -1176,7 +1195,6 @@
             showNotification('Глобальні налаштування збережено');
         }
 
-        // --- БЕЗПЕЧНИЙ ВИХІД З АККАУНТУ ---
         async function logout() { 
             await _supabase.auth.signOut();
             window.location.href = 'index.html'; 
