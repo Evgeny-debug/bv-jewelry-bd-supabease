@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Оформлення замовлення</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#111111] text-white p-8">
+
+    <div class="max-w-2xl mx-auto bg-[#1c1c1e] p-8 rounded-xl border border-white/10" id="checkout-form-container">
+        <h1 class="text-2xl text-[#c5a059] mb-6 font-serif">Оформлення замовлення</h1>
+        
+        <form id="checkoutForm" class="flex flex-col gap-4">
+            <!-- Контакти -->
+            <h3 class="font-bold text-sm uppercase text-gray-400 mt-4">Контактні дані</h3>
+            <input type="text" id="order-name" placeholder="Ваше Ім'я" class="w-full bg-white/5 border border-white/10 rounded p-3" required>
+            <input type="tel" id="order-phone" placeholder="Телефон (обов'язково)" class="w-full bg-white/5 border border-white/10 rounded p-3" required>
+            <input type="email" id="order-email" placeholder="Email (для чеку та реєстрації)" class="w-full bg-white/5 border border-white/10 rounded p-3" required>
+
+            <!-- Доставка -->
+            <h3 class="font-bold text-sm uppercase text-gray-400 mt-4">Доставка (Нова Пошта)</h3>
+            <input type="text" id="order-city" placeholder="Місто" class="w-full bg-white/5 border border-white/10 rounded p-3" required>
+            <input type="text" id="order-branch" placeholder="Номер відділення або поштомату" class="w-full bg-white/5 border border-white/10 rounded p-3" required>
+
+            <!-- Оплата -->
+            <h3 class="font-bold text-sm uppercase text-gray-400 mt-4">Оплата</h3>
+            <select id="order-payment" class="w-full bg-[#1c1c1e] border border-white/10 rounded p-3 text-white">
+                <option value="card">Оплата карткою онлайн</option>
+                <option value="cod">Накладений платіж (при отриманні)</option>
+            </select>
+
+            <!-- Коментар -->
+            <textarea id="order-comment" placeholder="Коментар до замовлення..." class="w-full bg-white/5 border border-white/10 rounded p-3 h-24 mt-4"></textarea>
+
+            <button type="submit" class="bg-[#c5a059] text-black font-bold py-4 rounded mt-6 hover:opacity-90 transition">Підтвердити замовлення</button>
+        </form>
+    </div>
+
+    <!-- Модалка успішного замовлення (пропозиція реєстрації) -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#1c1c1e] p-8 rounded-xl border border-[#c5a059] max-w-md text-center">
+            <h2 class="text-2xl text-[#c5a059] mb-4">Дякуємо за замовлення!</h2>
+            <p class="text-gray-400 mb-6">Ваше замовлення успішно прийнято. Адміністратор зв'яжеться з вами найближчим часом.</p>
+            
+            <div id="guest-promo" class="bg-white/5 p-4 rounded mb-6">
+                <p class="text-sm text-white mb-2">Хочете відслідковувати статус замовлення та отримувати бонуси?</p>
+                <button onclick="window.location.href='index.html#register'" class="text-[#c5a059] underline font-bold">Створити особистий кабінет</button>
+            </div>
+
+            <button onclick="window.location.href='index.html'" class="w-full border border-white/20 py-2 rounded text-gray-300">Повернутися на головну</button>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('ТВІЙ_URL', 'ТВІЙ_PUBLISHABLE_KEY');
+
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // 1. Перевіряємо, чи авторизований юзер
+            const { data: { session } } = await _supabase.auth.getSession();
+            const userId = session ? session.user.id : null;
+
+            // 2. Беремо кошик (припустимо, він лежить в localStorage)
+            const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cartItems.length === 0) return alert('Кошик порожній!');
+            
+            const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            // 3. Формуємо об'єкт замовлення
+            const orderData = {
+                user_id: userId, // null якщо гість
+                user_email: document.getElementById('order-email').value,
+                phone: document.getElementById('order-phone').value,
+                delivery_info: {
+                    city: document.getElementById('order-city').value,
+                    branch: document.getElementById('order-branch').value
+                },
+                payment_method: document.getElementById('order-payment').value,
+                comment: document.getElementById('order-comment').value,
+                items: cartItems,
+                total_price: totalPrice,
+                status: 'pending'
+            };
+
+            // 4. Відправляємо в Supabase
+            const { error } = await _supabase.from('orders').insert([orderData]);
+
+            if (error) {
+                alert('Помилка оформлення: ' + error.message);
+            } else {
+                // Очищаємо кошик
+                localStorage.removeItem('cart');
+                
+                // Ховаємо форму, показуємо вікно успіху
+                document.getElementById('checkout-form-container').classList.add('hidden');
+                document.getElementById('successModal').classList.remove('hidden');
+
+                // Якщо юзер вже авторизований, ховаємо пропозицію реєстрації
+                if (userId) document.getElementById('guest-promo').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
