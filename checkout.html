@@ -18,16 +18,22 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
+        
+        /* Стили для дропдаунов Новой Почты */
+        .np-dropdown-item { padding: 12px 14px; color: #f5f5f7; font-size: 13px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: #c5a059; }
+        .np-dropdown-item:last-child { border-bottom: none; }
+        .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 pb-20">
 
     <a href="index.html" class="absolute top-6 left-6 text-sm text-gray-400 hover:text-[#c5a059] flex items-center gap-2 transition-colors z-10">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Повернутися до покупок
+        <span class="hidden md:inline">Повернутися до покупок</span>
     </a>
 
-    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-8 mt-12 lg:mt-0" id="checkoutContainer">
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-8 mt-16 lg:mt-0" id="checkoutContainer">
         
         <div class="w-full lg:w-5/12 glass-panel p-6 shadow-2xl flex flex-col max-h-[85vh]">
             <h2 class="text-xl font-serif text-[#c5a059] italic mb-6">Ваше замовлення</h2>
@@ -46,7 +52,7 @@
                 <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-6">
+            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off">
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
@@ -58,16 +64,27 @@
                 </div>
 
                 <div class="pt-4 border-t border-white/10">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Доставка (Нова Пошта)</h3>
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1 flex justify-between items-center">
+                        Доставка (Нова Пошта)
+                        <img src="https://novaposhta.ua/runtime/cache/320x95/np-logo-uk_1.png" alt="NP" class="h-3 opacity-80 rounded" style="filter: grayscale(1) invert(1) brightness(2);">
+                    </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="orderCity" placeholder="Місто / Населений пункт" class="input-field" required>
-                        <input type="text" id="orderBranch" placeholder="№ Відділення або Поштомату" class="input-field" required>
+                        <div class="relative">
+                            <input type="text" id="orderCity" placeholder="Почніть вводити місто..." class="input-field" autocomplete="new-password" required>
+                            <input type="hidden" id="orderCityRef" value="">
+                            <div id="cityDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
+                        </div>
+
+                        <div class="relative">
+                            <input type="text" id="orderBranch" placeholder="Оберіть місто спочатку" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password" required>
+                            <div id="branchDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-white/10">
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Спосіб оплати</h3>
-                    <select id="orderPayment" class="input-field">
+                    <select id="orderPayment" class="input-field cursor-pointer">
                         <option value="cod">Накладений платіж (Оплата при отриманні)</option>
                         <option value="card">Онлайн оплата (Карткою / Apple Pay)</option>
                     </select>
@@ -75,18 +92,18 @@
 
                 <div class="pt-4 border-t border-white/10">
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Коментар до замовлення</h3>
-                    <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-20 resize-none"></textarea>
+                    <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-4">
+                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2">
                     Підтвердити замовлення
                 </button>
             </form>
         </div>
     </div>
 
-    <div id="successModal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-500">
-        <div class="glass-panel p-8 md:p-12 text-center max-w-md w-full border-[#c5a059]/30">
+    <div id="successModal" class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4 opacity-0 transition-opacity duration-500">
+        <div class="glass-panel p-8 md:p-12 text-center max-w-md w-full border-[#c5a059]/30 shadow-2xl">
             <div class="w-20 h-20 mx-auto bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
@@ -106,6 +123,155 @@
     <script src="main.js"></script>
 
     <script>
+        // ==========================================
+        // НАЛАШТУВАННЯ НОВОЇ ПОШТИ
+        // ==========================================
+        const NP_API_KEY = ''; // <-- ВСТАВ ТУТ СВІЙ API КЛЮЧ НОВОЇ ПОШТИ
+        
+        let allBranches = []; // Кеш відділень для обраного міста
+
+        // API запит до НП
+        async function fetchNP(model, method, properties) {
+            if(!NP_API_KEY) {
+                console.warn('API Ключ Нової Пошти не вказано!');
+                return [];
+            }
+            try {
+                const res = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        apiKey: NP_API_KEY,
+                        modelName: model,
+                        calledMethod: method,
+                        methodProperties: properties
+                    })
+                });
+                const data = await res.json();
+                return data.success ? data.data : [];
+            } catch (e) {
+                console.error('Помилка NP API:', e);
+                return [];
+            }
+        }
+
+        // Логіка Міст
+        const cityInput = document.getElementById('orderCity');
+        const cityDropdown = document.getElementById('cityDropdown');
+        const cityRefInput = document.getElementById('orderCityRef');
+        
+        const branchInput = document.getElementById('orderBranch');
+        const branchDropdown = document.getElementById('branchDropdown');
+        
+        let cityDebounceTimer;
+
+        cityInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(cityDebounceTimer);
+            
+            // Скидаємо відділення, якщо міняють місто
+            branchInput.value = '';
+            branchInput.disabled = true;
+            branchInput.placeholder = 'Оберіть місто спочатку';
+            allBranches = [];
+
+            if (query.length < 2) {
+                cityDropdown.classList.add('hidden');
+                return;
+            }
+
+            cityDebounceTimer = setTimeout(async () => {
+                // Використовуємо AddressGeneral для міст
+                const cities = await fetchNP("Address", "searchSettlements", { CityName: query, Limit: "20" });
+                const addresses = cities.length > 0 ? cities[0].Addresses : [];
+                
+                if (addresses.length > 0) {
+                    cityDropdown.innerHTML = addresses.map(c => `
+                        <div class="np-dropdown-item" data-ref="${c.DeliveryCity}" data-name="${c.Present}">
+                            ${c.Present}
+                        </div>
+                    `).join('');
+                    cityDropdown.classList.remove('hidden');
+                } else {
+                    cityDropdown.innerHTML = '<div class="p-3 text-xs text-gray-500">Місто не знайдено</div>';
+                    cityDropdown.classList.remove('hidden');
+                }
+            }, 400); // 400ms debounce
+        });
+
+        // Вибір міста
+        cityDropdown.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('np-dropdown-item')) {
+                const name = e.target.getAttribute('data-name');
+                const ref = e.target.getAttribute('data-ref');
+                
+                cityInput.value = name;
+                cityRefInput.value = ref;
+                cityDropdown.classList.add('hidden');
+
+                // Завантажуємо відділення для цього міста
+                branchInput.disabled = false;
+                branchInput.placeholder = 'Завантаження відділень...';
+                branchInput.value = '';
+                
+                allBranches = await fetchNP("Address", "getWarehouses", { CityRef: ref });
+                branchInput.placeholder = 'Введіть номер або адресу відділення';
+            }
+        });
+
+        // Логіка Відділень (Локальний пошук по кешу)
+        branchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query.length === 0) {
+                branchDropdown.classList.add('hidden');
+                return;
+            }
+
+            const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query) || b.Number === query);
+            
+            if (filtered.length > 0) {
+                branchDropdown.innerHTML = filtered.slice(0, 30).map(b => `
+                    <div class="np-dropdown-item" data-name="${b.Description}">
+                        ${b.Description}
+                    </div>
+                `).join('');
+                branchDropdown.classList.remove('hidden');
+            } else {
+                branchDropdown.innerHTML = '<div class="p-3 text-xs text-gray-500">Відділення не знайдено</div>';
+                branchDropdown.classList.remove('hidden');
+            }
+        });
+        
+        // Показати всі відділення при кліку (якщо поле порожнє)
+        branchInput.addEventListener('focus', () => {
+            if (allBranches.length > 0 && branchInput.value === '') {
+                branchDropdown.innerHTML = allBranches.slice(0, 30).map(b => `
+                    <div class="np-dropdown-item" data-name="${b.Description}">
+                        ${b.Description}
+                    </div>
+                `).join('');
+                branchDropdown.classList.remove('hidden');
+            }
+        });
+
+        // Вибір відділення
+        branchDropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('np-dropdown-item')) {
+                branchInput.value = e.target.getAttribute('data-name');
+                branchDropdown.classList.add('hidden');
+            }
+        });
+
+        // Закриття дропдаунів при кліку поза ними
+        document.addEventListener('click', (e) => {
+            if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
+            if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
+        });
+
+        // ==========================================
+        // ЛОГІКА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
+        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const cart = typeof getCart === 'function' ? getCart() : [];
@@ -124,9 +290,9 @@
                     total += item.price * item.qty;
                     const sizeBadge = item.size ? `<span class="bg-[#c5a059]/20 text-[#c5a059] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
                     return `
-                        <div class="flex gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="flex gap-4 bg-white/5 p-3 rounded-xl border border-white/5 relative group">
                             <img src="${item.img}" class="w-16 h-16 object-cover rounded-lg border border-white/10">
-                            <div class="flex-grow flex flex-col justify-center">
+                            <div class="flex-grow flex flex-col justify-center pr-6">
                                 <span class="text-xs font-semibold uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
                                 <div class="flex items-center gap-2 mt-1 mb-1">
                                     ${sizeBadge}
@@ -137,6 +303,9 @@
                                     <span class="text-sm font-bold text-[#c5a059]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
                                 </div>
                             </div>
+                            <button class="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
                         </div>
                     `;
                 }).join('');
@@ -154,6 +323,12 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
+                // Валідація: перевіряємо, чи ввів клієнт щось у Новій Пошті, якщо API не підключено
+                if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
+                    alert('Будь ласка, введіть місто та відділення Нової Пошти.');
+                    return;
+                }
+
                 const btn = document.getElementById('submitBtn');
                 btn.innerText = 'Обробка...';
                 btn.disabled = true;
@@ -190,8 +365,6 @@
                     // Підготовка до платіжної системи
                     if(paymentMethod === 'card') {
                         // Тут ми будемо підключати WayForPay / LiqPay. 
-                        // Поки що просто показуємо успіх, але в майбутньому тут буде редірект на сторінку оплати.
-                        // window.location.href = 'ТУТ_БУДЕ_ЛІНК_НА_ОПЛАТУ';
                     }
 
                     document.getElementById('checkoutContainer').classList.add('hidden');
