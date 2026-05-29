@@ -51,34 +51,6 @@ const i18n = {
         search_ph: "Search...", login: "Log in", register: "Register", login_mob_title: "PROFILE", theme_mob: "Change Theme", lang_title: "LANGUAGE",
         footer_rights: "All rights reserved.", footer_dev: "Developed by",
         exc_title: "Exclusive Creation", exc_step: "Step", exc_order: "Request Quote"
-    },
-    ru: { 
-        m1: "Главная", m2: "Каталог", m3: "Бренд", m4: "Контакты", m_price: "Прайс", m_atelier: "Эксклюзив",
-        menu_all: "Все товары", menu_for_whom: "Для кого", menu_metal: "По металлу",
-        cart_title: "Корзина", cart_subtotal: "Итого:", cart_checkout: "Оформить заказ", cart_empty: "Ваша корзина пуста",
-        fav_title: "Избранное", fav_empty: "Список пуст",
-        in_stock: "В наличии", out_stock: "Нет в наличии", pre_order: "Под заказ",
-        badge_new: "Новинка", badge_exclusive: "Эксклюзив", badge_sale: "Sale", badge_sold_out: "Продано", badge_pre_order: "Под заказ",
-        btn_buy: "Купить", btn_details: "Подробнее", btn_send: "Отправить",
-        similar: "Также рекомендуем", desc_title: "Описание изделия", pd_nav_specs: "Характеристики", pd_nav_review: "Отзывы", pd_nav_all: "Всё о товаре", pd_nav_photo: "Фото", pd_nav_ask: "Задать вопрос",
-        cat_filters: "Фильтры", cat_sort: "Сортировка", cat_sort_new: "Сначала новые", cat_sort_cheap: "От дешевых к дорогим", cat_sort_exp: "От дорогих к дешевым", cat_load_more: "Показать еще", cat_reset: "Сбросить", cat_empty: "Товары не найдены",
-        search_ph: "Поиск...", login: "Войти", register: "Регистрация", login_mob_title: "КАБИНЕТ", theme_mob: "Сменить тему", lang_title: "ЯЗЫК",
-        footer_rights: "Все права защищены.", footer_dev: "Разработано",
-        exc_title: "Создание эксклюзива", exc_step: "Этап", exc_order: "Заказать просчет"
-    },
-    bg: { 
-        m1: "Начало", m2: "Каталог", m3: "Марка", m4: "Контакти", m_price: "Цени", m_atelier: "Ексклузив",
-        menu_all: "Всички продукти", menu_for_whom: "За кого", menu_metal: "По метал",
-        cart_title: "Количка", cart_subtotal: "Общо:", cart_checkout: "Поръчай", cart_empty: "Вашата количка е празна",
-        fav_title: "Любими", fav_empty: "Списъкът е празен",
-        in_stock: "В наличност", out_stock: "Изчерпано", pre_order: "По поръчка",
-        badge_new: "Ново", badge_exclusive: "Ексклузивно", badge_sale: "Разпродажба", badge_sold_out: "Изчерпано", badge_pre_order: "По поръчка",
-        btn_buy: "Купи", btn_details: "Детайли", btn_send: "Изпрати",
-        similar: "Препоръчваме също", desc_title: "Описание", pd_nav_specs: "Характеристики", pd_nav_review: "Отзиви", pd_nav_all: "За продукта", pd_nav_photo: "Снимки", pd_nav_ask: "Задай въпрос",
-        cat_filters: "Филтри", cat_sort: "Сортиране", cat_sort_new: "Най-нови", cat_sort_cheap: "От евтини към скъпи", cat_sort_exp: "От скъпи към евтини", cat_load_more: "Покажи още", cat_reset: "Изчисти", cat_empty: "Няма намерени продукти",
-        search_ph: "Търсене...", login: "Вход", register: "Регистрация", login_mob_title: "ПРОФИЛ", theme_mob: "Смяна на тема", lang_title: "ЕЗИК",
-        footer_rights: "Всички права запазени.", footer_dev: "Разработено от",
-        exc_title: "Създаване на ексклузив", exc_step: "Етап", exc_order: "Запитване за цена"
     }
 };
 
@@ -104,50 +76,30 @@ let products = [];
 window.loadCloudData = async function() {
     console.log("BV Jewelry: Завантаження даних з Supabase...");
     try {
-        // 1. Завантажуємо товари
-        const { data: prodData, error: prodErr } = await _supabase.from('products').select('*');
+        const { data: prodData } = await _supabase.from('products').select('*');
         if (prodData && prodData.length > 0) {
             products = prodData;
             API.set('bv_products', products);
         } else if (prodData && prodData.length === 0 && typeof window.BVDemoData !== 'undefined') {
-            // Якщо база порожня, заливаємо туди демо-дані
-            console.log("BV Jewelry: База порожня. Експорт демо-товарів у хмару...");
             products = window.BVDemoData.products || [];
             if(products.length > 0) await _supabase.from('products').upsert(products);
             API.set('bv_products', products);
         }
 
-        // 2. Завантажуємо налаштування сайту
-        const { data: storageData, error: storeErr } = await _supabase.from('site_storage').select('*');
+        const { data: storageData } = await _supabase.from('site_storage').select('*');
         if (storageData && storageData.length > 0) {
             storageData.forEach(item => {
                 API.set(item.key, item.value);
                 if(item.key === 'bv_categories_tree') categoriesTree = item.value;
             });
-        } else if (typeof window.BVDemoData !== 'undefined') {
-            // Заливаємо базові налаштування
-            console.log("BV Jewelry: Експорт налаштувань у хмару...");
-            const defaultStorage = [
-                { key: 'bv_settings', value: window.BVDemoData.settings || {} },
-                { key: 'bv_categories_tree', value: window.BVDemoData.categories || [] },
-                { key: 'bv_banners', value: window.BVDemoData.banners || [] },
-                { key: 'bv_pages_content', value: window.BVDemoData.pages || {} },
-                { key: 'bv_price_list', value: window.BVDemoData.priceList || [] },
-                { key: 'bv_exclusive_process', value: window.BVDemoData.exclusiveProcess || [] },
-                { key: 'bv_exclusive_materials', value: window.BVDemoData.exclusiveMaterials || [] }
-            ];
-            await _supabase.from('site_storage').upsert(defaultStorage);
-            defaultStorage.forEach(item => {
-                API.set(item.key, item.value);
-                if(item.key === 'bv_categories_tree') categoriesTree = item.value;
-            });
         }
         
-        // Ініціалізуємо UI після завантаження даних
         if(typeof generateMenus === 'function') generateMenus();
         if(typeof initBannerSlider === 'function') initBannerSlider();
-        if(document.getElementById('specialGrid') && typeof initPremiumCarousel === 'function') renderHomeSections();
+        if(document.getElementById('specialGrid') && typeof renderHomeSections === 'function') renderHomeSections();
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
+        
+        window.updateProfileMenu(); // Оновлюємо дропдаун профілю
 
     } catch (err) {
         console.error("Помилка завантаження бази:", err);
@@ -155,7 +107,7 @@ window.loadCloudData = async function() {
 };
 
 // ==========================================
-// 4. СТАН ТА СИНХРОНІЗАЦІЯ (SCOPED STORAGE)
+// 4. СТАН ТА СИНХРОНІЗАЦІЯ
 // ==========================================
 function getCurrentUser() { return API.get('bv_current_user', null); }
 function getScopedStorageKey(baseKey) {
@@ -188,7 +140,6 @@ window.setFavs = async function(favs) {
     if (currentUser && currentUser.id) {
         currentUser.favs = favs; 
         API.set('bv_current_user', currentUser);
-        // Синхронізуємо з Supabase
         await _supabase.from('profiles').update({ favs: favs }).eq('id', currentUser.id);
     }
 }
@@ -213,7 +164,7 @@ function getCategoryIconSVG(catId) {
 }
 
 // ==========================================
-// 5. КОШИК ТА УЛЮБЛЕНЕ (ЛОГІКА І РЕНДЕР)
+// 5. КОШИК ТА УЛЮБЛЕНЕ
 // ==========================================
 window.toggleCart = function() {
     const drawer = document.getElementById('cartDrawer');
@@ -264,16 +215,8 @@ window.clearEntireCart = function(force = false) {
 
 window.checkoutOrder = function() {
     const cart = getCart();
-    
-    // Перевіряємо, чи не порожній кошик
-    if(cart.length === 0) {
-        return alert('Ваш кошик порожній!');
-    }
-    
-    // Закриваємо шторку кошика
+    if(cart.length === 0) { return alert('Ваш кошик порожній!'); }
     window.toggleCart();
-    
-    // Перенаправляємо клієнта на нову сторінку оформлення
     window.location.href = 'checkout.html';
 };
 
@@ -292,8 +235,6 @@ window.renderCart = function() {
         cartBody.innerHTML = `<div class="cart-empty-msg text-center text-[var(--text-muted)] mt-10">${i18n[lang].cart_empty}</div>`;
         if(subtotalVal) subtotalVal.innerText = '0 ₴';
         cartBadges.forEach(b => b.innerText = '0');
-        
-        // Сховати кнопку оформлення
         const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
         if(checkoutBtnWrapper) checkoutBtnWrapper.style.display = 'none';
         return;
@@ -330,7 +271,6 @@ window.renderCart = function() {
         b.style.display = totalQty > 0 ? 'flex' : 'none';
     });
 
-    // Рендер кнопки Checkout якщо вона не інтегрована жорстко в HTML
     const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
     if(checkoutBtnWrapper) {
         checkoutBtnWrapper.style.display = 'block';
@@ -404,9 +344,11 @@ window.renderFavDrawer = function() {
     }
 
     const favProducts = allProducts.filter(p => favsIds.includes(p.id));
-    favBody.innerHTML = favProducts.map(prod => `
+    favBody.innerHTML = favProducts.map(prod => {
+        const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
+        return `
         <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
-            <img src="${prod.img || prod.image}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
+            <img src="${safeImg}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
             <div class="flex-grow flex flex-col justify-center pr-6">
                 <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${escapeHtml(window.getLoc(prod, 'name'))}</span>
                 <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(window.getLoc(prod, 'variant'))}</span>
@@ -416,7 +358,8 @@ window.renderFavDrawer = function() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
-    `).join('');
+        `;
+    }).join('');
 };
 
 // ==========================================
@@ -444,7 +387,9 @@ window.renderProductCard = function(prod) {
     const safeId = escapeHtml(prod.id);
     const safeName = escapeHtml(window.getLoc(prod, 'name')).replace(/'/g, "\\'"); 
     const safeVariant = escapeHtml(window.getLoc(prod, 'variant')).replace(/'/g, "\\'");
-    const safeImg = escapeHtml(prod.img || prod.image);
+    
+    // Підтримка нового масиву зображень з адмінки
+    const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
     const priceDisplay = prod.discount && Number(prod.discount) > 0 ? prod.discount : prod.price;
 
     return `
@@ -494,12 +439,9 @@ function generateMenus() {
             const isActive = index === 0 ? 'active' : ''; 
             const svgIcon = getCategoryIconSVG(cat.id);
             
-            // 1. Ліва колонка
             megaCol1.innerHTML += `<div class="mega-cat-item ${isActive}" data-target="mc-${cat.id}"><svg class="mega-cat-icon" viewBox="0 0 24 24">${svgIcon}</svg><span>${cat.name}</span></div>`;
 
-            // 2. Сітка груп
             let groupsHtml = '<div class="zlato-groups-grid">';
-            
             if (cat.subcategories && cat.subcategories.length > 0) {
                 cat.subcategories.forEach(sub => {
                     groupsHtml += `<div class="zlato-group-wrapper">`;
@@ -517,7 +459,6 @@ function generateMenus() {
             }
             groupsHtml += '</div>';
 
-            // 3. Блок нижніх хайлайтів
             let highlightsHtml = '';
             if (cat.highlights && cat.highlights.length > 0) {
                 highlightsHtml += `<div class="zlato-highlights">`;
@@ -528,7 +469,6 @@ function generateMenus() {
                 highlightsHtml += `</div>`;
             }
 
-            // 4. Збірка правої колонки
             if(megaMenu) {
                 const newCol2 = document.createElement('div');
                 newCol2.className = `mega-col-2 zlato-content ${isActive}`;
@@ -627,10 +567,10 @@ function generateMenus() {
                     <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
                 <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 20px;">
-                    <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Історія Atelier</a>
-                    <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія</a>
-                    <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Умови</a>
-                    <a href="info.html?p=reviews" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Відгуки</a>
+                    <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+                    <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+                    <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+                    <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
                 </div>
             </div>
             
@@ -652,7 +592,6 @@ function generateMenus() {
                     <div class="mob-accordion-list" id="mobLangList" style="margin-top: 10px; background: rgba(0,0,0,0.1); border-radius: 12px;">
                         <div class="dropdown-item py-3" onclick="window.changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="flag"> Українська</div>
                         <div class="dropdown-item py-3" onclick="window.changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="flag"> English</div>
-                        <div class="dropdown-item py-3" onclick="window.changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="flag"> Русский</div>
                     </div>
                 </div>
                 
@@ -993,39 +932,15 @@ window.goToBanner = function(index) {
 };
 
 // ==========================================
-// 11. ГОЛОВНА: РЕНДЕР СЕКЦІЙ 
+// 11. ГОЛОВНА ТА ПІДВАЛ: РЕНДЕР СЕКЦІЙ 
 // ==========================================
-window.renderHomeCollage = function() {
-    const collage = document.getElementById('art-collage');
-    if (!collage) return;
-    const config = API.get('bv_collage_config', { template: 'grid-6', items: [] });
-    
-    const perfectCollage = document.querySelector('.grid-perfect-collage');
-    if (perfectCollage && config.items.length > 0) {
-        perfectCollage.innerHTML = '';
-        config.items.forEach((item, index) => {
-            let itemClass = index === 0 ? 'grid-6-big' : 'grid-6-box';
-            let badgeHtml = index === 0 ? '<span class="badge-status badge-new">New</span>' : (index === 1 ? '<span class="badge-status badge-sale">Sale</span>' : '');
-            
-            perfectCollage.innerHTML += `
-                <div class="collage-item ${itemClass} group" onclick="location.href='catalog.html#${item.catId}'">
-                    <img src="${item.img}" alt="${item.title}" class="item-img" loading="lazy">
-                    <div class="item-overlay">
-                        ${badgeHtml}
-                        <span class="item-category-serif">${item.title}</span>
-                    </div>
-                </div>
-            `;
-        });
-    }
-};
-
 window.renderHomeSections = function() {
     const specialGrid = document.getElementById('specialGrid');
     const weeklyGrid = document.getElementById('weeklyGrid');
 
     const trackClasses = "flex overflow-x-auto gap-4 md:gap-5 pb-6 pt-2 snap-x snap-mandatory no-scrollbar";
     const cardWrapper = (p) => `<div class="flex-none w-[45%] sm:w-[32%] md:w-[26%] lg:w-[20%] xl:w-[18%] snap-start flex">${window.renderProductCard(p)}</div>`;
+    
     const generateInfiniteHTML = (items) => {
         if(items.length === 0) return '';
         let blockItems = [...items];
@@ -1036,16 +951,25 @@ window.renderHomeSections = function() {
 
     if(specialGrid) {
         specialGrid.className = trackClasses;
-        const items = products.filter(p => p.isSpecial).slice(0, 10);
-        specialGrid.innerHTML = generateInfiniteHTML(items);
-        initPremiumCarousel(specialGrid);
+        // Перевірка на true для нових даних, або "true"
+        const items = products.filter(p => p.isSpecial === true || p.isSpecial === 'true').slice(0, 10);
+        if(items.length > 0) {
+            specialGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(specialGrid);
+        } else {
+            specialGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Нових пропозицій ще не додано.</p>';
+        }
     }
     
     if(weeklyGrid) {
         weeklyGrid.className = trackClasses;
-        const items = products.filter(p => p.isWeekly).slice(0, 10);
-        weeklyGrid.innerHTML = generateInfiniteHTML(items);
-        initPremiumCarousel(weeklyGrid);
+        const items = products.filter(p => p.isWeekly === true || p.isWeekly === 'true').slice(0, 10);
+        if(items.length > 0) {
+            weeklyGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(weeklyGrid);
+        } else {
+            weeklyGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Хіти тижня ще не обрано.</p>';
+        }
     }
 };
 
@@ -1079,9 +1003,47 @@ window.applyAdminSettings = function() {
         }
         if(settings.tgLink) document.querySelectorAll('.tg-link').forEach(link => link.href = settings.tgLink);
         if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
-        if(settings.addr1) document.querySelectorAll('.addr-text-1').forEach(el => el.innerText = settings.addr1);
-        if(settings.addr2) document.querySelectorAll('.addr-text-2').forEach(el => el.innerText = settings.addr2);
+        
+        // Рендер адресів (філіалів)
+        const footerAddrBlock = document.getElementById('footerAddressesBlock');
+        if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
+            let html = '';
+            // Головна адреса
+            html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        <span>${settings.addresses[0]}</span>
+                    </a>`;
+            
+            // Якщо є більше адрес, додаємо кнопку "Наші філіали"
+            if (settings.addresses.length > 1) {
+                html += `<button onclick="window.showBranchesModal()" class="text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
+            }
+            footerAddrBlock.innerHTML = html;
+        }
     }
+};
+
+window.showBranchesModal = function() {
+    const settings = API.get('bv_settings', {});
+    const addrs = settings.addresses || [];
+    if(addrs.length === 0) return;
+    
+    const list = addrs.map(a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-xl hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
+        <span>${a}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+    </a>`).join('');
+    
+    const modalHtml = `
+    <div id="branchesModal" class="fixed inset-0 bg-black/80 z-[7000] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="this.remove()">
+        <div class="glass-panel p-8 w-full max-w-md relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('branchesModal').remove()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-2xl leading-none">&times;</button>
+            <h3 class="text-2xl font-serif text-[var(--gold-muted)] mb-6 text-center italic">Наші філіали</h3>
+            <div class="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                ${list}
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 };
 
 window.renderServicesTable = function() {
@@ -1272,35 +1234,10 @@ window.openAuthModal = function() {
     if(document.getElementById('sideMenu') && document.getElementById('sideMenu').classList.contains('active')){ window.toggleMenu(); }
     const modal = document.getElementById('authModal');
     if(!modal) return;
-
-    const currentUser = API.get('bv_current_user', null);
     modal.classList.remove('hidden'); 
     setTimeout(() => modal.classList.remove('opacity-0'), 10);
-
-    if (currentUser) {
-        document.getElementById('authFormContainer').classList.add('hidden');
-        document.getElementById('profileView').classList.remove('hidden');
-        document.getElementById('profileView').classList.add('flex');
-
-        const initial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : (currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U');
-        document.getElementById('profAvatar').innerText = initial;
-        document.getElementById('profName').innerText = currentUser.name || 'Клієнт';
-        document.getElementById('profEmail').innerText = currentUser.username || '';
-
-        if (currentUser.role === 'admin' || localStorage.getItem('isAdminAuth') === 'true') {
-            document.getElementById('adminLinkBtn').classList.remove('hidden');
-            document.getElementById('clientLinkBtn').classList.add('hidden');
-        } else {
-            document.getElementById('adminLinkBtn').classList.add('hidden');
-            document.getElementById('clientLinkBtn').classList.remove('hidden');
-        }
-    } else {
-        document.getElementById('profileView').classList.add('hidden');
-        document.getElementById('profileView').classList.remove('flex');
-        document.getElementById('authFormContainer').classList.remove('hidden');
-        isRegisterMode = false; 
-        updateAuthView();
-    }
+    isRegisterMode = false; 
+    updateAuthView();
 };
 
 window.closeAuthModal = function() {
@@ -1332,7 +1269,6 @@ window.updateAuthView = function() {
         }
     }
 
-    // Динамічно додаємо підписки при реєстрації
     const subsField = document.getElementById('subsFieldContainer');
     if(!subsField && isRegisterMode) {
         document.getElementById('authForm').insertAdjacentHTML('beforeend', `
@@ -1346,11 +1282,29 @@ window.updateAuthView = function() {
     }
 };
 
+window.updateProfileMenu = function() {
+    const user = getCurrentUser();
+    const dropdownMenu = document.getElementById('profileDropdownMenu');
+    if(dropdownMenu) {
+        if (user) {
+            dropdownMenu.innerHTML = `
+                <a href="profile.html" class="dropdown-item w-full text-left font-medium">Мій кабінет</a>
+                ${user.role === 'admin' ? '<a href="admin.html" class="dropdown-item w-full text-left font-bold text-[#c5a059]">Панель Адміна</a>' : ''}
+                <button onclick="logoutUser()" class="dropdown-item w-full text-left text-red-400 hover:text-red-500 mt-2 border-t border-[var(--border)] pt-2">Вийти з акаунту</button>
+            `;
+        } else {
+            dropdownMenu.innerHTML = `
+                <button onclick="window.isRegisterMode=false; window.openAuthModal();" class="dropdown-item w-full text-left font-medium">Увійти</button>
+                <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="dropdown-item w-full text-left font-medium text-[#c5a059]">Зареєструватися</button>
+            `;
+        }
+    }
+};
+
 window.initRealtime = function() {
     const user = getCurrentUser();
     if(!user) return;
 
-    // Підписуємось на оновлення статусу замовлення в реальному часі
     _supabase.channel('custom-user-orders')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, (payload) => {
             const newStatus = payload.new.status;
@@ -1378,14 +1332,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('authUser').value.trim();
             const pass = document.getElementById('authPass').value.trim();
             const name = document.getElementById('authName') ? document.getElementById('authName').value.trim() : '';
-            
-            if(email === 'admin' && pass === 'admin') {
-                localStorage.setItem('isAdminAuth', 'true');
-                API.set('bv_current_user', { username: 'admin', email: 'admin@bv.com', role: 'admin', name: 'Admin' });
-                submitBtn.innerText = originalText; submitBtn.disabled = false;
-                window.openAuthModal();
-                return;
-            }
 
             if (isRegisterMode) {
                 if (pass.length < 6) { 
@@ -1404,7 +1350,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (error) {
                     alert('Помилка реєстрації: ' + error.message);
                 } else {
-                    // Створюємо профіль у таблиці profiles
                     if(data.user) {
                         await _supabase.from('profiles').insert([
                             { id: data.user.id, full_name: name, role: 'client', wants_newsletter: w_news, wants_discounts: w_disc, favs: [] }
@@ -1434,13 +1379,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 API.set('bv_current_user', { id: data.user.id, username: data.user.email, role: role, name: fullName, favs: userFavs });
                 if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
                 
-                // Синхронізуємо улюблене після входу
                 API.set(getScopedStorageKey('bv_favs'), userFavs);
                 
-                openAuthModal();
+                closeAuthModal();
                 if(typeof updateBadges === 'function') updateBadges();
                 window.renderFavDrawer();
-                window.initRealtime(); // Вмикаємо сповіщення
+                window.initRealtime();
+                window.updateProfileMenu(); // Оновлюємо дропдаун після логіну
             }
             submitBtn.innerText = originalText; submitBtn.disabled = false;
         });
@@ -1449,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.logoutUser = async function() {
     if(typeof _supabase !== 'undefined' && _supabase.auth) {
-        _supabase.removeAllChannels(); // Відключаємо realtime
+        _supabase.removeAllChannels();
         await _supabase.auth.signOut();
     }
     API.set('bv_current_user', null); 
@@ -1460,11 +1405,9 @@ window.logoutUser = async function() {
     if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('profile.html')) {
         window.location.href = 'index.html';
     } else {
-        openAuthModal();
         if(typeof window.renderCart === 'function') window.renderCart(); 
         if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
-        const profBtn = document.getElementById('headerProfileBtn');
-        if(profBtn) profBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        window.updateProfileMenu(); // Оновлюємо дропдаун після логауту
     }
 };
 
@@ -1477,7 +1420,6 @@ window.onload = async () => {
     migrateScopedState();
     if(typeof window.injectGlobalUI === 'function') window.injectGlobalUI();
     
-    // Запускаємо завантаження даних із хмари Supabase
     await window.loadCloudData();
 
     if(document.getElementById('marqueeTrack') && typeof initMarqueeSim === 'function') initMarqueeSim();
@@ -1502,11 +1444,10 @@ window.onload = async () => {
 
     const currentUser = API.get('bv_current_user', null);
     if(currentUser || localStorage.getItem('isAdminAuth') === 'true') {
-        const profBtn = document.getElementById('headerProfileBtn');
-        const initial = currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'A';
-        if(profBtn) profBtn.innerHTML = `<div class="w-6 h-6 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-xs font-bold">${initial}</div>`;
-        window.initRealtime(); // Вмикаємо сповіщення для авторизованих клієнтів
+        window.initRealtime();
     }
+    
+    window.updateProfileMenu(); // Ініціалізуємо дропдаун профілю при завантаженні
 
     const burgerBtn = document.getElementById('burger');
     if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }

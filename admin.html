@@ -100,7 +100,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 class="text-2xl font-semibold">Управління товарами</h2>
                 <div class="flex gap-3 w-full sm:w-auto">
-                    <input type="text" id="prodSearch" onkeyup="searchProducts()" placeholder="Пошук..." class="input-field py-2 flex-grow sm:w-64">
+                    <input type="text" id="prodSearch" onkeyup="searchProducts()" placeholder="Пошук за назвою чи артикулом..." class="input-field py-2 flex-grow sm:w-64">
                     <button onclick="openProductModal()" class="btn-primary whitespace-nowrap">+ Додати товар</button>
                 </div>
             </div>
@@ -110,7 +110,7 @@
                         <thead class="bg-white/5 uppercase text-[10px] text-gray-400 tracking-wider">
                             <tr>
                                 <th class="p-4">Фото</th>
-                                <th class="p-4">Назва / ID</th>
+                                <th class="p-4">Назва / Артикул</th>
                                 <th class="p-4">Категорія</th>
                                 <th class="p-4">Ціна</th>
                                 <th class="p-4">Статус</th>
@@ -136,10 +136,10 @@
                 <label class="text-[10px] uppercase text-gray-400 block mb-1">Оберіть сторінку для редагування</label>
                 <select id="builder-page-select" class="input-field" onchange="loadPageBuilderForm()">
                     <option value="home_hero">Головна: Обкладинка (Hero)</option>
-                    <option value="about">Історія Atelier (Про нас)</option>
-                    <option value="warranty">Гарантія та Якість</option>
+                    <option value="about">Про нас (Історія Atelier)</option>
+                    <option value="warranty">Гарантія та Повернення</option>
                     <option value="terms">Умови та Доставка</option>
-                    <option value="reviews">Відгуки клієнтів</option>
+                    <option value="faq">Часті питання (FAQ)</option>
                 </select>
             </div>
             <div id="builder-form-container" class="glass-panel p-6"></div>
@@ -226,11 +226,9 @@
                     </div>
                 </div>
                 <div class="glass-panel p-6">
-                    <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Адреси</h3>
-                    <div class="flex flex-col gap-4">
-                        <input type="text" id="set-addr1" class="input-field" placeholder="Адреса 1">
-                        <input type="text" id="set-addr2" class="input-field" placeholder="Адреса 2">
-                    </div>
+                    <h3 class="text-sm font-semibold uppercase tracking-widest text-[#c5a059] mb-4">Адреси (Філіали)</h3>
+                    <div id="addressesContainer" class="flex flex-col gap-3"></div>
+                    <button type="button" onclick="addAddressField()" class="mt-3 text-xs text-[#c5a059] hover:underline font-bold uppercase tracking-widest">+ Додати філіал</button>
                 </div>
             </div>
             <div class="mt-6 text-right"><button onclick="saveSiteSettings()" class="btn-primary">Зберегти глобальні</button></div>
@@ -238,16 +236,14 @@
 
     </main>
 
-    <!-- МОДАЛЬНІ ВІКНА -->
     <div id="productModal" class="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity p-4">
-        <div class="glass-panel p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold" id="prodModalTitle">Додати товар</h3>
+        <div class="glass-panel p-6 w-full max-w-3xl max-h-[95vh] overflow-y-auto custom-scrollbar border-[#c5a059]/30">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <h3 class="text-xl font-serif text-[#c5a059]" id="prodModalTitle">Додати товар</h3>
                 <button type="button" onclick="closeProductModal()" class="text-gray-400 text-3xl leading-none hover:text-white">&times;</button>
             </div>
             <form id="productForm" class="flex flex-col gap-4">
                 <input type="hidden" id="prod-id">
-                <input type="hidden" id="prod-imgBase64"> 
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва (UA)</label><input type="text" id="prod-name" class="input-field" required></div>
@@ -255,14 +251,18 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Артикул</label><input type="text" id="prod-sku" class="input-field" required></div>
-                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Матеріал</label><input type="text" id="prod-variant" class="input-field" required></div>
-                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Розміри</label><input type="text" id="prod-sizes" class="input-field" placeholder="15.5, 16.0"></div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] block mb-1">Артикул (SKU)</label><input type="text" id="prod-sku" class="input-field border-[#c5a059]/50" required placeholder="Напр: R-1234"></div>
                     <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Категорія</label><select id="prod-category" class="input-field" required onchange="updateSubcatOptions()"></select></div>
                     <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Підкатегорія</label><select id="prod-subcategory" class="input-field"></select></div>
+                </div>
+
+                <div class="bg-white/5 p-4 rounded-lg border border-white/10 mb-2">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest text-[#c5a059] mb-3 border-b border-white/10 pb-2">Параметри виробу</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Матеріал</label><input type="text" id="prod-variant" class="input-field" required placeholder="Золото 585"></div>
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Каміння / Вставка</label><input type="text" id="prod-stones" class="input-field" placeholder="Діамант 0.5ct"></div>
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Доступні розміри</label><input type="text" id="prod-sizes" class="input-field" placeholder="15.5, 16.0, 16.5"></div>
+                    </div>
                 </div>
 
                 <div class="bg-white/5 p-4 rounded-lg border border-white/10 mb-2">
@@ -271,10 +271,10 @@
                             <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Тип ціноутворення</label>
                             <select id="prod-price-type" class="input-field font-semibold bg-[#1a1a1a]" onchange="togglePriceMode()">
                                 <option value="manual">Фіксована ціна</option>
-                                <option value="auto">Авто-розрахунок</option>
+                                <option value="auto">Авто-розрахунок (по вазі)</option>
                             </select>
                         </div>
-                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Акційна ціна (ГРН)</label><input type="number" id="prod-discount" class="input-field"></div>
+                        <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Акційна ціна (ГРН) (за креслену ціну)</label><input type="number" id="prod-discount" class="input-field"></div>
                     </div>
                     <div id="price-mode-manual" class="grid grid-cols-1 gap-4">
                         <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Ціна (ГРН)</label><input type="number" id="prod-price" class="input-field"></div>
@@ -282,26 +282,30 @@
                     <div id="price-mode-auto" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
                         <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Вага (Грам)</label><input type="number" step="0.01" id="prod-weight" class="input-field" oninput="previewAutoPrice()"></div>
                         <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Робота (ГРН)</label><input type="number" id="prod-work-cost" class="input-field" oninput="previewAutoPrice()"></div>
-                        <div class="md:col-span-2 text-right text-xs text-gray-400 mt-1">Разом: <span id="auto-price-preview" class="font-bold text-[#c5a059] text-sm ml-2">0 ₴</span></div>
+                        <div class="md:col-span-2 text-right text-xs text-gray-400 mt-1">Розрахована вартість: <span id="auto-price-preview" class="font-bold text-[#c5a059] text-sm ml-2">0 ₴</span></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Статус</label><select id="prod-status" class="input-field"><option value="in-stock">В наявності</option><option value="out-stock">Немає</option><option value="pre-order">Під замовлення</option></select></div>
-                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Мітка</label><select id="prod-badge" class="input-field"><option value="none">Без мітки</option><option value="new">Новинка</option><option value="exclusive">Ексклюзив</option><option value="sale">Sale</option></select></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Статус наявності</label><select id="prod-status" class="input-field"><option value="in-stock">В наявності</option><option value="out-stock">Немає в наявності</option><option value="pre-order">Під замовлення</option></select></div>
+                    <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Бейдж на фото</label><select id="prod-badge" class="input-field"><option value="none">Без мітки</option><option value="new">Новинка</option><option value="exclusive">Ексклюзив</option><option value="sale">Sale</option></select></div>
+                    <div class="flex flex-col justify-center gap-2 bg-white/5 p-3 rounded-lg border border-white/10 mt-1 md:mt-0">
+                        <label class="flex items-center gap-2 text-[11px] text-white cursor-pointer"><input type="checkbox" id="prod-is-weekly" class="accent-[#c5a059] w-4 h-4"> Хіт тижня (Головна)</label>
+                        <label class="flex items-center gap-2 text-[11px] text-white cursor-pointer"><input type="checkbox" id="prod-is-special" class="accent-[#c5a059] w-4 h-4"> Хіт місяця (Головна)</label>
+                    </div>
                 </div>
                 
-                <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-1">Фото товару <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: квадрат 1:1, до 2MB)</span></label>
-                    <input type="file" id="prod-img-file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'prodPreview', 'prod-imgBase64', 2)">
-                    <img id="prodPreview" class="h-32 w-32 object-cover rounded mt-2 hidden mx-auto border border-white/20">
+                <div class="bg-white/5 p-4 rounded-lg border border-[#c5a059]/30">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фото товару (Галерея) <span class="text-gray-400 normal-case font-normal ml-1">Можна обрати декілька (Рекомендовано: квадрат 1:1)</span></label>
+                    <input type="file" id="prod-img-file" accept="image/png, image/jpeg, image/webp" multiple class="input-field file-input bg-[#1a1a1a]" onchange="handleGalleryUpload(event)">
+                    <div id="galleryPreview" class="flex gap-3 mt-4 overflow-x-auto pb-2 custom-scrollbar"></div>
                 </div>
                 
-                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис (UA)</label><textarea id="prod-desc" class="input-field h-20 resize-none"></textarea></div>
+                <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис товару (UA)</label><textarea id="prod-desc" class="input-field h-24 resize-none"></textarea></div>
                 
                 <div class="flex gap-3 mt-4">
-                    <button type="button" onclick="closeProductModal()" class="flex-1 border border-white/10 rounded-lg text-sm text-gray-300 py-2">Скасувати</button>
-                    <button type="submit" class="flex-1 btn-primary py-2 text-sm">Зберегти товар</button>
+                    <button type="button" onclick="closeProductModal()" class="flex-1 border border-white/10 rounded-lg text-sm text-gray-300 py-3 hover:bg-white/5 transition">Скасувати</button>
+                    <button type="submit" class="flex-1 btn-primary py-3 text-sm tracking-widest uppercase">Зберегти товар</button>
                 </div>
             </form>
         </div>
@@ -316,8 +320,8 @@
             <form id="bannerForm" class="flex flex-col gap-4">
                 <input type="hidden" id="banner-id"><input type="hidden" id="banner-img"> 
                 <div class="bg-white/5 p-4 rounded-lg">
-                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фонове зображення <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: до 3MB)</span></label>
-                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'bannerPreview', 'banner-img', 3)">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фонове зображення <span class="text-gray-400 normal-case font-normal ml-1">(Без жорстких обмежень ваги)</span></label>
+                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'bannerPreview', 'banner-img')">
                     <img id="bannerPreview" class="w-full aspect-[21/9] object-cover rounded mt-2 hidden border border-white/20">
                 </div>
                 <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Посилання (catalog.html#sale)</label><input type="text" id="banner-link" class="input-field"></div>
@@ -337,8 +341,8 @@
                 <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Назва</label><input type="text" id="process-title" class="input-field" required></div>
                 <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Опис</label><textarea id="process-desc" class="input-field h-24 resize-none" required></textarea></div>
                 <div class="bg-white/5 p-4 rounded-lg">
-                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фото етапу <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: 4:3, до 2MB)</span></label>
-                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'processPreview', 'process-img', 2)">
+                    <label class="text-[10px] font-bold uppercase text-[#c5a059] block mb-2">Фото етапу <span class="text-gray-400 normal-case font-normal ml-1">(Рекомендовано: 4:3)</span></label>
+                    <input type="file" accept="image/png, image/jpeg, image/webp" class="input-field file-input" onchange="handleImageUpload(event, 'processPreview', 'process-img')">
                     <img id="processPreview" class="w-full aspect-[4/3] object-cover rounded mt-2 hidden border border-white/20">
                 </div>
                 <div class="flex gap-3 mt-2">
@@ -366,6 +370,8 @@
         let pagesContentDB = {};
         let priceListDB = [];
         let ordersList = [];
+        let currentProductGallery = []; // Масив для фотографій товару
+        let currentAddresses = []; // Масив для філіалів
 
         let currentPage = 1;
         const itemsPerPage = 15;
@@ -377,13 +383,13 @@
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
-        function handleImageUpload(event, previewId, targetInputId, recommendedMb = 2) {
+        // Завантаження 1 фото (для банерів, етапів) без жорсткого ліміту
+        function handleImageUpload(event, previewId, targetInputId, recommendedMb = 5) {
             const file = event.target.files[0];
             if (!file) return;
             
-            // Якщо файл більший за рекомендований розмір — просто попереджаємо, але дозволяємо завантаження
             if (file.size > recommendedMb * 1024 * 1024) {
-                alert(`Увага: розмір файлу перевищує рекомендовані ${recommendedMb}MB. Це може трохи сповільнити завантаження сайту, але ми його збережемо.`);
+                alert(`Увага: розмір файлу перевищує рекомендовані ${recommendedMb}MB. Ми його збережемо, але це може трохи сповільнити сайт.`);
             }
             
             const reader = new FileReader();
@@ -396,27 +402,52 @@
             reader.readAsDataURL(file);
         }
 
-        async function checkAdminAccess() {
-            const { data: { session } } = await _supabase.auth.getSession();
+        // Завантаження галереї фото для товару
+        function handleGalleryUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`Увага: фото "${file.name}" важить більше 5MB. Рекомендуємо стискати фото для швидкості сайту.`);
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    currentProductGallery.push(e.target.result);
+                    renderGalleryPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+            // Очищаємо інпут, щоб можна було завантажити ті ж самі файли ще раз, якщо їх видалили
+            event.target.value = ''; 
+        }
 
-            if (!session) {
-                window.location.href = 'index.html';
+        function renderGalleryPreview() {
+            const container = document.getElementById('galleryPreview');
+            if(currentProductGallery.length === 0) {
+                container.innerHTML = '<div class="text-[10px] text-gray-500 italic py-4">Фотографій ще немає. Перше фото буде головним.</div>';
                 return;
             }
+            container.innerHTML = currentProductGallery.map((img, idx) => `
+                <div class="relative w-24 h-24 flex-shrink-0 group rounded-lg overflow-hidden border ${idx === 0 ? 'border-[#c5a059] shadow-[0_0_10px_rgba(197,160,89,0.3)]' : 'border-white/20'}">
+                    ${idx === 0 ? '<div class="absolute top-0 left-0 bg-[#c5a059] text-black text-[8px] font-bold px-1.5 py-0.5 rounded-br-lg z-10">ГОЛОВНЕ</div>' : ''}
+                    <img src="${img}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeGalleryImg(${idx})" class="absolute top-1 right-1 bg-red-500/80 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10">&times;</button>
+                </div>
+            `).join('');
+        }
 
-            const { data: profile } = await _supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+        function removeGalleryImg(index) {
+            currentProductGallery.splice(index, 1);
+            renderGalleryPreview();
+        }
 
-            if (profile && profile.role === 'admin') {
-                document.body.style.opacity = '1'; 
-                loadAllData();
-            } else {
-                alert('У вас немає доступу до панелі адміністратора!');
-                window.location.href = 'index.html';
-            }
+        async function checkAdminAccess() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', session.user.id).single();
+            if (profile && profile.role === 'admin') { document.body.style.opacity = '1'; loadAllData(); } 
+            else { alert('У вас немає доступу до панелі адміністратора!'); window.location.href = 'index.html'; }
         }
 
         checkAdminAccess();
@@ -562,10 +593,12 @@
             
             currentBatch.forEach(p => {
                 const pName = categories.find(c => c.id === p.category)?.name || p.category;
+                const mainImg = (p.images && p.images.length > 0) ? p.images[0] : (p.img || p.image);
+                
                 tbody.innerHTML += `
                     <tr class="hover:bg-white/5 border-b border-white/5">
-                        <td class="p-3"><img src="${p.img || p.image}" class="w-10 h-10 object-cover rounded border border-white/10"></td>
-                        <td class="p-3 font-medium min-w-[140px] text-xs"><span class="text-[10px] text-gray-500 block mb-1">Арт: ${p.sku || p.id}</span>${p.name}</td>
+                        <td class="p-3"><img src="${mainImg}" class="w-10 h-10 object-cover rounded border border-white/10"></td>
+                        <td class="p-3 font-medium min-w-[140px] text-xs"><span class="text-[10px] text-[#c5a059] block mb-1">Арт: ${p.sku || p.id}</span>${p.name}</td>
                         <td class="p-3 text-gray-400 text-xs">${pName}</td>
                         <td class="p-3 text-[#c5a059] text-xs font-semibold">${p.price} ₴</td>
                         <td class="p-3 text-xs"><span class="${p.status === 'out-stock' ? 'text-red-500' : 'text-green-500'}">${p.status === 'out-stock' ? 'Немає' : 'Є'}</span></td>
@@ -596,7 +629,9 @@
 
         function openProductModal(id = null) {
             document.getElementById('productForm').reset(); 
-            document.getElementById('prodPreview').style.display = 'none'; 
+            currentProductGallery = [];
+            renderGalleryPreview();
+            
             document.getElementById('prod-id').value = '';
             document.getElementById('prodModalTitle').innerText = 'Додати товар';
             updateSubcatOptions();
@@ -608,6 +643,7 @@
                 document.getElementById('prod-name-en').value = p.nameEN || ''; 
                 document.getElementById('prod-sku').value = p.sku || p.id; 
                 document.getElementById('prod-variant').value = p.variant || '';
+                document.getElementById('prod-stones').value = p.stones || '';
                 document.getElementById('prod-sizes').value = p.sizes ? p.sizes.join(', ') : '';
                 document.getElementById('prod-category').value = p.category; 
                 updateSubcatOptions(); 
@@ -616,6 +652,9 @@
                 document.getElementById('prod-status').value = p.status || 'in-stock'; 
                 document.getElementById('prod-badge').value = p.badge || 'none'; 
                 
+                document.getElementById('prod-is-weekly').checked = !!p.isWeekly;
+                document.getElementById('prod-is-special').checked = !!p.isSpecial;
+                
                 document.getElementById('prod-price-type').value = p.priceType || 'manual';
                 document.getElementById('prod-price').value = p.price || '';
                 document.getElementById('prod-weight').value = p.weight || '';
@@ -623,9 +662,16 @@
                 togglePriceMode();
                 
                 document.getElementById('prod-discount').value = p.discount || ''; 
-                document.getElementById('prod-imgBase64').value = p.img || p.image; 
-                if(p.img || p.image) { document.getElementById('prodPreview').src = p.img || p.image; document.getElementById('prodPreview').style.display = 'block'; }
                 document.getElementById('prod-desc').value = p.desc || ''; 
+                
+                // Відновлення галереї
+                if (p.images && p.images.length > 0) {
+                    currentProductGallery = [...p.images];
+                } else if (p.img || p.image) {
+                    currentProductGallery = [p.img || p.image];
+                }
+                renderGalleryPreview();
+                
                 document.getElementById('prodModalTitle').innerText = 'Редагувати товар';
             }
             document.getElementById('productModal').classList.remove('hidden'); 
@@ -637,28 +683,38 @@
         document.getElementById('productForm').onsubmit = async (e) => {
             e.preventDefault(); 
             const idInput = document.getElementById('prod-id').value;
+            const skuInput = document.getElementById('prod-sku').value.trim();
             const priceType = document.getElementById('prod-price-type').value;
+            
+            // Якщо це новий товар, робимо ID на основі Артикулу (SKU), щоб він не губився
+            const safeSkuId = skuInput.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || Date.now();
+            const finalId = idInput || `prod_${safeSkuId}_${Date.now()}`;
+            
             let finalPrice = priceType === 'auto' 
                 ? Math.round(((Number(document.getElementById('prod-weight').value)||0) * (Number(siteSettings.goldRate)||0)) + (Number(document.getElementById('prod-work-cost').value)||0))
                 : (Number(document.getElementById('prod-price').value)||0);
 
             const prodData = {
-                id: idInput || 'prod_' + Date.now(),
-                sku: document.getElementById('prod-sku').value,
+                id: finalId,
+                sku: skuInput,
                 name: document.getElementById('prod-name').value,
                 nameEN: document.getElementById('prod-name-en').value,
                 variant: document.getElementById('prod-variant').value,
+                stones: document.getElementById('prod-stones').value,
                 sizes: document.getElementById('prod-sizes').value.split(',').map(s=>s.trim()).filter(s=>s),
                 category: document.getElementById('prod-category').value,
                 subcategory: document.getElementById('prod-subcategory').value,
                 status: document.getElementById('prod-status').value,
                 badge: document.getElementById('prod-badge').value,
+                isWeekly: document.getElementById('prod-is-weekly').checked,
+                isSpecial: document.getElementById('prod-is-special').checked,
                 priceType: priceType,
                 weight: Number(document.getElementById('prod-weight').value)||0,
                 workCost: Number(document.getElementById('prod-work-cost').value)||0,
                 price: finalPrice,
                 discount: document.getElementById('prod-discount').value ? Number(document.getElementById('prod-discount').value) : null,
-                img: document.getElementById('prod-imgBase64').value,
+                images: currentProductGallery,
+                img: currentProductGallery.length > 0 ? currentProductGallery[0] : '', // Перше фото як головне для сумісності
                 desc: document.getElementById('prod-desc').value
             };
 
@@ -1155,24 +1211,61 @@
             }
         }
 
+        // --- ДИНАМІЧНІ АДРЕСИ ---
         function populateSettings() {
-            ['phone','tg','inst','addr1','addr2', 'gold-rate', 'banner-ratio'].forEach(k => {
+            // Базові поля
+            ['phone','tg','inst','gold-rate', 'banner-ratio'].forEach(k => {
                 const mapKey = k==='tg'?'tgLink':(k==='inst'?'instLink':(k==='gold-rate'?'goldRate':(k==='banner-ratio'?'bannerRatio':k)));
                 if(document.getElementById(`set-${k}`)) document.getElementById(`set-${k}`).value = siteSettings[mapKey] || (k==='banner-ratio'?'3/1':'');
             });
+            
+            // Адреси
+            currentAddresses = siteSettings.addresses || [];
+            if(currentAddresses.length === 0) {
+                if(siteSettings.addr1) currentAddresses.push(siteSettings.addr1);
+                if(siteSettings.addr2) currentAddresses.push(siteSettings.addr2);
+            }
+            renderAddresses();
+        }
+
+        function renderAddresses() {
+            const container = document.getElementById('addressesContainer');
+            container.innerHTML = currentAddresses.map((addr, idx) => `
+                <div class="flex gap-2 items-center">
+                    <input type="text" class="input-field addr-input" value="${addr}" placeholder="Місто, Вулиця, 1">
+                    <button type="button" class="btn-danger flex items-center justify-center w-10 h-10 px-0" onclick="removeAddressField(${idx})" title="Видалити філіал">&times;</button>
+                </div>
+            `).join('');
+            
+            if (currentAddresses.length === 0) {
+                container.innerHTML = '<div class="text-[10px] text-gray-500 italic">Жодного філіалу не додано</div>';
+            }
+        }
+
+        function addAddressField() {
+            currentAddresses.push('');
+            renderAddresses();
+        }
+
+        function removeAddressField(index) {
+            currentAddresses.splice(index, 1);
+            renderAddresses();
         }
 
         async function saveSiteSettings() {
             const oldRate = siteSettings.goldRate;
             const newRate = document.getElementById('set-gold-rate').value;
             const newRatio = document.getElementById('set-banner-ratio').value;
+            
+            // Збираємо адреси з DOM
+            const addrInputs = document.querySelectorAll('.addr-input');
+            const savedAddresses = Array.from(addrInputs).map(inp => inp.value.trim()).filter(val => val !== '');
 
             siteSettings = {
                 phone: document.getElementById('set-phone').value, 
                 tgLink: document.getElementById('set-tg').value,
                 instLink: document.getElementById('set-inst').value, 
-                addr1: document.getElementById('set-addr1').value,
-                addr2: document.getElementById('set-addr2').value,
+                addresses: savedAddresses,
                 goldRate: newRate,
                 bannerRatio: newRatio,
                 heroBg: siteSettings.heroBg,
