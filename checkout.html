@@ -15,111 +15,134 @@
         .input-field { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
         .input-field:focus { border-color: #c5a059; }
         select.input-field option { background-color: #1c1c1e; color: #f5f5f7; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Кнопка назад -->
-    <a href="index.html" class="absolute top-6 left-6 text-sm text-gray-400 hover:text-[#c5a059] flex items-center gap-2 transition-colors">
+    <a href="index.html" class="absolute top-6 left-6 text-sm text-gray-400 hover:text-[#c5a059] flex items-center gap-2 transition-colors z-10">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Повернутися до покупок
     </a>
 
-    <div class="w-full max-w-2xl glass-panel p-6 md:p-10 shadow-2xl mt-12" id="checkoutContainer">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-serif text-[#c5a059] italic mb-2">Оформлення замовлення</h1>
-            <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-8 mt-12 lg:mt-0" id="checkoutContainer">
+        
+        <div class="w-full lg:w-5/12 glass-panel p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <h2 class="text-xl font-serif text-[#c5a059] italic mb-6">Ваше замовлення</h2>
+            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-4">
+                </div>
+            
+            <div class="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
+                <span class="text-xs uppercase tracking-widest text-gray-400">Підсумок:</span>
+                <span class="text-2xl font-bold text-white" id="checkoutTotal">0 ₴</span>
+            </div>
         </div>
 
-        <form id="checkoutForm" class="flex flex-col gap-6">
-            
-            <!-- Секція контактів -->
-            <div>
-                <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
-                    <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
-                    <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2" required>
+        <div class="w-full lg:w-7/12 glass-panel p-6 md:p-10 shadow-2xl flex flex-col">
+            <div class="mb-8">
+                <h1 class="text-2xl md:text-3xl font-serif text-white mb-2">Оформлення замовлення</h1>
+                <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
+            </div>
+
+            <form id="checkoutForm" class="flex flex-col gap-6">
+                
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
+                        <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
+                        <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Секція доставки -->
-            <div class="pt-4 border-t border-white/10">
-                <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Доставка (Нова Пошта)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="orderCity" placeholder="Місто / Населений пункт" class="input-field" required>
-                    <input type="text" id="orderBranch" placeholder="№ Відділення або Поштомату" class="input-field" required>
+                <div class="pt-4 border-t border-white/10">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Доставка (Нова Пошта)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="orderCity" placeholder="Місто / Населений пункт" class="input-field" required>
+                        <input type="text" id="orderBranch" placeholder="№ Відділення або Поштомату" class="input-field" required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Секція оплати -->
-            <div class="pt-4 border-t border-white/10">
-                <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Спосіб оплати</h3>
-                <select id="orderPayment" class="input-field">
-                    <option value="cod">Накладений платіж (Оплата при отриманні)</option>
-                    <option value="card">Переказ на карту (Реквізити надішле менеджер)</option>
-                </select>
-            </div>
-
-            <!-- Коментар -->
-            <div class="pt-4 border-t border-white/10">
-                <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Коментар до замовлення</h3>
-                <textarea id="orderComment" placeholder="Побажання щодо пакування, розміру тощо..." class="input-field h-24 resize-none"></textarea>
-            </div>
-
-            <!-- Підсумок та кнопка -->
-            <div class="mt-6 bg-[#c5a059]/10 border border-[#c5a059]/30 rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="text-center sm:text-left">
-                    <div class="text-[10px] uppercase tracking-widest text-gray-400">До сплати:</div>
-                    <div class="text-2xl font-bold text-[#c5a059]" id="checkoutTotal">0 ₴</div>
+                <div class="pt-4 border-t border-white/10">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Спосіб оплати</h3>
+                    <select id="orderPayment" class="input-field">
+                        <option value="cod">Накладений платіж (Оплата при отриманні)</option>
+                        <option value="card">Онлайн оплата (Карткою / Apple Pay)</option>
+                    </select>
                 </div>
-                <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95">
+
+                <div class="pt-4 border-t border-white/10">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Коментар до замовлення</h3>
+                    <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-20 resize-none"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-4">
                     Підтвердити замовлення
                 </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <!-- Модальне вікно успіху -->
     <div id="successModal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-500">
         <div class="glass-panel p-8 md:p-12 text-center max-w-md w-full border-[#c5a059]/30">
             <div class="w-20 h-20 mx-auto bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <h2 class="text-2xl font-serif text-[#c5a059] italic mb-3">Дякуємо!</h2>
-            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно прийнято. Наш менеджер зв'яжеться з вами найближчим часом для підтвердження деталей.</p>
+            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно прийнято. Наш менеджер зв'яжеться з вами найближчим часом.</p>
             
             <div id="guestPromo" class="bg-white/5 border border-white/10 rounded-xl p-5 mb-8">
-                <p class="text-xs text-gray-400 mb-3">Хочете відстежувати статус замовлень та отримувати знижки?</p>
-                <button onclick="window.location.href='index.html?auth=register'" class="text-[#c5a059] text-xs font-bold uppercase tracking-widest hover:underline">Створити акаунт</button>
+                <p class="text-xs text-gray-400 mb-3">Відстежуйте статус замовлень та отримуйте знижки</p>
+                <button onclick="window.location.href='index.html'" class="text-[#c5a059] text-xs font-bold uppercase tracking-widest hover:underline">Створити акаунт</button>
             </div>
 
             <a href="index.html" class="block w-full border border-white/20 text-white text-xs font-bold uppercase tracking-widest py-3 rounded-lg hover:bg-white/5 transition-colors">На головну</a>
         </div>
     </div>
 
-    <!-- Підключаємо Supabase та основний скрипт для доступу до кошика -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Чекаємо, поки main.js підвантажить API
             setTimeout(() => {
                 const cart = typeof getCart === 'function' ? getCart() : [];
                 
-                // Якщо користувач зайшов сюди з порожнім кошиком — викидаємо назад
                 if (cart.length === 0) {
                     alert('Ваш кошик порожній!');
                     window.location.href = 'index.html';
                     return;
                 }
 
-                // Рахуємо суму
-                const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                // Рендер товарів зліва
+                const listContainer = document.getElementById('checkoutItemsList');
+                let total = 0;
+                
+                listContainer.innerHTML = cart.map(item => {
+                    total += item.price * item.qty;
+                    const sizeBadge = item.size ? `<span class="bg-[#c5a059]/20 text-[#c5a059] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
+                    return `
+                        <div class="flex gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
+                            <img src="${item.img}" class="w-16 h-16 object-cover rounded-lg border border-white/10">
+                            <div class="flex-grow flex flex-col justify-center">
+                                <span class="text-xs font-semibold uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
+                                <div class="flex items-center gap-2 mt-1 mb-1">
+                                    ${sizeBadge}
+                                    <span class="text-[10px] text-gray-400">Арт: ${item.sku}</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-auto">
+                                    <span class="text-xs text-gray-400">${item.qty} шт.</span>
+                                    <span class="text-sm font-bold text-[#c5a059]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
                 document.getElementById('checkoutTotal').innerText = new Intl.NumberFormat('uk-UA').format(total) + ' ₴';
 
-                // Якщо юзер авторизований - підставляємо його дані та ховаємо рекламу реєстрації
                 const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                 if (user) {
                     document.getElementById('orderEmail').value = user.username || '';
@@ -128,7 +151,6 @@
                 }
             }, 500);
 
-            // Обробка відправки форми
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -139,8 +161,8 @@
                 const cart = getCart();
                 const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const user = getCurrentUser();
+                const paymentMethod = document.getElementById('orderPayment').value;
 
-                // Формуємо об'єкт для таблиці orders
                 const orderData = {
                     user_id: user ? user.id : null,
                     user_email: document.getElementById('orderEmail').value.trim(),
@@ -150,25 +172,28 @@
                         city: document.getElementById('orderCity').value.trim(),
                         branch: document.getElementById('orderBranch').value.trim()
                     },
-                    payment_method: document.getElementById('orderPayment').value,
+                    payment_method: paymentMethod,
                     comment: document.getElementById('orderComment').value.trim(),
                     items: cart,
                     total_price: total,
                     status: 'pending'
                 };
 
-                // Відправляємо в базу
                 try {
                     const { error } = await _supabase.from('orders').insert([orderData]);
-                    
                     if (error) throw error;
 
-                    // Очищаємо кошик через функцію з main.js
                     if(typeof clearEntireCart === 'function') {
                         clearEntireCart(true); 
                     }
 
-                    // Показуємо вікно успіху
+                    // Підготовка до платіжної системи
+                    if(paymentMethod === 'card') {
+                        // Тут ми будемо підключати WayForPay / LiqPay. 
+                        // Поки що просто показуємо успіх, але в майбутньому тут буде редірект на сторінку оплати.
+                        // window.location.href = 'ТУТ_БУДЕ_ЛІНК_НА_ОПЛАТУ';
+                    }
+
                     document.getElementById('checkoutContainer').classList.add('hidden');
                     const modal = document.getElementById('successModal');
                     modal.classList.remove('hidden');

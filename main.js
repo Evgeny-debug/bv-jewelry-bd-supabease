@@ -74,7 +74,6 @@ let products = [];
 // 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ (SUPABASE)
 // ==========================================
 window.loadCloudData = async function() {
-    console.log("BV Jewelry: Завантаження даних з Supabase...");
     try {
         const { data: prodData } = await _supabase.from('products').select('*');
         if (prodData && prodData.length > 0) {
@@ -99,8 +98,7 @@ window.loadCloudData = async function() {
         if(document.getElementById('specialGrid') && typeof renderHomeSections === 'function') renderHomeSections();
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
         
-        window.updateProfileMenu(); // Оновлюємо дропдаун профілю
-
+        window.updateProfileMenu(); 
     } catch (err) {
         console.error("Помилка завантаження бази:", err);
     }
@@ -182,26 +180,57 @@ window.toggleCart = function() {
 
 window.addToCart = function(id, title, variant, price, img) {
     let cart = getCart();
-    const existing = cart.find(item => item.id === id);
-    if (existing) existing.qty += 1;
-    else cart.push({ id, title: String(title), variant: String(variant), price: Number(price), img: String(img), qty: 1 });
+    
+    // Смарт-парсинг: витягуємо розмір з назви (якщо є) і знаходимо SKU
+    let extractedSize = null;
+    let cleanTitle = String(title);
+    if (cleanTitle.includes('(Розмір:')) {
+        const parts = cleanTitle.split('(Розмір:');
+        cleanTitle = parts[0].trim();
+        extractedSize = parts[1].replace(')', '').trim();
+    }
+
+    const allProducts = API.get('bv_products', []);
+    const prod = allProducts.find(p => p.id === id);
+    const sku = prod && prod.sku ? prod.sku : id;
+
+    // Створюємо унікальний ID для товару в кошику (щоб різні розміри не зливалися)
+    const cartId = id + (extractedSize ? '-' + extractedSize : '');
+
+    const existing = cart.find(item => item.cartId === cartId);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ 
+            cartId: cartId, 
+            id: id, 
+            title: cleanTitle, 
+            variant: String(variant), 
+            price: Number(price), 
+            img: String(img), 
+            qty: 1,
+            sku: sku,
+            size: extractedSize
+        });
+    }
+    
     setCart(cart);
     window.renderCart();
     if (!document.getElementById('cartDrawer').classList.contains('active')) window.toggleCart();
 };
 
-window.updateCartQty = function(id, delta) {
+window.updateCartQty = function(cartId, delta) {
     const cart = getCart();
-    const item = cart.find((entry) => entry.id === id);
+    const item = cart.find((entry) => entry.cartId === cartId);
     if (!item) return;
     item.qty = Math.max(1, item.qty + delta);
     setCart(cart);
     window.renderCart();
 };
 
-window.removeFromCart = function(id) {
+window.removeFromCart = function(cartId) {
     let cart = getCart();
-    cart = cart.filter(item => item.id !== id);
+    cart = cart.filter(item => item.cartId !== cartId);
     setCart(cart);
     window.renderCart();
 };
@@ -243,22 +272,29 @@ window.renderCart = function() {
     cart.forEach(item => {
         total += item.price * item.qty;
         totalQty += item.qty;
+        
+        const sizeBadge = item.size ? `<span class="bg-[var(--gold-muted)]/20 text-[var(--gold-muted)] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
+        const skuBadge = `<span class="text-[10px] text-[var(--text-muted)]">Арт: ${item.sku}</span>`;
+
         cartBody.insertAdjacentHTML('beforeend', `
             <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/40">
                 <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]">
                 <div class="flex-grow flex flex-col justify-center pr-6">
                     <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${escapeHtml(item.title)}</span>
-                    <span class="text-xs text-[var(--text-muted)] mt-1">${escapeHtml(item.variant)}</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                        ${sizeBadge}
+                        ${skuBadge}
+                    </div>
                     <div class="flex items-center gap-3 mt-2">
                         <span class="text-sm font-bold text-[var(--gold-muted)]">${formatterPrice.format(item.price)} ₴</span>
                         <div class="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]">
-                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.id}', -1)">−</button>
+                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.cartId}', -1)">−</button>
                             <span class="px-2 text-xs text-[var(--text-main)] font-semibold min-w-6 text-center">${item.qty}</span>
-                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.id}', 1)">+</button>
+                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.cartId}', 1)">+</button>
                         </div>
                     </div>
                 </div>
-                <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)]" onclick="removeFromCart('${item.id}')">
+                <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)]" onclick="removeFromCart('${item.cartId}')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
@@ -274,7 +310,7 @@ window.renderCart = function() {
     const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
     if(checkoutBtnWrapper) {
         checkoutBtnWrapper.style.display = 'block';
-        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="w-full bg-[var(--gold-muted)] text-[#111] font-bold uppercase tracking-widest py-3 rounded-xl hover:opacity-90 transition-opacity">Оформити замовлення</button>`;
+        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="w-full bg-[var(--gold-muted)] text-[#111] font-bold uppercase tracking-widest py-3 rounded-xl hover:opacity-90 transition-opacity active:scale-95">Оформити замовлення</button>`;
     }
 };
 
@@ -388,7 +424,6 @@ window.renderProductCard = function(prod) {
     const safeName = escapeHtml(window.getLoc(prod, 'name')).replace(/'/g, "\\'"); 
     const safeVariant = escapeHtml(window.getLoc(prod, 'variant')).replace(/'/g, "\\'");
     
-    // Підтримка нового масиву зображень з адмінки
     const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
     const priceDisplay = prod.discount && Number(prod.discount) > 0 ? prod.discount : prod.price;
 
@@ -464,7 +499,7 @@ function generateMenus() {
                 highlightsHtml += `<div class="zlato-highlights">`;
                 cat.highlights.forEach(hl => {
                     const accentClass = hl.isAccent ? 'accent' : '';
-                    highlightsHtml += `<a href="catalog.html${hl.link}" class="zlato-highlight-btn ${accentClass}">${hl.name} &rarr;</a>`;
+                    highlightsHtml += `<a href="catalog.html${hl.link}" class="zlato-highlight-btn ${accentClass}">${hl.name} →</a>`;
                 });
                 highlightsHtml += `</div>`;
             }
@@ -477,7 +512,7 @@ function generateMenus() {
                 newCol2.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
                         <h2 class="text-3xl font-serif text-[var(--text-main)]">${cat.name}</h2>
-                        <a href="catalog.html#${cat.id}" class="text-[12px] uppercase tracking-widest text-[var(--gold-muted)] font-bold transition-colors">Всі &rarr;</a>
+                        <a href="catalog.html#${cat.id}" class="text-[12px] uppercase tracking-widest text-[var(--gold-muted)] font-bold transition-colors">Всі →</a>
                     </div>
                     ${groupsHtml}
                     ${highlightsHtml}
@@ -517,7 +552,7 @@ function generateMenus() {
                    }
                 });
             }
-            mobSubLinksHtml += `<a href="catalog.html#${cat.id}" class="mob-all-btn" onclick="window.toggleMenu()">Всі товари: ${cat.name} &rarr;</a>`;
+            mobSubLinksHtml += `<a href="catalog.html#${cat.id}" class="mob-all-btn" onclick="window.toggleMenu()">Всі товари: ${cat.name} →</a>`;
             
             mobCatHtml += `
             <div class="mob-nested-wrap">
@@ -868,7 +903,7 @@ window.initBannerSlider = function() {
     html += '</div>';
 
     if(banners.length > 1) {
-        html += `<button class="banner-arrow prev" onclick="moveBanner(-1)">&#10094;</button><button class="banner-arrow next" onclick="moveBanner(1)">&#10095;</button><div class="banner-dots">`;
+        html += `<button class="banner-arrow prev" onclick="moveBanner(-1)">❮</button><button class="banner-arrow next" onclick="moveBanner(1)">❯</button><div class="banner-dots">`;
         banners.forEach((_, i) => { html += `<span class="banner-dot ${i===0?'active':''}" onclick="goToBanner(${i})"></span>`; });
         html += `</div>`;
     }
@@ -951,7 +986,6 @@ window.renderHomeSections = function() {
 
     if(specialGrid) {
         specialGrid.className = trackClasses;
-        // Перевірка на true для нових даних, або "true"
         const items = products.filter(p => p.isSpecial === true || p.isSpecial === 'true').slice(0, 10);
         if(items.length > 0) {
             specialGrid.innerHTML = generateInfiniteHTML(items);
@@ -1004,17 +1038,14 @@ window.applyAdminSettings = function() {
         if(settings.tgLink) document.querySelectorAll('.tg-link').forEach(link => link.href = settings.tgLink);
         if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
         
-        // Рендер адресів (філіалів)
         const footerAddrBlock = document.getElementById('footerAddressesBlock');
         if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
             let html = '';
-            // Головна адреса
             html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
                         <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                         <span>${settings.addresses[0]}</span>
                     </a>`;
             
-            // Якщо є більше адрес, додаємо кнопку "Наші філіали"
             if (settings.addresses.length > 1) {
                 html += `<button onclick="window.showBranchesModal()" class="text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
             }
@@ -1036,7 +1067,7 @@ window.showBranchesModal = function() {
     const modalHtml = `
     <div id="branchesModal" class="fixed inset-0 bg-black/80 z-[7000] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="this.remove()">
         <div class="glass-panel p-8 w-full max-w-md relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]" onclick="event.stopPropagation()">
-            <button onclick="document.getElementById('branchesModal').remove()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-2xl leading-none">&times;</button>
+            <button onclick="document.getElementById('branchesModal').remove()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-2xl leading-none">×</button>
             <h3 class="text-2xl font-serif text-[var(--gold-muted)] mb-6 text-center italic">Наші філіали</h3>
             <div class="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
                 ${list}
@@ -1280,6 +1311,40 @@ window.updateAuthView = function() {
     } else if (subsField && !isRegisterMode) {
         subsField.remove();
     }
+    
+    // Додаємо кнопки соціального входу (Google та Apple)
+    const socialBlockId = 'socialLoginBlock';
+    let socialBlock = document.getElementById(socialBlockId);
+    
+    if(!socialBlock) {
+        const formContainer = document.getElementById('authFormContainer');
+        formContainer.insertAdjacentHTML('beforeend', `
+            <div id="${socialBlockId}" class="mt-4 flex flex-col gap-3">
+                <div class="relative flex items-center justify-center w-full mt-2 mb-2">
+                    <div class="border-t border-[var(--border)] w-full"></div>
+                    <span class="bg-[var(--bg-card)] px-3 text-[10px] text-[var(--text-muted)] absolute uppercase tracking-widest">Або</span>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="loginWithGoogle()" class="flex-1 flex items-center justify-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google
+                    </button>
+                    <button type="button" onclick="loginWithApple()" class="flex-1 flex items-center justify-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.8 3.59-.83 1.89-.04 3.23.86 4.14 2.19-3.21 1.83-2.66 5.89.5 7.05-.72 1.63-1.87 3.19-3.31 3.76zm-3.08-16.7c.66-.82 1.13-1.95.95-3.08-1.02.04-2.27.68-2.98 1.5-.61.69-1.16 1.86-.93 2.97 1.14.09 2.24-.51 2.96-1.39z"/></svg> Apple
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+};
+
+window.loginWithGoogle = async function() {
+    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    await _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
+};
+
+window.loginWithApple = async function() {
+    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    await _supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin + window.location.pathname } });
 };
 
 window.updateProfileMenu = function() {
@@ -1319,7 +1384,27 @@ window.initRealtime = function() {
         .subscribe();
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Перевірка OAuth сесії після повернення з Google/Apple
+    if(window.location.hash && window.location.hash.includes('access_token')) {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session && session.user) {
+            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            const role = (profile && profile.role === 'admin') ? 'admin' : 'client';
+            const fullName = (profile && profile.full_name) ? profile.full_name : (session.user.user_metadata?.full_name || 'Клієнт');
+            const userFavs = profile && profile.favs ? profile.favs : [];
+
+            API.set('bv_current_user', { id: session.user.id, username: session.user.email, role: role, name: fullName, favs: userFavs });
+            if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
+            API.set(getScopedStorageKey('bv_favs'), userFavs);
+            
+            // Очищуємо URL
+            history.replaceState(null, null, ' ');
+            window.updateProfileMenu();
+            if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+        }
+    }
+
     const authForm = document.getElementById('authForm');
     if(authForm) {
         authForm.addEventListener('submit', async (e) => {
@@ -1385,7 +1470,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(typeof updateBadges === 'function') updateBadges();
                 window.renderFavDrawer();
                 window.initRealtime();
-                window.updateProfileMenu(); // Оновлюємо дропдаун після логіну
+                window.updateProfileMenu(); 
             }
             submitBtn.innerText = originalText; submitBtn.disabled = false;
         });
@@ -1407,7 +1492,7 @@ window.logoutUser = async function() {
     } else {
         if(typeof window.renderCart === 'function') window.renderCart(); 
         if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
-        window.updateProfileMenu(); // Оновлюємо дропдаун після логауту
+        window.updateProfileMenu(); 
     }
 };
 
@@ -1447,7 +1532,7 @@ window.onload = async () => {
         window.initRealtime();
     }
     
-    window.updateProfileMenu(); // Ініціалізуємо дропдаун профілю при завантаженні
+    window.updateProfileMenu(); 
 
     const burgerBtn = document.getElementById('burger');
     if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }

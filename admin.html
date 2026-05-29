@@ -85,7 +85,7 @@
                             <tr>
                                 <th class="p-4">ID / Дата</th>
                                 <th class="p-4">Клієнт</th>
-                                <th class="p-4">Товари</th>
+                                <th class="p-4">Товари (Артикул / Розмір)</th>
                                 <th class="p-4">Сума</th>
                                 <th class="p-4">Статус</th>
                             </tr>
@@ -511,33 +511,54 @@
             
             ordersList.forEach(o => {
                 const date = new Date(o.created_at).toLocaleString('uk-UA');
-                const itemsHtml = o.items.map(i => `<div class="text-[10px] text-gray-400 font-medium">${i.name} x${i.qty}</div>`).join('');
+                
+                // Рендеримо товари: додаємо артикул і розмір, якщо вони є
+                const itemsHtml = o.items.map(i => {
+                    const skuText = i.sku ? `(Арт: ${i.sku})` : '';
+                    const sizeText = i.size ? `[Розмір: ${i.size}]` : '';
+                    return `
+                        <div class="mb-2 last:mb-0">
+                            <div class="text-[11px] text-white font-medium">${i.title} <span class="text-[#c5a059] ml-1">x${i.qty}</span></div>
+                            <div class="text-[10px] text-gray-400 flex gap-1 mt-0.5">
+                                ${skuText ? `<span>${skuText}</span>` : ''}
+                                ${sizeText ? `<span class="text-[#c5a059] bg-[#c5a059]/10 px-1 rounded">${sizeText}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
                 
                 const city = o.delivery_info ? o.delivery_info.city : 'Не вказано';
                 const branch = o.delivery_info ? o.delivery_info.branch : 'Не вказано';
-                const comment = o.comment ? `<div class="mt-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-1 rounded">Коментар: ${o.comment}</div>` : '';
+                const comment = o.comment ? `<div class="mt-2 text-[10px] text-yellow-500 bg-yellow-500/10 p-1.5 rounded">Коментар: ${o.comment}</div>` : '';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-white/5 border-b border-white/5 transition-colors">
-                        <td class="p-3">
-                            <div class="font-bold text-[#c5a059] text-base">#${o.id}</div>
+                        <td class="p-3 align-top">
+                            <div class="font-bold text-[#c5a059] text-sm">#${o.id}</div>
                             <div class="text-[10px] text-gray-500 mt-1">${date}</div>
                         </td>
-                        <td class="p-3 text-xs text-white">
+                        <td class="p-3 text-xs text-white align-top">
                             <div>Email: ${o.user_email || 'Гість'}</div>
                             <div class="text-[#c5a059] font-bold">Тел: ${o.phone || 'Не вказано'}</div>
                             <div class="text-gray-400 mt-1">м. ${city}, Відділ: ${branch}</div>
                             ${comment}
                         </td>
-                        <td class="p-3">${itemsHtml}</td>
-                        <td class="p-3 font-semibold text-white">${o.total_price} ₴<br><span class="text-[10px] text-gray-500 uppercase">${o.payment_method === 'card' ? 'Картка' : 'Накладений'}</span></td>
-                        <td class="p-3">
+                        <td class="p-3 align-top">
+                            <div class="bg-black/20 p-2 rounded border border-white/5 min-w-[200px]">
+                                ${itemsHtml}
+                            </div>
+                        </td>
+                        <td class="p-3 font-semibold text-white align-top whitespace-nowrap">
+                            ${o.total_price} ₴<br>
+                            <span class="text-[10px] text-gray-500 uppercase mt-1 inline-block">${o.payment_method === 'card' ? 'Картка' : 'Накладений'}</span>
+                        </td>
+                        <td class="p-3 align-top">
                             <select class="input-field py-1 px-2 text-xs w-32 font-medium" onchange="updateOrderStatus(${o.id}, this.value)">
-                                <option value="pending" ${o.status==='pending'?'selected':''}>Нове 🔴</option>
-                                <option value="accepted" ${o.status==='accepted'?'selected':''}>В роботі 🟡</option>
-                                <option value="shipped" ${o.status==='shipped'?'selected':''}>Відправлено 🔵</option>
-                                <option value="completed" ${o.status==='completed'?'selected':''}>Успіх 🟢</option>
-                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Скасовано ⚫</option>
+                                <option value="pending" ${o.status==='pending'?'selected':''}>🔴 Нове</option>
+                                <option value="accepted" ${o.status==='accepted'?'selected':''}>🟡 В роботі</option>
+                                <option value="shipped" ${o.status==='shipped'?'selected':''}>🔵 Відправлено</option>
+                                <option value="completed" ${o.status==='completed'?'selected':''}>🟢 Успіх</option>
+                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>⚫ Скасовано</option>
                             </select>
                         </td>
                     </tr>
@@ -1211,15 +1232,12 @@
             }
         }
 
-        // --- ДИНАМІЧНІ АДРЕСИ ---
         function populateSettings() {
-            // Базові поля
             ['phone','tg','inst','gold-rate', 'banner-ratio'].forEach(k => {
                 const mapKey = k==='tg'?'tgLink':(k==='inst'?'instLink':(k==='gold-rate'?'goldRate':(k==='banner-ratio'?'bannerRatio':k)));
                 if(document.getElementById(`set-${k}`)) document.getElementById(`set-${k}`).value = siteSettings[mapKey] || (k==='banner-ratio'?'3/1':'');
             });
             
-            // Адреси
             currentAddresses = siteSettings.addresses || [];
             if(currentAddresses.length === 0) {
                 if(siteSettings.addr1) currentAddresses.push(siteSettings.addr1);
@@ -1257,7 +1275,6 @@
             const newRate = document.getElementById('set-gold-rate').value;
             const newRatio = document.getElementById('set-banner-ratio').value;
             
-            // Збираємо адреси з DOM
             const addrInputs = document.querySelectorAll('.addr-input');
             const savedAddresses = Array.from(addrInputs).map(inp => inp.value.trim()).filter(val => val !== '');
 
