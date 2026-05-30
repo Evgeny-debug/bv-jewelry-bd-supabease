@@ -1031,6 +1031,23 @@
             if(!actProd.sku) return alert('Артикул (SKU) обов\'язковий!');
             if(!actProd.variations.base.name.uk) return alert('Базова назва товару (UA) обов\'язкова!');
 
+            // Якщо режим auto, остаточно перераховуємо ціну перед збереженням
+            Object.keys(actProd.variations).forEach(k => {
+                const v = actProd.variations[k];
+                if(v.priceType === 'auto' && v.weight && v.workCost) {
+                    v.price = Math.round((Number(v.weight) * Number(siteSettings.goldRate || 0)) + Number(v.workCost));
+                }
+            });
+
+            // ФІКС ПОМИЛКИ БАЗИ: Дублюємо головні дані в корінь об'єкта для Supabase
+            actProd.name = actProd.variations.base.name.uk;
+            actProd.price = actProd.variations.base.price || 0;
+            if (actProd.variations.base.images && actProd.variations.base.images.length > 0) {
+                actProd.img = actProd.variations.base.images[0];
+            } else {
+                actProd.img = '';
+            }
+
             const safeSkuId = actProd.sku.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || Date.now();
             actProd.id = actProd.id || `prod_${safeSkuId}_${Date.now()}`;
 
