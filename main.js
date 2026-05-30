@@ -38,20 +38,6 @@ const i18n = {
         footer_rights: "Всі права захищені.", footer_dev: "Розроблено",
         exc_title: "Створення ексклюзиву", exc_step: "Етап", exc_order: "Замовити прорахунок"
     },
-    ru: { 
-        m1: "Главная", m2: "Каталог", m3: "Бренд", m4: "Контакты", m_price: "Прайс", m_atelier: "Эксклюзив",
-        menu_all: "Все товары", menu_for_whom: "Для кого", menu_metal: "По металлу",
-        cart_title: "Корзина", cart_subtotal: "Итог:", cart_checkout: "Оформить заказ", cart_empty: "Ваша корзина пуста",
-        fav_title: "Избранное", fav_empty: "Список пуст",
-        in_stock: "В наличии", out_stock: "Нет в наличии", pre_order: "Под заказ",
-        badge_new: "Новинка", badge_exclusive: "Эксклюзив", badge_sale: "Sale", badge_sold_out: "Продано", badge_pre_order: "Под заказ",
-        btn_buy: "Купить", btn_details: "Подробнее", btn_send: "Отправить",
-        similar: "Также рекомендуем", desc_title: "Описание изделия", pd_nav_specs: "Характеристики", pd_nav_review: "Отзывы", pd_nav_all: "Всё о товаре", pd_nav_photo: "Фото", pd_nav_ask: "Задать вопрос",
-        cat_filters: "Фильтры", cat_sort: "Сортировка", cat_sort_new: "Сначала новые", cat_sort_cheap: "От дешевых к дорогим", cat_sort_exp: "От дорогих к дешевым", cat_load_more: "Показать еще", cat_reset: "Сбросить", cat_empty: "Товары не найдены",
-        search_ph: "Поиск...", login: "Войти", register: "Регистрация", login_mob_title: "КАБИНЕТ", theme_mob: "Сменить тему", lang_title: "ЯЗЫК",
-        footer_rights: "Все права защищены.", footer_dev: "Разработано",
-        exc_title: "Создание эксклюзива", exc_step: "Этап", exc_order: "Заказать просчет"
-    },
     en: { 
         m1: "Home", m2: "Catalog", m3: "Brand", m4: "Contacts", m_price: "Price", m_atelier: "Exclusive",
         menu_all: "All products", menu_for_whom: "For whom", menu_metal: "By metal",
@@ -68,31 +54,15 @@ const i18n = {
     }
 };
 
-// УМНИЙ ЛОКАЛІЗАТОР (Підтримує і старий, і новий мультиязичний JSON-формат)
 window.getLoc = function(obj, field) {
     if (!obj) return '';
     const lang = API.get('bv_lang', 'uk');
-    
-    if (typeof obj === 'string') return obj;
-    if (typeof obj === 'object') {
-        if (field) {
-            // Новий формат: obj.name = {uk: '...', ru: '...', en: '...'}
-            if (typeof obj[field] === 'object' && obj[field] !== null) {
-                return obj[field][lang] || obj[field]['uk'] || '';
-            }
-            // Старий формат
-            if (lang === 'uk') return obj[field] || '';
-            const locField = field + lang.toUpperCase(); 
-            return obj[locField] || obj[field] || ''; 
-        } else {
-            // Якщо передали одразу об'єкт перекладів
-            return obj[lang] || obj['uk'] || '';
-        }
-    }
-    return '';
+    if (lang === 'uk') return obj[field] || '';
+    const locField = field + lang.toUpperCase(); 
+    return obj[locField] || obj[field] || ''; 
 };
 
-const flags = { uk: "ua", ru: "ru", en: "gb", bg: "bg" };
+const flags = { uk: "ua", en: "gb", ru: "ru", bg: "bg" };
 const sunSVG = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
 const moonSVG = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
 const formatterPrice = new Intl.NumberFormat('uk-UA', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -101,22 +71,8 @@ let categoriesTree = [];
 let products = [];
 
 // ==========================================
-// 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ ТА ГЕНЕРАЦІЯ ДЕРЕВА
+// 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ (SUPABASE)
 // ==========================================
-function buildTree(flatList) {
-    let tree = [];
-    let lookup = {};
-    flatList.forEach(c => lookup[c.id] = { ...c, subcategories: [] });
-    flatList.forEach(c => {
-        if (c.parentId && lookup[c.parentId]) {
-            lookup[c.parentId].subcategories.push(lookup[c.id]);
-        } else {
-            tree.push(lookup[c.id]);
-        }
-    });
-    return tree;
-}
-
 window.loadCloudData = async function() {
     try {
         const { data: prodData } = await _supabase.from('products').select('*');
@@ -131,23 +87,15 @@ window.loadCloudData = async function() {
 
         const { data: storageData } = await _supabase.from('site_storage').select('*');
         if (storageData && storageData.length > 0) {
-            let flatCats = [];
             storageData.forEach(item => {
                 API.set(item.key, item.value);
-                if(item.key === 'bv_categories_flat') flatCats = item.value;
-                if(item.key === 'bv_categories_tree') categoriesTree = item.value; // Фоллбек
+                if(item.key === 'bv_categories_tree') categoriesTree = item.value;
             });
-            
-            // Якщо є плоский список - будуємо справжнє безкінечне дерево
-            if(flatCats.length > 0) {
-                categoriesTree = buildTree(flatCats);
-                API.set('bv_categories_tree', categoriesTree);
-            }
         }
         
         if(typeof generateMenus === 'function') generateMenus();
         if(typeof initBannerSlider === 'function') initBannerSlider();
-        if(typeof renderHomeSections === 'function') renderHomeSections();
+        if(document.getElementById('specialGrid') && typeof renderHomeSections === 'function') renderHomeSections();
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
         
         window.updateProfileMenu(); 
@@ -199,7 +147,7 @@ function setCart(cart) { API.set(getScopedStorageKey('bv_cart'), cart); API.set(
 
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
-    return unsafe.toString().replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, """).replace(/'/g, "'");
+    return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 function getCategoryIconSVG(catId) {
@@ -233,6 +181,7 @@ window.toggleCart = function() {
 window.addToCart = function(id, title, variant, price, img) {
     let cart = getCart();
     
+    // Смарт-парсинг: витягуємо розмір з назви (якщо є) і знаходимо SKU
     let extractedSize = null;
     let cleanTitle = String(title);
     if (cleanTitle.includes('(Розмір:')) {
@@ -245,14 +194,23 @@ window.addToCart = function(id, title, variant, price, img) {
     const prod = allProducts.find(p => p.id === id);
     const sku = prod && prod.sku ? prod.sku : id;
 
+    // Створюємо унікальний ID для товару в кошику (щоб різні розміри не зливалися)
     const cartId = id + (extractedSize ? '-' + extractedSize : '');
+
     const existing = cart.find(item => item.cartId === cartId);
-    
-    if (existing) existing.qty += 1;
-    else {
+    if (existing) {
+        existing.qty += 1;
+    } else {
         cart.push({ 
-            cartId: cartId, id: id, title: cleanTitle, variant: String(variant), 
-            price: Number(price), img: String(img), qty: 1, sku: sku, size: extractedSize
+            cartId: cartId, 
+            id: id, 
+            title: cleanTitle, 
+            variant: String(variant), 
+            price: Number(price), 
+            img: String(img), 
+            qty: 1,
+            sku: sku,
+            size: extractedSize
         });
     }
     
@@ -286,7 +244,7 @@ window.clearEntireCart = function(force = false) {
 
 window.checkoutOrder = function() {
     const cart = getCart();
-    if(cart.length === 0) return alert('Ваш кошик порожній!');
+    if(cart.length === 0) { return alert('Ваш кошик порожній!'); }
     window.toggleCart();
     window.location.href = 'checkout.html';
 };
@@ -423,18 +381,14 @@ window.renderFavDrawer = function() {
 
     const favProducts = allProducts.filter(p => favsIds.includes(p.id));
     favBody.innerHTML = favProducts.map(prod => {
-        const base = prod.variations ? prod.variations.base : prod;
-        const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
-        const safeName = escapeHtml(window.getLoc(base.name));
-        const priceDisplay = base.discount && Number(base.discount) > 0 ? base.discount : base.price;
-
+        const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
         return `
         <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
             <img src="${safeImg}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
             <div class="flex-grow flex flex-col justify-center pr-6">
-                <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${safeName}</span>
-                <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(prod.variant || '')}</span>
-                <span class="text-sm font-bold text-[var(--gold-muted)] mt-1">${formatterPrice.format(priceDisplay)} ₴</span>
+                <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${escapeHtml(window.getLoc(prod, 'name'))}</span>
+                <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(window.getLoc(prod, 'variant'))}</span>
+                <span class="text-sm font-bold text-[var(--gold-muted)] mt-1">${formatterPrice.format(prod.discount || prod.price)} ₴</span>
             </div>
             <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)]" onclick="event.stopPropagation(); toggleFav('${prod.id}')" title="Видалити">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -449,8 +403,6 @@ window.renderFavDrawer = function() {
 // ==========================================
 window.renderProductCard = function(prod) {
     const lang = API.get('bv_lang', 'uk');
-    const base = prod.variations ? prod.variations.base : prod; // Зворотня сумісність
-    
     const isOutOfStock = prod.status === 'out-stock';
     const isPreOrder = prod.status === 'pre-order';
     const isFav = getFavs().includes(prod.id);
@@ -463,20 +415,17 @@ window.renderProductCard = function(prod) {
     if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale">${i18n[lang].badge_sale}</div>`;
     badgesHtml += '</div>';
 
-    const price = base.price || 0;
-    const discount = base.discount || null;
-
-    let priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
-    if (discount && Number(discount) > 0) {
-        priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--success)]">${formatterPrice.format(discount)} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${formatterPrice.format(price)} ₴</span>`;
+    let priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(prod.price)} ₴</span>`;
+    if (prod.discount && Number(prod.discount) > 0) {
+        priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--success)]">${formatterPrice.format(prod.discount)} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${formatterPrice.format(prod.price)} ₴</span>`;
     }
 
     const safeId = escapeHtml(prod.id);
-    const safeName = escapeHtml(window.getLoc(base.name)).replace(/'/g, "\\'"); 
-    const safeVariant = escapeHtml(prod.variant || '').replace(/'/g, "\\'");
+    const safeName = escapeHtml(window.getLoc(prod, 'name')).replace(/'/g, "\\'"); 
+    const safeVariant = escapeHtml(window.getLoc(prod, 'variant')).replace(/'/g, "\\'");
     
-    const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
-    const priceDisplay = discount && Number(discount) > 0 ? discount : price;
+    const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
+    const priceDisplay = prod.discount && Number(prod.discount) > 0 ? prod.discount : prod.price;
 
     return `
         <div class="product-card group relative overflow-hidden transition-all duration-400 flex flex-col w-full h-full">
@@ -510,60 +459,33 @@ window.renderProductCard = function(prod) {
 };
 
 // ==========================================
-// 8. ДИНАМІЧНА ГЕНЕРАЦІЯ МЕНЮ (БЕЗКІНЧЕННІ КАТЕГОРІЇ)
+// 8. ДИНАМІЧНА ГЕНЕРАЦІЯ МЕНЮ (CMS DATA)
 // ==========================================
 function generateMenus() {
     const megaCol1 = document.getElementById('megaCol1');
     const megaMenu = document.querySelector('.mega-menu');
     const sideMenu = document.getElementById('sideMenu');
     
-    // Допоміжна функція для мобільного дерева
-    const buildMobileTree = (nodes) => {
-        let html = '';
-        nodes.forEach(n => {
-            const name = window.getLoc(n.name);
-            if (n.subcategories && n.subcategories.length > 0) {
-                html += `
-                <div class="mob-nested-wrap">
-                    <div class="mob-nested-title" onclick="window.toggleAccordion('mob-sub-${n.id}', 'mob-arrow-${n.id}')">
-                        <div class="flex items-center gap-3">
-                            <span style="font-size: 14px; font-weight: 500;">${name}</span>
-                        </div>
-                        <svg id="mob-arrow-${n.id}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-nested-list" id="mob-sub-${n.id}">
-                        ${buildMobileTree(n.subcategories)}
-                        <a href="catalog.html#${n.id}" class="mob-all-btn mt-2" onclick="window.toggleMenu()">Всі товари: ${name} →</a>
-                    </div>
-                </div>`;
-            } else {
-                html += `<a href="catalog.html#${n.id}" class="mob-tag py-2" onclick="window.toggleMenu()">${name}</a>`;
-            }
-        });
-        return html;
-    };
-
-    if(megaCol1 && categoriesTree.length > 0) {
+    if(megaCol1) {
         megaCol1.innerHTML = '';
         if(megaMenu) megaMenu.querySelectorAll('.mega-col-2').forEach(col => col.remove());
 
         categoriesTree.forEach((cat, index) => {
             const isActive = index === 0 ? 'active' : ''; 
             const svgIcon = getCategoryIconSVG(cat.id);
-            const catName = window.getLoc(cat.name);
             
-            megaCol1.innerHTML += `<div class="mega-cat-item ${isActive}" data-target="mc-${cat.id}"><svg class="mega-cat-icon" viewBox="0 0 24 24">${svgIcon}</svg><span>${catName}</span></div>`;
+            megaCol1.innerHTML += `<div class="mega-cat-item ${isActive}" data-target="mc-${cat.id}"><svg class="mega-cat-icon" viewBox="0 0 24 24">${svgIcon}</svg><span>${cat.name}</span></div>`;
 
             let groupsHtml = '<div class="zlato-groups-grid">';
             if (cat.subcategories && cat.subcategories.length > 0) {
                 cat.subcategories.forEach(sub => {
                     groupsHtml += `<div class="zlato-group-wrapper">`;
-                    groupsHtml += `<a href="catalog.html#${sub.id}" class="zlato-group-title">${window.getLoc(sub.name)}</a>`;
+                    groupsHtml += `<a href="catalog.html#${sub.id}" class="zlato-group-title">${sub.name}</a>`;
                     
                     if (sub.subcategories && sub.subcategories.length > 0) {
                         groupsHtml += `<div class="zlato-tags-container">`;
                         sub.subcategories.forEach(subsub => { 
-                            groupsHtml += `<a href="catalog.html#${subsub.id}" class="zlato-tag">${window.getLoc(subsub.name)}</a>`; 
+                            groupsHtml += `<a href="catalog.html#${subsub.id}" class="zlato-tag">${subsub.name}</a>`; 
                         });
                         groupsHtml += `</div>`;
                     }
@@ -572,16 +494,28 @@ function generateMenus() {
             }
             groupsHtml += '</div>';
 
+            let highlightsHtml = '';
+            if (cat.highlights && cat.highlights.length > 0) {
+                highlightsHtml += `<div class="zlato-highlights">`;
+                cat.highlights.forEach(hl => {
+                    const accentClass = hl.isAccent ? 'accent' : '';
+                    highlightsHtml += `<a href="catalog.html${hl.link}" class="zlato-highlight-btn ${accentClass}">${hl.name} →</a>`;
+                });
+                highlightsHtml += `</div>`;
+            }
+
             if(megaMenu) {
                 const newCol2 = document.createElement('div');
                 newCol2.className = `mega-col-2 zlato-content ${isActive}`;
                 newCol2.id = `mc-${cat.id}`;
+                
                 newCol2.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
-                        <h2 class="text-3xl font-serif text-[var(--text-main)]">${catName}</h2>
+                        <h2 class="text-3xl font-serif text-[var(--text-main)]">${cat.name}</h2>
                         <a href="catalog.html#${cat.id}" class="text-[12px] uppercase tracking-widest text-[var(--gold-muted)] font-bold transition-colors">Всі →</a>
                     </div>
                     ${groupsHtml}
+                    ${highlightsHtml}
                 `;
                 megaMenu.appendChild(newCol2);
             }
@@ -603,7 +537,38 @@ function generateMenus() {
     }
 
     if(sideMenu) {
-        let mobCatHtml = buildMobileTree(categoriesTree);
+        let mobCatHtml = '';
+        categoriesTree.forEach(cat => {
+            let mobSubLinksHtml = '';
+            if (cat.subcategories && cat.subcategories.length > 0) {
+                cat.subcategories.forEach(sub => {
+                   mobSubLinksHtml += `<div class="mob-group-title">${sub.name}</div>`;
+                   if (sub.subcategories && sub.subcategories.length > 0) {
+                       mobSubLinksHtml += `<div class="mob-tags-wrap">`;
+                       sub.subcategories.forEach(subsub => {
+                            mobSubLinksHtml += `<a href="catalog.html#${subsub.id}" class="mob-tag" onclick="window.toggleMenu()">${subsub.name}</a>`; 
+                       });
+                       mobSubLinksHtml += `</div>`;
+                   }
+                });
+            }
+            mobSubLinksHtml += `<a href="catalog.html#${cat.id}" class="mob-all-btn" onclick="window.toggleMenu()">Всі товари: ${cat.name} →</a>`;
+            
+            mobCatHtml += `
+            <div class="mob-nested-wrap">
+                <div class="mob-nested-title" onclick="window.toggleAccordion('mob-sub-${cat.id}', 'mob-arrow-${cat.id}')">
+                    <div class="flex items-center gap-3">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-70">${getCategoryIconSVG(cat.id)}</svg> 
+                        <span style="font-size: 15px;">${cat.name}</span>
+                    </div>
+                    <svg id="mob-arrow-${cat.id}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="mob-nested-list" id="mob-sub-${cat.id}">
+                    ${mobSubLinksHtml}
+                </div>
+            </div>`;
+        });
+
         const savedLang = API.get('bv_lang', 'uk');
         const displayLang = savedLang === 'uk' ? 'UA' : savedLang.toUpperCase();
         const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -615,6 +580,7 @@ function generateMenus() {
                     <span class="text-4xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
                     <span class="text-[10px] tracking-[0.4em] text-[var(--text-main)] uppercase font-light pl-1">jewelry</span>
                 </a>
+                <p class="text-[9px] text-[var(--text-muted)] mt-4 uppercase tracking-[0.2em]">Вишуканість у деталях</p>
             </div>
             
             <a href="index.html" data-i18n="m1" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
@@ -660,7 +626,6 @@ function generateMenus() {
                     </div>
                     <div class="mob-accordion-list" id="mobLangList" style="margin-top: 10px; background: rgba(0,0,0,0.1); border-radius: 12px;">
                         <div class="dropdown-item py-3" onclick="window.changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="flag"> Українська</div>
-                        <div class="dropdown-item py-3" onclick="window.changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="flag"> Русский</div>
                         <div class="dropdown-item py-3" onclick="window.changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="flag"> English</div>
                     </div>
                 </div>
@@ -682,10 +647,47 @@ if (!document.getElementById('marquee-fix-styles')) {
     const style = document.createElement('style');
     style.id = 'marquee-fix-styles';
     style.innerHTML = `
-        .marquee-wrapper { width: 100% !important; overflow: hidden !important; background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 20px 0; cursor: grab; user-select: none; display: block !important; position: relative; }
-        #marqueeTrack { display: flex !important; gap: 0px !important; white-space: nowrap; width: max-content; will-change: transform; align-items: center; }
-        .marquee-item { flex-shrink: 0; padding: 0 !important; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-muted); text-decoration: none; display: flex; align-items: center; user-select: none; -webkit-user-drag: none; }
-        .marquee-item::after { content: "•"; margin: 0 25px !important; color: var(--gold-muted); opacity: 0.4; }
+        .marquee-wrapper {
+            width: 100% !important;
+            overflow: hidden !important;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            cursor: grab;
+            user-select: none;
+            display: block !important;
+            position: relative;
+        }
+        #marqueeTrack {
+            display: flex !important;
+            gap: 0px !important;
+            white-space: nowrap;
+            width: max-content;
+            will-change: transform;
+            align-items: center;
+        }
+        .marquee-item {
+            flex-shrink: 0;
+            padding: 0 !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .marquee-item::after {
+            content: "•";
+            margin: 0 25px !important;
+            color: var(--gold-muted);
+            opacity: 0.4;
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     `;
     document.head.appendChild(style);
@@ -696,44 +698,90 @@ function createInertiaScroll(containerSelector, trackSelector, baseSpeed = -0.5)
     const track = document.querySelector(trackSelector);
     if (!container || !track) return;
 
-    let currentX = 0, isDown = false, isDragging = false, startX, velocity = 0, state = 'playing', pauseTimer = null;
+    let currentX = 0;
+    let isDown = false;
+    let isDragging = false; 
+    let startX;
+    let velocity = 0;
+    let state = 'playing'; 
+    let pauseTimer = null;
+
     const content = track.innerHTML;
     track.innerHTML = content + content + content + content;
 
     track.addEventListener('dragstart', (e) => e.preventDefault());
-    track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
+    track.addEventListener('click', (e) => {
+        if (isDragging) { e.preventDefault(); e.stopPropagation(); }
+    });
 
     function step() {
-        if (state === 'playing') currentX += baseSpeed;
-        else if (state === 'coasting') {
-            currentX += velocity; velocity *= 0.95; 
-            if (Math.abs(velocity) < 0.2) { state = 'paused'; clearTimeout(pauseTimer); pauseTimer = setTimeout(() => { state = 'playing'; }, 3000); }
+        if (state === 'playing') {
+            currentX += baseSpeed;
+        } else if (state === 'coasting') {
+            currentX += velocity;
+            velocity *= 0.95; 
+            if (Math.abs(velocity) < 0.2) {
+                state = 'paused';
+                clearTimeout(pauseTimer);
+                pauseTimer = setTimeout(() => { state = 'playing'; }, 3000);
+            }
         } 
+
         const resetPoint = track.scrollWidth / 4;
         if (currentX <= -resetPoint) currentX += resetPoint;
         if (currentX > 0) currentX -= resetPoint;
+
         track.style.transform = `translate3d(${currentX}px, 0, 0)`;
         requestAnimationFrame(step);
     }
 
-    const startDrag = (e) => { isDown = true; isDragging = false; state = 'dragging'; clearTimeout(pauseTimer); startX = (e.pageX || e.touches[0].pageX) - currentX; velocity = 0; container.style.cursor = 'grabbing'; };
-    const endDrag = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; state = 'coasting'; setTimeout(() => { isDragging = false; }, 50); };
-    const moveDrag = (e) => { if (!isDown) return; const x = (e.pageX || e.touches[0].pageX) - startX; if (Math.abs(x - currentX) > 3) isDragging = true; velocity = x - currentX; currentX = x; };
+    const startDrag = (e) => {
+        isDown = true; isDragging = false; state = 'dragging';
+        clearTimeout(pauseTimer);
+        startX = (e.pageX || e.touches[0].pageX) - currentX;
+        velocity = 0;
+        container.style.cursor = 'grabbing';
+    };
 
-    container.addEventListener('mousedown', startDrag); window.addEventListener('mouseup', endDrag); container.addEventListener('mouseleave', endDrag); container.addEventListener('mousemove', moveDrag);
-    container.addEventListener('touchstart', startDrag, {passive: true}); container.addEventListener('touchend', endDrag); container.addEventListener('touchmove', moveDrag, {passive: true});
+    const endDrag = () => {
+        if (!isDown) return;
+        isDown = false;
+        container.style.cursor = 'grab';
+        state = 'coasting'; 
+        setTimeout(() => { isDragging = false; }, 50);
+    };
+
+    const moveDrag = (e) => {
+        if (!isDown) return;
+        const x = (e.pageX || e.touches[0].pageX) - startX;
+        if (Math.abs(x - currentX) > 3) isDragging = true;
+        velocity = x - currentX; 
+        currentX = x;
+    };
+
+    container.addEventListener('mousedown', startDrag);
+    window.addEventListener('mouseup', endDrag);
+    container.addEventListener('mouseleave', endDrag);
+    container.addEventListener('mousemove', moveDrag);
+    container.addEventListener('touchstart', startDrag, {passive: true});
+    container.addEventListener('touchend', endDrag);
+    container.addEventListener('touchmove', moveDrag, {passive: true});
+
     requestAnimationFrame(step);
 }
 
 window.initMarqueeSim = function() {
     const track = document.getElementById('marqueeTrack');
     if (!track) return;
-    const categoriesFlat = API.get('bv_categories_flat', []);
-    const html = categoriesFlat.map(c => `<a href="catalog.html#${c.id}" class="marquee-item">${window.getLoc(c.name)}</a>`).join('');
-    if (html) { track.innerHTML = html; setTimeout(() => { createInertiaScroll('.marquee-wrapper', '#marqueeTrack', -0.5); }, 100); }
+    const categoriesDB = API.get('bv_categories_tree', []);
+    const html = categoriesDB.map(c => `<a href="catalog.html#${c.id}" class="marquee-item">${c.name}</a>`).join('');
+    if (html) {
+        track.innerHTML = html;
+        setTimeout(() => { createInertiaScroll('.marquee-wrapper', '#marqueeTrack', -0.5); }, 100);
+    }
 };
 
-window.initPremiumCarousel = function(track) {
+function initPremiumCarousel(track) {
     if (!track || track.dataset.init === 'true') return;
     track.dataset.init = 'true';
 
@@ -746,34 +794,92 @@ window.initPremiumCarousel = function(track) {
     }
 
     const btnClass = "hidden md:flex absolute top-1/2 -translate-y-1/2 z-40 w-12 h-12 lg:w-14 lg:h-14 items-center justify-center rounded-full bg-[var(--bg-card)]/40 backdrop-blur-md border border-[var(--border)] text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all duration-400 hover:scale-110 hover:bg-[var(--bg-card)] hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
-    const prevBtn = document.createElement('button'); prevBtn.className = `${btnClass} left-2 lg:left-6`; prevBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>`;
-    const nextBtn = document.createElement('button'); nextBtn.className = `${btnClass} right-2 lg:right-6`; nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>`;
-    wrapper.appendChild(prevBtn); wrapper.appendChild(nextBtn);
+    
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `${btnClass} left-2 lg:left-6`;
+    prevBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>`;
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `${btnClass} right-2 lg:right-6`;
+    nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>`;
 
-    track.classList.add('no-scrollbar', 'cursor-grab'); track.classList.remove('snap-x', 'snap-mandatory'); track.style.scrollBehavior = 'auto';
+    wrapper.appendChild(prevBtn);
+    wrapper.appendChild(nextBtn);
 
-    let isDown = false, isDragging = false, startX, scrollLeft, lastX, velX = 0, momentumID;
+    track.classList.add('no-scrollbar', 'cursor-grab');
+    track.classList.remove('snap-x', 'snap-mandatory');
+    track.style.scrollBehavior = 'auto';
+
+    let isDown = false;
+    let isDragging = false;
+    let startX, scrollLeft, lastX;
+    let velX = 0;
+    let momentumID;
 
     track.addEventListener('dragstart', (e) => e.preventDefault());
     track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
 
     const momentumLoop = () => {
-        if (isDown) return; track.scrollLeft -= velX; velX *= 0.95; checkInfinite();
-        if (Math.abs(velX) > 0.5) { momentumID = requestAnimationFrame(momentumLoop); } else { track.classList.add('snap-x', 'snap-mandatory'); }
+        if (isDown) return;
+        track.scrollLeft -= velX;
+        velX *= 0.95;
+        checkInfinite();
+        if (Math.abs(velX) > 0.5) { momentumID = requestAnimationFrame(momentumLoop); } 
+        else { track.classList.add('snap-x', 'snap-mandatory'); }
     };
 
-    const beginMomentum = () => { track.classList.remove('snap-x', 'snap-mandatory'); cancelAnimationFrame(momentumID); momentumID = requestAnimationFrame(momentumLoop); };
+    const beginMomentum = () => {
+        track.classList.remove('snap-x', 'snap-mandatory');
+        cancelAnimationFrame(momentumID);
+        momentumID = requestAnimationFrame(momentumLoop);
+    };
 
     nextBtn.onclick = () => { velX = -25; beginMomentum(); };
     prevBtn.onclick = () => { velX = 25; beginMomentum(); };
 
-    const startAction = (e) => { isDown = true; isDragging = false; track.classList.remove('snap-x', 'snap-mandatory'); track.classList.add('cursor-grabbing'); cancelAnimationFrame(momentumID); startX = (e.pageX || e.touches[0].pageX); scrollLeft = track.scrollLeft; lastX = startX; velX = 0; };
-    const endAction = () => { if (!isDown) return; isDown = false; track.classList.remove('cursor-grabbing'); beginMomentum(); setTimeout(() => { isDragging = false; }, 50); };
-    const moveAction = (e) => { if (!isDown) return; const currentX = (e.pageX || e.touches[0].pageX); const walk = (currentX - startX); if (Math.abs(walk) > 5) isDragging = true; track.scrollLeft = scrollLeft - walk; velX = currentX - lastX; lastX = currentX; checkInfinite(); };
-    const checkInfinite = () => { const bWidth = track.scrollWidth / 3; if (track.scrollLeft >= bWidth * 2) track.scrollLeft -= bWidth; if (track.scrollLeft <= 0) track.scrollLeft += bWidth; };
+    const startAction = (e) => {
+        isDown = true; isDragging = false;
+        track.classList.remove('snap-x', 'snap-mandatory');
+        track.classList.add('cursor-grabbing');
+        cancelAnimationFrame(momentumID);
+        startX = (e.pageX || e.touches[0].pageX);
+        scrollLeft = track.scrollLeft;
+        lastX = startX;
+        velX = 0;
+    };
 
-    track.addEventListener('mousedown', startAction); window.addEventListener('mouseup', endAction); track.addEventListener('mousemove', moveAction); track.addEventListener('mouseleave', endAction);
-    track.addEventListener('touchstart', startAction, {passive: true}); track.addEventListener('touchend', endAction); track.addEventListener('touchmove', moveAction, {passive: true});
+    const endAction = () => {
+        if (!isDown) return;
+        isDown = false;
+        track.classList.remove('cursor-grabbing');
+        beginMomentum();
+        setTimeout(() => { isDragging = false; }, 50);
+    };
+
+    const moveAction = (e) => {
+        if (!isDown) return;
+        const currentX = (e.pageX || e.touches[0].pageX);
+        const walk = (currentX - startX);
+        if (Math.abs(walk) > 5) isDragging = true;
+        track.scrollLeft = scrollLeft - walk;
+        velX = currentX - lastX;
+        lastX = currentX;
+        checkInfinite();
+    };
+
+    const checkInfinite = () => {
+        const bWidth = track.scrollWidth / 3;
+        if (track.scrollLeft >= bWidth * 2) track.scrollLeft -= bWidth;
+        if (track.scrollLeft <= 0) track.scrollLeft += bWidth;
+    };
+
+    track.addEventListener('mousedown', startAction);
+    window.addEventListener('mouseup', endAction);
+    track.addEventListener('mousemove', moveAction);
+    track.addEventListener('mouseleave', endAction);
+    track.addEventListener('touchstart', startAction, {passive: true});
+    track.addEventListener('touchend', endAction);
+    track.addEventListener('touchmove', moveAction, {passive: true});
 
     setTimeout(() => { track.scrollLeft = track.scrollWidth / 3; }, 200);
 }
@@ -792,7 +898,7 @@ window.initBannerSlider = function() {
     window.bannerCount = banners.length; window.currentBanner = 0; window.isBannerAnimating = false;
     let html = '<div class="banner-track" id="bannerTrack" style="display: flex; width: 100%; height: 100%;">';
     banners.forEach((b, i) => { 
-        html += `<div class="banner-slide" data-index="${i}"><a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio}; object-cover;"></a></div>`; 
+        html += `<div class="banner-slide" data-index="${i}"><a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio};"></a></div>`; 
     });
     html += '</div>';
 
@@ -861,78 +967,44 @@ window.goToBanner = function(index) {
 };
 
 // ==========================================
-// 11. ГОЛОВНА: ДИНАМІЧНІ БЛОКИ СЕКЦІЙ
+// 11. ГОЛОВНА ТА ПІДВАЛ: РЕНДЕР СЕКЦІЙ 
 // ==========================================
 window.renderHomeSections = function() {
-    const homeBlocks = API.get('bv_home_blocks', [
-        { id: 'hits', name: {uk: 'Хіти місяця', ru: 'Хиты', en: 'Hits'}, active: true },
-        { id: 'weekly', name: {uk: 'Вибір тижня', ru: 'Выбор недели', en: 'Weekly Choice'}, active: true }
-    ]);
+    const specialGrid = document.getElementById('specialGrid');
+    const weeklyGrid = document.getElementById('weeklyGrid');
+
+    const trackClasses = "flex overflow-x-auto gap-4 md:gap-5 pb-6 pt-2 snap-x snap-mandatory no-scrollbar";
+    const cardWrapper = (p) => `<div class="flex-none w-[45%] sm:w-[32%] md:w-[26%] lg:w-[20%] xl:w-[18%] snap-start flex">${window.renderProductCard(p)}</div>`;
     
-    // Видаляємо старі хардкодні секції
-    const oldSpecial = document.getElementById('special-section');
-    if (oldSpecial) oldSpecial.style.display = 'none';
-    const oldWeekly = document.getElementById('weekly-section');
-    if (oldWeekly) oldWeekly.style.display = 'none';
-    
-    // Створюємо динамічний контейнер
-    let container = document.getElementById('dynamicHomeBlocksContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'dynamicHomeBlocksContainer';
-        const catSec = document.getElementById('categories-section');
-        if (catSec && catSec.parentNode) {
-            catSec.parentNode.insertBefore(container, catSec);
+    const generateInfiniteHTML = (items) => {
+        if(items.length === 0) return '';
+        let blockItems = [...items];
+        while(blockItems.length < 12) { blockItems = blockItems.concat(items); }
+        const html = blockItems.map(cardWrapper).join('');
+        return html + html + html; 
+    };
+
+    if(specialGrid) {
+        specialGrid.className = trackClasses;
+        const items = products.filter(p => p.isSpecial === true || p.isSpecial === 'true').slice(0, 10);
+        if(items.length > 0) {
+            specialGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(specialGrid);
         } else {
-            // Фолбек якщо структуру сторінки змінено
-            document.querySelector('main').appendChild(container);
+            specialGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Нових пропозицій ще не додано.</p>';
         }
     }
     
-    let html = '';
-    homeBlocks.filter(b => b.active).forEach(block => {
-        // Шукаємо товари для цього блоку
-        let items = products.filter(p => {
-            if (p.blocks && p.blocks.includes(block.id)) return true;
-            // Зворотня сумісність
-            if (block.id === 'hits' && p.isSpecial) return true;
-            if (block.id === 'weekly' && p.isWeekly) return true;
-            return false;
-        });
-        
-        if (items.length > 0) {
-            const title = window.getLoc(block.name);
-            const trackId = `block-track-${block.id}`;
-            const cardWrapper = (p) => `<div class="flex-none w-[45%] sm:w-[32%] md:w-[26%] lg:w-[20%] xl:w-[18%] snap-start flex">${window.renderProductCard(p)}</div>`;
-            
-            let blockItems = [...items];
-            // Розмножуємо для безкінечного скролу
-            while(blockItems.length < 12 && blockItems.length > 0) { blockItems = blockItems.concat(items); }
-            
-            html += `
-            <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-12 md:py-24 border-t border-[var(--border)] mt-10">
-                <div class="mb-8 md:mb-16 text-left md:text-center px-4">
-                    <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">BV Jewelry</span>
-                    <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[40px] leading-tight">${title}</h2>
-                </div>
-                <div class="promo-carousel-container select-none group relative">
-                    <div id="${trackId}" class="flex overflow-x-auto gap-4 md:gap-5 pb-6 pt-2 snap-x snap-mandatory no-scrollbar min-h-[300px]">
-                        ${blockItems.map(cardWrapper).join('')}
-                    </div>
-                </div>
-            </section>`;
+    if(weeklyGrid) {
+        weeklyGrid.className = trackClasses;
+        const items = products.filter(p => p.isWeekly === true || p.isWeekly === 'true').slice(0, 10);
+        if(items.length > 0) {
+            weeklyGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(weeklyGrid);
+        } else {
+            weeklyGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Хіти тижня ще не обрано.</p>';
         }
-    });
-    
-    container.innerHTML = html;
-    
-    // Ініціалізація каруселей
-    homeBlocks.filter(b => b.active).forEach(block => {
-        const track = document.getElementById(`block-track-${block.id}`);
-        if (track && typeof window.initPremiumCarousel === 'function') {
-            window.initPremiumCarousel(track);
-        }
-    });
+    }
 };
 
 window.applyAdminSettings = function() {
@@ -1139,9 +1211,7 @@ window.changeLang = function(lang) {
     API.set('bv_lang', lang);
     window.renderCart();
     window.renderFavDrawer();
-    
-    // Перерендер динамічних блоків
-    if(document.getElementById('dynamicHomeBlocksContainer') && typeof renderHomeSections === 'function') renderHomeSections();
+    if(document.getElementById('specialGrid') && typeof renderHomeSections === 'function') renderHomeSections();
     if(typeof window.renderCatalogBatch === 'function') window.renderCatalogBatch(); 
     if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
     const mobLangList = document.getElementById('mobLangList');
@@ -1242,6 +1312,7 @@ window.updateAuthView = function() {
         subsField.remove();
     }
     
+    // Додаємо кнопки соціального входу (Google та Apple)
     const socialBlockId = 'socialLoginBlock';
     let socialBlock = document.getElementById(socialBlockId);
     
@@ -1314,6 +1385,7 @@ window.initRealtime = function() {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Перевірка OAuth сесії після повернення з Google/Apple
     if(window.location.hash && window.location.hash.includes('access_token')) {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
@@ -1326,6 +1398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
             API.set(getScopedStorageKey('bv_favs'), userFavs);
             
+            // Очищуємо URL
             history.replaceState(null, null, ' ');
             window.updateProfileMenu();
             if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();

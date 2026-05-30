@@ -31,7 +31,7 @@
 
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[32px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]">
-            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors" aria-label="Закрити">&times;</button>
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors" aria-label="Закрити">×</button>
             
             <div id="authFormContainer">
                 <h3 id="authTitle" class="text-3xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
@@ -95,7 +95,9 @@
                 <span data-i18n="cart_subtotal">Підсумок:</span>
                 <span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span>
             </div>
-            <button class="btn-checkout w-full bg-[var(--text-main)] text-[var(--bg-body)] py-4 rounded-xl font-bold uppercase tracking-widest mt-4 hover:opacity-90 transition-all active:scale-95" data-i18n="cart_checkout">Оформити замовлення</button>
+            <div id="checkoutBtnWrapper">
+                <button onclick="window.checkoutOrder()" id="checkoutBtn" class="btn-checkout w-full bg-[var(--text-main)] text-[var(--bg-body)] py-4 rounded-xl font-bold uppercase tracking-widest mt-4 hover:opacity-90 transition-all active:scale-95" data-i18n="cart_checkout">Оформити замовлення</button>
+            </div>
         </div>
     </div>
 
@@ -125,10 +127,10 @@
                 <div class="dropdown-wrapper group" style="padding: 20px 0; margin: -20px 0;">
                     <button class="nav-link flex items-center gap-1 hover:text-[var(--gold-muted)] transition-colors"><span data-i18n="m3">Бренд</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
                     <div class="dropdown-menu">
-                        <a href="info.html?p=about" class="dropdown-item" data-i18n="brand_about">Історія Atelier</a>
-                        <a href="info.html?p=warranty" class="dropdown-item" data-i18n="brand_warranty">Гарантія</a>
-                        <a href="info.html?p=terms" class="dropdown-item" data-i18n="brand_terms">Умови</a>
-                        <a href="info.html?p=reviews" class="dropdown-item" data-i18n="brand_reviews">Відгуки</a>
+                        <a href="info.html?p=about" class="dropdown-item">Про нас</a>
+                        <a href="info.html?p=warranty" class="dropdown-item">Гарантія та повернення</a>
+                        <a href="info.html?p=terms" class="dropdown-item">Оплата і доставка</a>
+                        <a href="info.html?p=faq" class="dropdown-item">Часті питання</a>
                     </div>
                 </div>
                 <a href="exclusive.html" class="exclusive-nav-btn" data-i18n="m_atelier">Ексклюзив</a>
@@ -155,13 +157,16 @@
                 <div class="dropdown-menu">
                     <button class="dropdown-item w-full text-left" onclick="changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> UA</button>
                     <button class="dropdown-item w-full text-left" onclick="changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> EN</button>
-                    <button class="dropdown-item w-full text-left" onclick="changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> RU</button>
-                    <button class="dropdown-item w-full text-left" onclick="changeLang('bg')"><img src="https://flagcdn.com/bg.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> BG</button>
                 </div>
             </div>
-            <div class="dropdown-wrapper desktop-only">
-                <button class="icon-btn" onclick="openAuthModal()"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></button>
+            
+            <div class="dropdown-wrapper desktop-only group">
+                <button class="icon-btn" id="headerProfileBtn" onclick="if(window.innerWidth < 1024) window.openAuthModal()">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
+                <div class="dropdown-menu" id="profileDropdownMenu"></div>
             </div>
+            
             <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
@@ -232,7 +237,7 @@
         <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-20 md:py-32" id="special-section">
             <div class="mb-8 md:mb-12 text-left md:text-center px-4">
                 <span class="section-subtitle">Лімітована колекція</span>
-                <h2 class="section-title">Пропозиції місяця</h2>
+                <h2 class="section-title">Хіти місяця</h2>
             </div>
             <div class="promo-carousel-container select-none" id="promoCarouselContainer">
                 <div id="specialGrid" class="promo-track min-h-[300px]"></div>
@@ -242,7 +247,7 @@
         <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-20 md:py-32" id="weekly-section">
             <div class="mb-8 md:mb-12 text-left md:text-center px-4">
                 <span class="section-subtitle">Вибір Atelier</span>
-                <h2 class="section-title">Прикраси тижня</h2>
+                <h2 class="section-title">Хіти тижня</h2>
             </div>
             <div class="weekly-carousel-container select-none" id="weeklyCarouselContainer">
                 <div id="weeklyGrid" class="weekly-track min-h-[300px]"></div>
@@ -266,7 +271,7 @@
                                 <a href="catalog.html#wr_silver" class="panel-tag">Срібні</a>
                                 <a href="catalog.html#wr_diamonds" class="panel-tag">З діамантами</a>
                             </div>
-                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки &rarr;</a>
+                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки →</a>
                         </div>
                     </div>
                 </div>
@@ -281,7 +286,7 @@
                                 <a href="catalog.html#we_silver" class="panel-tag">Срібні</a>
                                 <a href="catalog.html#we_studs" class="panel-tag">Пусети</a>
                             </div>
-                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки &rarr;</a>
+                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки →</a>
                         </div>
                     </div>
                 </div>
@@ -295,7 +300,7 @@
                                 <a href="catalog.html#wn_gold_chains" class="panel-tag">Золоті</a>
                                 <a href="catalog.html#wn_silver_chains" class="panel-tag">Срібні</a>
                             </div>
-                            <a href="catalog.html#necklaces" class="panel-btn">Всі ланцюжки &rarr;</a>
+                            <a href="catalog.html#necklaces" class="panel-btn">Всі ланцюжки →</a>
                         </div>
                     </div>
                 </div>
@@ -309,7 +314,7 @@
                                 <a href="catalog.html#wb_gold" class="panel-tag">Золоті</a>
                                 <a href="catalog.html#wb_silver_hard" class="panel-tag">Срібні</a>
                             </div>
-                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети &rarr;</a>
+                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети →</a>
                         </div>
                     </div>
                 </div>
@@ -380,23 +385,18 @@
             </div>
 
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6">Клієнтам</h4>
-                <a href="services.html" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="m_price">Послуги та Прайс</a>
-                <a href="info.html?p=warranty" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="brand_warranty">Гарантія та якість</a>
-                <a href="info.html?p=terms" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="brand_terms">Оплата і доставка</a>
-                <a href="exclusive.html" class="text-[14px] text-[var(--gold-muted)] font-medium hover:text-[var(--text-main)] transition" data-i18n="m_atelier">Індивідуальне замовлення</a>
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6">Бренд</h4>
+                <a href="info.html?p=about" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Про нас</a>
+                <a href="info.html?p=warranty" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Гарантія та повернення</a>
+                <a href="info.html?p=terms" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Оплата і доставка</a>
+                <a href="info.html?p=faq" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Часті питання</a>
             </div>
 
             <div class="flex flex-col items-center md:items-end text-center md:text-right">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6" data-i18n="m4">Контакти</h4>
                 <a href="tel:+380634540901" class="text-[15px] text-[var(--gold-muted)] font-medium mb-4 transition hover:opacity-80 tracking-wide phone-num">+38 063 45 40 901</a>
                 
-                <div class="flex flex-col gap-3 items-center md:items-end mb-6">
-                    <a href="https://share.google/R7G0tiXeqXrx98Uhi" target="_blank" class="addr-link-1 text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
-                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        <span class="addr-text-1">м. Ізмаїл, вул. Торгова, 68</span>
-                    </a>
-                </div>
+                <div class="flex flex-col gap-3 items-center md:items-end mb-6" id="footerAddressesBlock"></div>
 
                 <div class="flex items-center gap-4">
                     <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
@@ -420,7 +420,6 @@
     
     <script type="module" src="main.js"></script>
     <script>
-        // Ініціалізація специфічна для головної сторінки
         document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('is_home_page', 'true');
             setTimeout(() => {
