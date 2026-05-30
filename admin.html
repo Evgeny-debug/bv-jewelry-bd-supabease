@@ -1770,5 +1770,43 @@
             window.location.href = 'index.html'; 
         }
     </script>
+    <script>
+    // 1. Открытие модалки (для создания или редактирования)
+    window.openProductModal = function(id = null) {
+        const modal = document.getElementById('productModal');
+        const form = document.getElementById('productForm');
+        
+        if (!modal) {
+            console.error("Модальное окно #productModal не найдено!");
+            return;
+        }
+
+        // Сброс формы
+        if (form) form.reset();
+        document.getElementById('prod-id').value = id || '';
+        document.getElementById('prodModalTitle').innerText = id ? 'Редагувати товар' : 'Додати товар';
+
+        // Показ модалки
+        modal.classList.remove('hidden');
+        // Добавляем микро-задержку для анимации
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+        }, 10);
+
+        // Если это редактирование, заполняем данные (твоя существующая логика)
+        if (id && typeof fillProductForm === 'function') {
+            fillProductForm(id);
+        }
+    };
+
+    // 2. Закрытие модалки
+    window.closeProductModal = function() {
+        const modal = document.getElementById('productModal');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    };
+</script>
 </body>
 </html>
