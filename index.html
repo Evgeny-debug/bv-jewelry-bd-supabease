@@ -111,9 +111,9 @@
 
     <header id="header">
         <div class="header-left">
-            <button class="burger" id="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            <button class="burger hidden md:block" id="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
             <nav class="nav-left desktop-only">
-                <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors">Головна</a>
+                <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors active">Головна</a>
                 <div class="catalog-dropdown-wrapper group">
                     <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='catalog.html'">
                         <span data-i18n="m2">Каталог</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -137,7 +137,7 @@
             </nav>
         </div>
 
-        <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
+        <a href="index.html" class="bv-logo md:ml-0 -ml-4"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
             <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center" onclick="window.toggleMobileSearch()">
@@ -234,27 +234,10 @@
             </a>
         </section>
 
-        <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-20 md:py-32" id="special-section">
-            <div class="mb-8 md:mb-12 text-left md:text-center px-4">
-                <span class="section-subtitle">Лімітована колекція</span>
-                <h2 class="section-title">Хіти місяця</h2>
-            </div>
-            <div class="promo-carousel-container select-none" id="promoCarouselContainer">
-                <div id="specialGrid" class="promo-track min-h-[300px]"></div>
-            </div>
-        </section>
-
-        <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-20 md:py-32" id="weekly-section">
-            <div class="mb-8 md:mb-12 text-left md:text-center px-4">
-                <span class="section-subtitle">Вибір Atelier</span>
-                <h2 class="section-title">Хіти тижня</h2>
-            </div>
-            <div class="weekly-carousel-container select-none" id="weeklyCarouselContainer">
-                <div id="weeklyGrid" class="weekly-track min-h-[300px]"></div>
-            </div>
-        </section>
+        <!-- ТЕПЕР УСІ ГОРИЗОНТАЛЬНІ БЛОКИ ВСТАВЛЯЮТЬСЯ СЮДИ ДИНАМІЧНО З MAIN.JS -->
+        <div id="dynamicHomeBlocksContainer"></div>
         
-        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
+        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32 mt-10 border-t border-[var(--border)]" id="categories-section">
             <div class="text-center mb-10 md:mb-16">
                 <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">Our World</h3>
                 <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
@@ -322,15 +305,16 @@
         </section>
     </main>
 
+    <!-- ОНОВЛЕНА НИЖНЯ ПАНЕЛЬ НАВІГАЦІЇ ДЛЯ МОБІЛЬНИХ -->
     <nav class="mobile-bottom-nav" aria-label="Нижняя панель навигации">
         <a href="index.html" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span data-i18n="m1">Головна</span>
         </a>
-        <a href="catalog.html" class="bottom-nav-item">
+        <button onclick="window.toggleMenu();" class="bottom-nav-item">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             <span data-i18n="m2">Каталог</span>
-        </a>
+        </button>
         <button onclick="window.toggleCart();" class="bottom-nav-item" aria-label="Корзина">
             <div class="relative">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
@@ -351,7 +335,7 @@
         </button>
     </nav>
 
-    <section class="max-w-[1200px] mx-auto px-6 text-center pb-20">
+    <section class="max-w-[1200px] mx-auto px-6 text-center pb-20 mt-10">
         <span class="section-subtitle mb-4 block">Atelier since 1984</span>
         <h2 class="section-title mb-4 block">BV Jewelry - ювелірна майстерня та бутик</h2>
         <p class="text-[var(--text-muted)] text-sm md:text-base max-w-3xl mx-auto leading-relaxed font-light mb-8">
@@ -364,7 +348,7 @@
         </div>
     </section>
 
-    <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-20">
+    <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-10">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
             
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
@@ -418,19 +402,15 @@
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <script type="module" src="main.js"></script>
+    <script src="main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('is_home_page', 'true');
+            // Трохи затримуємо ініт, щоб main.js встиг стягнути дані з бази
             setTimeout(() => {
                 if(typeof window.initMarqueeSim === 'function') window.initMarqueeSim();
-                if(typeof window.initPremiumCarousel === 'function') {
-                    const sg = document.getElementById('specialGrid');
-                    const wg = document.getElementById('weeklyGrid');
-                    if(sg) window.initPremiumCarousel(sg);
-                    if(wg) window.initPremiumCarousel(wg);
-                }
-            }, 100);
+                if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
+            }, 400);
         });
     </script>
 </body>
