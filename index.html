@@ -26,9 +26,20 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-
+    
     <style>
-        /* Стилі для нижнього мобільного бару (PWA Style) */
+        /* Глобальне скидання стилів кнопок для iOS/Safari */
+        button {
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            outline: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Стилі нижнього мобільного бару */
         .mobile-bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -39,7 +50,7 @@
             padding: 10px 0;
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
             z-index: 5000;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 -4px 25px rgba(0,0,0,0.08);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
@@ -52,12 +63,8 @@
             font-size: 10px;
             font-weight: 600;
             transition: all 0.2s;
-            background: transparent;
-            border: none;
-            outline: none;
             width: 20%;
             -webkit-tap-highlight-color: transparent;
-            cursor: pointer;
             text-decoration: none;
         }
         .bottom-nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; transition: transform 0.2s; }
@@ -72,26 +79,26 @@
             .mobile-only { display: none; } 
         }
 
-        /* Адаптивні кнопки */
-        .btn-cross {
-            -webkit-appearance: none;
-            appearance: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        /* Фікс для кнопок форм та кошика на телефонах */
+        .btn-solid {
+            background-color: var(--text-main) !important;
+            color: var(--bg-body) !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            text-align: center !important;
+            width: 100%;
         }
     </style>
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-20 md:pb-0">
 
+    <!-- ЄДИНЕ МОДАЛЬНЕ ВІКНО: АВТОРИЗАЦІЯ ТА ПРОФІЛЬ -->
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[32px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
-            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors outline-none btn-cross bg-transparent z-10" aria-label="Закрити">&times;</button>
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
             
+            <!-- Форма логіну / Реєстрації -->
             <div id="authFormContainer">
                 <h3 id="authTitle" class="text-3xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
                 <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-[13px] mb-8 font-light">Раді бачити вас знову</p>
@@ -110,18 +117,19 @@
                         <input type="password" id="authPass" placeholder="Мінімум 6 символів" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
                     </div>
                     
-                    <button type="submit" class="btn-cross w-full mt-4 bg-[var(--text-main)] text-[var(--bg-body)] py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[var(--gold-muted)] transition-colors active:scale-95 shadow-lg" id="authSubmitBtn" data-i18n="login">Увійти</button>
+                    <button type="submit" class="btn-solid py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[var(--gold-muted)] transition-colors active:scale-95 shadow-lg mt-4" id="authSubmitBtn" data-i18n="login">Увійти</button>
                     
+                    <!-- Соціальні кнопки (type="button" блокує відправку форми) -->
                     <div id="socialLoginBlock" class="mt-4 flex flex-col gap-3">
                         <div class="relative flex items-center justify-center w-full mt-2 mb-2">
                             <div class="border-t border-[var(--border)] w-full"></div>
                             <span class="bg-[var(--bg-card)] px-3 text-[10px] text-[var(--text-muted)] absolute uppercase tracking-widest font-semibold">Або</span>
                         </div>
                         <div class="flex gap-3">
-                            <button type="button" onclick="loginWithGoogle()" class="btn-cross flex-1 gap-2 border border-[var(--border)] bg-transparent py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                            <button type="button" onclick="loginWithGoogle()" class="flex-1 flex justify-center items-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
                                 <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google
                             </button>
-                            <button type="button" onclick="loginWithApple()" class="btn-cross flex-1 gap-2 border border-[var(--border)] bg-transparent py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                            <button type="button" onclick="loginWithApple()" class="flex-1 flex justify-center items-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.8 3.59-.83 1.89-.04 3.23.86 4.14 2.19-3.21 1.83-2.66 5.89.5 7.05-.72 1.63-1.87 3.19-3.31 3.76zm-3.08-16.7c.66-.82 1.13-1.95.95-3.08-1.02.04-2.27.68-2.98 1.5-.61.69-1.16 1.86-.93 2.97 1.14.09 2.24-.51 2.96-1.39z"/></svg> Apple
                             </button>
                         </div>
@@ -129,11 +137,12 @@
 
                     <div class="text-center text-[13px] text-[var(--text-muted)] mt-4">
                         <span id="authToggleText">Немає акаунта?</span> 
-                        <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1 outline-none btn-cross bg-transparent inline-block" id="authToggleLink" data-i18n="register">Зареєструватися</button>
+                        <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1 inline-block" id="authToggleLink" data-i18n="register">Зареєструватися</button>
                     </div>
                 </form>
             </div>
 
+            <!-- Вікно профілю (якщо авторизований) -->
             <div id="profileView" class="hidden flex-col gap-4">
                 <h3 class="text-3xl font-serif text-[var(--text-main)] mb-2 text-center" data-i18n="login_mob_title">Кабінет</h3>
                 <div class="flex flex-col items-center justify-center p-6 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-2xl mb-2 relative overflow-hidden group">
@@ -144,29 +153,31 @@
                 </div>
                 
                 <div class="flex flex-col gap-3">
-                    <button onclick="location.href='admin.html'" id="adminLinkBtn" class="hidden btn-cross w-full bg-[#1a1a1a] border border-[#c5a059] text-[#c5a059] py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#c5a059] hover:text-[#000] transition-colors active:scale-95 shadow-lg relative overflow-hidden">
-                        <span class="relative z-10 flex items-center gap-2">Панель Адміністратора</span>
+                    <button onclick="location.href='admin.html'" id="adminLinkBtn" class="hidden w-full bg-[#1a1a1a] border border-[#c5a059] text-[#c5a059] py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#c5a059] hover:text-[#000] transition-colors active:scale-95 shadow-lg relative overflow-hidden">
+                        <span class="flex items-center justify-center gap-2 w-full"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Панель Адміністратора</span>
                     </button>
-                    <button onclick="location.href='profile.html'" id="clientLinkBtn" class="btn-cross w-full bg-[var(--text-main)] text-[var(--bg-body)] py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-lg">Мої замовлення</button>
-                    <button onclick="logoutUser()" class="btn-cross w-full py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--danger)] hover:text-[var(--danger)] transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 bg-transparent mt-1">Вийти з акаунту</button>
+                    <button onclick="location.href='profile.html'" id="clientLinkBtn" class="btn-solid py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-lg w-full">Мої замовлення</button>
+                    <button onclick="logoutUser()" class="w-full py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--danger)] hover:text-[var(--danger)] transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 mt-1">Вийти з акаунту</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ОВЕРЛЕЇ ДЛЯ ШУХЛЯД -->
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
 
+    <!-- КОШИК -->
     <div class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Корзина">
         <div class="cart-header">
             <h2 data-i18n="cart_title">Кошик</h2>
-            <button class="cart-close" id="cartClose" onclick="toggleCart()" aria-label="Закрыть корзину">&times;</button>
+            <button class="cart-close" id="cartClose" onclick="toggleCart()">&times;</button>
         </div>
         <div class="cart-body custom-scrollbar" id="cartBody"></div>
         <div class="cart-footer">
             <div class="flex justify-end mb-3">
-                <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors flex items-center gap-1 btn-cross bg-transparent outline-none">
+                <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors flex items-center gap-1">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     Очистити
                 </button>
@@ -175,25 +186,29 @@
                 <span data-i18n="cart_subtotal">Підсумок:</span>
                 <span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span>
             </div>
-            <div id="checkoutBtnWrapper" class="w-full mt-4"></div>
+            <div id="checkoutBtnWrapper" class="w-full mt-4">
+                <!-- main.js генерує сюди кнопку оформлення -->
+            </div>
         </div>
     </div>
 
+    <!-- УЛЮБЛЕНЕ -->
     <div class="cart-drawer" id="favDrawer" role="dialog" aria-label="Избранное">
         <div class="cart-header">
             <h2 data-i18n="fav_title">Улюблене</h2>
-            <button class="cart-close" onclick="toggleFavDrawer()" aria-label="Закрыть избранное">&times;</button>
+            <button class="cart-close" onclick="toggleFavDrawer()">&times;</button>
         </div>
         <div class="cart-body custom-scrollbar" id="favBody"></div>
     </div>
 
+    <!-- HEADER (ШАПКА - ПК версія та мобільний пошук) -->
     <header id="header">
         <div class="header-left">
-            <button class="burger desktop-only" id="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+            <button class="burger desktop-only" onclick="toggleMenu()"><span></span><span></span><span></span></button>
             <nav class="nav-left desktop-only">
                 <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors active">Головна</a>
                 <div class="catalog-dropdown-wrapper group">
-                    <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors btn-cross bg-transparent" onclick="location.href='catalog.html'">
+                    <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='catalog.html'">
                         <span data-i18n="m2">Каталог</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                     </button>
                     <div class="mega-menu zlato-style">
@@ -203,7 +218,7 @@
                 </div>
                 <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
                 <div class="dropdown-wrapper group" style="padding: 20px 0; margin: -20px 0;">
-                    <button class="nav-link flex items-center gap-1 hover:text-[var(--gold-muted)] transition-colors btn-cross bg-transparent"><span data-i18n="m3">Бренд</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                    <button class="nav-link flex items-center gap-1 hover:text-[var(--gold-muted)] transition-colors"><span data-i18n="m3">Бренд</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
                     <div class="dropdown-menu">
                         <a href="info.html?p=about" class="dropdown-item" data-i18n="brand_about">Історія Atelier</a>
                         <a href="info.html?p=warranty" class="dropdown-item" data-i18n="brand_warranty">Гарантія</a>
@@ -218,7 +233,8 @@
         <a href="index.html" class="bv-logo md:ml-0 -ml-4"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center btn-cross bg-transparent text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
+            <!-- Пошук на мобільних -->
+            <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-5 h-5 active:scale-90 transition-transform"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
             
@@ -232,29 +248,29 @@
                 <span class="header-phone-text font-medium tracking-wide">+38 063 45 40 901</span>
             </a>
             
-            <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)] btn-cross bg-transparent" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
+            <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
             
             <div class="dropdown-wrapper lang-dropdown desktop-only">
-                <button class="lang-current btn-cross bg-transparent"><img src="https://flagcdn.com/ua.svg" class="flag" id="currentFlag" alt=""><span id="currentLangLabel">UA</span></button>
+                <button class="lang-current"><img src="https://flagcdn.com/ua.svg" class="flag" id="currentFlag" alt=""><span id="currentLangLabel">UA</span></button>
                 <div class="dropdown-menu">
-                    <button class="dropdown-item w-full text-left btn-cross bg-transparent" onclick="changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> UA</button>
-                    <button class="dropdown-item w-full text-left btn-cross bg-transparent" onclick="changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> EN</button>
-                    <button class="dropdown-item w-full text-left btn-cross bg-transparent" onclick="changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="w-5 rounded-[3px] shadow-sm" alt=""> RU</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="w-5 rounded-[3px]" alt=""> UA</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="w-5 rounded-[3px]" alt=""> EN</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="w-5 rounded-[3px]" alt=""> RU</button>
                 </div>
             </div>
             
             <div class="dropdown-wrapper desktop-only group">
-                <button class="icon-btn btn-cross bg-transparent" id="headerProfileBtn" onclick="window.openAuthModal()">
+                <button class="icon-btn" id="headerProfileBtn" onclick="window.smartProfileClick()">
                     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
                 <div class="dropdown-menu" id="profileDropdownMenu"></div>
             </div>
             
-            <button onclick="toggleFavDrawer()" class="icon-btn desktop-only btn-cross bg-transparent">
+            <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
             </button>
-            <button onclick="toggleCart()" class="icon-btn desktop-only btn-cross bg-transparent">
+            <button onclick="toggleCart()" class="icon-btn desktop-only">
                 <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                 <span class="cart-badge">0</span>
             </button>
@@ -263,15 +279,17 @@
         <div id="mobSearchContainer" class="absolute top-[100%] left-0 w-full p-4 bg-[var(--bg-card)] border-b border-[var(--border)] shadow-xl hidden z-[4000]">
             <div class="flex items-center bg-black/5 dark:bg-white/5 border border-[var(--border)] rounded-2xl px-4 py-3 focus-within:border-[var(--gold-muted)] transition-colors">
                 <input type="search" id="mobSearchOverlayInput" data-i18n-placeholder="search_ph" placeholder="Пошукаємо прикрасу?..." class="w-full bg-transparent outline-none text-[var(--text-main)] text-sm font-['Inter']">
-                <button onclick="window.executeSearch(document.getElementById('mobSearchOverlayInput').value)" class="text-[var(--gold-muted)] ml-2 btn-cross bg-transparent">
+                <button onclick="window.executeSearch(document.getElementById('mobSearchOverlayInput').value)" class="text-[var(--gold-muted)] ml-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
             </div>
         </div>
     </header>
 
+    <!-- БІЧНЕ МЕНЮ -->
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
+    <!-- ОСНОВНИЙ КОНТЕНТ -->
     <main id="home">
         <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero">
             <div class="hero-overlay absolute inset-0 bg-black/40 z-10"></div>
@@ -314,6 +332,7 @@
             </a>
         </section>
 
+        <!-- ТУТ БУДУТЬ ДИНАМІЧНІ БЛОКИ З АДМІНКИ (замість статичних "Хітів місяця") -->
         <div id="dynamicHomeBlocksContainer"></div>
         
         <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
@@ -384,6 +403,7 @@
         </section>
     </main>
 
+    <!-- НИЖНІЙ МОБІЛЬНИЙ БАР (BOTTOM APP BAR) З КНОПКОЮ МЕНЮ -->
     <nav class="mobile-bottom-nav" aria-label="Нижняя панель навигации">
         <a href="index.html" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -407,13 +427,14 @@
             </div>
             <span data-i18n="fav_title">Улюблене</span>
         </button>
-        <button onclick="window.openAuthModal();" class="bottom-nav-item">
+        <button onclick="window.smartProfileClick();" class="bottom-nav-item">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span data-i18n="login">Профіль</span>
         </button>
     </nav>
 
-    <section class="max-w-[1200px] mx-auto px-6 text-center pb-8 pt-8">
+    <!-- SEO ТЕКСТ -->
+    <section class="max-w-[1200px] mx-auto px-6 text-center pb-24 md:pb-20">
         <span class="section-subtitle mb-4 block">Atelier since 1984</span>
         <h2 class="section-title mb-4 block">BV Jewelry - ювелірна майстерня та бутик</h2>
         <p class="text-[var(--text-muted)] text-sm md:text-base max-w-3xl mx-auto leading-relaxed font-light mb-8">
@@ -426,6 +447,7 @@
         </div>
     </section>
 
+    <!-- ПІДВАЛ -->
     <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-10">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
             
@@ -486,11 +508,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="main.js"></script>
     
+    <!-- СКРИПТ: РЕАЛЬНА ПЕРЕВІРКА СЕСІЇ У БД ТА ВІДОБРАЖЕННЯ ПРОФІЛЮ -->
     <script>
+        // Створюємо клієнт для перевірки сесії в обхід localStorage
         const sbClient = window.supabase.createClient('https://trcjsnvcdonlzxprgdzd.supabase.co', 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV');
 
-        window.openAuthModal = async function() {
-            // Закриваємо бокове меню, якщо відкрито
+        window.smartProfileClick = async function() {
+            // Закриваємо бокове меню, якщо воно відкрите
             const sideMenu = document.getElementById('sideMenu');
             if(sideMenu && sideMenu.classList.contains('active')) {
                 if(typeof window.toggleMenu === 'function') window.toggleMenu();
@@ -500,20 +524,20 @@
             if(!modal) return;
 
             try {
-                // Запитуємо реальну сесію з Supabase, а не з кешу
+                // Запитуємо реальну сесію з бази даних
                 const { data: { session }, error } = await sbClient.auth.getSession();
                 
                 const formContainer = document.getElementById('authFormContainer');
                 const profileView = document.getElementById('profileView');
 
                 if (session && session.user) {
-                    // Якщо сесія є, запитуємо профіль щоб взнати чи він Адмін
+                    // Користувач авторизований
                     const { data: profile } = await sbClient.from('profiles').select('role, full_name').eq('id', session.user.id).single();
                     
-                    if(formContainer) formContainer.classList.add('hidden');
+                    if(formContainer) formContainer.style.display = 'none';
                     if(profileView) {
+                        profileView.style.display = 'flex';
                         profileView.classList.remove('hidden');
-                        profileView.classList.add('flex');
                     }
                     
                     const role = profile?.role || 'client';
@@ -525,15 +549,20 @@
                     
                     if (role === 'admin') {
                         document.getElementById('adminLinkBtn').classList.remove('hidden');
+                        document.getElementById('adminLinkBtn').style.display = 'flex';
                     } else {
                         document.getElementById('adminLinkBtn').classList.add('hidden');
+                        document.getElementById('adminLinkBtn').style.display = 'none';
                     }
                 } else {
-                    // Сесії немає -> показуємо форму входу
-                    if(formContainer) formContainer.classList.remove('hidden');
+                    // Користувач не авторизований
                     if(profileView) {
+                        profileView.style.display = 'none';
                         profileView.classList.add('hidden');
-                        profileView.classList.remove('flex');
+                    }
+                    if(formContainer) {
+                        formContainer.style.display = 'block';
+                        formContainer.classList.remove('hidden');
                     }
                     if (typeof window.updateAuthView === 'function') {
                         window.isRegisterMode = false;
@@ -541,17 +570,30 @@
                     }
                 }
             } catch (err) {
-                console.error("Помилка авторизації:", err);
+                console.error("Помилка перевірки сесії:", err);
             }
 
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         };
 
+        // Запуск функцій сторінки
         document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('is_home_page', 'true');
+            
             setTimeout(() => {
+                // Рендер каруселей та блоків з адмінки
                 if(typeof window.initMarqueeSim === 'function') window.initMarqueeSim();
+                if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
+                
+                // Автоматичне відкриття профілю після входу через Google (коли сторінка перезавантажується з токеном)
+                if(window.location.hash && window.location.hash.includes('access_token')) {
+                    setTimeout(() => {
+                        window.smartProfileClick();
+                        // Очищаємо хеш, щоб при оновленні сторінки модалка не відкривалась знову
+                        history.replaceState(null, null, ' ');
+                    }, 1000); // Даємо 1 сек на те, щоб main.js обробив токен
+                }
             }, 100);
         });
     </script>
