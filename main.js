@@ -656,29 +656,30 @@ window.renderProductCard = function(prod) {
     const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
     const priceDisplay = discount && Number(discount) > 0 ? discount : price;
 
+    // Заменить return в window.renderProductCard
     return `
-        <div class="product-card group relative overflow-hidden transition-all duration-400 flex flex-col w-full h-full">
-            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-[var(--bg-elevated)] block">
-                <img src="${safeImg}" class="product-img w-full h-full object-cover transition duration-700 group-hover:scale-105" loading="lazy">
+        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] border border-[#e5e5e5] hover:border-[var(--gold-muted)] transition-colors duration-300">
+            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-4">
+                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-700 group-hover:scale-105" loading="lazy">
             </a>
             
-            <div class="p-4 flex flex-col gap-1 flex-grow bg-[var(--bg-card)]">
-                <a href="product.html?id=${prod.id}" class="text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--gold-muted)] transition-all duration-300">${safeVariant}</a>
-                <a href="product.html?id=${prod.id}" class="text-[12px] md:text-[14px] font-medium text-[var(--text-main)] leading-snug hover:text-[var(--gold-muted)] transition-all duration-300 line-clamp-2 mt-1 min-h-[36px] md:min-h-[44px]">${safeName}</a>
+            <div class="px-4 pb-1 pt-3 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
+                <a href="product.html?id=${prod.id}" class="text-[9px] md:text-[10px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-all duration-300">${safeVariant}</a>
+                <a href="product.html?id=${prod.id}" class="text-[12px] md:text-[14px] font-medium text-[#222] leading-snug hover:text-[var(--gold-muted)] transition-all duration-300 line-clamp-2 mt-1 min-h-[36px] md:min-h-[44px]">${safeName}</a>
                 <div class="mt-auto pt-2 mb-1 flex items-center">${priceHtml}</div>
             </div>
 
-            <div class="px-4 py-3 border-t border-[var(--border)] flex justify-between items-center mt-auto bg-[var(--bg-card)]">
+            <div class="px-4 py-3 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
                 <div class="flex items-center gap-2">
                     ${!isOutOfStock ? `
-                    <button onclick="addToCart('${safeId}', '${safeName}', '${safeVariant}', ${priceDisplay}, '${safeImg}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:text-[var(--gold-muted)] transition-all duration-300 active:scale-95 group/btn">
+                    <button onclick="addToCart('${safeId}', '${safeName}', '${safeVariant}', ${priceDisplay}, '${safeImg}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#222] hover:text-[var(--gold-muted)] transition-all duration-300 active:scale-95 group/btn">
                         <span>${i18n[lang].btn_buy}</span><span class="text-[14px] font-light mb-[2px] transition-transform group-hover/btn:rotate-90">+</span>
                     </button>
-                    ` : `<span class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">${i18n[lang].out_stock}</span>`}
+                    ` : `<span class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#888]">${i18n[lang].out_stock}</span>`}
                 </div>
                 <div class="flex items-center gap-3">
                     ${badgesHtml}
-                    <button class="fav-btn-inline btn-cross ${isFav ? 'text-[var(--danger)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'} transition-all duration-300 active:scale-95" data-id="${prod.id}" onclick="toggleFav('${prod.id}')">
+                    <button class="fav-btn-inline btn-cross ${isFav ? 'text-[var(--danger)]' : 'text-[#888] hover:text-[#222]'} transition-all duration-300 active:scale-95" data-id="${prod.id}" onclick="toggleFav('${prod.id}')">
                         <svg width="18" height="18" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
                 </div>
@@ -798,8 +799,6 @@ window.initBannerSlider = function() {
     if (!container) return;
 
     let banners = API.get('bv_banners', []);
-    
-    // Резервний варіант, якщо банерів в БД ще немає
     if (!banners || banners.length === 0) {
         banners = [
             { id: 1, img: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg', link: 'catalog.html' },
@@ -810,74 +809,90 @@ window.initBannerSlider = function() {
     const settings = API.get('bv_settings', {});
     const ratio = settings.bannerRatio || '3/1';
 
-    window.bannerCount = banners.length; window.currentBanner = 0; window.isBannerAnimating = false;
-    let html = '<div class="banner-track" id="bannerTrack" style="display: flex; width: 100%; height: 100%;">';
+    window.bannerCount = banners.length; 
+    window.currentBanner = 0; 
+    window.isBannerAnimating = false;
+    
+    // Переписано под абсолютное позиционирование для Fade
+    let html = '<div class="banner-track relative w-full h-full overflow-hidden rounded-2xl" id="bannerTrack">';
     banners.forEach((b, i) => { 
-        html += `<div class="banner-slide" data-index="${i}"><a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio}; object-fit: cover;"></a></div>`; 
+        html += `<div class="banner-slide absolute inset-0 transition-opacity duration-700 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" data-index="${i}">
+                    <a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio}; object-fit: cover; width: 100%; height: 100%;"></a>
+                 </div>`; 
     });
     html += '</div>';
 
     if(banners.length > 1) {
-        html += `<button class="banner-arrow prev btn-cross" onclick="moveBanner(-1)">❮</button><button class="banner-arrow next btn-cross" onclick="moveBanner(1)">❯</button><div class="banner-dots">`;
-        banners.forEach((_, i) => { html += `<span class="banner-dot btn-cross ${i===0?'active':''}" onclick="goToBanner(${i})"></span>`; });
+        html += `<button class="banner-arrow prev btn-cross z-20 absolute left-4 top-1/2 -translate-y-1/2" onclick="moveBanner(-1)">❮</button>
+                 <button class="banner-arrow next btn-cross z-20 absolute right-4 top-1/2 -translate-y-1/2" onclick="moveBanner(1)">❯</button>
+                 <div class="banner-dots z-20 absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">`;
+        banners.forEach((_, i) => { html += `<span class="banner-dot btn-cross w-2 h-2 rounded-full bg-white/50 cursor-pointer transition-all ${i===0?'!bg-[var(--gold-muted)] scale-125':''}" onclick="goToBanner(${i})"></span>`; });
         html += `</div>`;
     }
+    
     container.innerHTML = html;
-    document.getElementById('bannerTrack').style.transition = 'none';
+    container.classList.add('relative'); // Важно для позиционирования стрелок
     
     if(banners.length > 1) { 
         clearInterval(window.bannerInterval); 
         window.bannerInterval = setInterval(() => moveBanner(1), 5000); 
 
+        // Свайпы оставляем, но они теперь тоже триггерят Fade
         let touchStartX = 0; let touchEndX = 0;
         container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(window.bannerInterval); }, {passive: true});
         container.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
-            const swipeThreshold = 50; 
-            if (touchStartX - touchEndX > swipeThreshold) moveBanner(1); 
-            if (touchEndX - touchStartX > swipeThreshold) moveBanner(-1); 
+            if (touchStartX - touchEndX > 50) moveBanner(1); 
+            if (touchEndX - touchStartX > 50) moveBanner(-1); 
             window.bannerInterval = setInterval(() => moveBanner(1), 5000); 
         }, {passive: true});
     }
 };
 
-function updateBannerDots() {
+window.updateBannerDots = function() {
     const dots = document.querySelectorAll('.banner-dot');
-    dots.forEach(d => d.classList.remove('active'));
-    if(dots[window.currentBanner]) dots[window.currentBanner].classList.add('active');
-}
+    dots.forEach((d, i) => {
+        if(i === window.currentBanner) {
+            d.classList.add('!bg-[var(--gold-muted)]', 'scale-125');
+        } else {
+            d.classList.remove('!bg-[var(--gold-muted)]', 'scale-125');
+        }
+    });
+};
 
 window.moveBanner = function(dir) {
     if(window.bannerCount <= 1 || window.isBannerAnimating) return;
-    clearInterval(window.bannerInterval);
-    const track = document.getElementById('bannerTrack');
     window.isBannerAnimating = true;
-    window.currentBanner = (window.currentBanner + dir + window.bannerCount) % window.bannerCount;
-    updateBannerDots();
-    track.style.transition = 'none';
-    const targetSlide = track.querySelector(`.banner-slide[data-index="${window.currentBanner}"]`);
-    track.prepend(targetSlide);
-    track.style.transform = 'translateX(-100%)';
-    void track.offsetWidth;
-    track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-    track.style.transform = 'translateX(0)';
-    setTimeout(() => { window.isBannerAnimating = false; }, 600);
+    clearInterval(window.bannerInterval);
+    
+    const newIndex = (window.currentBanner + dir + window.bannerCount) % window.bannerCount;
+    executeFade(newIndex);
+    
+    setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
 };
-
+window.executeFade = function(newIndex) {
+    const track = document.getElementById('bannerTrack');
+    const oldSlide = track.querySelector(`.banner-slide[data-index="${window.currentBanner}"]`);
+    const newSlide = track.querySelector(`.banner-slide[data-index="${newIndex}"]`);
+    
+    oldSlide.classList.replace('opacity-100', 'opacity-0');
+    oldSlide.classList.replace('z-10', 'z-0');
+    
+    newSlide.classList.replace('opacity-0', 'opacity-100');
+    newSlide.classList.replace('z-0', 'z-10');
+    
+    window.currentBanner = newIndex;
+    updateBannerDots();
+};
 window.goToBanner = function(index) {
     if(window.bannerCount <= 1 || window.isBannerAnimating || index === window.currentBanner) return;
+    window.isBannerAnimating = true;
     clearInterval(window.bannerInterval);
-    const track = document.getElementById('bannerTrack');
-    window.isBannerAnimating = true; window.currentBanner = index; updateBannerDots();
-    track.style.transition = 'none';
-    const targetSlide = track.querySelector(`.banner-slide[data-index="${window.currentBanner}"]`);
-    track.prepend(targetSlide);
-    track.style.transform = 'translateX(-100%)';
-    void track.offsetWidth;
-    track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-    track.style.transform = 'translateX(0)';
-    setTimeout(() => { window.isBannerAnimating = false; }, 600);
+    
+    executeFade(index);
+    
+    setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
 };
 
@@ -1154,8 +1169,9 @@ window.injectGlobalUI = function() {
         const tgLink = API.get('bv_settings', {}).tgLink || 'https://t.me/bv_jewelry_izmail';
         document.body.insertAdjacentHTML('beforeend', `<a href="${tgLink}" target="_blank" id="globalContactBtn" class="floating-contact-btn tg-link btn-cross" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.48 1.02-.73 4-1.74 6.67-2.88 8.01-3.41 3.81-1.52 4.6-1.78 5.12-1.79.11 0 .37.03.54.17.14.12.18.28.2.4.02.07.02.15.02.24z"/></svg></a>`);
     }
-    if (!document.getElementById('scrollToTopBtn')) {
-        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] right-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--gold-muted)] rounded-full flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:right-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
+    // Заменить инжект scrollToTopBtn в функции injectGlobalUI
+        if (!document.getElementById('scrollToTopBtn')) {
+        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--gold-muted)] rounded-full flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
     }
 };
 
@@ -1417,22 +1433,48 @@ window.onload = async () => {
 
     const burgerBtn = document.getElementById('burger');
     if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }
+
+    // Добавить в конец window.onload
+    if (document.getElementById('home')) {
+        setTimeout(() => {
+            const promoSection = document.getElementById('promo-banner-top');
+            // Проверяем, что пользователь еще не начал активно скроллить сам
+            if (promoSection && window.scrollY < 100) {
+                promoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 3000);
+    }
 };
+
+// Заменить глобальный слушатель скролла в конце main.js
+let lastScrollTop = 0;
+let isScrollingUp = false;
 
 window.addEventListener('scroll', () => {
     const header = document.getElementById('header');
     if(header) header.classList.toggle('scrolled', window.scrollY > 50);
+    
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    isScrollingUp = currentScroll < lastScrollTop && currentScroll > 400; // Проверка направления
+    
     const topBtn = document.getElementById('scrollToTopBtn');
     const tgBtn = document.getElementById('globalContactBtn');
 
-    if(window.scrollY > 400) { 
+    // Кнопка наверх появляется ТОЛЬКО при скролле вверх
+    if(isScrollingUp) { 
         if(topBtn) { topBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.add('opacity-100', 'translate-y-0'); }
-        if(tgBtn) tgBtn.classList.add('lifted'); 
     } else {
         if(topBtn) { topBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.remove('opacity-100', 'translate-y-0'); }
-        if(tgBtn) tgBtn.classList.remove('lifted'); 
     }
-});
+    
+    if(window.scrollY > 400) {
+        if(tgBtn) tgBtn.classList.add('lifted');
+    } else {
+        if(tgBtn) tgBtn.classList.remove('lifted');
+    }
+    
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+}, { passive: true });
 
 const overlay = document.getElementById('overlay');
 const cartOverlay = document.getElementById('cartOverlay');
