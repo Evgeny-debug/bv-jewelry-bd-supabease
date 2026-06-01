@@ -1752,3 +1752,67 @@ aside.custom-scrollbar {
     background: rgba(197, 160, 89, 0.1);
     font-weight: 600;
 }
+/* ФІКС: СІТКА КАТАЛОГУ (Повертаємо колонки) */
+.product-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0; /* Нуль, щоб рамки карток ідеально зливалися */
+}
+
+@media (min-width: 768px) {
+    .product-grid-wide { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+    .product-grid-wide { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Знімаємо обмеження, щоб картка тягнулася на всю колонку */
+.product-card {
+    max-width: 100% !important;
+}
+/* --- СЕТКА ТОВАРОВ: ИДЕАЛЬНЫЕ ГРАНИЦЫ И ФОТО НА ВСЮ ШИРИНУ --- */
+
+/* 1. Убираем отступы между карточками и добавляем внешние границы сетки */
+.product-grid-wide {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 колонки на мобайле */
+    gap: 0 !important; /* УБИРАЕМ ОТСТУПЫ */
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+    .product-grid-wide { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 1024px) {
+    .product-grid-wide { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* 2. Добавляем границы каждой карточке (справа и снизу) */
+.product-card {
+    border: none !important;
+    border-right: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    background: var(--bg-card) !important;
+}
+
+/* 3. Фото на всю ширину без падингов */
+.product-card > a.relative {
+    padding: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+.product-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Растягивает фото, заполняя всю площадь */
+    padding: 0 !important;
+    margin: 0 !important;
+    transition: transform 0.6s ease;
+}
