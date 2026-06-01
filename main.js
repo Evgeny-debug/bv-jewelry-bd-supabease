@@ -133,14 +133,21 @@ function buildTree(flatList) {
 // 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ (SUPABASE)
 // ==========================================
 window.loadCloudData = async function() {
+    console.log("BV Jewelry: Починаю завантаження...");
+    
+    // 1. Спочатку беремо те, що є в кеші, щоб меню з'явилося миттєво
+    products = API.get('bv_products', []);
+    categoriesTree = API.get('bv_categories_tree', []);
+    
+    if (typeof generateMenus === 'function') generateMenus();
+    if (typeof initBannerSlider === 'function') initBannerSlider();
+    if (document.getElementById('dynamicHomeBlocksContainer')) renderHomeSections();
+
+    // 2. Асинхронно оновлюємо дані з бази (не чекаємо їх для рендеру)
     try {
         const { data: prodData } = await _supabase.from('products').select('*');
         if (prodData && prodData.length > 0) {
             products = prodData.map(migrateProductToNewFormat);
-            API.set('bv_products', products);
-        } else if (prodData && prodData.length === 0 && typeof window.BVDemoData !== 'undefined') {
-            products = window.BVDemoData.products || [];
-            if(products.length > 0) await _supabase.from('products').upsert(products);
             API.set('bv_products', products);
         }
 
@@ -150,7 +157,6 @@ window.loadCloudData = async function() {
             storageData.forEach(item => {
                 API.set(item.key, item.value);
                 if(item.key === 'bv_categories_flat') flatCats = item.value;
-                if(item.key === 'bv_categories_tree') categoriesTree = item.value; 
             });
             if(flatCats.length > 0) {
                 categoriesTree = buildTree(flatCats);
@@ -158,20 +164,13 @@ window.loadCloudData = async function() {
             }
         }
         
+        // Перемальовуємо, якщо прийшли нові дані
+        console.log("BV Jewelry: Дані оновлено з хмари.");
         if(typeof generateMenus === 'function') generateMenus();
-        if(typeof initBannerSlider === 'function') initBannerSlider();
-        if(document.getElementById('dynamicHomeBlocksContainer')) {
-            if(typeof renderHomeSections === 'function') renderHomeSections();
-        }
-        if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
-        if (categoriesTree.length === 0) {
-            console.log("Дерево категорий еще пустое, ждем 1с...");
-            setTimeout(() => generateMenus(), 1000); // Повторная попытка рендера через 1 сек
-        } else {
-            generateMenus();
-        }
+        if(typeof renderHomeSections === 'function') renderHomeSections();
+        if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings();
     } catch (err) {
-        console.error("Помилка завантаження бази:", err);
+        console.error("Помилка зв'язку з Supabase (можливо, база спить):", err);
     }
 };
 
