@@ -39,33 +39,39 @@
             font-family: inherit;
         }
 
-        /* Стилі нижнього мобільного бару */
+        /* Стилі нижнього мобільного бару - МЕРТВА ХВАТКА */
         .mobile-bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             background: var(--bg-card);
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom)) 0;
             z-index: 5000;
             box-shadow: 0 -4px 25px rgba(0,0,0,0.08);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            width: 100%;
         }
         .bottom-nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            gap: 4px;
             color: var(--text-muted);
             font-size: 10px;
             font-weight: 600;
-            transition: all 0.2s;
-            width: 20%;
+            transition: color 0.2s;
+            width: 20%; /* Рівно 1/5 простору для кожної кнопки */
+            height: 100%;
             -webkit-tap-highlight-color: transparent;
             text-decoration: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         .bottom-nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; transition: transform 0.2s; }
         .bottom-nav-item.active { color: var(--gold-muted); }
@@ -79,7 +85,7 @@
             .mobile-only { display: none; } 
         }
 
-        /* Фікс для кнопок форм та кошика на телефонах */
+        /* Фікс для кнопок форм */
         .btn-solid {
             background-color: var(--text-main) !important;
             color: var(--bg-body) !important;
@@ -89,16 +95,28 @@
             text-align: center !important;
             width: 100%;
         }
+
+        /* Компактність меню та Ексклюзиву */
+        .exclusive-block-img { height: 140px; }
+        @media(min-width: 768px) { .exclusive-block-img { height: 240px; } }
+        .promo-section-override { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; margin-top: 1rem !important; }
+        .sidebar-top-logo { padding-bottom: 0.5rem !important; margin-bottom: 0.5rem !important; border-bottom: none !important; }
+        .sidebar-top-logo .text-4xl { font-size: 2.2rem !important; }
+        #sideMenu { padding-top: 1rem !important; }
+        .mob-menu-title { padding: 0.75rem 0 !important; font-size: 15px !important; }
+        .menu-divider { margin: 8px 0 !important; }
+        
+        /* Кнопка нагору зліва */
+        #scrollToTopBtn { left: 1rem !important; right: auto !important; }
+        @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
     </style>
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-20 md:pb-0">
 
-    <!-- ЄДИНЕ МОДАЛЬНЕ ВІКНО: АВТОРИЗАЦІЯ ТА ПРОФІЛЬ -->
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[32px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
             
-            <!-- Форма логіну / Реєстрації -->
             <div id="authFormContainer">
                 <h3 id="authTitle" class="text-3xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
                 <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-[13px] mb-8 font-light">Раді бачити вас знову</p>
@@ -119,7 +137,6 @@
                     
                     <button type="submit" class="btn-solid py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[var(--gold-muted)] transition-colors active:scale-95 shadow-lg mt-4" id="authSubmitBtn" data-i18n="login">Увійти</button>
                     
-                    <!-- Соціальні кнопки (type="button" блокує відправку форми) -->
                     <div id="socialLoginBlock" class="mt-4 flex flex-col gap-3">
                         <div class="relative flex items-center justify-center w-full mt-2 mb-2">
                             <div class="border-t border-[var(--border)] w-full"></div>
@@ -134,7 +151,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="text-center text-[13px] text-[var(--text-muted)] mt-4">
                         <span id="authToggleText">Немає акаунта?</span> 
                         <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1 inline-block" id="authToggleLink" data-i18n="register">Зареєструватися</button>
@@ -142,7 +158,6 @@
                 </form>
             </div>
 
-            <!-- Вікно профілю (якщо авторизований) -->
             <div id="profileView" class="hidden flex-col gap-4">
                 <h3 class="text-3xl font-serif text-[var(--text-main)] mb-2 text-center" data-i18n="login_mob_title">Кабінет</h3>
                 <div class="flex flex-col items-center justify-center p-6 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-2xl mb-2 relative overflow-hidden group">
@@ -157,18 +172,16 @@
                         <span class="flex items-center justify-center gap-2 w-full"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Панель Адміністратора</span>
                     </button>
                     <button onclick="location.href='profile.html'" id="clientLinkBtn" class="btn-solid py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-lg w-full">Мої замовлення</button>
-                    <button onclick="logoutUser()" class="w-full py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--danger)] hover:text-[var(--danger)] transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 mt-1">Вийти з акаунту</button>
+                    <button onclick="window.logoutUser()" class="w-full py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--danger)] hover:text-[var(--danger)] transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 mt-1">Вийти з акаунту</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ОВЕРЛЕЇ ДЛЯ ШУХЛЯД -->
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
 
-    <!-- КОШИК -->
     <div class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Корзина">
         <div class="cart-header">
             <h2 data-i18n="cart_title">Кошик</h2>
@@ -178,21 +191,17 @@
         <div class="cart-footer">
             <div class="flex justify-end mb-3">
                 <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors flex items-center gap-1">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Очистити
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Очистити
                 </button>
             </div>
             <div class="cart-subtotal">
                 <span data-i18n="cart_subtotal">Підсумок:</span>
                 <span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span>
             </div>
-            <div id="checkoutBtnWrapper" class="w-full mt-4">
-                <!-- main.js генерує сюди кнопку оформлення -->
-            </div>
+            <div id="checkoutBtnWrapper" class="w-full mt-4"></div>
         </div>
     </div>
 
-    <!-- УЛЮБЛЕНЕ -->
     <div class="cart-drawer" id="favDrawer" role="dialog" aria-label="Избранное">
         <div class="cart-header">
             <h2 data-i18n="fav_title">Улюблене</h2>
@@ -201,10 +210,8 @@
         <div class="cart-body custom-scrollbar" id="favBody"></div>
     </div>
 
-    <!-- HEADER (ШАПКА - ПК версія та мобільний пошук) -->
     <header id="header">
         <div class="header-left">
-            <button class="burger desktop-only" onclick="toggleMenu()"><span></span><span></span><span></span></button>
             <nav class="nav-left desktop-only">
                 <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors active">Головна</a>
                 <div class="catalog-dropdown-wrapper group">
@@ -230,26 +237,21 @@
             </nav>
         </div>
 
-        <a href="index.html" class="bv-logo md:ml-0 -ml-4"><span>BV</span><span>jewelry</span></a>
+        <a href="index.html" class="bv-logo md:ml-0"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <!-- Пошук на мобільних -->
             <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-5 h-5 active:scale-90 transition-transform"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
-            
             <div class="search-box desktop-only group mr-4">
                 <input type="search" class="search-input" data-i18n-placeholder="search_ph" placeholder="Пошук..." onkeypress="if(event.key==='Enter') window.executeSearch(this.value)">
                 <svg class="search-icon group-focus-within:stroke-[var(--gold-muted)] transition-colors" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </div>
-            
             <a href="tel:+380634540901" class="header-phone-link desktop-only hover:text-[var(--gold-muted)] transition-colors">
                 <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 <span class="header-phone-text font-medium tracking-wide">+38 063 45 40 901</span>
             </a>
-            
             <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
-            
             <div class="dropdown-wrapper lang-dropdown desktop-only">
                 <button class="lang-current"><img src="https://flagcdn.com/ua.svg" class="flag" id="currentFlag" alt=""><span id="currentLangLabel">UA</span></button>
                 <div class="dropdown-menu">
@@ -258,14 +260,12 @@
                     <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="w-5 rounded-[3px]" alt=""> RU</button>
                 </div>
             </div>
-            
             <div class="dropdown-wrapper desktop-only group">
                 <button class="icon-btn" id="headerProfileBtn" onclick="window.smartProfileClick()">
                     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
                 <div class="dropdown-menu" id="profileDropdownMenu"></div>
             </div>
-            
             <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
@@ -275,7 +275,6 @@
                 <span class="cart-badge">0</span>
             </button>
         </div>
-        
         <div id="mobSearchContainer" class="absolute top-[100%] left-0 w-full p-4 bg-[var(--bg-card)] border-b border-[var(--border)] shadow-xl hidden z-[4000]">
             <div class="flex items-center bg-black/5 dark:bg-white/5 border border-[var(--border)] rounded-2xl px-4 py-3 focus-within:border-[var(--gold-muted)] transition-colors">
                 <input type="search" id="mobSearchOverlayInput" data-i18n-placeholder="search_ph" placeholder="Пошукаємо прикрасу?..." class="w-full bg-transparent outline-none text-[var(--text-main)] text-sm font-['Inter']">
@@ -286,10 +285,8 @@
         </div>
     </header>
 
-    <!-- БІЧНЕ МЕНЮ -->
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
-    <!-- ОСНОВНИЙ КОНТЕНТ -->
     <main id="home">
         <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero">
             <div class="hero-overlay absolute inset-0 bg-black/40 z-10"></div>
@@ -308,35 +305,34 @@
             <div class="marquee-track" id="marqueeTrack"></div>
         </div>
 
-        <section class="max-w-[1920px] mx-auto px-4 md:px-8 py-6 md:py-10" id="promo-banner-top">
+        <section class="max-w-[1920px] mx-auto px-4 md:px-8 py-4 md:py-8" id="promo-banner-top">
             <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px]">
                 <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-2xl"></div>
             </div>
         </section>
         
-        <section class="py-6 md:py-8 px-4 md:px-6 max-w-[1200px] mx-auto w-full">
-            <a href="exclusive.html" class="relative flex flex-col md:flex-row items-stretch bg-[var(--bg-card)] rounded-[20px] md:rounded-[24px] overflow-hidden border border-[var(--border)] shadow-[var(--shadow-mid)] group cursor-pointer transition-all duration-700 hover:shadow-[var(--shadow-strong)]" style="text-decoration: none;">
-                <div class="w-full md:w-5/12 h-[200px] md:h-[320px] relative overflow-hidden bg-black">
+        <section class="py-4 md:py-8 px-4 md:px-6 max-w-[1000px] mx-auto w-full">
+            <a href="exclusive.html" class="relative flex flex-col md:flex-row items-stretch bg-[var(--bg-card)] rounded-[16px] overflow-hidden border border-[var(--border)] shadow-[var(--shadow-mid)] group cursor-pointer transition-all duration-700 hover:shadow-[var(--shadow-strong)]" style="text-decoration: none;">
+                <div class="w-full md:w-5/12 exclusive-block-img relative overflow-hidden bg-black">
                     <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" alt="Ексклюзивне замовлення" class="absolute inset-0 w-full h-full object-cover opacity-85 transition-transform duration-[1.5s] group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[var(--bg-card)] via-transparent to-transparent opacity-90 md:opacity-100"></div>
                 </div>
-                <div class="w-full md:w-7/12 p-6 md:p-8 lg:p-10 flex flex-col justify-center items-center md:items-start text-center md:text-left relative z-10">
-                    <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-medium mb-2 block">Individual Order</span>
-                    <h2 class="font-serif text-3xl md:text-4xl text-[var(--text-main)] font-light tracking-[0.1em] mb-4 group-hover:text-[var(--gold-muted)] transition-colors duration-500" data-i18n="m_atelier">ЕКСКЛЮЗИВ</h2>
-                    <p class="text-[12px] md:text-[14px] text-[var(--text-muted)] leading-relaxed mb-6 max-w-md font-light">Створіть прикрасу своєї мрії. Від першого ескізу до фінального полірування — ми втілимо вашу ідею у дорогоцінному металі.</p>
-                    <div class="inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] group-hover:text-[var(--gold-muted)] transition-colors">
+                <div class="w-full md:w-7/12 p-4 md:p-6 lg:p-8 flex flex-col justify-center items-center md:items-start text-center md:text-left relative z-10">
+                    <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-medium mb-1 block">Individual Order</span>
+                    <h2 class="font-serif text-2xl md:text-3xl text-[var(--text-main)] font-light tracking-[0.1em] mb-2 group-hover:text-[var(--gold-muted)] transition-colors duration-500" data-i18n="m_atelier">ЕКСКЛЮЗИВ</h2>
+                    <p class="text-[11px] md:text-[13px] text-[var(--text-muted)] leading-relaxed mb-4 max-w-sm font-light">Створіть прикрасу своєї мрії. Від першого ескізу до фінального полірування — ми втілимо вашу ідею у дорогоцінному металі.</p>
+                    <div class="inline-flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest text-[var(--text-main)] group-hover:text-[var(--gold-muted)] transition-colors">
                         <span data-i18n="btn_details">Дізнатися більше</span>
-                        <span class="w-8 h-[1px] bg-[var(--gold-muted)] transition-all duration-700 group-hover:w-16"></span>
+                        <span class="w-8 h-[1px] bg-[var(--gold-muted)] transition-all duration-700 group-hover:w-12"></span>
                     </div>
                 </div>
             </a>
         </section>
 
-        <!-- ТУТ БУДУТЬ ДИНАМІЧНІ БЛОКИ З АДМІНКИ (замість статичних "Хітів місяця") -->
         <div id="dynamicHomeBlocksContainer"></div>
         
-        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
-            <div class="text-center mb-10 md:mb-16">
+        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-8 md:py-24" id="categories-section">
+            <div class="text-center mb-8 md:mb-12">
                 <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">Our World</h3>
                 <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
             </div>
@@ -403,38 +399,36 @@
         </section>
     </main>
 
-    <!-- НИЖНІЙ МОБІЛЬНИЙ БАР (BOTTOM APP BAR) З КНОПКОЮ МЕНЮ -->
-    <nav class="mobile-bottom-nav" aria-label="Нижняя панель навигации">
-        <a href="index.html" class="bottom-nav-item active">
+    <nav class="mobile-bottom-nav">
+        <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span data-i18n="m1">Головна</span>
-        </a>
-        <button onclick="window.toggleMenu()" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            <span data-i18n="m2">Меню</span>
+        </button>
+        <button onclick="window.location.href='catalog.html'" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="m2">Каталог</span>
         </button>
         <button onclick="window.toggleCart();" class="bottom-nav-item">
             <div class="relative">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                 <span class="cart-badge">0</span>
             </div>
             <span data-i18n="cart_title">Кошик</span>
         </button>
         <button onclick="window.toggleFavDrawer();" class="bottom-nav-item">
             <div class="relative">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
             </div>
             <span data-i18n="fav_title">Улюблене</span>
         </button>
-        <button onclick="window.smartProfileClick();" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span data-i18n="login">Профіль</span>
+        <button onclick="window.toggleMenu()" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <span data-i18n="m2">Меню</span>
         </button>
     </nav>
 
-    <!-- SEO ТЕКСТ -->
-    <section class="max-w-[1200px] mx-auto px-6 text-center pb-24 md:pb-20">
+    <section class="max-w-[1200px] mx-auto px-6 text-center pb-24 md:pb-20 pt-8">
         <span class="section-subtitle mb-4 block">Atelier since 1984</span>
         <h2 class="section-title mb-4 block">BV Jewelry - ювелірна майстерня та бутик</h2>
         <p class="text-[var(--text-muted)] text-sm md:text-base max-w-3xl mx-auto leading-relaxed font-light mb-8">
@@ -447,10 +441,8 @@
         </div>
     </section>
 
-    <!-- ПІДВАЛ -->
     <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-10">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
-            
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
                 <div class="bv-logo mb-6 relative !static !transform-none !items-center md:!items-start !opacity-100">
                     <span class="!text-3xl">BV</span><span class="!text-[8px] mt-1 font-['Montserrat'] font-bold tracking-widest">jewelry</span>
@@ -459,7 +451,6 @@
                     Вишуканість у деталях. Формуємо сімейні цінності у дорогоцінних металах з 1984 року.
                 </p>
             </div>
-
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6" data-i18n="m2">Каталог</h4>
                 <a href="catalog.html#rings" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Каблучки</a>
@@ -467,7 +458,6 @@
                 <a href="catalog.html#necklaces" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">Ланцюжки</a>
                 <a href="catalog.html#bracelets" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] transition">Браслети</a>
             </div>
-
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6">Клієнтам</h4>
                 <a href="services.html" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="m_price">Послуги та Прайс</a>
@@ -475,18 +465,10 @@
                 <a href="info.html?p=terms" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition" data-i18n="brand_terms">Оплата і доставка</a>
                 <a href="exclusive.html" class="text-[14px] text-[var(--gold-muted)] font-medium hover:text-[var(--text-main)] transition" data-i18n="m_atelier">Індивідуальне замовлення</a>
             </div>
-
             <div class="flex flex-col items-center md:items-end text-center md:text-right">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-6" data-i18n="m4">Контакти</h4>
                 <a href="tel:+380634540901" class="text-[15px] text-[var(--gold-muted)] font-medium mb-4 transition hover:opacity-80 tracking-wide phone-num">+38 063 45 40 901</a>
-                
-                <div class="flex flex-col gap-3 items-center md:items-end mb-6" id="footerAddressesBlock">
-                    <a href="https://share.google/R7G0tiXeqXrx98Uhi" target="_blank" class="addr-link-1 text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
-                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        <span class="addr-text-1">м. Ізмаїл, вул. Торгова, 68</span>
-                    </a>
-                </div>
-
+                <div class="flex flex-col gap-3 items-center md:items-end mb-6" id="footerAddressesBlock"></div>
                 <div class="flex items-center gap-4">
                     <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.48 1.02-.73 4-1.74 6.67-2.88 8.01-3.41 3.81-1.52 4.6-1.78 5.12-1.79.11 0 .37.03.54.17.14.12.18.28.2.4.02.07.02.15.02.24z"/></svg>
@@ -497,105 +479,219 @@
                 </div>
             </div>
         </div>
-        
         <div class="mt-12 pt-8 border-t border-[var(--border)] flex flex-col items-center text-center gap-2 text-[13px] text-[var(--text-muted)] font-medium tracking-wide">
-            <p>© <span id="currentYear">2026</span> BV Jewelry. <span data-i18n="footer_rights">Всі права захищені.</span></p>
-            <p class="opacity-70"><span data-i18n="footer_dev">Developed by</span> Evgeny.Sychov</p>
+            <p>© <span id="currentYear">2026</span> BV Jewelry. Всі права захищені.</p>
         </div>
     </footer>
 
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="main.js"></script>
-    
-    <!-- СКРИПТ: РЕАЛЬНА ПЕРЕВІРКА СЕСІЇ У БД ТА ВІДОБРАЖЕННЯ ПРОФІЛЮ -->
+
     <script>
-        // Створюємо клієнт для перевірки сесії в обхід localStorage
-        const sbClient = window.supabase.createClient('https://trcjsnvcdonlzxprgdzd.supabase.co', 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV');
-
-        window.smartProfileClick = async function() {
-            // Закриваємо бокове меню, якщо воно відкрите
+        // 1. Інжектимо профіль прямо в бокове меню (Side Menu)
+        const originalUpdateProfileMenu = window.updateProfileMenu;
+        window.updateProfileMenu = function() {
+            if (typeof originalUpdateProfileMenu === 'function') originalUpdateProfileMenu();
+            
             const sideMenu = document.getElementById('sideMenu');
-            if(sideMenu && sideMenu.classList.contains('active')) {
-                if(typeof window.toggleMenu === 'function') window.toggleMenu();
-            }
-
-            const modal = document.getElementById('authModal');
-            if(!modal) return;
-
-            try {
-                // Запитуємо реальну сесію з бази даних
-                const { data: { session }, error } = await sbClient.auth.getSession();
-                
-                const formContainer = document.getElementById('authFormContainer');
-                const profileView = document.getElementById('profileView');
-
-                if (session && session.user) {
-                    // Користувач авторизований
-                    const { data: profile } = await sbClient.from('profiles').select('role, full_name').eq('id', session.user.id).single();
-                    
-                    if(formContainer) formContainer.style.display = 'none';
-                    if(profileView) {
-                        profileView.style.display = 'flex';
-                        profileView.classList.remove('hidden');
-                    }
-                    
-                    const role = profile?.role || 'client';
-                    const name = profile?.full_name || session.user.user_metadata?.full_name || 'Клієнт';
-                    
-                    document.getElementById('profName').innerText = name;
-                    document.getElementById('profAvatar').innerText = name.charAt(0).toUpperCase();
-                    document.getElementById('profEmail').innerText = session.user.email;
-                    
-                    if (role === 'admin') {
-                        document.getElementById('adminLinkBtn').classList.remove('hidden');
-                        document.getElementById('adminLinkBtn').style.display = 'flex';
-                    } else {
-                        document.getElementById('adminLinkBtn').classList.add('hidden');
-                        document.getElementById('adminLinkBtn').style.display = 'none';
-                    }
-                } else {
-                    // Користувач не авторизований
-                    if(profileView) {
-                        profileView.style.display = 'none';
-                        profileView.classList.add('hidden');
-                    }
-                    if(formContainer) {
-                        formContainer.style.display = 'block';
-                        formContainer.classList.remove('hidden');
-                    }
-                    if (typeof window.updateAuthView === 'function') {
-                        window.isRegisterMode = false;
-                        window.updateAuthView();
-                    }
+            if (sideMenu) {
+                let profileBlock = document.getElementById('mob-profile-block');
+                if (!profileBlock) {
+                    profileBlock = document.createElement('div');
+                    profileBlock.id = 'mob-profile-block';
+                    // Вставляємо одразу після логотипу
+                    const firstDivider = sideMenu.querySelector('.menu-divider') || sideMenu.firstChild.nextSibling;
+                    sideMenu.insertBefore(profileBlock, firstDivider);
                 }
-            } catch (err) {
-                console.error("Помилка перевірки сесії:", err);
+                
+                let user = null;
+                try { user = JSON.parse(localStorage.getItem('bv_current_user')); } catch(e) {}
+                
+                if (user && user.id) {
+                    profileBlock.innerHTML = `
+                        <div class="glass-panel p-4 mb-4 mt-2 rounded-xl flex items-center justify-between border border-[var(--gold-muted)]/30 bg-[var(--gold-muted)]/5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center font-bold text-lg shadow-md">${user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-[var(--text-main)] truncate max-w-[120px]">${user.name || 'Клієнт'}</span>
+                                    <a href="profile.html" class="text-[10px] text-[var(--gold-muted)] uppercase tracking-widest hover:underline mt-0.5">Мій кабінет</a>
+                                </div>
+                            </div>
+                            <button onclick="window.logoutUser()" class="text-[var(--text-muted)] hover:text-[var(--danger)] p-2 transition-colors">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    profileBlock.innerHTML = `
+                        <button onclick="window.openAuthModal()" class="w-full mb-4 mt-2 py-3.5 rounded-xl border border-[var(--gold-muted)] text-[var(--gold-muted)] font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-[var(--gold-muted)] hover:text-[#111] transition-all active:scale-95 shadow-sm">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Увійти в кабінет
+                        </button>
+                    `;
+                }
             }
-
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
         };
 
-        // Запуск функцій сторінки
-        document.addEventListener('DOMContentLoaded', () => {
-            sessionStorage.setItem('is_home_page', 'true');
+        // 2. Розумний Аккордеон (закриває тільки сусідів того ж рівня)
+        window.toggleAccordion = function(listId, arrowId) {
+            const list = document.getElementById(listId);
+            const arrow = document.getElementById(arrowId);
+            if (!list) return;
             
-            setTimeout(() => {
-                // Рендер каруселей та блоків з адмінки
-                if(typeof window.initMarqueeSim === 'function') window.initMarqueeSim();
-                if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
-                
-                // Автоматичне відкриття профілю після входу через Google (коли сторінка перезавантажується з токеном)
-                if(window.location.hash && window.location.hash.includes('access_token')) {
-                    setTimeout(() => {
-                        window.smartProfileClick();
-                        // Очищаємо хеш, щоб при оновленні сторінки модалка не відкривалась знову
-                        history.replaceState(null, null, ' ');
-                    }, 1000); // Даємо 1 сек на те, щоб main.js обробив токен
+            const isOpening = !list.classList.contains('open');
+            if (isOpening) {
+                // Шукаємо сусідів ТІЛЬКИ у спільному батьківському блоці
+                const parent = list.parentElement.parentElement; 
+                if (parent) {
+                    const siblings = parent.querySelectorAll(':scope > div > .mob-accordion-list.open, :scope > .mob-nested-wrap > .mob-nested-list.open');
+                    siblings.forEach(sibling => {
+                        if (sibling !== list) {
+                            sibling.classList.remove('open');
+                            const title = sibling.previousElementSibling;
+                            if (title) {
+                                const siblingArrow = title.querySelector('svg');
+                                if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
+                            }
+                        }
+                    });
                 }
-            }, 100);
+            }
+            list.classList.toggle('open');
+            if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        };
+
+        // 3. Ідеальний слайдер банерів (без стрибків)
+        window.initBannerSlider = function() {
+            const container = document.getElementById('mainBannerContainer');
+            if (!container) return;
+
+            let banners = [];
+            if(typeof API !== 'undefined') banners = API.get('bv_banners', []);
+            
+            if (!banners || banners.length === 0) {
+                banners = [
+                    { id: 1, img: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg', link: 'catalog.html' },
+                    { id: 2, img: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg', link: 'exclusive.html' }
+                ];
+            }
+
+            const settings = API.get('bv_settings', {});
+            const ratio = settings.bannerRatio || '3/1';
+
+            window.bannerCount = banners.length; 
+            window.currentBanner = 0; 
+            
+            container.innerHTML = `
+                <div class="relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden group">
+                    <div id="bannerTrack" class="flex w-full h-full transition-transform duration-500 ease-out" style="transform: translateX(0%);">
+                        ${banners.map(b => `
+                            <div class="w-full h-full flex-shrink-0 relative cursor-pointer" onclick="window.location.href='${b.link || '#'}'">
+                                <img src="${b.img}" class="w-full h-full object-cover" style="aspect-ratio: ${ratio};">
+                                <div class="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.scrollBanner(-1, event)">❮</button>
+                    <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-full items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.scrollBanner(1, event)">❯</button>
+                    
+                    <div id="bannerDots" class="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                        ${banners.map((_, i) => `
+                            <button class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 ${i === 0 ? 'bg-[var(--gold-muted)] scale-125' : 'bg-white/50'}" onclick="window.goToBanner(${i}, event)"></button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            if(window.bannerInterval) clearInterval(window.bannerInterval);
+            
+            if(banners.length > 1) { 
+                window.bannerInterval = setInterval(() => window.scrollBanner(1), 5000); 
+
+                let touchStartX = 0; let touchEndX = 0;
+                container.addEventListener('touchstart', e => { 
+                    touchStartX = e.changedTouches[0].screenX; 
+                    clearInterval(window.bannerInterval); 
+                }, {passive: true});
+                
+                container.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    const diff = touchStartX - touchEndX;
+                    // Свайп вліво -> Наступний
+                    if (diff > 40) window.scrollBanner(1); 
+                    // Свайп вправо -> Попередній
+                    else if (diff < -40) window.scrollBanner(-1); 
+                    
+                    window.bannerInterval = setInterval(() => window.scrollBanner(1), 5000); 
+                }, {passive: true});
+            }
+        };
+
+        window.scrollBanner = function(dir, e) {
+            if(e) e.stopPropagation();
+            let newIdx = window.currentBanner + dir;
+            if (newIdx >= window.bannerCount) newIdx = 0;
+            if (newIdx < 0) newIdx = window.bannerCount - 1;
+            window.goToBanner(newIdx);
+        };
+
+        window.goToBanner = function(idx, e) {
+            if(e) e.stopPropagation();
+            window.currentBanner = idx;
+            const track = document.getElementById('bannerTrack');
+            if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+            
+            const dots = document.querySelectorAll('#bannerDots button');
+            dots.forEach((dot, i) => {
+                dot.className = i === idx 
+                    ? 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 bg-[var(--gold-muted)] scale-125' 
+                    : 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 bg-white/50';
+            });
+        };
+
+        // 4. Розумна кнопка "Нагору" (зліва і тільки коли скролиш вгору)
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const topBtn = document.getElementById('scrollToTopBtn');
+            if (topBtn) {
+                const currentScrollY = window.scrollY;
+                if (currentScrollY > 400 && currentScrollY < lastScrollY) {
+                    topBtn.classList.add('opacity-100', 'translate-y-0');
+                    topBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                } else {
+                    topBtn.classList.remove('opacity-100', 'translate-y-0');
+                    topBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                }
+                lastScrollY = currentScrollY;
+            }
         });
+
+        // 5. Авто-скрол до банерів
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const bannerSection = document.getElementById('promo-banner-top');
+                // Скролимо, тільки якщо юзер ще сам не встиг опуститись
+                if (bannerSection && window.scrollY < 50) {
+                    const offset = 80; 
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const elementRect = bannerSection.getBoundingClientRect().top;
+                    const elementPosition = elementRect - bodyRect;
+                    const offsetPosition = elementPosition - offset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+            }, 3000);
+        });
+
+        // 6. Динамічне зменшення відступів між секціями
+        const styleOverride = document.createElement('style');
+        styleOverride.innerHTML = `
+            section.max-w-\\[1920px\\] { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; margin-top: 0 !important; }
+            .promo-carousel-container { min-h-[220px] !important; }
+            .mb-8.md\\:mb-16 { margin-bottom: 1rem !important; }
+        `;
+        document.head.appendChild(styleOverride);
     </script>
 </body>
 </html>
