@@ -71,7 +71,7 @@ p, .panel-desc, .nav-link, .dropdown-item, .auth-input {
     --text-muted: #5A544C;     
     
     /* ФИКС: Насыщенное античное золото для текста (читабельное!) */
-    --gold-muted: #7A571B;     
+    --gold-muted: #7A571B;    
     
     /* Границы элементов */
     --border: rgba(31, 29, 26, 0.15); 
@@ -234,8 +234,8 @@ header.scrolled {
 .sub-cat-link:hover { opacity: 1; color: var(--gold-muted); transform: translateX(6px); }
 .mega-col-3 { width: 300px; padding: 30px; border-left: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
 .preview-card { display: flex; flex-direction: column; gap: 14px; text-decoration: none;}
-.preview-img-wrap { position: relative; width: 100%; aspect-ratio: 1; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: transparent; box-shadow: var(--shadow-soft);}
-.preview-img-wrap img { width: 100%; height: 100%; object-fit: contain !important; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none;}
+.preview-img-wrap { position: relative; width: 100%; aspect-ratio: 1; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: color-mix(in srgb, var(--bg-card) 60%, #000); box-shadow: var(--shadow-soft);}
+.preview-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none;}
 .preview-card:hover .preview-img-wrap img { transform: scale(1.05); }
 
 .dropdown-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: var(--text-main); opacity: 0.8; cursor: pointer; text-decoration: none;}
@@ -269,7 +269,7 @@ header.scrolled {
     background: linear-gradient(180deg, rgba(20, 15, 10, 0.5) 0%, rgba(20, 15, 10, 0.3) 50%, rgba(20, 15, 10, 0.8) 100%); 
     z-index: 1; 
 }
-.hero-content { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center;}
+.hero-content { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; items-align: center;}
 
 .hero-subtitle { font-family: 'Inter', sans-serif; font-size: clamp(10px, 2vw, 12px); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4em; color: var(--gold-muted); margin-bottom: 12px; opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; }
 .hero-title { 
@@ -309,7 +309,7 @@ header.scrolled {
 .marquee-wrapper.active { cursor: grabbing; }
 .marquee-track, #marqueeTrack { 
     display: flex; 
-    gap: 0px; 
+    gap: 0px; /* ВБИВАЄМО 40px, які робили діру */
     width: max-content; 
     will-change: transform; 
     align-items: center;
@@ -317,7 +317,7 @@ header.scrolled {
 
 .marquee-item { 
     flex-shrink: 0;
-    padding: 0;
+    padding: 0; /* Прибираємо зайве */
     font-family: 'Playfair Display', serif; 
     font-size: 20px; 
     font-style: italic; 
@@ -328,22 +328,22 @@ header.scrolled {
     align-items: center;
     transition: 0.3s; 
     text-decoration: none; 
-    user-select: none; 
-    -webkit-user-drag: none;
+    user-select: none; /* ЗАБОРОНА виділення тексту */
+    -webkit-user-drag: none; /* ЗАБОРОНА перетягування лінку */
 }
 
 .marquee-item::after {
     content: "•";
-    margin: 0 25px;
+    margin: 0 25px; /* Ідеальний, компактний відступ з обох боків крапки */
     color: var(--gold-muted);
     opacity: 0.4;
 }
 
 .marquee-item:hover { color: var(--text-main); transform: scale(1.05); }
-
 .banner-slider-container { 
     position: relative; 
     width: 100%; 
+    /* Мобільний розмір (високий вертикальний формат) */
     aspect-ratio: 3 / 4 !important; 
     border-radius: var(--radius-lg); 
     overflow: hidden; 
@@ -363,7 +363,7 @@ header.scrolled {
 /* Каруселі товарів з інерцією та фіксом тіней */
 .promo-carousel-container, .weekly-carousel-container { 
     position: relative; width: 100%; overflow: hidden; cursor: grab; touch-action: pan-y;
-    padding-top: 24px; padding-bottom: 32px; margin-top: -24px; margin-bottom: -32px; 
+    padding-top: 24px; padding-bottom: 32px; margin-top: -24px; margin-bottom: -32px; /* Місце для тіней */
 }
 .promo-carousel-container.active, .weekly-carousel-container.active { cursor: grabbing; }
 .promo-track, .weekly-track { display: flex; gap: 16px; width: max-content; will-change: transform; padding: 10px 0; padding-right: 15vw; }
@@ -373,10 +373,10 @@ header.scrolled {
 @media (min-width: 1280px) { .promo-track .product-card, .weekly-track .product-card { width: calc(16.666vw - 20px); gap: 20px;} }
 
 /* ==========================================
-   КАТКА ТОВАРУ ТА БЕЙДЖИ (ИСПРАВЛЕНО ФОН ФОТО)
+   КАТКА ТОВАРУ ТА БЕЙДЖИ
    ========================================== */
 .product-card { 
-    background: var(--bg-card);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%) 0%, var(--bg-card) 100%);
     border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; position: relative; 
     box-shadow: 0 4px 16px rgba(0,0,0,0.04); transform: translateY(0);
 }
@@ -384,17 +384,8 @@ header.scrolled {
 .product-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-mid); border-color: rgba(184, 155, 114, 0.3); }
 [data-theme="dark"] .product-card:hover { border-color: rgba(212, 175, 55, 0.4); }
 
-.product-img-wrap, .product-card > a.relative { 
-    position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; 
-    background: transparent !important; /* УБРАЛИ СЕРЫЙ/ЧЕРНЫЙ ФОН */
-    display: flex; align-items: center; justify-content: center;
-}
-.product-img { 
-    width: 100%; height: 100%; 
-    object-fit: contain !important; /* ПОДОГНАНО ПО ПАРАМЕТРАМ БЕЗ ИСКАЖЕНИЯ/ОБРЕЗКИ */
-    background: transparent !important;
-    transition: transform 0.8s ease; pointer-events: none;
-}
+.product-img-wrap, .product-card > a.relative { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: color-mix(in srgb, var(--bg-card) 60%, #000); }
+.product-img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; pointer-events: none;}
 .product-card:hover .product-img { transform: scale(1.05); }
 
 /* Бейджи у футері картки */
@@ -451,7 +442,7 @@ header.scrolled {
 .cart-item { display: flex; gap: 20px; align-items: center; background: rgba(255,255,255,0.05); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
 [data-theme="light"] .cart-item { background: rgba(0,0,0,0.02); }
 .cart-item:hover { border-color: color-mix(in srgb, var(--gold-muted) 35%, var(--border)); transform: translateY(-2px); }
-.cart-item img { width: 80px; height: 80px; object-fit: contain; border-radius: 10px; background: transparent; }
+.cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); }
 .cart-item-remove svg { stroke-linecap: round; stroke-linejoin: round; }
 .cart-item-remove:hover { color: var(--danger); transform: scale(1.1);}
 
@@ -1537,43 +1528,30 @@ a[href="exclusive.html"].relative {
     }
 }
 
-/* 5. КАРТКИ ТОВАРІВ (Строгі прямокутники, чистий фон картинки) */
+/* 5. КАРТКИ ТОВАРІВ (Строгі прямокутники) */
 .product-card,
 .product-img-wrap, 
 .product-card > a.relative {
-    border-radius: 0 !important;
+    border-radius: 0 !important; /* Забираємо мило з карток */
 }
 
-/* Встановлюємо чистий або прозорий фон для обгортки картинки */
+.product-grid-wide, 
+.promo-track, 
+.weekly-track {
+    gap: 24px 16px !important;
+}
+@media (min-width: 768px) {
+    .product-grid-wide { gap: 32px 20px !important; }
+}
+@media (min-width: 1024px) {
+    .product-grid-wide { gap: 48px 24px !important; }
+}
+
 .product-img-wrap, 
 .product-card > a.relative {
-    aspect-ratio: 3 / 4 !important; /* Оставляємо книжковий формат */
-    background: transparent !important; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    aspect-ratio: 4 / 5 !important;
+    background: transparent !important;
 }
-
-/* Оригінальна фотографія, подогнана по параметрам */
-.product-img {
-    width: 100%; 
-    height: 100%; 
-    object-fit: contain !important; /* Вписуємо фото без обрізки */
-    background: transparent !important; /* Ніякого сірого фону */
-    mix-blend-mode: normal !important; /* Видаляємо всі спотворення кольору */
-    transition: 0.8s ease; 
-    pointer-events: none;
-}
-
-/* Робимо фон самої картки суцільним, без градієнтів */
-.product-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border);
-    display: flex; flex-direction: column; position: relative;
-    box-shadow: none !important; /* Видаляємо зайві тіні */
-}
-[data-theme="light"] .product-card { background: #ffffff !important; }
-[data-theme="dark"] .product-card { background: #121212 !important; border-color: rgba(255,255,255,0.05) !important; }
 
 /* 6. КАТЕГОРІЇ (СТЕКЛЯНИЙ АКОРДЕОН) - Тепер це суворі панелі */
 .glass-accordion-container,
@@ -1671,6 +1649,17 @@ header.scrolled {
 @media (min-width: 1280px) {
     .product-grid-wide { grid-template-columns: repeat(4, 1fr) !important; gap: 40px 24px !important; }
 }
+/* Видалили божевільні 7 колонок, щоб картки мали повітря і текст не обрізався */
+
+/* Пропорції карток: високі, вертикальні (editorial style) */
+.product-img-wrap, 
+.product-card > a.relative {
+    aspect-ratio: 3 / 4 !important; /* Вертикальний, книжковий формат */
+    border-radius: 0 !important;
+}
+.product-card {
+    border-radius: 0 !important;
+}
 
 /* 6. ГЕОМЕТРІЯ БАНЕРІВ ТА БІГУЧОЇ СТРОКИ */
 .banner-slider-container {
@@ -1751,68 +1740,4 @@ aside.custom-scrollbar {
     opacity: 1;
     background: rgba(197, 160, 89, 0.1);
     font-weight: 600;
-}
-/* ФІКС: СІТКА КАТАЛОГУ (Повертаємо колонки) */
-.product-grid-wide {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0; /* Нуль, щоб рамки карток ідеально зливалися */
-}
-
-@media (min-width: 768px) {
-    .product-grid-wide { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 1024px) {
-    .product-grid-wide { grid-template-columns: repeat(4, 1fr); }
-}
-
-/* Знімаємо обмеження, щоб картка тягнулася на всю колонку */
-.product-card {
-    max-width: 100% !important;
-}
-/* --- СЕТКА ТОВАРОВ: ИДЕАЛЬНЫЕ ГРАНИЦЫ И ФОТО НА ВСЮ ШИРИНУ --- */
-
-/* 1. Убираем отступы между карточками и добавляем внешние границы сетки */
-.product-grid-wide {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 колонки на мобайле */
-    gap: 0 !important; /* УБИРАЕМ ОТСТУПЫ */
-    border-top: 1px solid var(--border);
-    border-left: 1px solid var(--border);
-}
-
-@media (min-width: 768px) {
-    .product-grid-wide { grid-template-columns: repeat(3, 1fr) !important; }
-}
-@media (min-width: 1024px) {
-    .product-grid-wide { grid-template-columns: repeat(4, 1fr) !important; }
-}
-
-/* 2. Добавляем границы каждой карточке (справа и снизу) */
-.product-card {
-    border: none !important;
-    border-right: 1px solid var(--border) !important;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 0 !important;
-    background: var(--bg-card) !important;
-}
-
-/* 3. Фото на всю ширину без падингов */
-.product-card > a.relative {
-    padding: 0 !important;
-    aspect-ratio: 1 / 1 !important;
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    background: transparent !important;
-}
-
-.product-img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important; /* Растягивает фото, заполняя всю площадь */
-    padding: 0 !important;
-    margin: 0 !important;
-    transition: transform 0.6s ease;
 }
