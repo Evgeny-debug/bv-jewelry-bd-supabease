@@ -164,6 +164,12 @@ window.loadCloudData = async function() {
             if(typeof renderHomeSections === 'function') renderHomeSections();
         }
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
+        if (categoriesTree.length === 0) {
+            console.log("Дерево категорий еще пустое, ждем 1с...");
+            setTimeout(() => generateMenus(), 1000); // Повторная попытка рендера через 1 сек
+        } else {
+            generateMenus();
+        }
     } catch (err) {
         console.error("Помилка завантаження бази:", err);
     }
