@@ -317,53 +317,76 @@ function generateMenus() {
 
     if(sideMenu) {
         let mobCatHtml = buildMobileTree(categoriesTree);
+        const savedLang = API.get('bv_lang', 'uk');
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const currentThemeIcon = currentTheme === 'light' ? sunSVG : moonSVG;
 
         sideMenu.innerHTML = `
-            <div class="sidebar-top-logo mb-6 border-b border-[var(--border)] pb-8 pt-4 text-center flex flex-col items-center">
-                <a href="index.html" class="flex flex-col items-center justify-center gap-1" style="text-decoration:none;">
-                    <span class="text-4xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
-                    <span class="text-[10px] tracking-[0.4em] text-[var(--text-main)] uppercase font-light pl-1">jewelry</span>
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-[var(--border)] pt-4 px-4">
+                <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
+                    <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
                 </a>
-            </div>
-            
-            <a href="index.html" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
-            <a href="#" onclick="window.smartProfileClick(); return false;" class="mob-menu-title">Профіль</a>
-            
-            <div class="menu-divider"></div>
-            
-            <div>
-                <div class="mob-menu-title" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
-                    <span data-i18n="m2">Каталог</span>
-                    <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-                <div class="mob-accordion-list" id="mobCatList" style="gap: 0; padding-left: 0;">${mobCatHtml}</div>
-            </div>
-            
-            <div>
-                <div class="mob-menu-title" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
-                    <span>Бренд</span>
-                    <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-                <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 20px;">
-                    <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
-                    <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
-                    <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
-                    <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+                <div class="flex items-center gap-5">
+                    <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                        <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
+                    </button>
+                    
+                    <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
+                        <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
+                        <span class="opacity-30">|</span>
+                        <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
+                        <span class="opacity-30">|</span>
+                        <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
+                    </div>
+                    
+                    <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </button>
                 </div>
             </div>
             
-            <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span data-i18n="m_price">Прайс</span></a>
-            
-            <div class="menu-divider mt-6"></div>
-            
-            <div class="flex flex-col gap-2 mt-4 px-4 text-sm text-[var(--text-muted)] font-light pb-4">
-                <span class="text-[10px] uppercase tracking-widest text-[var(--text-main)] font-bold mb-1">Контакти</span>
-                <a href="tel:+380634540901" class="text-[var(--gold-muted)] font-medium">+38 063 45 40 901</a>
-                <span>Графік роботи: 08:00 - 18:00</span>
-                <span>м. Ізмаїл, вул. Торгова, 68</span>
-            </div>
+            <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
+                <a href="index.html" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
+                
+                <div class="menu-divider"></div>
+                
+                <div>
+                    <div class="mob-menu-title cursor-pointer" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
+                        <span data-i18n="m2">Каталог</span>
+                        <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="mob-accordion-list" id="mobCatList" style="gap: 0; padding-left: 0;">${mobCatHtml}</div>
+                </div>
+                
+                <div>
+                    <div class="mob-menu-title cursor-pointer" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
+                        <span>Бренд</span>
+                        <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
+                        <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+                        <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+                        <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+                        <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+                    </div>
+                </div>
+                
+                <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span data-i18n="m_price">Прайс</span></a>
+                
+                <div class="menu-divider mt-4"></div>
+                
+                <div class="mt-auto pt-4 pb-4">
+                    <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2">
+                        <a href="tel:+380634540901" class="text-[var(--gold-muted)] font-medium text-sm mb-1">+38 063 45 40 901</a>
+                        <span>Графік роботи: 08:00 - 18:00</span>
+                        <span>м. Ізмаїл, вул. Торгова, 68</span>
+                    </div>
 
-            <a href="exclusive.html" class="mob-atelier-link mt-4 border-t border-[var(--border)] pt-4" onclick="window.toggleMenu()"><span data-i18n="m_atelier">Ексклюзив</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                    <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" onclick="window.toggleMenu()">
+                        <span data-i18n="m_atelier">Ексклюзив</span>
+                    </a>
+                </div>
+            </div>
         `;
     }
 }
@@ -650,9 +673,9 @@ window.renderProductCard = function(prod) {
     const priceDisplay = discount && Number(discount) > 0 ? discount : price;
 
     return `
-        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] border border-[#e5e5e5] hover:border-[var(--gold-muted)] transition-colors duration-300">
-            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-3 md:p-4">
-                <img src="${safeImg}" class="product-img w-full h-full object-contain mix-blend-multiply transition duration-700 group-hover:scale-105" loading="lazy">
+        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] transition-colors duration-300">
+            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-2 md:p-4">
+                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-700 group-hover:scale-105" loading="lazy">
             </a>
             
             <div class="px-3 md:px-4 pb-1 pt-2 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
@@ -805,25 +828,27 @@ window.initBannerSlider = function() {
     window.currentBanner = 0; 
     window.isBannerAnimating = false;
     
-    // Переписано под абсолютное позиционирование для Fade. Видалено rounded!
-    let html = '<div class="banner-track relative w-full h-full overflow-hidden rounded-none" id="bannerTrack">';
-    banners.forEach((b, i) => { 
-        html += `<div class="banner-slide absolute inset-0 transition-opacity duration-700 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" data-index="${i}">
-                    <a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio}; object-fit: cover; width: 100%; height: 100%;"></a>
-                 </div>`; 
-    });
-    html += '</div>';
-
-    if(banners.length > 1) {
-        html += `<button class="banner-arrow prev btn-cross z-20 absolute left-4 top-1/2 -translate-y-1/2 rounded-none" onclick="moveBanner(-1)">❮</button>
-                 <button class="banner-arrow next btn-cross z-20 absolute right-4 top-1/2 -translate-y-1/2 rounded-none" onclick="moveBanner(1)">❯</button>
-                 <div class="banner-dots z-20 absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">`;
-        banners.forEach((_, i) => { html += `<span class="banner-dot btn-cross w-2 h-2 rounded-none bg-white/50 cursor-pointer transition-all ${i===0?'!bg-[var(--gold-muted)] scale-125':''}" onclick="goToBanner(${i})"></span>`; });
-        html += `</div>`;
-    }
+    let html = `
+        <div class="relative w-full h-full rounded-none overflow-hidden group bg-[var(--bg-elevated)] border border-[var(--border)]" id="bannerTrack">
+            ${banners.map((b, i) => `
+                <div class="banner-slide absolute inset-0 w-full h-full cursor-pointer transition-opacity duration-700 ease-in-out" style="opacity: ${i === 0 ? '1' : '0'}; z-index: ${i === 0 ? '10' : '1'};" data-index="${i}" onclick="window.location.href='${b.link || '#'}'">
+                    <img src="${b.img}" class="w-full h-full object-cover" style="aspect-ratio: ${ratio};">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
+                </div>
+            `).join('')}
+            
+            <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.moveBanner(-1, event)">❮</button>
+            <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.moveBanner(1, event)">❯</button>
+            
+            <div id="bannerDots" class="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                ${banners.map((_, i) => `
+                    <button class="banner-dot w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 ${i === 0 ? 'bg-[var(--gold-muted)] scale-125' : 'bg-white/50'}" onclick="window.goToBanner(${i}, event)"></button>
+                `).join('')}
+            </div>
+        </div>
+    `;
     
     container.innerHTML = html;
-    container.classList.add('relative');
     
     if(banners.length > 1) { 
         clearInterval(window.bannerInterval); 
@@ -833,8 +858,8 @@ window.initBannerSlider = function() {
         container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(window.bannerInterval); }, {passive: true});
         container.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
-            if (touchStartX - touchEndX > 50) moveBanner(1); 
-            if (touchEndX - touchStartX > 50) moveBanner(-1); 
+            if (touchStartX - touchEndX > 40) moveBanner(1); 
+            if (touchEndX - touchStartX > 40) moveBanner(-1); 
             window.bannerInterval = setInterval(() => moveBanner(1), 5000); 
         }, {passive: true});
     }
@@ -843,45 +868,46 @@ window.initBannerSlider = function() {
 window.updateBannerDots = function() {
     const dots = document.querySelectorAll('.banner-dot');
     dots.forEach((d, i) => {
-        if(i === window.currentBanner) {
-            d.classList.add('!bg-[var(--gold-muted)]', 'scale-125');
-        } else {
-            d.classList.remove('!bg-[var(--gold-muted)]', 'scale-125');
-        }
+        d.className = i === window.currentBanner 
+            ? 'banner-dot w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 bg-[var(--gold-muted)] scale-125' 
+            : 'banner-dot w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 bg-white/50';
     });
 };
 
-window.moveBanner = function(dir) {
+window.moveBanner = function(dir, e) {
+    if(e) e.stopPropagation();
     if(window.bannerCount <= 1 || window.isBannerAnimating) return;
     window.isBannerAnimating = true;
     clearInterval(window.bannerInterval);
     
     const newIndex = (window.currentBanner + dir + window.bannerCount) % window.bannerCount;
-    executeFade(newIndex);
+    window.executeFade(newIndex);
     
     setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
 };
+
 window.executeFade = function(newIndex) {
     const track = document.getElementById('bannerTrack');
-    const oldSlide = track.querySelector(`.banner-slide[data-index="${window.currentBanner}"]`);
-    const newSlide = track.querySelector(`.banner-slide[data-index="${newIndex}"]`);
+    if(!track) return;
+    const slides = track.querySelectorAll('.banner-slide');
     
-    oldSlide.classList.replace('opacity-100', 'opacity-0');
-    oldSlide.classList.replace('z-10', 'z-0');
-    
-    newSlide.classList.replace('opacity-0', 'opacity-100');
-    newSlide.classList.replace('z-0', 'z-10');
+    slides.forEach((slide, i) => {
+        slide.style.opacity = i === newIndex ? '1' : '0';
+        slide.style.zIndex = i === newIndex ? '10' : '1';
+    });
     
     window.currentBanner = newIndex;
-    updateBannerDots();
+    window.updateBannerDots();
 };
-window.goToBanner = function(index) {
+
+window.goToBanner = function(index, e) {
+    if(e) e.stopPropagation();
     if(window.bannerCount <= 1 || window.isBannerAnimating || index === window.currentBanner) return;
     window.isBannerAnimating = true;
     clearInterval(window.bannerInterval);
     
-    executeFade(index);
+    window.executeFade(index);
     
     setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
@@ -911,20 +937,19 @@ window.renderHomeSections = function() {
         if (items.length > 0) {
             const title = window.getLoc(block.name);
             const trackId = `block-track-${block.id}`;
-            // Строгі відступи, без зазорів, 0 gap
-            const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.33%] md:w-[25%] lg:w-[20%] xl:w-[16.66%] snap-start flex">${window.renderProductCard(p)}</div>`;
+            // Строгі відступи, без зазорів, 0 gap, ширина 50%
+            const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex">${window.renderProductCard(p)}</div>`;
             
             let blockItems = [...items];
             while(blockItems.length < 12 && blockItems.length > 0) { blockItems = blockItems.concat(items); }
             
-            // Зменшено відступи (py-6 md:py-10) і прибрано відступ між товарами (gap-0)
             html += `
-            <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-6 md:py-10 border-t border-[var(--border)] mt-4">
-                <div class="mb-4 text-center px-4">
-                    <span class="text-[9px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-2">BV Jewelry</span>
+            <section class="max-w-[1920px] mx-auto px-0 py-4 md:py-6 border-t border-[var(--border)]">
+                <div class="mb-3 text-center px-4">
+                    <span class="text-[9px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-1">BV Jewelry</span>
                     <h2 class="hero-title text-[var(--text-main)] !text-[24px] md:!text-[32px]">${title}</h2>
                 </div>
-                <div class="promo-carousel-container select-none group relative mt-4">
+                <div class="promo-carousel-container select-none group relative">
                     <div id="${trackId}" class="flex overflow-x-auto gap-0 snap-x snap-mandatory no-scrollbar min-h-[300px]">
                         ${blockItems.map(cardWrapper).join('')}
                     </div>
@@ -977,7 +1002,7 @@ window.applyAdminSettings = function() {
         const footerAddrBlock = document.getElementById('footerAddressesBlock');
         if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
             let html = '';
-            html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+            html += `<a href="http://maps.google.com/?q=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
                         <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                         <span>${settings.addresses[0]}</span>
                     </a>`;
@@ -995,7 +1020,7 @@ window.showBranchesModal = function() {
     const addrs = settings.addresses || [];
     if(addrs.length === 0) return;
     
-    const list = addrs.map(a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
+    const list = addrs.map(a => `<a href="http://maps.google.com/?q=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
         <span>${a}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
     </a>`).join('');
@@ -1162,7 +1187,7 @@ window.changeLang = function(lang) {
 
 window.injectGlobalUI = function() {
     if (!document.getElementById('scrollToTopBtn')) {
-        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--gold-muted)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
+        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
     }
 };
 
