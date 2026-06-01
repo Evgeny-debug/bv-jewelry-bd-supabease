@@ -68,7 +68,6 @@ const i18n = {
     }
 };
 
-// РОЗУМНИЙ ЛОКАЛІЗАТОР (Підтримує старий формат та новий JSON {uk, ru, en})
 window.getLoc = function(obj, field) {
     if (!obj) return '';
     const lang = API.get('bv_lang', 'uk');
@@ -76,11 +75,9 @@ window.getLoc = function(obj, field) {
     if (typeof obj === 'string') return obj;
     if (typeof obj === 'object') {
         if (field) {
-            // Новий формат
             if (typeof obj[field] === 'object' && obj[field] !== null) {
                 return obj[field][lang] || obj[field]['uk'] || '';
             }
-            // Старий формат
             if (lang === 'uk') return obj[field] || '';
             const locField = field + lang.toUpperCase(); 
             return obj[locField] || obj[field] || ''; 
@@ -99,7 +96,6 @@ const formatterPrice = new Intl.NumberFormat('uk-UA', { style: 'decimal', minimu
 let categoriesTree = [];
 let products = [];
 
-// Функція міграції старих товарів у новий формат "на льоту" (для клієнта)
 function migrateProductToNewFormat(p) {
     if(p.variations) return p; 
     let base = {
@@ -122,7 +118,6 @@ function migrateProductToNewFormat(p) {
     };
 }
 
-// Побудова дерева з плоского списку
 function buildTree(flatList) {
     let tree = [];
     let lookup = {};
@@ -165,12 +160,9 @@ window.loadCloudData = async function() {
         
         if(typeof generateMenus === 'function') generateMenus();
         if(typeof initBannerSlider === 'function') initBannerSlider();
-        
-        // Рендеримо нові динамічні блоки
         if(document.getElementById('dynamicHomeBlocksContainer')) {
             if(typeof renderHomeSections === 'function') renderHomeSections();
         }
-        
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
     } catch (err) {
         console.error("Помилка завантаження бази:", err);
@@ -178,7 +170,7 @@ window.loadCloudData = async function() {
 };
 
 // ==========================================
-// 4. СТАН ТА СИНХРОНІЗАЦІЯ (АВТОРИЗАЦІЯ)
+// 4. СТАН ТА СИНХРОНІЗАЦІЯ
 // ==========================================
 function getCurrentUser() { return API.get('bv_current_user', null); }
 function getScopedStorageKey(baseKey) {
@@ -220,7 +212,7 @@ function setCart(cart) { API.set(getScopedStorageKey('bv_cart'), cart); API.set(
 
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
-    return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    return unsafe.toString().replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 function getCategoryIconSVG(catId) {
@@ -309,7 +301,7 @@ function generateMenus() {
             }
         });
 
-        megaCol1.innerHTML += `<a href="exclusive.html" class="mega-atelier-btn mt-auto mx-4 mb-4 border border-[var(--gold-muted)] text-[var(--gold-muted)] p-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors font-bold uppercase tracking-widest text-[10px]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7-7-7M5 12h14"/></svg><span data-i18n="m_atelier">Ексклюзив</span></a>`;
+        megaCol1.innerHTML += `<a href="exclusive.html" class="mega-atelier-btn mt-auto mx-4 mb-4 border border-[var(--gold-muted)] text-[var(--gold-muted)] p-3 rounded-none flex items-center justify-center gap-2 hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors font-bold uppercase tracking-widest text-[10px]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7-7-7M5 12h14"/></svg><span data-i18n="m_atelier">Ексклюзив</span></a>`;
         
         document.querySelectorAll('.mega-cat-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
@@ -325,10 +317,6 @@ function generateMenus() {
 
     if(sideMenu) {
         let mobCatHtml = buildMobileTree(categoriesTree);
-        const savedLang = API.get('bv_lang', 'uk');
-        const displayLang = savedLang === 'uk' ? 'UA' : savedLang.toUpperCase();
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const currentThemeIcon = currentTheme === 'light' ? sunSVG : moonSVG;
 
         sideMenu.innerHTML = `
             <div class="sidebar-top-logo mb-6 border-b border-[var(--border)] pb-8 pt-4 text-center flex flex-col items-center">
@@ -338,8 +326,8 @@ function generateMenus() {
                 </a>
             </div>
             
-            <a href="index.html" data-i18n="m1" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
-            <a href="exclusive.html" class="mob-atelier-link mt-4" onclick="window.toggleMenu()"><span data-i18n="m_atelier">Ексклюзив</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a href="index.html" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
+            <a href="#" onclick="window.smartProfileClick(); return false;" class="mob-menu-title">Профіль</a>
             
             <div class="menu-divider"></div>
             
@@ -364,37 +352,42 @@ function generateMenus() {
                 </div>
             </div>
             
-            <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span>Прайс</span></a>
-            <a href="#footer" data-i18n="m4" class="mob-menu-title" onclick="window.toggleMenu()">Контакти</a>
+            <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span data-i18n="m_price">Прайс</span></a>
             
             <div class="menu-divider mt-6"></div>
             
-            <div class="mobile-settings-group pb-10">
-                <div>
-                    <div class="mob-menu-title border-none" onclick="window.toggleAccordion('mobLangList', 'mobLangArrow')" style="font-size: 14px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <img src="https://flagcdn.com/${flags[savedLang] || 'ua'}.svg" class="flag" id="currentFlagMob">
-                            <span>МОВА:</span> 
-                            <span id="currentLangLabelMob" style="font-weight: 600; color: var(--text-main);">${displayLang}</span>
-                        </div>
-                        <svg id="mobLangArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list" id="mobLangList" style="margin-top: 10px; background: rgba(0,0,0,0.1); border-radius: 12px;">
-                        <div class="dropdown-item py-3" onclick="window.changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="flag"> Українська</div>
-                        <div class="dropdown-item py-3" onclick="window.changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="flag"> Русский</div>
-                        <div class="dropdown-item py-3" onclick="window.changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="flag"> English</div>
-                    </div>
-                </div>
-                
-                <div id="themeToggleMob" class="mobile-theme-toggle flex items-center gap-3 py-4 mt-2 cursor-pointer opacity-80 hover:opacity-100 transition-opacity bg-[var(--bg-elevated)] rounded-xl px-4 justify-center" onclick="window.toggleTheme()" style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-                    <svg id="themeIconMob" viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-currentColor stroke-2 text-[var(--gold-muted)]">${currentThemeIcon}</svg>
-                    <span data-i18n="theme_mob">Змінити тему</span>
-                </div>
+            <div class="flex flex-col gap-2 mt-4 px-4 text-sm text-[var(--text-muted)] font-light pb-4">
+                <span class="text-[10px] uppercase tracking-widest text-[var(--text-main)] font-bold mb-1">Контакти</span>
+                <a href="tel:+380634540901" class="text-[var(--gold-muted)] font-medium">+38 063 45 40 901</a>
+                <span>Графік роботи: 08:00 - 18:00</span>
+                <span>м. Ізмаїл, вул. Торгова, 68</span>
             </div>
+
+            <a href="exclusive.html" class="mob-atelier-link mt-4 border-t border-[var(--border)] pt-4" onclick="window.toggleMenu()"><span data-i18n="m_atelier">Ексклюзив</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
         `;
-        document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = i18n[savedLang][el.dataset.i18n] || el.innerHTML);
     }
 }
+
+window.smartProfileClick = function() {
+    if(document.getElementById('sideMenu')?.classList.contains('active')) {
+        window.toggleMenu(); 
+    }
+    const user = API.get('bv_current_user', null);
+    if (user && user.id) {
+        window.location.href = 'profile.html';
+    } else {
+        window.openAuthModal();
+    }
+};
+
+window.openAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+};
+
 // ==========================================
 // 5. КОШИК ТА УЛЮБЛЕНЕ
 // ==========================================
@@ -505,12 +498,12 @@ window.renderCart = function() {
         total += item.price * item.qty;
         totalQty += item.qty;
         
-        const sizeBadge = item.size ? `<span class="bg-[var(--gold-muted)]/20 text-[var(--gold-muted)] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
+        const sizeBadge = item.size ? `<span class="bg-[var(--gold-muted)]/20 text-[var(--gold-muted)] px-2 py-0.5 rounded-none text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
         const skuBadge = `<span class="text-[10px] text-[var(--text-muted)]">Арт: ${item.sku}</span>`;
 
         cartBody.insertAdjacentHTML('beforeend', `
-            <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/40">
-                <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]">
+            <div class="cart-item flex gap-4 p-3 border border-[var(--border)] rounded-none mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/40">
+                <img src="${item.img}" class="w-20 h-20 object-cover border border-[var(--border)] rounded-none mix-blend-multiply">
                 <div class="flex-grow flex flex-col justify-center pr-6">
                     <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${escapeHtml(item.title)}</span>
                     <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -519,7 +512,7 @@ window.renderCart = function() {
                     </div>
                     <div class="flex items-center gap-3 mt-2">
                         <span class="text-sm font-bold text-[var(--gold-muted)]">${formatterPrice.format(item.price)} ₴</span>
-                        <div class="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]">
+                        <div class="inline-flex items-center rounded-none border border-[var(--border)] bg-[var(--bg-elevated)]">
                             <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] btn-cross" onclick="updateCartQty('${item.cartId}', -1)">−</button>
                             <span class="px-2 text-xs text-[var(--text-main)] font-semibold min-w-6 text-center">${item.qty}</span>
                             <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] btn-cross" onclick="updateCartQty('${item.cartId}', 1)">+</button>
@@ -542,7 +535,7 @@ window.renderCart = function() {
     const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
     if(checkoutBtnWrapper) {
         checkoutBtnWrapper.style.display = 'block';
-        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="btn-solid w-full bg-[var(--gold-muted)] !text-[#111] font-bold uppercase tracking-widest py-3 rounded-xl hover:opacity-90 transition-opacity active:scale-95 border-none">Оформити замовлення</button>`;
+        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="btn-solid w-full bg-[var(--gold-muted)] !text-[#111] font-bold uppercase tracking-widest py-3 rounded-none hover:opacity-90 transition-opacity active:scale-95 border-none">Оформити замовлення</button>`;
     }
 };
 
@@ -607,8 +600,8 @@ window.renderFavDrawer = function() {
         const priceDisplay = base.discount && Number(base.discount) > 0 ? base.discount : base.price;
 
         return `
-        <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
-            <img src="${safeImg}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
+        <div class="cart-item flex gap-4 p-3 border border-[var(--border)] rounded-none mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
+            <img src="${safeImg}" class="w-16 h-16 object-cover border border-[var(--border)] rounded-none mix-blend-multiply">
             <div class="flex-grow flex flex-col justify-center pr-6">
                 <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${safeName}</span>
                 <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(prod.variant || '')}</span>
@@ -634,11 +627,11 @@ window.renderProductCard = function(prod) {
     const isFav = getFavs().includes(prod.id);
     
     let badgesHtml = '<div class="flex flex-wrap gap-1 justify-end items-center">';
-    if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out">${i18n[lang].badge_sold_out}</div>`;
-    else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order">${i18n[lang].badge_pre_order}</div>`;
-    if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new">${i18n[lang].badge_new}</div>`;
-    if(prod.badge === 'exclusive') badgesHtml += `<div class="prod-badge badge-exclusive">${i18n[lang].badge_exclusive}</div>`;
-    if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale">${i18n[lang].badge_sale}</div>`;
+    if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out rounded-none">${i18n[lang].badge_sold_out}</div>`;
+    else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order rounded-none">${i18n[lang].badge_pre_order}</div>`;
+    if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new rounded-none">${i18n[lang].badge_new}</div>`;
+    if(prod.badge === 'exclusive') badgesHtml += `<div class="prod-badge badge-exclusive rounded-none">${i18n[lang].badge_exclusive}</div>`;
+    if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale rounded-none">${i18n[lang].badge_sale}</div>`;
     badgesHtml += '</div>';
 
     const price = base.price || 0;
@@ -646,7 +639,7 @@ window.renderProductCard = function(prod) {
 
     let priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
     if (discount && Number(discount) > 0) {
-        priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--success)]">${formatterPrice.format(discount)} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${formatterPrice.format(price)} ₴</span>`;
+        priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${formatterPrice.format(price)} ₴</span>`;
     }
 
     const safeId = escapeHtml(prod.id);
@@ -656,20 +649,19 @@ window.renderProductCard = function(prod) {
     const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
     const priceDisplay = discount && Number(discount) > 0 ? discount : price;
 
-    // Заменить return в window.renderProductCard
     return `
         <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] border border-[#e5e5e5] hover:border-[var(--gold-muted)] transition-colors duration-300">
-            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-4">
-                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-700 group-hover:scale-105" loading="lazy">
+            <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-3 md:p-4">
+                <img src="${safeImg}" class="product-img w-full h-full object-contain mix-blend-multiply transition duration-700 group-hover:scale-105" loading="lazy">
             </a>
             
-            <div class="px-4 pb-1 pt-3 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
+            <div class="px-3 md:px-4 pb-1 pt-2 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
                 <a href="product.html?id=${prod.id}" class="text-[9px] md:text-[10px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-all duration-300">${safeVariant}</a>
                 <a href="product.html?id=${prod.id}" class="text-[12px] md:text-[14px] font-medium text-[#222] leading-snug hover:text-[var(--gold-muted)] transition-all duration-300 line-clamp-2 mt-1 min-h-[36px] md:min-h-[44px]">${safeName}</a>
                 <div class="mt-auto pt-2 mb-1 flex items-center">${priceHtml}</div>
             </div>
 
-            <div class="px-4 py-3 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
+            <div class="px-3 md:px-4 py-3 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
                 <div class="flex items-center gap-2">
                     ${!isOutOfStock ? `
                     <button onclick="addToCart('${safeId}', '${safeName}', '${safeVariant}', ${priceDisplay}, '${safeImg}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#222] hover:text-[var(--gold-muted)] transition-all duration-300 active:scale-95 group/btn">
@@ -758,7 +750,7 @@ window.initPremiumCarousel = function(track) {
         wrapper.appendChild(track);
     }
 
-    const btnClass = "btn-cross hidden md:flex absolute top-1/2 -translate-y-1/2 z-40 w-12 h-12 lg:w-14 lg:h-14 items-center justify-center rounded-full bg-[var(--bg-card)]/40 backdrop-blur-md border border-[var(--border)] text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all duration-400 hover:scale-110 hover:bg-[var(--bg-card)] hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
+    const btnClass = "btn-cross hidden md:flex absolute top-1/2 -translate-y-1/2 z-40 w-12 h-12 lg:w-14 lg:h-14 items-center justify-center rounded-none bg-[var(--bg-card)]/40 backdrop-blur-md border border-[var(--border)] text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all duration-400 hover:bg-[var(--bg-card)] hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
     const prevBtn = document.createElement('button'); prevBtn.className = `${btnClass} left-2 lg:left-6`; prevBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>`;
     const nextBtn = document.createElement('button'); nextBtn.className = `${btnClass} right-2 lg:right-6`; nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>`;
     wrapper.appendChild(prevBtn); wrapper.appendChild(nextBtn);
@@ -813,8 +805,8 @@ window.initBannerSlider = function() {
     window.currentBanner = 0; 
     window.isBannerAnimating = false;
     
-    // Переписано под абсолютное позиционирование для Fade
-    let html = '<div class="banner-track relative w-full h-full overflow-hidden rounded-2xl" id="bannerTrack">';
+    // Переписано под абсолютное позиционирование для Fade. Видалено rounded!
+    let html = '<div class="banner-track relative w-full h-full overflow-hidden rounded-none" id="bannerTrack">';
     banners.forEach((b, i) => { 
         html += `<div class="banner-slide absolute inset-0 transition-opacity duration-700 ease-in-out ${i === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}" data-index="${i}">
                     <a href="${b.link || '#'}"><img src="${b.img}" alt="Promo" style="aspect-ratio: ${ratio}; object-fit: cover; width: 100%; height: 100%;"></a>
@@ -823,21 +815,20 @@ window.initBannerSlider = function() {
     html += '</div>';
 
     if(banners.length > 1) {
-        html += `<button class="banner-arrow prev btn-cross z-20 absolute left-4 top-1/2 -translate-y-1/2" onclick="moveBanner(-1)">❮</button>
-                 <button class="banner-arrow next btn-cross z-20 absolute right-4 top-1/2 -translate-y-1/2" onclick="moveBanner(1)">❯</button>
+        html += `<button class="banner-arrow prev btn-cross z-20 absolute left-4 top-1/2 -translate-y-1/2 rounded-none" onclick="moveBanner(-1)">❮</button>
+                 <button class="banner-arrow next btn-cross z-20 absolute right-4 top-1/2 -translate-y-1/2 rounded-none" onclick="moveBanner(1)">❯</button>
                  <div class="banner-dots z-20 absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">`;
-        banners.forEach((_, i) => { html += `<span class="banner-dot btn-cross w-2 h-2 rounded-full bg-white/50 cursor-pointer transition-all ${i===0?'!bg-[var(--gold-muted)] scale-125':''}" onclick="goToBanner(${i})"></span>`; });
+        banners.forEach((_, i) => { html += `<span class="banner-dot btn-cross w-2 h-2 rounded-none bg-white/50 cursor-pointer transition-all ${i===0?'!bg-[var(--gold-muted)] scale-125':''}" onclick="goToBanner(${i})"></span>`; });
         html += `</div>`;
     }
     
     container.innerHTML = html;
-    container.classList.add('relative'); // Важно для позиционирования стрелок
+    container.classList.add('relative');
     
     if(banners.length > 1) { 
         clearInterval(window.bannerInterval); 
         window.bannerInterval = setInterval(() => moveBanner(1), 5000); 
 
-        // Свайпы оставляем, но они теперь тоже триггерят Fade
         let touchStartX = 0; let touchEndX = 0;
         container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(window.bannerInterval); }, {passive: true});
         container.addEventListener('touchend', e => {
@@ -912,7 +903,6 @@ window.renderHomeSections = function() {
     homeBlocks.filter(b => b.active).forEach(block => {
         let items = products.filter(p => {
             if (p.blocks && p.blocks.includes(block.id)) return true;
-            // Обратная совместимость для старых товаров:
             if (block.id === 'hits' && (p.isSpecial === true || p.isSpecial === 'true')) return true;
             if (block.id === 'weekly' && (p.isWeekly === true || p.isWeekly === 'true')) return true;
             return false;
@@ -921,19 +911,21 @@ window.renderHomeSections = function() {
         if (items.length > 0) {
             const title = window.getLoc(block.name);
             const trackId = `block-track-${block.id}`;
-            const cardWrapper = (p) => `<div class="flex-none w-[45%] sm:w-[32%] md:w-[26%] lg:w-[20%] xl:w-[18%] snap-start flex">${window.renderProductCard(p)}</div>`;
+            // Строгі відступи, без зазорів, 0 gap
+            const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.33%] md:w-[25%] lg:w-[20%] xl:w-[16.66%] snap-start flex">${window.renderProductCard(p)}</div>`;
             
             let blockItems = [...items];
             while(blockItems.length < 12 && blockItems.length > 0) { blockItems = blockItems.concat(items); }
             
+            // Зменшено відступи (py-6 md:py-10) і прибрано відступ між товарами (gap-0)
             html += `
-            <section class="max-w-[1920px] mx-auto px-4 md:px-12 py-12 md:py-24 border-t border-[var(--border)] mt-10">
-                <div class="mb-8 md:mb-16 text-left md:text-center px-4">
-                    <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">BV Jewelry</span>
-                    <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[40px] leading-tight">${title}</h2>
+            <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-6 md:py-10 border-t border-[var(--border)] mt-4">
+                <div class="mb-4 text-center px-4">
+                    <span class="text-[9px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-2">BV Jewelry</span>
+                    <h2 class="hero-title text-[var(--text-main)] !text-[24px] md:!text-[32px]">${title}</h2>
                 </div>
-                <div class="promo-carousel-container select-none group relative">
-                    <div id="${trackId}" class="flex overflow-x-auto gap-4 md:gap-5 pb-6 pt-2 snap-x snap-mandatory no-scrollbar min-h-[300px]">
+                <div class="promo-carousel-container select-none group relative mt-4">
+                    <div id="${trackId}" class="flex overflow-x-auto gap-0 snap-x snap-mandatory no-scrollbar min-h-[300px]">
                         ${blockItems.map(cardWrapper).join('')}
                     </div>
                 </div>
@@ -1003,14 +995,14 @@ window.showBranchesModal = function() {
     const addrs = settings.addresses || [];
     if(addrs.length === 0) return;
     
-    const list = addrs.map(a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-xl hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
+    const list = addrs.map(a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
         <span>${a}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
     </a>`).join('');
     
     const modalHtml = `
     <div id="branchesModal" class="fixed inset-0 bg-black/80 z-[7000] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="this.remove()">
-        <div class="glass-panel p-8 w-full max-w-md relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]" onclick="event.stopPropagation()">
+        <div class="glass-panel p-8 w-full max-w-md relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]" onclick="event.stopPropagation()">
             <button onclick="document.getElementById('branchesModal').remove()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-2xl leading-none btn-cross">×</button>
             <h3 class="text-2xl font-serif text-[var(--gold-muted)] mb-6 text-center italic">Наші філіали</h3>
             <div class="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
@@ -1111,25 +1103,29 @@ window.toggleMenu = function() {
     if(searchBox && !searchBox.classList.contains('hidden')) window.toggleMobileSearch(true);
 };
 
+// РОЗУМНИЙ АКОРДЕОН: закриває тільки сусідів на найвищому рівні
 window.toggleAccordion = function(listId, arrowId) {
     const list = document.getElementById(listId);
     const arrow = document.getElementById(arrowId);
     if (!list) return;
+
     const isOpening = !list.classList.contains('open');
-    if (isOpening) {
-        const isTopLevel = list.classList.contains('mob-accordion-list');
-        const openLists = isTopLevel ? document.querySelectorAll('.mob-accordion-list.open') : list.closest('.mob-accordion-list').querySelectorAll('.mob-nested-list.open');
-        openLists.forEach(openList => {
-            if (openList !== list) {
-                openList.classList.remove('open');
-                const title = openList.previousElementSibling;
-                if (title && title.getAttribute('onclick')) {
-                    const match = title.getAttribute('onclick').match(/'([^']+)',\s*'([^']+)'/);
-                    if (match && match[2]) { const oldArrow = document.getElementById(match[2]); if (oldArrow) oldArrow.style.transform = 'rotate(0deg)'; }
+
+    // Якщо це головний список (1й рівень)
+    if (isOpening && list.classList.contains('mob-accordion-list')) {
+        const openMainLists = document.querySelectorAll('.mob-accordion-list.open');
+        openMainLists.forEach(ol => {
+            if (ol !== list) {
+                ol.classList.remove('open');
+                const title = ol.previousElementSibling;
+                if (title) {
+                    const siblingArrow = title.querySelector('svg');
+                    if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
                 }
             }
         });
     }
+
     list.classList.toggle('open');
     if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
 };
@@ -1165,13 +1161,8 @@ window.changeLang = function(lang) {
 };
 
 window.injectGlobalUI = function() {
-    if (!document.getElementById('globalContactBtn')) {
-        const tgLink = API.get('bv_settings', {}).tgLink || 'https://t.me/bv_jewelry_izmail';
-        document.body.insertAdjacentHTML('beforeend', `<a href="${tgLink}" target="_blank" id="globalContactBtn" class="floating-contact-btn tg-link btn-cross" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.24.37-.48 1.02-.73 4-1.74 6.67-2.88 8.01-3.41 3.81-1.52 4.6-1.78 5.12-1.79.11 0 .37.03.54.17.14.12.18.28.2.4.02.07.02.15.02.24z"/></svg></a>`);
-    }
-    // Заменить инжект scrollToTopBtn в функции injectGlobalUI
-        if (!document.getElementById('scrollToTopBtn')) {
-        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--gold-muted)] rounded-full flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
+    if (!document.getElementById('scrollToTopBtn')) {
+        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--gold-muted)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
     }
 };
 
@@ -1300,7 +1291,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const overlayInput = document.getElementById('mobSearchOverlayInput');
     if (overlayInput) { overlayInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') window.executeSearch(e.target.value); }); }
 
-    // Перевірка OAuth сесії (Google/Apple) при поверненні на сайт
     if(window.location.hash && window.location.hash.includes('access_token')) {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
@@ -1433,20 +1423,8 @@ window.onload = async () => {
 
     const burgerBtn = document.getElementById('burger');
     if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }
-
-    // Добавить в конец window.onload
-    if (document.getElementById('home')) {
-        setTimeout(() => {
-            const promoSection = document.getElementById('promo-banner-top');
-            // Проверяем, что пользователь еще не начал активно скроллить сам
-            if (promoSection && window.scrollY < 100) {
-                promoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 3000);
-    }
 };
 
-// Заменить глобальный слушатель скролла в конце main.js
 let lastScrollTop = 0;
 let isScrollingUp = false;
 
@@ -1455,22 +1433,14 @@ window.addEventListener('scroll', () => {
     if(header) header.classList.toggle('scrolled', window.scrollY > 50);
     
     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    isScrollingUp = currentScroll < lastScrollTop && currentScroll > 400; // Проверка направления
+    isScrollingUp = currentScroll < lastScrollTop && currentScroll > 400;
     
     const topBtn = document.getElementById('scrollToTopBtn');
-    const tgBtn = document.getElementById('globalContactBtn');
 
-    // Кнопка наверх появляется ТОЛЬКО при скролле вверх
     if(isScrollingUp) { 
         if(topBtn) { topBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.add('opacity-100', 'translate-y-0'); }
     } else {
         if(topBtn) { topBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.remove('opacity-100', 'translate-y-0'); }
-    }
-    
-    if(window.scrollY > 400) {
-        if(tgBtn) tgBtn.classList.add('lifted');
-    } else {
-        if(tgBtn) tgBtn.classList.remove('lifted');
     }
     
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
