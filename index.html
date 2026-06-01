@@ -43,15 +43,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0; /* Прибираємо паддінги, висота задається кнопкам */
+            padding: 0; 
             padding-bottom: env(safe-area-inset-bottom);
             z-index: 5000;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
             width: 100%;
         }
         .bottom-nav-item {
-            flex: 1; /* Рівні 5 частин */
-            height: 60px; /* Фіксована висота, щоб не стрибали */
+            flex: 1; 
+            height: 60px; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -102,12 +102,13 @@
             aspect-ratio: 1 / 1 !important;
             object-fit: contain !important;
             padding: 10px;
-            background: #fff; /* Робимо фон білим для кращого контрасту як у Фокстроті */
+            background: #fff; 
         }
         .product-card {
             border-radius: 12px !important;
             border: 1px solid var(--border);
             box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            background-color: #fff !important;
         }
         .product-card .p-4 { padding: 10px !important; }
         .product-card ha, .product-card span { line-height: 1.2; }
@@ -119,7 +120,6 @@
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0">
 
-    <!-- МОДАЛЬНЕ ВІКНО АВТОРИЗАЦІЇ -->
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
@@ -182,12 +182,10 @@
         </div>
     </div>
 
-    <!-- ОВЕРЛЕЇ ДЛЯ ШУХЛЯД -->
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
 
-    <!-- КОШИК -->
     <div class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Корзина">
         <div class="cart-header">
             <h2 data-i18n="cart_title">Кошик</h2>
@@ -208,7 +206,6 @@
         </div>
     </div>
 
-    <!-- УЛЮБЛЕНЕ -->
     <div class="cart-drawer" id="favDrawer" role="dialog" aria-label="Избранное">
         <div class="cart-header">
             <h2 data-i18n="fav_title">Улюблене</h2>
@@ -217,7 +214,6 @@
         <div class="cart-body custom-scrollbar" id="favBody"></div>
     </div>
 
-    <!-- HEADER (ШАПКА - Бургер тільки на ПК) -->
     <header id="header">
         <div class="header-left">
             <button class="burger desktop-only md:flex" onclick="toggleMenu()"><span></span><span></span><span></span></button>
@@ -249,7 +245,6 @@
         <a href="index.html" class="bv-logo md:ml-0 -ml-4"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <!-- Пошук на мобільних -->
             <button class="mobile-only mr-2 p-2 cursor-pointer relative z-50 flex items-center justify-center text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-5 h-5 active:scale-90 transition-transform"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
@@ -302,10 +297,8 @@
         </div>
     </header>
 
-    <!-- БІЧНЕ МЕНЮ -->
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
-    <!-- ОСНОВНИЙ КОНТЕНТ -->
     <main id="home">
         <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero">
             <div class="hero-overlay absolute inset-0 bg-black/40 z-10"></div>
@@ -320,14 +313,12 @@
             </div>
         </section>
 
-        <!-- БАНЕРИ (FADE АНІМАЦІЯ БЕЗ СТРИБКІВ) -->
         <section class="max-w-[1920px] mx-auto px-4 md:px-8 py-4 md:py-8" id="promo-banner-top">
             <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px]">
                 <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-2xl"></div>
             </div>
         </section>
 
-        <!-- ЕКСКЛЮЗИВ КОМПАКТНИЙ БЛОК -->
         <section class="max-w-[1920px] mx-auto px-4 md:px-8 py-2 md:py-4">
             <a href="exclusive.html" class="relative block w-full h-[150px] md:h-[400px] rounded-[16px] md:rounded-2xl overflow-hidden shadow-md group border border-[var(--border)]">
                 <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
@@ -343,7 +334,6 @@
             </a>
         </section>
 
-        <!-- ДИНАМІЧНІ БЛОКИ З АДМІНКИ -->
         <div id="dynamicHomeBlocksContainer"></div>
         
         <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-8 md:py-24" id="categories-section">
@@ -414,7 +404,6 @@
         </section>
     </main>
 
-    <!-- НИЖНІЙ МОБІЛЬНИЙ БАР (МЕРТВА ХВАТКА: 5 іконок) -->
     <nav class="mobile-bottom-nav">
         <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -444,7 +433,6 @@
         </button>
     </nav>
 
-    <!-- SEO ТЕКСТ -->
     <section class="max-w-[1200px] mx-auto px-6 text-center pb-24 md:pb-20 pt-8">
         <span class="section-subtitle mb-4 block">Atelier since 1984</span>
         <h2 class="section-title mb-4 block">BV Jewelry - ювелірна майстерня та бутик</h2>
@@ -458,7 +446,6 @@
         </div>
     </section>
 
-    <!-- ПІДВАЛ -->
     <footer id="footer" class="pt-16 pb-32 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-10">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
             <div class="flex flex-col items-center md:items-start text-center md:text-left">
@@ -506,7 +493,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="main.js"></script>
 
-    <!-- ЛОГІКА ІНДЕКСУ: Профіль у меню, Банери (Fade), Аккордеон, Автоскрол -->
     <script>
         // 1. Інжектимо профіль прямо в бокове меню (Side Menu)
         const originalUpdateProfileMenu = window.updateProfileMenu;
@@ -579,7 +565,9 @@
             if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
         };
 
-        // 3. Ідеальний слайдер банерів (Fade-анімація без стрибків і збоїв напрямку)
+        // 3. Ідеальний слайдер банерів (Fade-анімація без стрибків)
+        let isBannerAnimatingLocal = false;
+        
         window.initBannerSlider = function() {
             const container = document.getElementById('mainBannerContainer');
             if (!container) return;
@@ -594,7 +582,7 @@
                 ];
             }
 
-            const settings = API.get('bv_settings', {});
+            const settings = typeof API !== 'undefined' ? API.get('bv_settings', {}) : {};
             const ratio = settings.bannerRatio || '3/1';
 
             window.bannerCount = banners.length; 
@@ -644,6 +632,7 @@
 
         window.scrollBanner = function(dir, e) {
             if(e) e.stopPropagation();
+            if(isBannerAnimatingLocal) return;
             let newIdx = window.currentBanner + dir;
             if (newIdx >= window.bannerCount) newIdx = 0;
             if (newIdx < 0) newIdx = window.bannerCount - 1;
@@ -652,7 +641,9 @@
 
         window.goToBanner = function(idx, e) {
             if(e) e.stopPropagation();
-            if (idx === window.currentBanner) return;
+            if (idx === window.currentBanner || isBannerAnimatingLocal) return;
+            
+            isBannerAnimatingLocal = true;
             window.currentBanner = idx;
             
             const slides = document.querySelectorAll('.banner-slide');
@@ -667,37 +658,56 @@
                     ? 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 bg-[var(--gold-muted)] scale-125' 
                     : 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 bg-white/50';
             });
+            
+            setTimeout(() => { isBannerAnimatingLocal = false; }, 700);
         };
 
-        // 4. Розумна кнопка "Нагору" (зліва і тільки коли скролиш вгору)
+        // 4. Розумна кнопка "Нагору" (Висока продуктивність)
         let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const topBtn = document.getElementById('scrollToTopBtn');
-            if (topBtn) {
-                const currentScrollY = window.scrollY;
-                if (currentScrollY > 400 && currentScrollY < lastScrollY) {
-                    topBtn.classList.add('opacity-100', 'translate-y-0');
-                    topBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-                } else {
-                    topBtn.classList.remove('opacity-100', 'translate-y-0');
-                    topBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-                }
-                lastScrollY = currentScrollY;
-            }
-        });
+        let ticking = false;
 
-        // 5. Авто-скрол до банерів
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const topBtn = document.getElementById('scrollToTopBtn');
+                    if (topBtn) {
+                        const currentScrollY = window.scrollY;
+                        if (currentScrollY > 400 && currentScrollY < lastScrollY) {
+                            topBtn.classList.add('opacity-100', 'translate-y-0');
+                            topBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                        } else {
+                            topBtn.classList.remove('opacity-100', 'translate-y-0');
+                            topBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                        }
+                        lastScrollY = currentScrollY;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // 5. Авто-скрол до банерів (З перериванням від користувача)
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
+            let autoScrollTimer;
+            
+            const doAutoScroll = () => {
                 const bannerSection = document.getElementById('promo-banner-top');
                 if (bannerSection && window.scrollY < 50) {
                     const offset = 70; 
-                    const bodyRect = document.body.getBoundingClientRect().top;
                     const elementRect = bannerSection.getBoundingClientRect().top;
-                    const offsetPosition = (elementRect - bodyRect) - offset;
+                    const offsetPosition = elementRect + window.pageYOffset - offset;
                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                 }
-            }, 3000);
+            };
+
+            const cancelAutoScroll = () => clearTimeout(autoScrollTimer);
+
+            // Якщо користувач почав скролити або натискати на екран — скасовуємо автоскрол
+            window.addEventListener('touchstart', cancelAutoScroll, { passive: true, once: true });
+            window.addEventListener('wheel', cancelAutoScroll, { passive: true, once: true });
+
+            autoScrollTimer = setTimeout(doAutoScroll, 3000);
         });
     </script>
 </body>
