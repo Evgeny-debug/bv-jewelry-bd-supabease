@@ -60,7 +60,7 @@
             border-radius: 0 !important;
         }
         .promo-track, .weekly-track, .product-grid-wide {
-            gap: 0 !important; /* Прибираємо відступи між картками */
+            gap: 0 !important;
         }
         
         /* Зменшення відступів між блоками */
@@ -73,9 +73,9 @@
         /* Прибираємо плаваючу кнопку (вона тепер в шапці) */
         #globalContactBtn { display: none !important; }
 
-        /* --- КАРТКИ ТОВАРІВ (Строгі, без зазорів, білий фон) --- */
+        /* --- КАРТКИ ТОВАРІВ (Строгі, білий фон) --- */
         .product-card {
-            border: 0.5px solid var(--border) !important; /* Тонка рамка для злиття */
+            border: 0.5px solid var(--border) !important;
             box-shadow: none !important;
             background-color: #fff !important;
         }
@@ -84,7 +84,7 @@
             object-fit: contain !important;
             padding: 0 !important;
             background: #fff !important;
-            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото, роблячи його прозорим на білому фоні */
+            /* mix-blend-mode видалено, щоб повернути оригінальний білий фон фото */
         }
         .product-card .p-4 { padding: 12px 10px !important; }
         .product-card ha, .product-card span { line-height: 1.2; }
@@ -106,7 +106,6 @@
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0">
 
-    <!-- МОДАЛЬНЕ ВІКНО АВТОРИЗАЦІЇ -->
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
@@ -150,12 +149,10 @@
         </div>
     </div>
 
-    <!-- ОВЕРЛЕЇ ДЛЯ ШУХЛЯД -->
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
 
-    <!-- КОШИК -->
     <div class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Корзина">
         <div class="cart-header">
             <h2 data-i18n="cart_title">Кошик</h2>
@@ -176,7 +173,6 @@
         </div>
     </div>
 
-    <!-- УЛЮБЛЕНЕ -->
     <div class="cart-drawer" id="favDrawer" role="dialog" aria-label="Избранное">
         <div class="cart-header">
             <h2 data-i18n="fav_title">Улюблене</h2>
@@ -185,14 +181,11 @@
         <div class="cart-body custom-scrollbar" id="favBody"></div>
     </div>
 
-    <!-- HEADER (Оновлено: Пошук зліва, Лого по центру, Чат справа) -->
     <header id="header">
         <div class="header-left">
-            <!-- Пошук замість бургера (Мобільний) -->
             <button class="mobile-only p-2 cursor-pointer text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-5 h-5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
-            
             
             <nav class="nav-left desktop-only">
                 <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors active">Головна</a>
@@ -222,9 +215,8 @@
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <!-- Іконка чату (Telegram) замість пошуку справа (Мобільний) -->
             <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
-                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 2L3 11l7 3 11-12-8 14v4l4-4 3 7L21 2z"></path></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
             
             <div class="search-box desktop-only group mr-4">
@@ -266,12 +258,9 @@
         </div>
     </header>
 
-    <!-- БІЧНЕ МЕНЮ -->
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
-    <!-- ОСНОВНИЙ КОНТЕНТ -->
     <main id="home">
-        <!-- Зменшений HERO банер -->
         <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero">
             <div class="hero-overlay absolute inset-0 bg-black/50 z-10"></div>
             <div class="hero-bg hero-img-bg bg-black/40 absolute inset-0 z-0"></div>
@@ -281,16 +270,14 @@
             </div>
         </section>
 
-        <!-- БАНЕРИ (FADE АНІМАЦІЯ БЕЗ СКРУГЛЕНЬ) -->
         <section class="max-w-[1920px] mx-auto px-4 md:px-8" id="promo-banner-top">
-            <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px]">
-                <div class="w-full h-full bg-gray-200/10 animate-pulse"></div>
+            <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px] rounded-none">
+                <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
             </div>
         </section>
 
-        <!-- ЕКСКЛЮЗИВ КОМПАКТНИЙ БЛОК -->
         <section class="max-w-[1920px] mx-auto px-4 md:px-8">
-            <a href="exclusive.html" class="relative block w-full h-[150px] md:h-[400px] overflow-hidden group border border-[var(--border)]">
+            <a href="exclusive.html" class="relative block w-full h-[150px] md:h-[400px] overflow-hidden group border border-[var(--border)] rounded-none">
                 <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
                 <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500"></div>
                 <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
@@ -304,7 +291,6 @@
             </a>
         </section>
 
-        <!-- ДИНАМІЧНІ БЛОКИ З АДМІНКИ (Скроли товарів) -->
         <div id="dynamicHomeBlocksContainer"></div>
         
         <section class="max-w-[1920px] mx-auto px-0 md:px-4" id="categories-section">
@@ -313,7 +299,7 @@
                 <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
             </div>
             <div class="glass-accordion-container" id="glassAccordion">
-                <div class="glass-panel-item group active" onclick="toggleAccordionPanel(this)">
+                <div class="glass-panel-item group active rounded-none" onclick="toggleAccordionPanel(this)">
                     <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800" alt="Каблучки" class="panel-bg">
                     <div class="panel-overlay"></div>
                     <div class="panel-content">
@@ -327,7 +313,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                <div class="glass-panel-item group rounded-none" onclick="toggleAccordionPanel(this)">
                     <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800" alt="Сережки" class="panel-bg">
                     <div class="panel-overlay"></div>
                     <div class="panel-content">
@@ -341,7 +327,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                <div class="glass-panel-item group rounded-none" onclick="toggleAccordionPanel(this)">
                     <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800" alt="Ланцюжки" class="panel-bg">
                     <div class="panel-overlay"></div>
                     <div class="panel-content">
@@ -354,7 +340,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                <div class="glass-panel-item group rounded-none" onclick="toggleAccordionPanel(this)">
                     <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=800" alt="Браслети" class="panel-bg">
                     <div class="panel-overlay"></div>
                     <div class="panel-content">
@@ -371,7 +357,6 @@
         </section>
     </main>
 
-    <!-- НИЖНІЙ МОБІЛЬНИЙ БАР (МЕРТВА ХВАТКА: 5 іконок) -->
     <nav class="mobile-bottom-nav">
         <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -401,7 +386,6 @@
         </button>
     </nav>
 
-    <!-- SEO ТЕКСТ -->
     <section class="max-w-[1200px] mx-auto px-6 text-center pb-24 md:pb-20 pt-8">
         <span class="section-subtitle mb-4 block">Atelier since 1984</span>
         <h2 class="section-title mb-4 block">BV Jewelry - ювелірна майстерня та бутик</h2>
@@ -410,7 +394,6 @@
         </p>
     </section>
 
-    <!-- ПІДВАЛ (Розкиданий на колонки для мобільних) -->
     <footer id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
         <div class="max-w-7xl mx-auto footer-grid">
             <div class="flex flex-col items-start col-span-2 md:col-span-1">
@@ -441,9 +424,13 @@
                 <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-2 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
                 <span class="text-[12px] text-[var(--text-muted)] mb-1">Графік: 08:00 - 18:00</span>
                 <span class="text-[12px] text-[var(--text-muted)] mb-4">м. Ізмаїл, вул. Торгова, 68</span>
-                <div class="flex items-center gap-4">
-                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] transition-all">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 2L3 11l7 3 11-12-8 14v4l4-4 3 7L21 2z"></path></svg>
+                
+                <div class="flex items-center gap-4 mt-2">
+                    <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </a>
                 </div>
             </div>
@@ -456,181 +443,5 @@
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="main.js"></script>
-
-    <!-- ЛОГІКА ІНДЕКСУ: Слайдер (Fade), Аккордеон, Автоскрол -->
-    <script>
-        // 1. Оновлена логіка Аккордеону
-        // (Закриває тільки сусідні списки 1-го рівня. Вкладені 2, 3+ рівні не закриваються при відкритті сусідів)
-        window.toggleAccordion = function(listId, arrowId) {
-            const list = document.getElementById(listId);
-            const arrow = document.getElementById(arrowId);
-            if (!list) return;
-            
-            const isOpening = !list.classList.contains('open');
-            
-            // Перевіряємо чи це головна категорія (1й рівень)
-            if (isOpening && list.classList.contains('mob-accordion-list')) {
-                // Закриваємо всі ІНШІ головні списки 1го рівня
-                const openMainLists = document.querySelectorAll('.mob-accordion-list.open');
-                openMainLists.forEach(ol => {
-                    if (ol !== list) {
-                        ol.classList.remove('open');
-                        const title = ol.previousElementSibling;
-                        if (title) {
-                            const siblingArrow = title.querySelector('svg');
-                            if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
-                        }
-                    }
-                });
-            }
-
-            list.classList.toggle('open');
-            if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
-        };
-
-        // 2. Ідеальний слайдер банерів (Fade-анімація без скруглень)
-        let isBannerAnimatingLocal = false;
-        
-        window.initBannerSlider = function() {
-            const container = document.getElementById('mainBannerContainer');
-            if (!container) return;
-
-            let banners = [];
-            if(typeof API !== 'undefined') banners = API.get('bv_banners', []);
-            
-            if (!banners || banners.length === 0) {
-                banners = [
-                    { id: 1, img: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg', link: 'catalog.html' },
-                    { id: 2, img: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg', link: 'exclusive.html' }
-                ];
-            }
-
-            const settings = typeof API !== 'undefined' ? API.get('bv_settings', {}) : {};
-            const ratio = settings.bannerRatio || '3/1';
-
-            window.bannerCount = banners.length; 
-            window.currentBanner = 0; 
-            
-            container.innerHTML = `
-                <div class="relative w-full h-full rounded-none overflow-hidden group bg-[var(--bg-elevated)]">
-                    ${banners.map((b, i) => `
-                        <div class="banner-slide absolute inset-0 w-full h-full cursor-pointer transition-opacity duration-700 ease-in-out" style="opacity: ${i === 0 ? '1' : '0'}; z-index: ${i === 0 ? '10' : '1'};" data-index="${i}" onclick="window.location.href='${b.link || '#'}'">
-                            <img src="${b.img}" class="w-full h-full object-cover" style="aspect-ratio: ${ratio};">
-                            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
-                        </div>
-                    `).join('')}
-                    
-                    <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.scrollBanner(-1, event)">❮</button>
-                    <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.scrollBanner(1, event)">❯</button>
-                    
-                    <div id="bannerDots" class="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                        ${banners.map((_, i) => `
-                            <button class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 ${i === 0 ? 'bg-[var(--gold-muted)] scale-125' : 'bg-white/50'}" onclick="window.goToBanner(${i}, event)"></button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-
-            if(window.bannerInterval) clearInterval(window.bannerInterval);
-            
-            if(banners.length > 1) { 
-                window.bannerInterval = setInterval(() => window.scrollBanner(1), 5000); 
-
-                let touchStartX = 0; let touchEndX = 0;
-                container.addEventListener('touchstart', e => { 
-                    touchStartX = e.changedTouches[0].screenX; 
-                    clearInterval(window.bannerInterval); 
-                }, {passive: true});
-                
-                container.addEventListener('touchend', e => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    const diff = touchStartX - touchEndX;
-                    if (diff > 40) window.scrollBanner(1); 
-                    else if (diff < -40) window.scrollBanner(-1); 
-                    
-                    window.bannerInterval = setInterval(() => window.scrollBanner(1), 5000); 
-                }, {passive: true});
-            }
-        };
-
-        window.scrollBanner = function(dir, e) {
-            if(e) e.stopPropagation();
-            if(isBannerAnimatingLocal) return;
-            let newIdx = window.currentBanner + dir;
-            if (newIdx >= window.bannerCount) newIdx = 0;
-            if (newIdx < 0) newIdx = window.bannerCount - 1;
-            window.goToBanner(newIdx);
-        };
-
-        window.goToBanner = function(idx, e) {
-            if(e) e.stopPropagation();
-            if (idx === window.currentBanner || isBannerAnimatingLocal) return;
-            
-            isBannerAnimatingLocal = true;
-            window.currentBanner = idx;
-            
-            const slides = document.querySelectorAll('.banner-slide');
-            slides.forEach((slide, i) => {
-                slide.style.opacity = i === idx ? '1' : '0';
-                slide.style.zIndex = i === idx ? '10' : '1';
-            });
-            
-            const dots = document.querySelectorAll('#bannerDots button');
-            dots.forEach((dot, i) => {
-                dot.className = i === idx 
-                    ? 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 bg-[var(--gold-muted)] scale-125' 
-                    : 'w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 bg-white/50';
-            });
-            
-            setTimeout(() => { isBannerAnimatingLocal = false; }, 700);
-        };
-
-        // 3. Розумна кнопка "Нагору" (Висока продуктивність)
-        let lastScrollY = window.scrollY;
-        let ticking = false;
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const topBtn = document.getElementById('scrollToTopBtn');
-                    if (topBtn) {
-                        const currentScrollY = window.scrollY;
-                        if (currentScrollY > 400 && currentScrollY < lastScrollY) {
-                            topBtn.classList.add('opacity-100', 'translate-y-0');
-                            topBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-                        } else {
-                            topBtn.classList.remove('opacity-100', 'translate-y-0');
-                            topBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-                        }
-                        lastScrollY = currentScrollY;
-                    }
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true });
-
-        // 4. Авто-скрол до банерів
-        document.addEventListener('DOMContentLoaded', () => {
-            let autoScrollTimer;
-            
-            const doAutoScroll = () => {
-                const bannerSection = document.getElementById('promo-banner-top');
-                if (bannerSection && window.scrollY < 50) {
-                    const offset = 70; 
-                    const elementRect = bannerSection.getBoundingClientRect().top;
-                    const offsetPosition = elementRect + window.pageYOffset - offset;
-                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                }
-            };
-
-            const cancelAutoScroll = () => clearTimeout(autoScrollTimer);
-
-            window.addEventListener('touchstart', cancelAutoScroll, { passive: true, once: true });
-            window.addEventListener('wheel', cancelAutoScroll, { passive: true, once: true });
-
-            autoScrollTimer = setTimeout(doAutoScroll, 3000);
-        });
-    </script>
 </body>
 </html>
