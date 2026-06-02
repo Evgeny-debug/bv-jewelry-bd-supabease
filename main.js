@@ -51,34 +51,6 @@ const i18n = {
         search_ph: "Search...", login: "Log in", register: "Register", login_mob_title: "PROFILE", theme_mob: "Change Theme", lang_title: "LANGUAGE",
         footer_rights: "All rights reserved.", footer_dev: "Developed by",
         exc_title: "Exclusive Creation", exc_step: "Step", exc_order: "Request Quote"
-    },
-    ru: { 
-        m1: "Главная", m2: "Каталог", m3: "Бренд", m4: "Контакты", m_price: "Прайс", m_atelier: "Эксклюзив",
-        menu_all: "Все товары", menu_for_whom: "Для кого", menu_metal: "По металлу",
-        cart_title: "Корзина", cart_subtotal: "Итого:", cart_checkout: "Оформить заказ", cart_empty: "Ваша корзина пуста",
-        fav_title: "Избранное", fav_empty: "Список пуст",
-        in_stock: "В наличии", out_stock: "Нет в наличии", pre_order: "Под заказ",
-        badge_new: "Новинка", badge_exclusive: "Эксклюзив", badge_sale: "Sale", badge_sold_out: "Продано", badge_pre_order: "Под заказ",
-        btn_buy: "Купить", btn_details: "Подробнее", btn_send: "Отправить",
-        similar: "Также рекомендуем", desc_title: "Описание изделия", pd_nav_specs: "Характеристики", pd_nav_review: "Отзывы", pd_nav_all: "Всё о товаре", pd_nav_photo: "Фото", pd_nav_ask: "Задать вопрос",
-        cat_filters: "Фильтры", cat_sort: "Сортировка", cat_sort_new: "Сначала новые", cat_sort_cheap: "От дешевых к дорогим", cat_sort_exp: "От дорогих к дешевым", cat_load_more: "Показать еще", cat_reset: "Сбросить", cat_empty: "Товары не найдены",
-        search_ph: "Поиск...", login: "Войти", register: "Регистрация", login_mob_title: "КАБИНЕТ", theme_mob: "Сменить тему", lang_title: "ЯЗЫК",
-        footer_rights: "Все права защищены.", footer_dev: "Разработано",
-        exc_title: "Создание эксклюзива", exc_step: "Этап", exc_order: "Заказать просчет"
-    },
-    bg: { 
-        m1: "Начало", m2: "Каталог", m3: "Марка", m4: "Контакти", m_price: "Цени", m_atelier: "Ексклузив",
-        menu_all: "Всички продукти", menu_for_whom: "За кого", menu_metal: "По метал",
-        cart_title: "Количка", cart_subtotal: "Общо:", cart_checkout: "Поръчай", cart_empty: "Вашата количка е празна",
-        fav_title: "Любими", fav_empty: "Списъкът е празен",
-        in_stock: "В наличност", out_stock: "Изчерпано", pre_order: "По поръчка",
-        badge_new: "Ново", badge_exclusive: "Ексклузивно", badge_sale: "Разпродажба", badge_sold_out: "Изчерпано", badge_pre_order: "По поръчка",
-        btn_buy: "Купи", btn_details: "Детайли", btn_send: "Изпрати",
-        similar: "Препоръчваме също", desc_title: "Описание", pd_nav_specs: "Характеристики", pd_nav_review: "Отзиви", pd_nav_all: "За продукта", pd_nav_photo: "Снимки", pd_nav_ask: "Задай въпрос",
-        cat_filters: "Филтри", cat_sort: "Сортиране", cat_sort_new: "Най-нови", cat_sort_cheap: "От евтини към скъпи", cat_sort_exp: "От скъпи към евтини", cat_load_more: "Покажи още", cat_reset: "Изчисти", cat_empty: "Няма намерени продукти",
-        search_ph: "Търсене...", login: "Вход", register: "Регистрация", login_mob_title: "ПРОФИЛ", theme_mob: "Смяна на тема", lang_title: "ЕЗИК",
-        footer_rights: "Всички права запазени.", footer_dev: "Разработено от",
-        exc_title: "Създаване на ексклузив", exc_step: "Етап", exc_order: "Запитване за цена"
     }
 };
 
@@ -102,60 +74,38 @@ let products = [];
 // 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ (SUPABASE)
 // ==========================================
 window.loadCloudData = async function() {
-    console.log("BV Jewelry: Завантаження даних з Supabase...");
     try {
-        // 1. Завантажуємо товари
-        const { data: prodData, error: prodErr } = await _supabase.from('products').select('*');
+        const { data: prodData } = await _supabase.from('products').select('*');
         if (prodData && prodData.length > 0) {
             products = prodData;
             API.set('bv_products', products);
         } else if (prodData && prodData.length === 0 && typeof window.BVDemoData !== 'undefined') {
-            // Якщо база порожня, заливаємо туди демо-дані
-            console.log("BV Jewelry: База порожня. Експорт демо-товарів у хмару...");
             products = window.BVDemoData.products || [];
             if(products.length > 0) await _supabase.from('products').upsert(products);
             API.set('bv_products', products);
         }
 
-        // 2. Завантажуємо налаштування сайту
-        const { data: storageData, error: storeErr } = await _supabase.from('site_storage').select('*');
+        const { data: storageData } = await _supabase.from('site_storage').select('*');
         if (storageData && storageData.length > 0) {
             storageData.forEach(item => {
                 API.set(item.key, item.value);
                 if(item.key === 'bv_categories_tree') categoriesTree = item.value;
             });
-        } else if (typeof window.BVDemoData !== 'undefined') {
-            // Заливаємо базові налаштування
-            console.log("BV Jewelry: Експорт налаштувань у хмару...");
-            const defaultStorage = [
-                { key: 'bv_settings', value: window.BVDemoData.settings || {} },
-                { key: 'bv_categories_tree', value: window.BVDemoData.categories || [] },
-                { key: 'bv_banners', value: window.BVDemoData.banners || [] },
-                { key: 'bv_pages_content', value: window.BVDemoData.pages || {} },
-                { key: 'bv_price_list', value: window.BVDemoData.priceList || [] },
-                { key: 'bv_exclusive_process', value: window.BVDemoData.exclusiveProcess || [] },
-                { key: 'bv_exclusive_materials', value: window.BVDemoData.exclusiveMaterials || [] }
-            ];
-            await _supabase.from('site_storage').upsert(defaultStorage);
-            defaultStorage.forEach(item => {
-                API.set(item.key, item.value);
-                if(item.key === 'bv_categories_tree') categoriesTree = item.value;
-            });
         }
         
-        // Ініціалізуємо UI після завантаження даних
         if(typeof generateMenus === 'function') generateMenus();
         if(typeof initBannerSlider === 'function') initBannerSlider();
-        if(document.getElementById('specialGrid') && typeof initPremiumCarousel === 'function') renderHomeSections();
+        if(document.getElementById('specialGrid') && typeof renderHomeSections === 'function') renderHomeSections();
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings(); 
-
+        
+        window.updateProfileMenu(); 
     } catch (err) {
         console.error("Помилка завантаження бази:", err);
     }
 };
 
 // ==========================================
-// 4. СТАН ТА СИНХРОНІЗАЦІЯ (SCOPED STORAGE)
+// 4. СТАН ТА СИНХРОНІЗАЦІЯ
 // ==========================================
 function getCurrentUser() { return API.get('bv_current_user', null); }
 function getScopedStorageKey(baseKey) {
@@ -188,7 +138,6 @@ window.setFavs = async function(favs) {
     if (currentUser && currentUser.id) {
         currentUser.favs = favs; 
         API.set('bv_current_user', currentUser);
-        // Синхронізуємо з Supabase
         await _supabase.from('profiles').update({ favs: favs }).eq('id', currentUser.id);
     }
 }
@@ -213,7 +162,7 @@ function getCategoryIconSVG(catId) {
 }
 
 // ==========================================
-// 5. КОШИК ТА УЛЮБЛЕНЕ (ЛОГІКА І РЕНДЕР)
+// 5. КОШИК ТА УЛЮБЛЕНЕ
 // ==========================================
 window.toggleCart = function() {
     const drawer = document.getElementById('cartDrawer');
@@ -231,26 +180,57 @@ window.toggleCart = function() {
 
 window.addToCart = function(id, title, variant, price, img) {
     let cart = getCart();
-    const existing = cart.find(item => item.id === id);
-    if (existing) existing.qty += 1;
-    else cart.push({ id, title: String(title), variant: String(variant), price: Number(price), img: String(img), qty: 1 });
+    
+    // Смарт-парсинг: витягуємо розмір з назви (якщо є) і знаходимо SKU
+    let extractedSize = null;
+    let cleanTitle = String(title);
+    if (cleanTitle.includes('(Розмір:')) {
+        const parts = cleanTitle.split('(Розмір:');
+        cleanTitle = parts[0].trim();
+        extractedSize = parts[1].replace(')', '').trim();
+    }
+
+    const allProducts = API.get('bv_products', []);
+    const prod = allProducts.find(p => p.id === id);
+    const sku = prod && prod.sku ? prod.sku : id;
+
+    // Створюємо унікальний ID для товару в кошику (щоб різні розміри не зливалися)
+    const cartId = id + (extractedSize ? '-' + extractedSize : '');
+
+    const existing = cart.find(item => item.cartId === cartId);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ 
+            cartId: cartId, 
+            id: id, 
+            title: cleanTitle, 
+            variant: String(variant), 
+            price: Number(price), 
+            img: String(img), 
+            qty: 1,
+            sku: sku,
+            size: extractedSize
+        });
+    }
+    
     setCart(cart);
     window.renderCart();
     if (!document.getElementById('cartDrawer').classList.contains('active')) window.toggleCart();
 };
 
-window.updateCartQty = function(id, delta) {
+window.updateCartQty = function(cartId, delta) {
     const cart = getCart();
-    const item = cart.find((entry) => entry.id === id);
+    const item = cart.find((entry) => entry.cartId === cartId);
     if (!item) return;
     item.qty = Math.max(1, item.qty + delta);
     setCart(cart);
     window.renderCart();
 };
 
-window.removeFromCart = function(id) {
+window.removeFromCart = function(cartId) {
     let cart = getCart();
-    cart = cart.filter(item => item.id !== id);
+    cart = cart.filter(item => item.cartId !== cartId);
     setCart(cart);
     window.renderCart();
 };
@@ -264,16 +244,8 @@ window.clearEntireCart = function(force = false) {
 
 window.checkoutOrder = function() {
     const cart = getCart();
-    
-    // Перевіряємо, чи не порожній кошик
-    if(cart.length === 0) {
-        return alert('Ваш кошик порожній!');
-    }
-    
-    // Закриваємо шторку кошика
+    if(cart.length === 0) { return alert('Ваш кошик порожній!'); }
     window.toggleCart();
-    
-    // Перенаправляємо клієнта на нову сторінку оформлення
     window.location.href = 'checkout.html';
 };
 
@@ -292,8 +264,6 @@ window.renderCart = function() {
         cartBody.innerHTML = `<div class="cart-empty-msg text-center text-[var(--text-muted)] mt-10">${i18n[lang].cart_empty}</div>`;
         if(subtotalVal) subtotalVal.innerText = '0 ₴';
         cartBadges.forEach(b => b.innerText = '0');
-        
-        // Сховати кнопку оформлення
         const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
         if(checkoutBtnWrapper) checkoutBtnWrapper.style.display = 'none';
         return;
@@ -302,22 +272,29 @@ window.renderCart = function() {
     cart.forEach(item => {
         total += item.price * item.qty;
         totalQty += item.qty;
+        
+        const sizeBadge = item.size ? `<span class="bg-[var(--gold-muted)]/20 text-[var(--gold-muted)] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
+        const skuBadge = `<span class="text-[10px] text-[var(--text-muted)]">Арт: ${item.sku}</span>`;
+
         cartBody.insertAdjacentHTML('beforeend', `
             <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/40">
                 <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]">
                 <div class="flex-grow flex flex-col justify-center pr-6">
                     <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${escapeHtml(item.title)}</span>
-                    <span class="text-xs text-[var(--text-muted)] mt-1">${escapeHtml(item.variant)}</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                        ${sizeBadge}
+                        ${skuBadge}
+                    </div>
                     <div class="flex items-center gap-3 mt-2">
                         <span class="text-sm font-bold text-[var(--gold-muted)]">${formatterPrice.format(item.price)} ₴</span>
                         <div class="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--bg-elevated)]">
-                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.id}', -1)">−</button>
+                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.cartId}', -1)">−</button>
                             <span class="px-2 text-xs text-[var(--text-main)] font-semibold min-w-6 text-center">${item.qty}</span>
-                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.id}', 1)">+</button>
+                            <button class="px-2 py-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)]" onclick="updateCartQty('${item.cartId}', 1)">+</button>
                         </div>
                     </div>
                 </div>
-                <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)]" onclick="removeFromCart('${item.id}')">
+                <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)]" onclick="removeFromCart('${item.cartId}')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
@@ -330,11 +307,10 @@ window.renderCart = function() {
         b.style.display = totalQty > 0 ? 'flex' : 'none';
     });
 
-    // Рендер кнопки Checkout якщо вона не інтегрована жорстко в HTML
     const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
     if(checkoutBtnWrapper) {
         checkoutBtnWrapper.style.display = 'block';
-        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="w-full bg-[var(--gold-muted)] text-[#111] font-bold uppercase tracking-widest py-3 rounded-xl hover:opacity-90 transition-opacity">Оформити замовлення</button>`;
+        checkoutBtnWrapper.innerHTML = `<button id="checkoutBtn" onclick="window.checkoutOrder()" class="w-full bg-[var(--gold-muted)] text-[#111] font-bold uppercase tracking-widest py-3 rounded-xl hover:opacity-90 transition-opacity active:scale-95">Оформити замовлення</button>`;
     }
 };
 
@@ -404,9 +380,11 @@ window.renderFavDrawer = function() {
     }
 
     const favProducts = allProducts.filter(p => favsIds.includes(p.id));
-    favBody.innerHTML = favProducts.map(prod => `
+    favBody.innerHTML = favProducts.map(prod => {
+        const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
+        return `
         <div class="cart-item flex gap-4 p-3 rounded-xl mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
-            <img src="${prod.img || prod.image}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
+            <img src="${safeImg}" class="w-16 h-16 object-cover rounded-lg border border-[var(--border)]">
             <div class="flex-grow flex flex-col justify-center pr-6">
                 <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${escapeHtml(window.getLoc(prod, 'name'))}</span>
                 <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(window.getLoc(prod, 'variant'))}</span>
@@ -416,7 +394,8 @@ window.renderFavDrawer = function() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
-    `).join('');
+        `;
+    }).join('');
 };
 
 // ==========================================
@@ -444,7 +423,8 @@ window.renderProductCard = function(prod) {
     const safeId = escapeHtml(prod.id);
     const safeName = escapeHtml(window.getLoc(prod, 'name')).replace(/'/g, "\\'"); 
     const safeVariant = escapeHtml(window.getLoc(prod, 'variant')).replace(/'/g, "\\'");
-    const safeImg = escapeHtml(prod.img || prod.image);
+    
+    const safeImg = escapeHtml((prod.images && prod.images.length > 0) ? prod.images[0] : (prod.img || prod.image));
     const priceDisplay = prod.discount && Number(prod.discount) > 0 ? prod.discount : prod.price;
 
     return `
@@ -494,12 +474,9 @@ function generateMenus() {
             const isActive = index === 0 ? 'active' : ''; 
             const svgIcon = getCategoryIconSVG(cat.id);
             
-            // 1. Ліва колонка
             megaCol1.innerHTML += `<div class="mega-cat-item ${isActive}" data-target="mc-${cat.id}"><svg class="mega-cat-icon" viewBox="0 0 24 24">${svgIcon}</svg><span>${cat.name}</span></div>`;
 
-            // 2. Сітка груп
             let groupsHtml = '<div class="zlato-groups-grid">';
-            
             if (cat.subcategories && cat.subcategories.length > 0) {
                 cat.subcategories.forEach(sub => {
                     groupsHtml += `<div class="zlato-group-wrapper">`;
@@ -517,18 +494,16 @@ function generateMenus() {
             }
             groupsHtml += '</div>';
 
-            // 3. Блок нижніх хайлайтів
             let highlightsHtml = '';
             if (cat.highlights && cat.highlights.length > 0) {
                 highlightsHtml += `<div class="zlato-highlights">`;
                 cat.highlights.forEach(hl => {
                     const accentClass = hl.isAccent ? 'accent' : '';
-                    highlightsHtml += `<a href="catalog.html${hl.link}" class="zlato-highlight-btn ${accentClass}">${hl.name} &rarr;</a>`;
+                    highlightsHtml += `<a href="catalog.html${hl.link}" class="zlato-highlight-btn ${accentClass}">${hl.name} →</a>`;
                 });
                 highlightsHtml += `</div>`;
             }
 
-            // 4. Збірка правої колонки
             if(megaMenu) {
                 const newCol2 = document.createElement('div');
                 newCol2.className = `mega-col-2 zlato-content ${isActive}`;
@@ -537,7 +512,7 @@ function generateMenus() {
                 newCol2.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
                         <h2 class="text-3xl font-serif text-[var(--text-main)]">${cat.name}</h2>
-                        <a href="catalog.html#${cat.id}" class="text-[12px] uppercase tracking-widest text-[var(--gold-muted)] font-bold transition-colors">Всі &rarr;</a>
+                        <a href="catalog.html#${cat.id}" class="text-[12px] uppercase tracking-widest text-[var(--gold-muted)] font-bold transition-colors">Всі →</a>
                     </div>
                     ${groupsHtml}
                     ${highlightsHtml}
@@ -577,7 +552,7 @@ function generateMenus() {
                    }
                 });
             }
-            mobSubLinksHtml += `<a href="catalog.html#${cat.id}" class="mob-all-btn" onclick="window.toggleMenu()">Всі товари: ${cat.name} &rarr;</a>`;
+            mobSubLinksHtml += `<a href="catalog.html#${cat.id}" class="mob-all-btn" onclick="window.toggleMenu()">Всі товари: ${cat.name} →</a>`;
             
             mobCatHtml += `
             <div class="mob-nested-wrap">
@@ -627,10 +602,10 @@ function generateMenus() {
                     <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
                 <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 20px;">
-                    <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Історія Atelier</a>
-                    <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія</a>
-                    <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Умови</a>
-                    <a href="info.html?p=reviews" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Відгуки</a>
+                    <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+                    <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+                    <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+                    <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
                 </div>
             </div>
             
@@ -652,7 +627,6 @@ function generateMenus() {
                     <div class="mob-accordion-list" id="mobLangList" style="margin-top: 10px; background: rgba(0,0,0,0.1); border-radius: 12px;">
                         <div class="dropdown-item py-3" onclick="window.changeLang('uk')"><img src="https://flagcdn.com/ua.svg" class="flag"> Українська</div>
                         <div class="dropdown-item py-3" onclick="window.changeLang('en')"><img src="https://flagcdn.com/gb.svg" class="flag"> English</div>
-                        <div class="dropdown-item py-3" onclick="window.changeLang('ru')"><img src="https://flagcdn.com/ru.svg" class="flag"> Русский</div>
                     </div>
                 </div>
                 
@@ -929,7 +903,7 @@ window.initBannerSlider = function() {
     html += '</div>';
 
     if(banners.length > 1) {
-        html += `<button class="banner-arrow prev" onclick="moveBanner(-1)">&#10094;</button><button class="banner-arrow next" onclick="moveBanner(1)">&#10095;</button><div class="banner-dots">`;
+        html += `<button class="banner-arrow prev" onclick="moveBanner(-1)">❮</button><button class="banner-arrow next" onclick="moveBanner(1)">❯</button><div class="banner-dots">`;
         banners.forEach((_, i) => { html += `<span class="banner-dot ${i===0?'active':''}" onclick="goToBanner(${i})"></span>`; });
         html += `</div>`;
     }
@@ -993,39 +967,15 @@ window.goToBanner = function(index) {
 };
 
 // ==========================================
-// 11. ГОЛОВНА: РЕНДЕР СЕКЦІЙ 
+// 11. ГОЛОВНА ТА ПІДВАЛ: РЕНДЕР СЕКЦІЙ 
 // ==========================================
-window.renderHomeCollage = function() {
-    const collage = document.getElementById('art-collage');
-    if (!collage) return;
-    const config = API.get('bv_collage_config', { template: 'grid-6', items: [] });
-    
-    const perfectCollage = document.querySelector('.grid-perfect-collage');
-    if (perfectCollage && config.items.length > 0) {
-        perfectCollage.innerHTML = '';
-        config.items.forEach((item, index) => {
-            let itemClass = index === 0 ? 'grid-6-big' : 'grid-6-box';
-            let badgeHtml = index === 0 ? '<span class="badge-status badge-new">New</span>' : (index === 1 ? '<span class="badge-status badge-sale">Sale</span>' : '');
-            
-            perfectCollage.innerHTML += `
-                <div class="collage-item ${itemClass} group" onclick="location.href='catalog.html#${item.catId}'">
-                    <img src="${item.img}" alt="${item.title}" class="item-img" loading="lazy">
-                    <div class="item-overlay">
-                        ${badgeHtml}
-                        <span class="item-category-serif">${item.title}</span>
-                    </div>
-                </div>
-            `;
-        });
-    }
-};
-
 window.renderHomeSections = function() {
     const specialGrid = document.getElementById('specialGrid');
     const weeklyGrid = document.getElementById('weeklyGrid');
 
     const trackClasses = "flex overflow-x-auto gap-4 md:gap-5 pb-6 pt-2 snap-x snap-mandatory no-scrollbar";
     const cardWrapper = (p) => `<div class="flex-none w-[45%] sm:w-[32%] md:w-[26%] lg:w-[20%] xl:w-[18%] snap-start flex">${window.renderProductCard(p)}</div>`;
+    
     const generateInfiniteHTML = (items) => {
         if(items.length === 0) return '';
         let blockItems = [...items];
@@ -1036,16 +986,24 @@ window.renderHomeSections = function() {
 
     if(specialGrid) {
         specialGrid.className = trackClasses;
-        const items = products.filter(p => p.isSpecial).slice(0, 10);
-        specialGrid.innerHTML = generateInfiniteHTML(items);
-        initPremiumCarousel(specialGrid);
+        const items = products.filter(p => p.isSpecial === true || p.isSpecial === 'true').slice(0, 10);
+        if(items.length > 0) {
+            specialGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(specialGrid);
+        } else {
+            specialGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Нових пропозицій ще не додано.</p>';
+        }
     }
     
     if(weeklyGrid) {
         weeklyGrid.className = trackClasses;
-        const items = products.filter(p => p.isWeekly).slice(0, 10);
-        weeklyGrid.innerHTML = generateInfiniteHTML(items);
-        initPremiumCarousel(weeklyGrid);
+        const items = products.filter(p => p.isWeekly === true || p.isWeekly === 'true').slice(0, 10);
+        if(items.length > 0) {
+            weeklyGrid.innerHTML = generateInfiniteHTML(items);
+            initPremiumCarousel(weeklyGrid);
+        } else {
+            weeklyGrid.innerHTML = '<p class="text-sm text-gray-500 w-full text-center py-10">Хіти тижня ще не обрано.</p>';
+        }
     }
 };
 
@@ -1079,9 +1037,44 @@ window.applyAdminSettings = function() {
         }
         if(settings.tgLink) document.querySelectorAll('.tg-link').forEach(link => link.href = settings.tgLink);
         if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
-        if(settings.addr1) document.querySelectorAll('.addr-text-1').forEach(el => el.innerText = settings.addr1);
-        if(settings.addr2) document.querySelectorAll('.addr-text-2').forEach(el => el.innerText = settings.addr2);
+        
+        const footerAddrBlock = document.getElementById('footerAddressesBlock');
+        if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
+            let html = '';
+            html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        <span>${settings.addresses[0]}</span>
+                    </a>`;
+            
+            if (settings.addresses.length > 1) {
+                html += `<button onclick="window.showBranchesModal()" class="text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
+            }
+            footerAddrBlock.innerHTML = html;
+        }
     }
+};
+
+window.showBranchesModal = function() {
+    const settings = API.get('bv_settings', {});
+    const addrs = settings.addresses || [];
+    if(addrs.length === 0) return;
+    
+    const list = addrs.map(a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-xl hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
+        <span>${a}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+    </a>`).join('');
+    
+    const modalHtml = `
+    <div id="branchesModal" class="fixed inset-0 bg-black/80 z-[7000] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="this.remove()">
+        <div class="glass-panel p-8 w-full max-w-md relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('branchesModal').remove()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-2xl leading-none">×</button>
+            <h3 class="text-2xl font-serif text-[var(--gold-muted)] mb-6 text-center italic">Наші філіали</h3>
+            <div class="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                ${list}
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 };
 
 window.renderServicesTable = function() {
@@ -1272,35 +1265,10 @@ window.openAuthModal = function() {
     if(document.getElementById('sideMenu') && document.getElementById('sideMenu').classList.contains('active')){ window.toggleMenu(); }
     const modal = document.getElementById('authModal');
     if(!modal) return;
-
-    const currentUser = API.get('bv_current_user', null);
     modal.classList.remove('hidden'); 
     setTimeout(() => modal.classList.remove('opacity-0'), 10);
-
-    if (currentUser) {
-        document.getElementById('authFormContainer').classList.add('hidden');
-        document.getElementById('profileView').classList.remove('hidden');
-        document.getElementById('profileView').classList.add('flex');
-
-        const initial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : (currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U');
-        document.getElementById('profAvatar').innerText = initial;
-        document.getElementById('profName').innerText = currentUser.name || 'Клієнт';
-        document.getElementById('profEmail').innerText = currentUser.username || '';
-
-        if (currentUser.role === 'admin' || localStorage.getItem('isAdminAuth') === 'true') {
-            document.getElementById('adminLinkBtn').classList.remove('hidden');
-            document.getElementById('clientLinkBtn').classList.add('hidden');
-        } else {
-            document.getElementById('adminLinkBtn').classList.add('hidden');
-            document.getElementById('clientLinkBtn').classList.remove('hidden');
-        }
-    } else {
-        document.getElementById('profileView').classList.add('hidden');
-        document.getElementById('profileView').classList.remove('flex');
-        document.getElementById('authFormContainer').classList.remove('hidden');
-        isRegisterMode = false; 
-        updateAuthView();
-    }
+    isRegisterMode = false; 
+    updateAuthView();
 };
 
 window.closeAuthModal = function() {
@@ -1332,7 +1300,6 @@ window.updateAuthView = function() {
         }
     }
 
-    // Динамічно додаємо підписки при реєстрації
     const subsField = document.getElementById('subsFieldContainer');
     if(!subsField && isRegisterMode) {
         document.getElementById('authForm').insertAdjacentHTML('beforeend', `
@@ -1344,13 +1311,65 @@ window.updateAuthView = function() {
     } else if (subsField && !isRegisterMode) {
         subsField.remove();
     }
+    
+    // Додаємо кнопки соціального входу (Google та Apple)
+    const socialBlockId = 'socialLoginBlock';
+    let socialBlock = document.getElementById(socialBlockId);
+    
+    if(!socialBlock) {
+        const formContainer = document.getElementById('authFormContainer');
+        formContainer.insertAdjacentHTML('beforeend', `
+            <div id="${socialBlockId}" class="mt-4 flex flex-col gap-3">
+                <div class="relative flex items-center justify-center w-full mt-2 mb-2">
+                    <div class="border-t border-[var(--border)] w-full"></div>
+                    <span class="bg-[var(--bg-card)] px-3 text-[10px] text-[var(--text-muted)] absolute uppercase tracking-widest">Або</span>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="loginWithGoogle()" class="flex-1 flex items-center justify-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google
+                    </button>
+                    <button type="button" onclick="loginWithApple()" class="flex-1 flex items-center justify-center gap-2 border border-[var(--border)] py-3 rounded-xl text-xs font-semibold hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-main)] active:scale-95">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.8 3.59-.83 1.89-.04 3.23.86 4.14 2.19-3.21 1.83-2.66 5.89.5 7.05-.72 1.63-1.87 3.19-3.31 3.76zm-3.08-16.7c.66-.82 1.13-1.95.95-3.08-1.02.04-2.27.68-2.98 1.5-.61.69-1.16 1.86-.93 2.97 1.14.09 2.24-.51 2.96-1.39z"/></svg> Apple
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+};
+
+window.loginWithGoogle = async function() {
+    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    await _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
+};
+
+window.loginWithApple = async function() {
+    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    await _supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin + window.location.pathname } });
+};
+
+window.updateProfileMenu = function() {
+    const user = getCurrentUser();
+    const dropdownMenu = document.getElementById('profileDropdownMenu');
+    if(dropdownMenu) {
+        if (user) {
+            dropdownMenu.innerHTML = `
+                <a href="profile.html" class="dropdown-item w-full text-left font-medium">Мій кабінет</a>
+                ${user.role === 'admin' ? '<a href="admin.html" class="dropdown-item w-full text-left font-bold text-[#c5a059]">Панель Адміна</a>' : ''}
+                <button onclick="logoutUser()" class="dropdown-item w-full text-left text-red-400 hover:text-red-500 mt-2 border-t border-[var(--border)] pt-2">Вийти з акаунту</button>
+            `;
+        } else {
+            dropdownMenu.innerHTML = `
+                <button onclick="window.isRegisterMode=false; window.openAuthModal();" class="dropdown-item w-full text-left font-medium">Увійти</button>
+                <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="dropdown-item w-full text-left font-medium text-[#c5a059]">Зареєструватися</button>
+            `;
+        }
+    }
 };
 
 window.initRealtime = function() {
     const user = getCurrentUser();
     if(!user) return;
 
-    // Підписуємось на оновлення статусу замовлення в реальному часі
     _supabase.channel('custom-user-orders')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, (payload) => {
             const newStatus = payload.new.status;
@@ -1365,7 +1384,27 @@ window.initRealtime = function() {
         .subscribe();
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Перевірка OAuth сесії після повернення з Google/Apple
+    if(window.location.hash && window.location.hash.includes('access_token')) {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session && session.user) {
+            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            const role = (profile && profile.role === 'admin') ? 'admin' : 'client';
+            const fullName = (profile && profile.full_name) ? profile.full_name : (session.user.user_metadata?.full_name || 'Клієнт');
+            const userFavs = profile && profile.favs ? profile.favs : [];
+
+            API.set('bv_current_user', { id: session.user.id, username: session.user.email, role: role, name: fullName, favs: userFavs });
+            if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
+            API.set(getScopedStorageKey('bv_favs'), userFavs);
+            
+            // Очищуємо URL
+            history.replaceState(null, null, ' ');
+            window.updateProfileMenu();
+            if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+        }
+    }
+
     const authForm = document.getElementById('authForm');
     if(authForm) {
         authForm.addEventListener('submit', async (e) => {
@@ -1378,14 +1417,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('authUser').value.trim();
             const pass = document.getElementById('authPass').value.trim();
             const name = document.getElementById('authName') ? document.getElementById('authName').value.trim() : '';
-            
-            if(email === 'admin' && pass === 'admin') {
-                localStorage.setItem('isAdminAuth', 'true');
-                API.set('bv_current_user', { username: 'admin', email: 'admin@bv.com', role: 'admin', name: 'Admin' });
-                submitBtn.innerText = originalText; submitBtn.disabled = false;
-                window.openAuthModal();
-                return;
-            }
 
             if (isRegisterMode) {
                 if (pass.length < 6) { 
@@ -1404,7 +1435,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (error) {
                     alert('Помилка реєстрації: ' + error.message);
                 } else {
-                    // Створюємо профіль у таблиці profiles
                     if(data.user) {
                         await _supabase.from('profiles').insert([
                             { id: data.user.id, full_name: name, role: 'client', wants_newsletter: w_news, wants_discounts: w_disc, favs: [] }
@@ -1434,13 +1464,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 API.set('bv_current_user', { id: data.user.id, username: data.user.email, role: role, name: fullName, favs: userFavs });
                 if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
                 
-                // Синхронізуємо улюблене після входу
                 API.set(getScopedStorageKey('bv_favs'), userFavs);
                 
-                openAuthModal();
+                closeAuthModal();
                 if(typeof updateBadges === 'function') updateBadges();
                 window.renderFavDrawer();
-                window.initRealtime(); // Вмикаємо сповіщення
+                window.initRealtime();
+                window.updateProfileMenu(); 
             }
             submitBtn.innerText = originalText; submitBtn.disabled = false;
         });
@@ -1449,7 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.logoutUser = async function() {
     if(typeof _supabase !== 'undefined' && _supabase.auth) {
-        _supabase.removeAllChannels(); // Відключаємо realtime
+        _supabase.removeAllChannels();
         await _supabase.auth.signOut();
     }
     API.set('bv_current_user', null); 
@@ -1460,11 +1490,9 @@ window.logoutUser = async function() {
     if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('profile.html')) {
         window.location.href = 'index.html';
     } else {
-        openAuthModal();
         if(typeof window.renderCart === 'function') window.renderCart(); 
         if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
-        const profBtn = document.getElementById('headerProfileBtn');
-        if(profBtn) profBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        window.updateProfileMenu(); 
     }
 };
 
@@ -1477,7 +1505,6 @@ window.onload = async () => {
     migrateScopedState();
     if(typeof window.injectGlobalUI === 'function') window.injectGlobalUI();
     
-    // Запускаємо завантаження даних із хмари Supabase
     await window.loadCloudData();
 
     if(document.getElementById('marqueeTrack') && typeof initMarqueeSim === 'function') initMarqueeSim();
@@ -1502,11 +1529,10 @@ window.onload = async () => {
 
     const currentUser = API.get('bv_current_user', null);
     if(currentUser || localStorage.getItem('isAdminAuth') === 'true') {
-        const profBtn = document.getElementById('headerProfileBtn');
-        const initial = currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'A';
-        if(profBtn) profBtn.innerHTML = `<div class="w-6 h-6 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-xs font-bold">${initial}</div>`;
-        window.initRealtime(); // Вмикаємо сповіщення для авторизованих клієнтів
+        window.initRealtime();
     }
+    
+    window.updateProfileMenu(); 
 
     const burgerBtn = document.getElementById('burger');
     if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }
