@@ -26,6 +26,7 @@
     
     <style>
         /* --- СКИДАННЯ ТА ЖОРСТКІ ПРАВИЛА --- */
+        * { box-sizing: border-box; }
         button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .btn-cross { -webkit-appearance: none; border: none; background: transparent; cursor: pointer; outline: none; }
         .btn-solid { background-color: var(--text-main) !important; color: var(--bg-body) !important; display: flex !important; justify-content: center !important; align-items: center !important; text-align: center !important; width: 100%; }
@@ -42,8 +43,7 @@
         .bottom-nav-item {
             flex: 1; height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 600;
-            text-decoration: none; border: none; background: transparent; outline: none;
-            margin: 0; padding: 0;
+            text-decoration: none; border: none; background: transparent; outline: none; margin: 0; padding: 0;
         }
         .bottom-nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; transition: transform 0.2s; flex-shrink: 0; }
         .bottom-nav-item.active { color: var(--gold-muted); }
@@ -59,11 +59,11 @@
 
         /* --- СТРОГИЙ ДИЗАЙН: КАРТКИ, СКРОЛИ, БАНЕРИ --- */
         .banner-slider-container, .banner-slide, .product-card, .exclusive-block-img {
-            border-radius: 0 !important; /* Гострі кути */
+            border-radius: 0 !important; 
         }
         
-        /* OVERRIDE для скролів (прибираємо gap з main.js) */
-        .promo-track, .weekly-track { gap: 0 !important; }
+        /* OVERRIDE для скролів (мінімальні відступи) */
+        .promo-track, .weekly-track { gap: 0 !important; padding-bottom: 10px !important; }
         .promo-track > div, .weekly-track > div { padding: 0 !important; width: 45% !important; }
         @media(min-width: 768px) { .promo-track > div, .weekly-track > div { width: 25% !important; } }
 
@@ -82,13 +82,14 @@
             background: #fff !important; 
             mix-blend-mode: multiply; /* Магія очищення фону */
         }
-        [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; }
-        .product-card .p-4 { padding: 12px 10px !important; }
+        [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
+        .product-card .p-3 { padding: 10px 8px !important; }
         
-        /* --- СЕКЦІЇ ТА ВІДСТУПИ --- */
+        /* --- СЕКЦІЇ ТА ВІДСТУПИ (МІНІМІЗОВАНІ) --- */
         section.max-w-\\[1920px\\] { padding-top: 0 !important; padding-bottom: 0 !important; margin-top: 0 !important; }
-        .mb-8.md\\:mb-16, .mb-8.md\\:mb-12 { margin-bottom: 12px !important; padding-top: 20px !important; }
-        .exclusive-block-img { height: 120px; }
+        .mb-8.md\\:mb-12 { margin-bottom: 6px !important; padding-top: 10px !important; }
+        
+        .exclusive-block-img { height: 120px; max-width: 100vw; }
         @media(min-width: 768px) { .exclusive-block-img { height: 200px; } }
         
         /* Нативний акордеон */
@@ -98,10 +99,15 @@
         /* Футер Сітка */
         .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
         @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        /* Фікс для кошика на мобілках */
+        #cartDrawer { min-height: -webkit-fill-available; padding-bottom: 60px; }
+        #cartDrawer .cart-footer { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0">
 
+    <!-- МОДАЛКА АВТОРИЗАЦІЇ -->
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[24px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none btn-cross">&times;</button>
@@ -141,6 +147,7 @@
         </div>
     </div>
 
+    <!-- ОВЕРЛЕЇ ТА ШУХЛЯДИ -->
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
@@ -149,13 +156,16 @@
         <div class="cart-header"><h2>Кошик</h2><button class="cart-close btn-cross" onclick="toggleCart()">&times;</button></div>
         <div class="cart-body custom-scrollbar" id="cartBody"></div>
         <div class="cart-footer">
-            <div class="flex justify-end mb-3">
+            <div class="flex justify-end mb-2">
                 <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] flex items-center gap-1 btn-cross">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Очистити
+                    Очистити
                 </button>
             </div>
-            <div class="cart-subtotal"><span>Підсумок:</span><span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span></div>
-            <div id="checkoutBtnWrapper" class="w-full mt-4 sticky bottom-0 bg-[var(--bg-card)] pt-2 pb-4 border-t border-[var(--border)] z-20"></div>
+            <div class="cart-subtotal mb-2"><span>Підсумок:</span><span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span></div>
+            <!-- Жорстко зафіксована кнопка внизу кошика -->
+            <div id="checkoutBtnWrapper" class="w-full sticky bottom-0 bg-[var(--bg-card)] pt-2 pb-6 z-20">
+                <button onclick="window.checkoutOrder()" class="btn-solid py-4 rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-md">Оформити замовлення</button>
+            </div>
         </div>
     </div>
     
@@ -164,63 +174,66 @@
         <div class="cart-body custom-scrollbar" id="favBody"></div>
     </div>
 
-    <header id="header" class="flex justify-between items-center px-4 py-3 bg-[var(--bg-card)] border-b border-[var(--border)] fixed top-0 w-full z-[4000] transition-colors">
-        <div class="header-left flex-1">
+    <!-- ШАПКА (Світла/Прозора, Лупа зліва, TG справа) -->
+    <header id="header" class="flex justify-between items-center px-4 py-3 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border-b border-[var(--border)] fixed top-0 w-full z-[4000] transition-colors">
+        <div class="header-left flex flex-1 items-center gap-3">
             <nav class="nav-left desktop-only">
                 <a href="index.html" class="nav-link active">Головна</a>
                 <a href="catalog.html" class="nav-link">Каталог</a>
                 <a href="exclusive.html" class="exclusive-nav-btn">Ексклюзив</a>
             </nav>
+            <!-- Лупа зліва на мобільному -->
+            <button class="mobile-only p-2 btn-cross text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
         </div>
         
         <a href="index.html" class="bv-logo flex-shrink-0 mx-auto"><span>BV</span><span>jewelry</span></a>
         
         <div class="header-right flex flex-1 justify-end items-center gap-3">
-            <button class="mobile-only p-2 btn-cross text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
-                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
             <div class="search-box desktop-only group">
                 <input type="search" class="search-input" placeholder="Пошук..." onkeypress="if(event.key==='Enter') window.executeSearch(this.value)">
                 <svg class="search-icon group-focus-within:stroke-[var(--gold-muted)] transition-colors" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </div>
+            <!-- Telegram справа на мобільному -->
             <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 text-[var(--text-main)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
         </div>
         
         <div id="mobSearchContainer" class="absolute top-[100%] left-0 w-full p-4 bg-[var(--bg-card)] border-b border-[var(--border)] shadow-xl hidden z-[4000]">
-            <div class="flex items-center border border-[var(--border)] rounded-xl px-4 py-3">
+            <div class="flex items-center border border-[var(--border)] rounded-xl px-4 py-3 bg-[var(--bg-elevated)]">
                 <input type="search" id="mobSearchOverlayInput" placeholder="Пошукаємо прикрасу?..." class="w-full bg-transparent outline-none text-[var(--text-main)] text-sm">
                 <button onclick="window.executeSearch(document.getElementById('mobSearchOverlayInput').value)" class="text-[var(--gold-muted)] ml-2 btn-cross"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
             </div>
         </div>
     </header>
 
+    <!-- БІЧНЕ МЕНЮ -->
     <nav class="side-menu no-scrollbar" id="sideMenu"></nav>
 
+    <!-- ОСНОВНИЙ КОНТЕНТ (Відступ зверху дорівнює висоті шапки) -->
     <main id="home" class="pt-[60px]">
-        <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero" style="min-height: calc(100vh - 60px);">
-            <div class="hero-overlay absolute inset-0 bg-black/40 z-10"></div>
+        <section class="h-screen-hero relative flex items-center justify-center overflow-hidden hero w-full m-0 p-0" style="height: 100vh;">
+            <div class="hero-overlay absolute inset-0 bg-black/30 z-10 pointer-events-none"></div>
             <div class="hero-bg hero-img-bg bg-black/40 absolute inset-0 z-0"></div>
-            <div class="relative z-20 flex flex-col items-center text-center px-4 hero-content">
+            <div class="relative z-20 flex flex-col items-center text-center px-4 hero-content mt-[-60px]"> <!-- Компенсація шапки -->
                 <span class="hero-subtitle tracking-[0.4em] mb-4 text-white">Atelier since 1984</span>
                 <h1 class="hero-title text-white">BV Jewelry</h1>
             </div>
-            <div class="scroll-indicator absolute bottom-10 z-20 flex flex-col items-center">
-                <span class="scroll-text text-[9px] uppercase tracking-[0.3em] text-white/70 mb-2 block">Scroll</span>
-                <div class="scroll-line bg-white/30 w-[1px] h-[30px]"></div>
-            </div>
         </section>
 
-        <section class="max-w-[1920px] mx-auto border-b border-[var(--border)]" id="promo-banner-top">
+        <!-- БАНЕРИ (ПЛАВНИЙ FADE, БЕЗ ВІДСТУПІВ ЗВЕРХУ) -->
+        <section class="w-full mx-auto border-b border-[var(--border)] m-0 p-0" id="promo-banner-top">
             <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px]"></div>
         </section>
 
-        <section class="max-w-[1920px] mx-auto">
-            <a href="exclusive.html" class="relative block w-full exclusive-block-img overflow-hidden group border-b border-[var(--border)] bg-black">
+        <!-- ЕКСКЛЮЗИВ КОМПАКТНИЙ (МІНІМУМ ВІДСТУПІВ) -->
+        <section class="w-full mx-auto border-b border-[var(--border)] m-0 p-0">
+            <a href="exclusive.html" class="relative block w-full exclusive-block-img overflow-hidden group bg-black m-0 p-0 box-border">
                 <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[1.5s]">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 flex flex-col justify-center items-start text-left p-6 md:p-10">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent pointer-events-none"></div>
+                <div class="absolute inset-0 flex flex-col justify-center items-start text-left p-6 md:p-10 pointer-events-none">
                     <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-bold mb-1 block">Individual Order</span>
                     <h2 class="font-serif text-2xl md:text-3xl text-white font-light tracking-[0.1em] mb-2">ЕКСКЛЮЗИВ</h2>
                     <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--gold-muted)]">Дізнатися більше <span class="w-8 h-[1px] bg-[var(--gold-muted)]"></span></div>
@@ -228,37 +241,87 @@
             </a>
         </section>
 
-        <section id="special-section" class="max-w-[1920px] mx-auto border-b border-[var(--border)] bg-[var(--bg-card)]">
-            <div class="mb-8 md:mb-12 text-left md:text-center px-4">
-                <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-2">Лімітована колекція</span>
-                <h2 class="hero-title text-[var(--text-main)] !text-[24px] md:!text-[32px]">Хіти місяця</h2>
+        <!-- СЕКЦІЇ РЕНДЕРУ (main.js підтягне сюди товари) -->
+        <section id="special-section" class="w-full mx-auto border-b border-[var(--border)] bg-[var(--bg-card)] pb-2 hidden">
+            <div class="mb-4 text-left px-4 pt-4">
+                <h2 class="hero-title text-[var(--text-main)] !text-[20px] md:!text-[28px]">Хіти місяця</h2>
             </div>
-            <div class="promo-carousel-container select-none">
-                <div id="specialGrid" class="promo-track min-h-[300px]"></div>
+            <div class="promo-carousel-container select-none px-4">
+                <div id="specialGrid" class="promo-track min-h-[250px]"></div>
             </div>
         </section>
 
-        <section id="weekly-section" class="max-w-[1920px] mx-auto border-b border-[var(--border)] bg-[var(--bg-card)] hidden"> <div class="mb-8 md:mb-12 text-left md:text-center px-4">
-                <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-2">Вибір Atelier</span>
-                <h2 class="hero-title text-[var(--text-main)] !text-[24px] md:!text-[32px]">Хіти тижня</h2>
+        <section id="weekly-section" class="w-full mx-auto border-b border-[var(--border)] bg-[var(--bg-card)] pb-2 hidden">
+            <div class="mb-4 text-left px-4 pt-4">
+                <h2 class="hero-title text-[var(--text-main)] !text-[20px] md:!text-[28px]">Вибір Atelier</h2>
             </div>
-            <div class="weekly-carousel-container select-none">
-                <div id="weeklyGrid" class="weekly-track min-h-[300px]"></div>
+            <div class="weekly-carousel-container select-none px-4">
+                <div id="weeklyGrid" class="weekly-track min-h-[250px]"></div>
             </div>
         </section>
         
-        <div id="dynamicHomeBlocksContainer"></div>
+        <!-- КАТАЛОГ (ПОВЕРНУВСЯ ПІСЛЯ ПРОМО) -->
+        <section id="categories-section" class="w-full mx-auto border-b border-[var(--border)] bg-[var(--bg-card)]">
+            <div class="mb-4 text-center px-4 pt-8">
+                <span class="text-[9px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-1">Our World</span>
+                <h2 class="hero-title text-[var(--text-main)] !text-[24px]">Каталог</h2>
+            </div>
+            <div class="glass-accordion-container px-4 pb-8" id="glassAccordion">
+                <div class="glass-panel-item group active rounded-none border border-[var(--border)]" onclick="window.toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800" alt="Каблучки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Каблучки</h3>
+                        <div class="panel-hidden-content">
+                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group rounded-none border border-[var(--border)] border-t-0" onclick="window.toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800" alt="Сережки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Сережки</h3>
+                        <div class="panel-hidden-content">
+                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group rounded-none border border-[var(--border)] border-t-0" onclick="window.toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800" alt="Ланцюжки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Ланцюжки</h3>
+                        <div class="panel-hidden-content">
+                            <a href="catalog.html#necklaces" class="panel-btn">Всі ланцюжки &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group rounded-none border border-[var(--border)] border-t-0" onclick="window.toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=800" alt="Браслети" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Браслети</h3>
+                        <div class="panel-hidden-content">
+                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
+    <!-- НИЖНІЙ МОБІЛЬНИЙ БАР -->
     <nav class="mobile-bottom-nav">
-        <a href="index.html" class="bottom-nav-item active">
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="bottom-nav-item active btn-cross">
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span>Головна</span>
-        </a>
-        <a href="catalog.html" class="bottom-nav-item">
+        </button>
+        <button onclick="window.location.href='catalog.html'" class="bottom-nav-item btn-cross">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             <span>Каталог</span>
-        </a>
+        </button>
         <button onclick="window.toggleCart();" class="bottom-nav-item btn-cross">
             <div class="relative"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span class="cart-badge">0</span></div>
             <span>Кошик</span>
@@ -273,7 +336,8 @@
         </button>
     </nav>
 
-    <footer id="footer" class="pt-12 pb-[90px] md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 mt-10">
+    <!-- ФУТЕР БАГАТОКОЛОНКОВИЙ (З АДРЕСАМИ З БД) -->
+    <footer id="footer" class="pt-12 pb-[90px] md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
         <div class="max-w-7xl mx-auto footer-grid">
             <div class="flex flex-col items-start col-span-2 md:col-span-1">
                 <div class="bv-logo mb-4 relative !static !transform-none !items-start !opacity-100">
@@ -300,10 +364,11 @@
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Контакти</h4>
                 <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-2 transition hover:opacity-80 tracking-wide phone-num">+38 063 45 40 901</a>
                 
+                <!-- Блок адрес для main.js -->
                 <div class="flex flex-col gap-1 mb-4" id="footerAddressesBlock">
-                    <span class="addr-text-1 text-[12px] text-[var(--text-muted)]"></span>
-                    <span class="addr-text-2 text-[12px] text-[var(--text-muted)]"></span>
-                    <button onclick="window.showBranchesModal()" class="text-[10px] text-[var(--gold-muted)] font-bold uppercase tracking-widest text-left hover:underline mt-1 hidden">Наші філіали</button>
+                    <span class="addr-text-1 text-[12px] text-[var(--text-muted)] min-h-[16px]"></span>
+                    <span class="addr-text-2 text-[12px] text-[var(--text-muted)] min-h-[16px]"></span>
+                    <button onclick="window.showBranchesModal()" class="text-[10px] text-[var(--gold-muted)] font-bold uppercase tracking-widest text-left hover:underline mt-1 hidden btn-cross">Наші філіали</button>
                 </div>
 
                 <div class="flex items-center gap-4 mt-2">
@@ -321,6 +386,7 @@
         </div>
     </footer>
 
+    <!-- КНОПКА "НАГОРУ" (Зліва, з'являється тільки при скролі вгору) -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed z-[4800] w-12 h-12 bg-[var(--bg-card)] backdrop-blur-xl border border-[var(--border)] rounded-full flex items-center justify-center text-[var(--gold-muted)] shadow-lg opacity-0 translate-y-4 pointer-events-none transition-all duration-300">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
     </button>
@@ -329,8 +395,70 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="main.js"></script>
 
+    <!-- ПЕРЕЗАПИС ЛОГІКИ: МЕНЮ, АКОРДЕОН (НА DETAILS), БАНЕРИ, КАРТКИ, СКРОЛ -->
     <script>
-        // 1. Повна генерація SideMenu з нативним акордеоном <details>
+        // --- 1. ПЕРЕЗАПИС РЕНДЕРУ КАРТОК (ФІКС КНОПКИ "КУПИТИ") ---
+        window.renderProductCard = function(prod) {
+            const lang = API.get('bv_lang', 'uk');
+            const isOutOfStock = prod.status === 'out-stock';
+            const isPreOrder = prod.status === 'pre-order';
+            let favs = [];
+            try { favs = API.get('bv_favs', []); } catch(e){} // Спрощення до глобального для швидкості
+            const isFav = favs.includes(prod.id);
+            
+            let badgesHtml = '<div class="flex flex-wrap gap-1 justify-end items-center">';
+            if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out text-[9px] bg-gray-500 text-white px-1 rounded">Продано</div>`;
+            else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order text-[9px] bg-yellow-600 text-white px-1 rounded">Під замовлення</div>`;
+            if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new text-[9px] bg-green-600 text-white px-1 rounded">New</div>`;
+            if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale text-[9px] bg-red-600 text-white px-1 rounded">Sale</div>`;
+            badgesHtml += '</div>';
+
+            const price = prod.discount && Number(prod.discount) > 0 ? Number(prod.discount) : Number(prod.price);
+            let priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--gold-muted)]">${price} ₴</span>`;
+            if (prod.discount && Number(prod.discount) > 0) {
+                priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-green-600">${price} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${prod.price} ₴</span>`;
+            }
+
+            // БЕЗПЕЧНЕ ЕКРАНУВАННЯ ЛАПОК
+            const safeId = String(prod.id).replace(/'/g, "\\'");
+            const rawName = window.getLoc ? window.getLoc(prod, 'name') : prod.name;
+            const safeName = String(rawName).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
+            const rawVariant = window.getLoc ? window.getLoc(prod, 'variant') : prod.variant;
+            const safeVariant = String(rawVariant).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeImg = String(prod.img || prod.image || '').replace(/'/g, "\\'");
+
+            return `
+                <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[var(--bg-card)]">
+                    <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-[var(--bg-elevated)] block z-10">
+                        <img src="${safeImg}" class="product-img w-full h-full object-cover transition duration-700 group-hover:scale-105" loading="lazy">
+                    </a>
+                    
+                    <div class="p-3 flex flex-col gap-1 flex-grow z-10">
+                        <a href="product.html?id=${prod.id}" class="text-[9px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--gold-muted)] transition-colors">${safeVariant}</a>
+                        <a href="product.html?id=${prod.id}" class="text-[12px] md:text-[13px] font-medium text-[var(--text-main)] leading-tight hover:text-[var(--gold-muted)] transition-colors line-clamp-2 mt-1 min-h-[34px]">${safeName}</a>
+                        <div class="mt-auto pt-2 mb-1 flex items-center">${priceHtml}</div>
+                    </div>
+
+                    <div class="px-3 py-2 border-t border-[var(--border)] flex justify-between items-center mt-auto z-20 relative bg-[var(--bg-card)]">
+                        <div class="flex items-center gap-2">
+                            ${!isOutOfStock ? `
+                            <button type="button" onclick="window.addToCart('${safeId}', '${safeName}', '${safeVariant}', ${price}, '${safeImg}'); event.stopPropagation();" class="btn-cross flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] hover:text-[var(--gold-muted)] transition-all duration-300 active:scale-95 cursor-pointer relative z-30">
+                                <span>Купити</span><span class="text-[14px] font-light mb-[2px]">+</span>
+                            </button>
+                            ` : `<span class="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Немає</span>`}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${badgesHtml}
+                            <button type="button" class="btn-cross fav-btn-inline cursor-pointer relative z-30 ${isFav ? 'text-[var(--danger)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'} transition-colors active:scale-95" data-id="${prod.id}" onclick="window.toggleFav('${prod.id}'); event.stopPropagation();">
+                                <svg width="16" height="16" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- 2. МЕНЮ ТА НАТИВНИЙ АКОРДЕОН ---
         window.buildMobileTree = function(nodes) {
             let html = '';
             nodes.forEach(n => {
@@ -354,7 +482,6 @@
             return html;
         };
 
-        // Делегування подій для розумного закриття сусідів <details>
         document.addEventListener('toggle', function(e) {
             if (e.target.tagName === 'DETAILS' && e.target.open) {
                 const siblings = e.target.parentElement.querySelectorAll(':scope > details');
@@ -389,8 +516,8 @@
                                 Київ
                             </div>
                             <div class="flex gap-3 text-[11px] font-bold uppercase opacity-90">
-                                <span class="${lang === 'uk' ? 'underline' : 'cursor-pointer hover:opacity-70'}" onclick="window.changeLang('uk')">УКР</span>
-                                <span class="${lang === 'ru' ? 'underline' : 'cursor-pointer hover:opacity-70'}" onclick="window.changeLang('ru')">РУС</span>
+                                <button class="btn-cross ${lang === 'uk' ? 'underline' : 'cursor-pointer hover:opacity-70'}" onclick="window.changeLang('uk')">УКР</button>
+                                <button class="btn-cross ${lang === 'ru' ? 'underline' : 'cursor-pointer hover:opacity-70'}" onclick="window.changeLang('ru')">РУС</button>
                             </div>
                         </div>
                         <div class="px-5 py-4 flex items-center gap-3 cursor-pointer hover:bg-black/10 transition-colors" onclick="${user ? 'window.location.href=\'profile.html\'' : 'window.openAuthModal()'}">
@@ -430,7 +557,7 @@
             }
         };
 
-        // 3. Ідеальний слайдер банерів (Fade-анімація, правильний напрямок свайпу)
+        // --- 3. ІДЕАЛЬНИЙ СЛАЙДЕР БАНЕРІВ (FADE) ---
         window.initBannerSlider = function() {
             const container = document.getElementById('mainBannerContainer');
             if (!container) return;
@@ -516,7 +643,7 @@
             });
         };
 
-        // 4. Кнопка "Нагору" (Зліва, з'являється тільки при скролі ВГОРУ)
+        // --- 4. КНОПКА "НАГОРУ" (ТІЛЬКИ ПРИ СКРОЛІ ВГОРУ) ---
         let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
         window.addEventListener('scroll', function() {
             let st = window.pageYOffset || document.documentElement.scrollTop;
@@ -533,7 +660,7 @@
             lastScrollTop = st <= 0 ? 0 : st; 
         }, false);
 
-        // 5. Авто-скрол до банерів
+        // --- 5. АВТОСКРОЛ ДО БАНЕРІВ ---
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const bannerSection = document.getElementById('promo-banner-top');
