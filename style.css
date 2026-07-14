@@ -2107,3 +2107,77 @@ body {
 #mobCatList a:last-child {
     border-bottom: none !important;
 }
+
+/* Отменяем побуквенный перенос для всего мега-меню */
+.mega-menu, 
+.zlato-categories, 
+.zlato-content,
+.mega-menu a {
+    word-break: normal !important;       /* Запрещает разрывать слова на буквах */
+    overflow-wrap: normal !important;    /* Перенос только по пробелам */
+    white-space: normal;                 /* Разрешает перенос, но только целыми словами */
+}
+
+/* Опционально: задаем минимальную ширину элементам, чтобы текст не сжимался слишком сильно */
+.zlato-categories a,
+.zlato-content a {
+    display: inline-block;
+    min-width: max-content;              /* Элемент будет стремиться занять ширину текста */
+}
+
+
+/* Полный запрет на побуквенный разрыв строк в мобильном меню */
+.mob-accordion-list,
+.mob-accordion-list a,
+.sub-cat-link,
+.mob-menu-title {
+    word-break: normal !important;        /* Запрещает разрывать одиночные слова */
+    overflow-wrap: break-word !important; /* Перенос строки только на стыке целых слов */
+    white-space: normal !important;       /* Позволяет переносить длинные фразы на новую строку */
+    hyphens: none !important;             /* Отключает автоматическую расстановку дефисов */
+}
+
+
+/* Полный запрет на перенос строк для всех подпунктов мобильного меню */
+.mob-accordion-list a, 
+.sub-cat-link {
+    white-space: nowrap !important;   /* Жестко в одну строку, никаких переносов */
+    overflow: hidden !important;      /* Скрываем то, что не помещается в экран */
+    text-overflow: ellipsis !important; /* Красивое троеточие на конце длинных фраз (...) */
+    display: block !important;        /* Гарантирует правильную работу обрезки текста */
+    width: 100%;                      /* Ограничиваем ширину рамками меню */
+}
+
+/* 1. Запрещаем перенос для самих ссылок и ЛЮБЫХ вложенных в них элементов */
+.mob-accordion-list a,
+.mob-accordion-list a *,
+.sub-cat-link,
+.sub-cat-link * {
+    white-space: nowrap !important;      /* Никаких переносов ни при каких условиях */
+    word-break: keep-all !important;     /* Запрет разрыва слов */
+    hyphens: none !important;            /* Отключаем дефисы */
+}
+
+/* 2. Настраиваем правильное скрытие длинного текста */
+.mob-accordion-list a,
+.sub-cat-link {
+    display: block !important;           /* Переводим в блочный режим для работы ellipsis */
+    width: 100% !important;
+    max-width: calc(100vw - 40px) !important; /* Ограничиваем ширину экраном (с учетом отступов) */
+    overflow: hidden !important;         /* Скрываем всё, что вылезает */
+    text-overflow: ellipsis !important;  /* Добавляем троеточие (...) */
+}
+
+/* 3. Если внутри ссылок используются флекс-контейнеры (например, текст + иконка в ряд) */
+.mob-accordion-list a.flex,
+.sub-cat-link.flex {
+    display: flex !important;
+    min-width: 0 !important;             /* Снимаем ограничение флекса на сжатие */
+}
+
+.mob-accordion-list a.flex > span,
+.sub-cat-link.flex > span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+}

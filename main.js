@@ -71,12 +71,16 @@ const i18n = {
 window.getLoc = function(obj, field) {
     if (!obj) return '';
     const lang = API.get('bv_lang', 'uk');
+    
     if (typeof obj === 'string') return obj;
     if (typeof obj === 'object') {
         if (field) {
-            if (typeof obj[field] === 'object' && obj[field] !== null) return obj[field][lang] || obj[field]['uk'] || '';
+            if (typeof obj[field] === 'object' && obj[field] !== null) {
+                return obj[field][lang] || obj[field]['uk'] || '';
+            }
             if (lang === 'uk') return obj[field] || '';
-            return obj[field + lang.toUpperCase()] || obj[field] || ''; 
+            const locField = field + lang.toUpperCase(); 
+            return obj[locField] || obj[field] || ''; 
         } else {
             return obj[lang] || obj['uk'] || '';
         }
@@ -101,12 +105,15 @@ function migrateProductToNewFormat(p) {
         price: p.price || 0, weight: p.weight || 0, workCost: p.workCost || 0, discount: p.discount || null,
         images: p.images && p.images.length > 0 ? p.images : (p.img || p.image ? [p.img || p.image] : [])
     };
+    
     let blocks = [];
     if(p.isSpecial) blocks.push('hits');
     if(p.isWeekly) blocks.push('weekly');
+
     return {
         id: p.id, sku: p.sku || p.id, category: p.category || '', status: p.status || 'in-stock', badge: p.badge || 'none',
-        blocks: blocks, sizes: Array.isArray(p.sizes) ? p.sizes : (typeof p.sizes === 'string' && p.sizes.trim() ? p.sizes.split(',').map(s=>s.trim()) : []),
+        blocks: blocks,
+        sizes: Array.isArray(p.sizes) ? p.sizes : (typeof p.sizes === 'string' && p.sizes.trim() ? p.sizes.split(',').map(s=>s.trim()) : []),
         variations: { base: base }, stones: p.stones || '', variant: p.variant || ''
     };
 }
@@ -123,18 +130,20 @@ function buildTree(flatList) {
 }
 
 // ==========================================
-// 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ
+// 3. АСИНХРОННЕ ЗАВАНТАЖЕННЯ ДАНИХ (SUPABASE)
 // ==========================================
 window.loadCloudData = async function() {
+    console.log("BV Jewelry: Починаю завантаження...");
+    
+    // 1. Спочатку беремо те, що є в кеші, щоб меню з'явилося миттєво
     products = API.get('bv_products', []);
     categoriesTree = API.get('bv_categories_tree', []);
     
     if (typeof generateMenus === 'function') generateMenus();
     if (typeof initBannerSlider === 'function') initBannerSlider();
     if (document.getElementById('dynamicHomeBlocksContainer')) renderHomeSections();
-    if (typeof renderDynamicIndexContent === 'function') renderDynamicIndexContent();
-    if (typeof renderGalleryPage === 'function') renderGalleryPage();
 
+    // 2. Асинхронно оновлюємо дані з бази (не чекаємо їх для рендеру)
     try {
         const { data: prodData } = await _supabase.from('products').select('*');
         if (prodData && prodData.length > 0) {
@@ -155,16 +164,19 @@ window.loadCloudData = async function() {
             }
         }
         
+        // Перемальовуємо, якщо прийшли нові дані
+        console.log("BV Jewelry: Дані оновлено з хмари.");
         if(typeof generateMenus === 'function') generateMenus();
         if(typeof renderHomeSections === 'function') renderHomeSections();
         if(typeof window.applyAdminSettings === 'function') window.applyAdminSettings();
-        if(typeof renderDynamicIndexContent === 'function') renderDynamicIndexContent();
-        if(typeof renderGalleryPage === 'function') renderGalleryPage();
     } catch (err) {
-        console.error("Помилка зв'язку з Supabase:", err);
+        console.error("Помилка зв'язку з Supabase (можливо, база спить):", err);
     }
 };
 
+// ==========================================
+// 4. СТАН ТА СИНХРОНІЗАЦІЯ
+// ==========================================
 function getCurrentUser() { return API.get('bv_current_user', null); }
 function getScopedStorageKey(baseKey) {
     const currentUser = getCurrentUser();
@@ -202,19 +214,24 @@ window.setFavs = async function(favs) {
 
 function getCart() { return API.get(getScopedStorageKey('bv_cart'), []); }
 function setCart(cart) { API.set(getScopedStorageKey('bv_cart'), cart); API.set('bv_cart', cart); }
-function escapeHtml(unsafe) { if (!unsafe) return ''; return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-window.getCategoryIconSVG = function(catId) {
-    const id = catId.toLowerCase();
-    if (id.includes('gold')) return `<path d="M12 2l3 5h4l-3 5 1 6-5-3-5 3 1-6-3-5h4z" stroke="currentColor" stroke-width="2" fill="none"/>`; 
-    if (id.includes('silver')) return `<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>`;
-    if (id.includes('ring')) return `<circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="2" fill="none"/>`; 
-    if (id.includes('earring')) return `<path d="M12 2a5 5 0 0 1 5 5c0 3-5 5-5 10m0-15a5 5 0 0 0-5 5c0 3 5 5 5 10" stroke="currentColor" stroke-width="2" fill="none"/>`; 
-    if (id.includes('chain') || id.includes('neck')) return `<path d="M6 12h12M6 8h12M6 16h12" stroke="currentColor" stroke-width="2" fill="none"/>`; 
-    if (id.includes('bracelet')) return `<path d="M3 12c0-5 3-9 9-9s9 4 9 9-3 9-9 9-9-4-9-9z" stroke="currentColor" stroke-width="2" fill="none"/>`; 
-    return `<circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/>`; 
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.toString().replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+function getCategoryIconSVG(catId) {
+    const id = catId.toLowerCase();
+    if (id.includes('gold')) return `<path stroke-linecap="round" stroke-linejoin="round" d="M6 3h12l4 6-10 13L2 9Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M11 3 8 9l4 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 3l3 6-4 13"/>`; 
+    if (id.includes('silver')) return `<path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    if (id.includes('ring')) return `<circle cx="12" cy="14" r="5" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9l-2-3h4l-2 3z"/>`; 
+    if (id.includes('earring')) return `<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v9"/><circle cx="12" cy="16" r="3" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 4h6"/>`; 
+    if (id.includes('chain') || id.includes('neck')) return `<circle cx="8" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M11 12h2"/>`; 
+    if (id.includes('bracelet')) return `<ellipse cx="12" cy="12" rx="7" ry="3" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 12v2c0 2 3 7 3s7-1 7-3v-2"/>`; 
+    return `<circle cx="12" cy="12" r="4" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v2"/>`; 
+}
+
+// ДИНАМІЧНА ГЕНЕРАЦІЯ МЕНЮ З ДЕРЕВА
 function generateMenus() {
     const megaCol1 = document.getElementById('megaCol1');
     const megaMenu = document.querySelector('.mega-menu');
@@ -228,7 +245,9 @@ function generateMenus() {
                 html += `
                 <div class="mob-nested-wrap">
                     <div class="mob-nested-title" onclick="window.toggleAccordion('mob-sub-${n.id}', 'mob-arrow-${n.id}')">
-                        <div class="flex items-center gap-3"><span style="font-size: 14px; font-weight: 500;">${name}</span></div>
+                        <div class="flex items-center gap-3">
+                            <span style="font-size: 14px; font-weight: 500;">${name}</span>
+                        </div>
                         <svg id="mob-arrow-${n.id}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
                     </div>
                     <div class="mob-nested-list" id="mob-sub-${n.id}">
@@ -257,10 +276,14 @@ function generateMenus() {
             let groupsHtml = '<div class="zlato-groups-grid">';
             if (cat.subcategories && cat.subcategories.length > 0) {
                 cat.subcategories.forEach(sub => {
-                    groupsHtml += `<div class="zlato-group-wrapper"><a href="catalog.html#${sub.id}" class="zlato-group-title">${window.getLoc(sub.name)}</a>`;
+                    groupsHtml += `<div class="zlato-group-wrapper">`;
+                    groupsHtml += `<a href="catalog.html#${sub.id}" class="zlato-group-title">${window.getLoc(sub.name)}</a>`;
+                    
                     if (sub.subcategories && sub.subcategories.length > 0) {
                         groupsHtml += `<div class="zlato-tags-container">`;
-                        sub.subcategories.forEach(subsub => { groupsHtml += `<a href="catalog.html#${subsub.id}" class="zlato-tag">${window.getLoc(subsub.name)}</a>`; });
+                        sub.subcategories.forEach(subsub => { 
+                            groupsHtml += `<a href="catalog.html#${subsub.id}" class="zlato-tag">${window.getLoc(subsub.name)}</a>`; 
+                        });
                         groupsHtml += `</div>`;
                     }
                     groupsHtml += `</div>`;
@@ -305,58 +328,81 @@ function generateMenus() {
 
         sideMenu.innerHTML = `
             <div class="flex justify-between items-center pb-4 mb-4 border-b border-[var(--border)] pt-4 px-4">
-                <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
-                    <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
-                </a>
-                <div class="flex items-center gap-5">
-                    <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
-                    </button>
-                    <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
-                        <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span><span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span><span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
-                    </div>
-                    <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
-                <a href="index.html" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
-                <div>
-                    <div class="mob-menu-title" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
-                        <span data-i18n="m2">Каталог</span>
-                        <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list" id="mobCatList" style="gap: 5px; padding-left: 10px;">${mobCatHtml}</div>
-                </div>
-                <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)]" onclick="window.toggleMenu()">Галерея</a>
-                <div>
-                    <div class="mob-menu-title cursor-pointer" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
-                        <span>Бренд</span>
-                        <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
-                        <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
-                        <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
-                        <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
-                        <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
-                    </div>
-                </div>
-                <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
-                <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" onclick="window.toggleMenu()">
-                        <span data-i18n="m_atelier">Ексклюзив</span>
-                </a>
-                <div class="mt-auto pt-4 pb-4">
-                    <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2" id="mobMenuContacts">
-                        </div>
-                </div>
-            </div>
+    <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
+        <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
+    </a>
+    <div class="flex items-center gap-5">
+        <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+            <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
+        </button>
+        
+        <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
+            <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
+            <span class="opacity-30">|</span>
+            <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
+            <span class="opacity-30">|</span>
+            <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
+        </div>
+        
+        <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+    </div>
+</div>
+
+<div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
+    <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
+    <div>
+        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
+            <span data-i18n="m2">Каталог</span>
+            <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">${mobCatHtml}</div>
+    </div>
+    <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
+    <div>
+        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
+            <span>Бренд</span>
+            <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
+            <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+            <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+            <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+            <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+        </div>
+    </div>
+    <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
+    <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors break-normal" onclick="window.toggleMenu()">
+        <span data-i18n="m_atelier">Ексклюзив</span>
+    </a>
+    <div class="mt-auto pt-4 pb-4">
+        <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2" id="mobMenuContacts"></div>
+    </div>
+</div>
         `;
     }
 }
+
+window.smartProfileClick = function() {
+    if(document.getElementById('sideMenu')?.classList.contains('active')) {
+        window.toggleMenu(); 
+    }
+    const user = API.get('bv_current_user', null);
+    if (user && user.id) {
+        window.location.href = 'profile.html';
+    } else {
+        window.openAuthModal();
+    }
+};
+
+window.openAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+};
 
 // ==========================================
 // 5. КОШИК ТА УЛЮБЛЕНЕ
@@ -377,6 +423,7 @@ window.toggleCart = function() {
 
 window.addToCart = function(id, title, variant, price, img) {
     let cart = getCart();
+    
     let extractedSize = null;
     let cleanTitle = String(title);
     if (cleanTitle.includes('(Розмір:')) {
@@ -384,14 +431,29 @@ window.addToCart = function(id, title, variant, price, img) {
         cleanTitle = parts[0].trim();
         extractedSize = parts[1].replace(')', '').trim();
     }
+
     const allProducts = API.get('bv_products', []);
     const prod = allProducts.find(p => p.id === id);
     const sku = prod && prod.sku ? prod.sku : id;
+
     const cartId = id + (extractedSize ? '-' + extractedSize : '');
+
     const existing = cart.find(item => item.cartId === cartId);
-    
-    if (existing) existing.qty += 1;
-    else cart.push({ cartId: cartId, id: id, title: cleanTitle, variant: String(variant), price: Number(price), img: String(img), qty: 1, sku: sku, size: extractedSize });
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ 
+            cartId: cartId, 
+            id: id, 
+            title: cleanTitle, 
+            variant: String(variant), 
+            price: Number(price), 
+            img: String(img), 
+            qty: 1,
+            sku: sku,
+            size: extractedSize
+        });
+    }
     
     setCart(cart);
     window.renderCart();
@@ -403,17 +465,22 @@ window.updateCartQty = function(cartId, delta) {
     const item = cart.find((entry) => entry.cartId === cartId);
     if (!item) return;
     item.qty = Math.max(1, item.qty + delta);
-    setCart(cart); window.renderCart();
+    setCart(cart);
+    window.renderCart();
 };
 
 window.removeFromCart = function(cartId) {
     let cart = getCart();
     cart = cart.filter(item => item.cartId !== cartId);
-    setCart(cart); window.renderCart();
+    setCart(cart);
+    window.renderCart();
 };
 
 window.clearEntireCart = function(force = false) {
-    if(force || confirm('Ви впевнені, що хочете очистити кошик?')) { setCart([]); window.renderCart(); }
+    if(force || confirm('Ви впевнені, що хочете очистити кошик?')) {
+        setCart([]);
+        window.renderCart();
+    }
 };
 
 window.checkoutOrder = function() {
@@ -446,6 +513,7 @@ window.renderCart = function() {
     cart.forEach(item => {
         total += item.price * item.qty;
         totalQty += item.qty;
+        
         const sizeBadge = item.size ? `<span class="bg-[var(--gold-muted)]/20 text-[var(--gold-muted)] px-2 py-0.5 rounded-none text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
         const skuBadge = `<span class="text-[10px] text-[var(--text-muted)]">Арт: ${item.sku}</span>`;
 
@@ -454,7 +522,10 @@ window.renderCart = function() {
                 <img src="${item.img}" class="w-20 h-20 object-cover border border-[var(--border)] rounded-none mix-blend-multiply">
                 <div class="flex-grow flex flex-col justify-center pr-6">
                     <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${escapeHtml(item.title)}</span>
-                    <div class="flex flex-wrap items-center gap-2 mt-1">${sizeBadge} ${skuBadge}</div>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                        ${sizeBadge}
+                        ${skuBadge}
+                    </div>
                     <div class="flex items-center gap-3 mt-2">
                         <span class="text-sm font-bold text-[var(--gold-muted)]">${formatterPrice.format(item.price)} ₴</span>
                         <div class="inline-flex items-center rounded-none border border-[var(--border)] bg-[var(--bg-elevated)]">
@@ -472,7 +543,10 @@ window.renderCart = function() {
     });
     
     if(subtotalVal) subtotalVal.innerText = formatterPrice.format(total) + ' ₴';
-    cartBadges.forEach(b => { b.innerText = totalQty; b.style.display = totalQty > 0 ? 'flex' : 'none'; });
+    cartBadges.forEach(b => {
+        b.innerText = totalQty;
+        b.style.display = totalQty > 0 ? 'flex' : 'none';
+    });
 
     const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
     if(checkoutBtnWrapper) {
@@ -495,6 +569,7 @@ window.toggleFavDrawer = function() {
         if (!document.getElementById('sideMenu')?.classList.contains('active')) document.body.style.overflow = '';
     }
 };
+
 window.toggleFav = function(id) {
     let favs = getFavs();
     const idx = favs.indexOf(id);
@@ -521,7 +596,10 @@ window.renderFavDrawer = function() {
     const favBody = document.getElementById('favBody');
     const favBadges = document.querySelectorAll('.fav-badge');
     
-    favBadges.forEach(b => { b.innerText = favsIds.length; b.style.display = favsIds.length > 0 ? 'flex' : 'none'; });
+    favBadges.forEach(b => {
+        b.innerText = favsIds.length;
+        b.style.display = favsIds.length > 0 ? 'flex' : 'none';
+    });
     if(!favBody) return;
 
     if (favsIds.length === 0) {
@@ -541,16 +619,21 @@ window.renderFavDrawer = function() {
         <div class="cart-item flex gap-4 p-3 border border-[var(--border)] rounded-none mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/35 cursor-pointer" onclick="location.href='product.html?id=${prod.id}'">
             <img src="${safeImg}" class="w-16 h-16 object-cover border border-[var(--border)] rounded-none mix-blend-multiply">
             <div class="flex-grow flex flex-col justify-center pr-6">
-                <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${safeName}</span>
+                <span class="text-xs font-semibold uppercase tracking-wide line-clamp-1">${safeName}</span>
+                <span class="text-[10px] text-[var(--text-muted)] mt-1">${escapeHtml(prod.variant || '')}</span>
                 <span class="text-sm font-bold text-[var(--gold-muted)] mt-1">${formatterPrice.format(priceDisplay)} ₴</span>
             </div>
-            <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)] btn-cross" onclick="event.stopPropagation(); window.toggleFav('${prod.id}')">
+            <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)] btn-cross" onclick="event.stopPropagation(); toggleFav('${prod.id}')" title="Видалити">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-        </div>`;
+        </div>
+        `;
     }).join('');
 };
 
+// ==========================================
+// 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
+// ==========================================
 window.renderProductCard = function(prod) {
     const lang = API.get('bv_lang', 'uk');
     const base = prod.variations ? prod.variations.base : prod; 
@@ -587,11 +670,13 @@ window.renderProductCard = function(prod) {
             <a href="product.html?id=${prod.id}" class="relative w-full aspect-square overflow-hidden bg-white block p-2 md:p-4">
                 <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-700 group-hover:scale-105" loading="lazy">
             </a>
+            
             <div class="px-3 md:px-4 pb-1 pt-2 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
                 <a href="product.html?id=${prod.id}" class="text-[9px] md:text-[10px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-all duration-300">${safeVariant}</a>
                 <a href="product.html?id=${prod.id}" class="text-[12px] md:text-[14px] font-medium text-[#222] leading-snug hover:text-[var(--gold-muted)] transition-all duration-300 line-clamp-2 mt-1 min-h-[36px] md:min-h-[44px]">${safeName}</a>
                 <div class="mt-auto pt-2 mb-1 flex items-center">${priceHtml}</div>
             </div>
+
             <div class="px-3 md:px-4 py-3 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
                 <div class="flex items-center gap-2">
                     ${!isOutOfStock ? `
@@ -631,8 +716,11 @@ function createInertiaScroll(containerSelector, trackSelector, baseSpeed = -0.5)
     const container = document.querySelector(containerSelector);
     const track = document.querySelector(trackSelector);
     if (!container || !track) return;
+
     let currentX = 0, isDown = false, isDragging = false, startX, velocity = 0, state = 'playing', pauseTimer = null;
-    const content = track.innerHTML; track.innerHTML = content + content + content + content;
+    const content = track.innerHTML;
+    track.innerHTML = content + content + content + content;
+
     track.addEventListener('dragstart', (e) => e.preventDefault());
     track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
 
@@ -648,6 +736,7 @@ function createInertiaScroll(containerSelector, trackSelector, baseSpeed = -0.5)
         track.style.transform = `translate3d(${currentX}px, 0, 0)`;
         requestAnimationFrame(step);
     }
+
     const startDrag = (e) => { isDown = true; isDragging = false; state = 'dragging'; clearTimeout(pauseTimer); startX = (e.pageX || e.touches[0].pageX) - currentX; velocity = 0; container.style.cursor = 'grabbing'; };
     const endDrag = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; state = 'coasting'; setTimeout(() => { isDragging = false; }, 50); };
     const moveDrag = (e) => { if (!isDown) return; const x = (e.pageX || e.touches[0].pageX) - startX; if (Math.abs(x - currentX) > 3) isDragging = true; velocity = x - currentX; currentX = x; };
@@ -693,9 +782,12 @@ window.initPremiumCarousel = function(track) {
         if (isDown) return; track.scrollLeft -= velX; velX *= 0.95; checkInfinite();
         if (Math.abs(velX) > 0.5) { momentumID = requestAnimationFrame(momentumLoop); } else { track.classList.add('snap-x', 'snap-mandatory'); }
     };
+
     const beginMomentum = () => { track.classList.remove('snap-x', 'snap-mandatory'); cancelAnimationFrame(momentumID); momentumID = requestAnimationFrame(momentumLoop); };
+
     nextBtn.onclick = () => { velX = -25; beginMomentum(); };
     prevBtn.onclick = () => { velX = 25; beginMomentum(); };
+
     const startAction = (e) => { isDown = true; isDragging = false; track.classList.remove('snap-x', 'snap-mandatory'); track.classList.add('cursor-grabbing'); cancelAnimationFrame(momentumID); startX = (e.pageX || e.touches[0].pageX); scrollLeft = track.scrollLeft; lastX = startX; velX = 0; };
     const endAction = () => { if (!isDown) return; isDown = false; track.classList.remove('cursor-grabbing'); beginMomentum(); setTimeout(() => { isDragging = false; }, 50); };
     const moveAction = (e) => { if (!isDown) return; const currentX = (e.pageX || e.touches[0].pageX); const walk = (currentX - startX); if (Math.abs(walk) > 5) isDragging = true; track.scrollLeft = scrollLeft - walk; velX = currentX - lastX; lastX = currentX; checkInfinite(); };
@@ -713,6 +805,7 @@ window.initPremiumCarousel = function(track) {
 window.initBannerSlider = function() {
     const container = document.getElementById('mainBannerContainer');
     if (!container) return;
+
     let banners = API.get('bv_banners', []);
     if (!banners || banners.length === 0) {
         banners = [
@@ -720,6 +813,7 @@ window.initBannerSlider = function() {
             { id: 2, img: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg', link: 'exclusive.html' }
         ];
     }
+
     const settings = API.get('bv_settings', {});
     const ratio = settings.bannerRatio || '3/1';
 
@@ -735,8 +829,10 @@ window.initBannerSlider = function() {
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
                 </div>
             `).join('')}
+            
             <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.moveBanner(-1, event)">❮</button>
             <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 text-white rounded-none items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hidden md:flex" onclick="window.moveBanner(1, event)">❯</button>
+            
             <div id="bannerDots" class="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                 ${banners.map((_, i) => `
                     <button class="banner-dot w-1.5 h-1.5 md:w-2 md:h-2 rounded-none transition-all duration-300 ${i === 0 ? 'bg-[var(--gold-muted)] scale-125' : 'bg-white/50'}" onclick="window.goToBanner(${i}, event)"></button>
@@ -744,11 +840,13 @@ window.initBannerSlider = function() {
             </div>
         </div>
     `;
+    
     container.innerHTML = html;
     
     if(banners.length > 1) { 
         clearInterval(window.bannerInterval); 
         window.bannerInterval = setInterval(() => moveBanner(1), 5000); 
+
         let touchStartX = 0; let touchEndX = 0;
         container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(window.bannerInterval); }, {passive: true});
         container.addEventListener('touchend', e => {
@@ -774,8 +872,10 @@ window.moveBanner = function(dir, e) {
     if(window.bannerCount <= 1 || window.isBannerAnimating) return;
     window.isBannerAnimating = true;
     clearInterval(window.bannerInterval);
+    
     const newIndex = (window.currentBanner + dir + window.bannerCount) % window.bannerCount;
     window.executeFade(newIndex);
+    
     setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
 };
@@ -784,7 +884,12 @@ window.executeFade = function(newIndex) {
     const track = document.getElementById('bannerTrack');
     if(!track) return;
     const slides = track.querySelectorAll('.banner-slide');
-    slides.forEach((slide, i) => { slide.style.opacity = i === newIndex ? '1' : '0'; slide.style.zIndex = i === newIndex ? '10' : '1'; });
+    
+    slides.forEach((slide, i) => {
+        slide.style.opacity = i === newIndex ? '1' : '0';
+        slide.style.zIndex = i === newIndex ? '10' : '1';
+    });
+    
     window.currentBanner = newIndex;
     window.updateBannerDots();
 };
@@ -794,7 +899,9 @@ window.goToBanner = function(index, e) {
     if(window.bannerCount <= 1 || window.isBannerAnimating || index === window.currentBanner) return;
     window.isBannerAnimating = true;
     clearInterval(window.bannerInterval);
+    
     window.executeFade(index);
+    
     setTimeout(() => { window.isBannerAnimating = false; }, 700);
     window.bannerInterval = setInterval(() => moveBanner(1), 5000);
 };
@@ -823,6 +930,7 @@ window.renderHomeSections = function() {
         if (items.length > 0) {
             const title = window.getLoc(block.name);
             const trackId = `block-track-${block.id}`;
+            // Строгі відступи, без зазорів, 0 gap, ширина 50%
             const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex">${window.renderProductCard(p)}</div>`;
             
             let blockItems = [...items];
@@ -842,53 +950,15 @@ window.renderHomeSections = function() {
             </section>`;
         }
     });
+    
     container.innerHTML = html;
     
     homeBlocks.filter(b => b.active).forEach(block => {
         const track = document.getElementById(`block-track-${block.id}`);
-        if (track && typeof window.initPremiumCarousel === 'function') window.initPremiumCarousel(track);
+        if (track && typeof window.initPremiumCarousel === 'function') {
+            window.initPremiumCarousel(track);
+        }
     });
-};
-
-window.renderDynamicIndexContent = function() {
-    const footerCatContainer = document.getElementById('footerDynamicCategories');
-    if (footerCatContainer && categoriesTree.length > 0) {
-        let fHtml = '<h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" data-i18n="m2">Каталог</h4>';
-        categoriesTree.slice(0, 4).forEach(cat => {
-            fHtml += `<a href="catalog.html#${cat.id}" class="text-[12px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] mb-3 transition">${window.getLoc(cat.name)}</a>`;
-        });
-        footerCatContainer.innerHTML = fHtml;
-    }
-
-    const accordion = document.getElementById('glassAccordion');
-    if (accordion && categoriesTree.length > 0) {
-        const allProducts = API.get('bv_products', []);
-        let accHtml = '';
-        
-        categoriesTree.slice(0, 4).forEach((cat, index) => {
-            let bgImg = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800'; 
-            const catProducts = allProducts.filter(p => p.category === cat.id);
-            if (catProducts.length > 0 && catProducts[0].img) {
-                bgImg = catProducts[0].img;
-            } else if (catProducts.length > 0 && catProducts[0].images && catProducts[0].images.length > 0) {
-                bgImg = catProducts[0].images[0];
-            }
-            
-            const activeClass = index === 0 ? 'active' : '';
-            accHtml += `
-            <div class="glass-panel-item group ${activeClass} rounded-none" onclick="window.toggleAccordionPanel(this)">
-                <img src="${bgImg}" class="panel-bg">
-                <div class="panel-overlay"></div>
-                <div class="panel-content">
-                    <h3 class="panel-title">${window.getLoc(cat.name)}</h3>
-                    <div class="panel-hidden-content">
-                        <a href="catalog.html#${cat.id}" class="panel-btn">Всі вироби →</a>
-                    </div>
-                </div>
-            </div>`;
-        });
-        accordion.innerHTML = accHtml;
-    }
 };
 
 window.applyAdminSettings = function() {
@@ -923,31 +993,17 @@ window.applyAdminSettings = function() {
         if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
         
         const footerAddrBlock = document.getElementById('footerAddressesBlock');
-        const mobMenuContacts = document.getElementById('mobMenuContacts');
-        
         if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
             let html = '';
-            html += `<a href="https://maps.google.com/?q=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[13px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-start gap-2 transition mb-3">
-                        <svg class="w-4 h-4 fill-currentColor opacity-60 mt-0.5 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        <span class="text-left leading-tight">${settings.addresses[0]}</span>
+            html += `<a href="http://maps.google.com/?q=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        <span>${settings.addresses[0]}</span>
                     </a>`;
+            
             if (settings.addresses.length > 1) {
-                html += `<a href="https://maps.google.com/?q=${encodeURIComponent(settings.addresses[1])}" target="_blank" class="text-[13px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-start gap-2 transition mb-3">
-                            <svg class="w-4 h-4 fill-currentColor opacity-60 mt-0.5 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            <span class="text-left leading-tight">${settings.addresses[1]}</span>
-                        </a>`;
-            }
-            if (settings.addresses.length > 2) {
-                html += `<button onclick="window.showBranchesModal()" class="text-[10px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-1">Всі філіали (${settings.addresses.length})</button>`;
+                html += `<button onclick="window.showBranchesModal()" class="btn-cross text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
             }
             footerAddrBlock.innerHTML = html;
-        }
-
-        if (mobMenuContacts && settings.addresses && settings.addresses.length > 0) {
-            let mHtml = `<a href="tel:${settings.phone ? settings.phone.replace(/\s+/g, '') : ''}" class="text-[var(--gold-muted)] font-medium text-sm mb-1">${settings.phone || ''}</a>`;
-            mHtml += `<span>Графік роботи: 08:00 - 18:00</span>`;
-            mHtml += `<span>${settings.addresses[0]}</span>`;
-            mobMenuContacts.innerHTML = mHtml;
         }
     }
 };
@@ -957,7 +1013,7 @@ window.showBranchesModal = function() {
     const addrs = settings.addresses || [];
     if(addrs.length === 0) return;
     
-    const list = addrs.map(a => `<a href="https://maps.google.com/?q=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
+    const list = addrs.map(a => `<a href="http://maps.google.com/?q=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
         <span>${a}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
     </a>`).join('');
@@ -1018,20 +1074,20 @@ window.renderServicesTable = function() {
 };
 
 window.renderExclusivePage = function() {
-    const processContainer = document.getElementById('processListContainer');
-    const materialsContainer = document.getElementById('materialsContainer');
+    const processContainer = document.getElementById('exclusive-process-container');
+    const materialsContainer = document.getElementById('material-options-container');
     
     if(processContainer) {
         const processDB = API.get('bv_exclusive_process', []);
         processContainer.innerHTML = processDB.map((step, idx) => `
-            <div class="process-step flex flex-col md:flex-row items-center gap-8 md:gap-16 group mb-10 w-full">
-                <div class="process-img-wrap w-full md:w-1/2 order-1 overflow-hidden rounded-[32px] shadow-2xl relative aspect-[4/3] block">
-                    <div class="absolute top-4 left-4 bg-[var(--gold-muted)] text-[#111] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full z-10">Етап 0${idx+1}</div>
-                    <img src="${step.img}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+            <div class="flex flex-col md:flex-row gap-6 items-center bg-[var(--bg-card)] border border-[var(--border)] p-6 rounded-none group hover:border-[var(--gold-muted)] transition-colors">
+                <div class="w-full md:w-1/3 aspect-[4/3] bg-black overflow-hidden relative">
+                    <div class="absolute top-2 left-2 bg-[var(--gold-muted)] text-[#111] text-[10px] font-bold uppercase tracking-widest px-2 py-1 z-10">Етап ${idx+1}</div>
+                    <img src="${step.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
                 </div>
-                <div class="process-text-wrap w-full md:w-1/2 order-2 flex flex-col justify-center px-2 md:px-0">
-                    <h3 class="text-3xl md:text-4xl font-serif mb-4 text-[var(--text-main)]">${step.title}</h3>
-                    <p class="text-sm md:text-base text-[var(--text-muted)] font-light leading-relaxed max-w-md">${step.desc}</p>
+                <div class="w-full md:w-2/3">
+                    <h3 class="font-serif text-2xl text-[var(--text-main)] mb-3">${step.title}</h3>
+                    <p class="text-sm text-[var(--text-muted)] leading-relaxed">${step.desc}</p>
                 </div>
             </div>
         `).join('');
@@ -1040,12 +1096,13 @@ window.renderExclusivePage = function() {
     if(materialsContainer) {
         const matDB = API.get('bv_exclusive_materials', []);
         materialsContainer.innerHTML = matDB.map(m => `
-            <button type="button" class="choice-btn flex-grow sm:flex-grow-0 ${m.selected ? 'active' : ''}" onclick="selectMaterial('${m.id}', this)">
-                ${m.label}
-            </button>
+            <label class="flex-1 cursor-pointer">
+                <input type="radio" name="material" value="${m.id}" class="peer hidden" ${m.selected ? 'checked' : ''}>
+                <div class="border border-[var(--border)] text-center py-4 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] peer-checked:border-[var(--gold-muted)] peer-checked:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-colors">
+                    ${m.label}
+                </div>
+            </label>
         `).join('');
-        const defaultMat = matDB.find(m => m.selected);
-        if(defaultMat && typeof selectedMaterial !== 'undefined') selectedMaterial = defaultMat.id;
     }
 };
 
@@ -1114,20 +1171,19 @@ window.changeLang = function(lang) {
     if(document.getElementById('dynamicHomeBlocksContainer') && typeof renderHomeSections === 'function') renderHomeSections();
     if(typeof window.renderCatalogBatch === 'function') window.renderCatalogBatch(); 
     if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
-    if(typeof renderDynamicIndexContent === 'function') renderDynamicIndexContent();
-    if(typeof renderGalleryPage === 'function') renderGalleryPage();
     
     const mobLangList = document.getElementById('mobLangList');
     if(mobLangList && mobLangList.classList.contains('open')) window.toggleAccordion('mobLangList', 'mobLangArrow');
 };
 
+// НОВА ФУНКЦІЯ: Глобальне створення модалки авторизації
 window.injectAuthModal = function() {
-    if (document.getElementById('authModal')) return; 
+    if (document.getElementById('authModal')) return; // Вже існує
 
     const modalHtml = `
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">×</button>
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
             <div id="authFormContainer">
                 <h3 id="authTitle" class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
                 <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-xs mb-6 font-light">Раді бачити вас знову</p>
@@ -1190,174 +1246,23 @@ window.injectAuthModal = function() {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 };
 
-window.updateProfileMenu = function() {
-    try {
-        const user = API.get('bv_current_user', null);
-        const dropdownMenu = document.getElementById('profileDropdownMenu');
-        const profileBtn = document.getElementById('headerProfileBtn');
-        
-        if (profileBtn) {
-            profileBtn.onclick = function(e) {
-                e.preventDefault();
-                if (user) {
-                    location.href = 'profile.html';
-                } else {
-                    if(typeof window.injectAuthModal === 'function') window.injectAuthModal();
-                    window.openAuthModal();
-                }
-            };
-        }
-        
-        if(dropdownMenu) {
-            if (user) {
-                dropdownMenu.innerHTML = `
-                    <a href="profile.html" class="dropdown-item w-full text-left font-medium">Мій кабінет</a>
-                    ${user.role === 'admin' ? '<a href="admin.html" class="dropdown-item w-full text-left font-bold text-[#c5a059]">Панель Адміна</a>' : ''}
-                    <button onclick="window.logoutUser()" class="btn-cross dropdown-item w-full text-left text-red-400 hover:text-red-500 mt-2 border-t border-[var(--border)] pt-2">Вийти з акаунту</button>
-                `;
-            } else {
-                dropdownMenu.innerHTML = `
-                    <button onclick="window.isRegisterMode=false; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium">Увійти</button>
-                    <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium text-[#c5a059]">Зареєструватися</button>
-                `;
-            }
-        }
-    } catch (err) {
-        console.warn('Помилка генерації меню профілю:', err);
+window.injectGlobalUI = function() {
+    window.injectAuthModal(); // Створюємо модалку глобально
+    if (!document.getElementById('scrollToTopBtn')) {
+        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
     }
 };
 
-window.smartProfileClick = function() {
-    if(document.getElementById('sideMenu')?.classList.contains('active')) {
-        window.toggleMenu(); 
-    }
-    const user = API.get('bv_current_user', null);
-    if (user && user.id) {
-        window.location.href = 'profile.html';
-    } else {
-        if(typeof window.injectAuthModal === 'function') window.injectAuthModal();
-        window.openAuthModal();
-    }
+window.toggleAccordionPanel = function(clickedPanel) {
+    const allPanels = document.querySelectorAll('.glass-panel-item');
+    if (clickedPanel.classList.contains('active')) return;
+    allPanels.forEach(panel => panel.classList.remove('active'));
+    clickedPanel.classList.add('active');
 };
-
-window.renderGalleryPage = function() {
-    const container = document.getElementById('galleryGrid');
-    if(!container) return;
-    
-    const items = API.get('bv_gallery', []);
-    const currentLang = API.get('bv_lang', 'uk');
-    const activeCat = window.location.hash.replace('#', '') || 'all';
-    
-    document.querySelectorAll('.gal-filter-btn').forEach(btn => {
-        if(btn.dataset.cat === activeCat) {
-            btn.classList.add('bg-[var(--text-main)]', 'text-[var(--bg-body)]', 'border-[var(--text-main)]');
-            btn.classList.remove('text-[var(--text-main)]', 'bg-transparent');
-        } else {
-            btn.classList.remove('bg-[var(--text-main)]', 'text-[var(--bg-body)]', 'border-[var(--text-main)]');
-            btn.classList.add('text-[var(--text-main)]', 'bg-transparent');
-        }
-    });
-
-    const filtered = activeCat === 'all' ? items : items.filter(i => i.category === activeCat);
-    
-    if(filtered.length === 0) {
-        container.innerHTML = '<p class="text-[var(--text-muted)] italic col-span-full text-center py-10">Тут поки немає фотографій.</p>';
-        return;
-    }
-    
-    container.innerHTML = filtered.map(item => `
-        <div class="flex flex-col gap-3 group">
-            <div class="overflow-hidden rounded-none border border-[var(--border)] bg-black/5">
-                <img src="${item.img}" class="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-700">
-            </div>
-            <p class="text-sm font-light text-[var(--text-muted)] leading-relaxed text-center">${item.desc[currentLang] || item.desc.uk}</p>
-        </div>
-    `).join('');
-};
-
-window.addEventListener('hashchange', () => {
-    if(window.location.pathname.includes('gallery.html')) renderGalleryPage();
-});
 
 // ==========================================
-// ONLOAD ТА ІНІЦІАЛІЗАЦІЯ
+// 13. ПОШУК, АВТОРИЗАЦІЯ ТА REALTIME (SUPABASE)
 // ==========================================
-window.onload = async () => { 
-    try {
-        if(window.location.pathname.includes('admin.html')) return;
-        
-        if(typeof migrateScopedState === 'function') migrateScopedState();
-        if(typeof window.injectGlobalUI === 'function') window.injectGlobalUI();
-        
-        await window.loadCloudData();
-
-        if(document.getElementById('marqueeTrack') && typeof initMarqueeSim === 'function') initMarqueeSim();
-        if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
-        if(document.getElementById('servicesPriceBody') && typeof renderServicesTable === 'function') renderServicesTable();
-        
-        if(document.getElementById('processListContainer') && typeof renderExclusivePage === 'function') {
-            window.renderExclusivePage();
-        }
-
-        const savedLang = API.get('bv_lang', 'uk');
-        if(typeof window.changeLang === 'function') window.changeLang(savedLang);
-
-        const savedTheme = API.get('bv_theme', 'light');
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const icon = document.getElementById('themeIcon'); 
-        const iconMob = document.getElementById('themeIconMob');
-        const svg = savedTheme === 'light' ? sunSVG : moonSVG;
-        if(icon) icon.innerHTML = svg; 
-        if(iconMob) iconMob.innerHTML = svg;
-
-        const yearEl = document.getElementById('currentYear');
-        if(yearEl) yearEl.textContent = new Date().getFullYear();
-
-        if(typeof window.renderCart === 'function') window.renderCart(); 
-        if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
-
-        const currentUser = API.get('bv_current_user', null);
-        if((currentUser || localStorage.getItem('isAdminAuth') === 'true') && typeof window.initRealtime === 'function') {
-            window.initRealtime();
-        }
-        
-        if(typeof window.updateProfileMenu === 'function') window.updateProfileMenu(); 
-
-        const burgerBtn = document.getElementById('burger');
-        if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }
-    } catch (err) {
-        console.error("Помилка при завантаженні (onload):", err);
-    }
-};
-
-let lastScrollTop = 0;
-let isScrollingUp = false;
-
-window.addEventListener('scroll', () => {
-    const header = document.getElementById('header');
-    if(header) header.classList.toggle('scrolled', window.scrollY > 50);
-    
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    isScrollingUp = currentScroll < lastScrollTop && currentScroll > 400;
-    
-    const topBtn = document.getElementById('scrollToTopBtn');
-
-    if(isScrollingUp) { 
-        if(topBtn) { topBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.add('opacity-100', 'translate-y-0'); }
-    } else {
-        if(topBtn) { topBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.remove('opacity-100', 'translate-y-0'); }
-    }
-    
-    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-}, { passive: true });
-
-const overlay = document.getElementById('overlay');
-const cartOverlay = document.getElementById('cartOverlay');
-const favOverlay = document.getElementById('favOverlay');
-if(overlay) overlay.onclick = () => { if(typeof window.toggleMenu === 'function') window.toggleMenu(); };
-if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'function') window.toggleCart(); };
-if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
-
 window.executeSearch = function(query) {
     if (!query || !query.trim()) return;
     window.location.href = `catalog.html?search=${encodeURIComponent(query.trim())}`;
@@ -1408,6 +1313,36 @@ window.loginWithApple = async function() {
     await _supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin + window.location.pathname } });
 };
 
+window.updateProfileMenu = function() {
+    const user = getCurrentUser();
+    const dropdownMenu = document.getElementById('profileDropdownMenu');
+    // ДОДАЄМО: оновлюємо подію для кліку на іконку профілю в шапці
+    const profileBtn = document.getElementById('headerProfileBtn');
+    if (profileBtn) {
+        // Якщо юзер є - перекидаємо в кабінет, якщо нема - відкриваємо модалку
+        profileBtn.onclick = function() {
+            if (user) location.href = 'profile.html';
+            else window.openAuthModal();
+        };
+    }
+
+    
+    if(dropdownMenu) {
+        if (user) {
+            dropdownMenu.innerHTML = `
+                <a href="profile.html" class="dropdown-item w-full text-left font-medium">Мій кабінет</a>
+                ${user.role === 'admin' ? '<a href="admin.html" class="dropdown-item w-full text-left font-bold text-[#c5a059]">Панель Адміна</a>' : ''}
+                <button onclick="logoutUser()" class="btn-cross dropdown-item w-full text-left text-red-400 hover:text-red-500 mt-2 border-t border-[var(--border)] pt-2">Вийти з акаунту</button>
+            `;
+        } else {
+            dropdownMenu.innerHTML = `
+                <button onclick="window.isRegisterMode=false; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium">Увійти</button>
+                <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium text-[#c5a059]">Зареєструватися</button>
+            `;
+        }
+    }
+};
+
 window.initRealtime = function() {
     const user = getCurrentUser();
     if(!user) return;
@@ -1445,7 +1380,11 @@ window.logoutUser = async function() {
     }
 };
 
+// ==========================================
+// 14. ГЛОБАЛЬНИЙ СТАРТ ТА СЛУХАЧІ
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // ВПРИСКУЄМО МОДАЛКУ ОДРАЗУ, ЩОБ ПІДХОПИТИ ПОДІЇ
     if(typeof window.injectAuthModal === 'function') window.injectAuthModal();
 
     const deskSearch = document.querySelector('.search-input.desktop-only') || document.querySelector('.desktop-only .search-input');
@@ -1471,6 +1410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Тепер authForm точно існує
     const authForm = document.getElementById('authForm');
     if(authForm) {
         authForm.addEventListener('submit', async (e) => {
@@ -1547,3 +1487,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
+
+// window.onload та скролл залишаються без змін
+window.onload = async () => { 
+    if(window.location.pathname.includes('admin.html')) return;
+
+    migrateScopedState();
+    if(typeof window.injectGlobalUI === 'function') window.injectGlobalUI();
+    
+    await window.loadCloudData();
+
+    if(document.getElementById('marqueeTrack') && typeof initMarqueeSim === 'function') initMarqueeSim();
+    if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
+    if(document.getElementById('servicesPriceBody') && typeof renderServicesTable === 'function') renderServicesTable();
+    if(document.getElementById('exclusive-process-container') && typeof renderExclusivePage === 'function') renderExclusivePage();
+
+    const savedLang = API.get('bv_lang', 'uk');
+    if(typeof window.changeLang === 'function') window.changeLang(savedLang);
+
+    const savedTheme = API.get('bv_theme', 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const icon = document.getElementById('themeIcon'); 
+    const iconMob = document.getElementById('themeIconMob');
+    const svg = savedTheme === 'light' ? sunSVG : moonSVG;
+    if(icon) icon.innerHTML = svg; 
+    if(iconMob) iconMob.innerHTML = svg;
+
+    const yearEl = document.getElementById('currentYear');
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+    if(typeof window.renderCart === 'function') window.renderCart(); 
+    if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+
+    const currentUser = API.get('bv_current_user', null);
+    if(currentUser || localStorage.getItem('isAdminAuth') === 'true') window.initRealtime();
+    
+    window.updateProfileMenu(); 
+
+    const burgerBtn = document.getElementById('burger');
+    if(burgerBtn) { burgerBtn.onclick = function(e) { e.stopPropagation(); if(typeof window.toggleMenu === 'function') window.toggleMenu(); }; }
+};
+
+let lastScrollTop = 0;
+let isScrollingUp = false;
+
+window.addEventListener('scroll', () => {
+    const header = document.getElementById('header');
+    if(header) header.classList.toggle('scrolled', window.scrollY > 50);
+    
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    isScrollingUp = currentScroll < lastScrollTop && currentScroll > 400;
+    
+    const topBtn = document.getElementById('scrollToTopBtn');
+
+    if(isScrollingUp) { 
+        if(topBtn) { topBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.add('opacity-100', 'translate-y-0'); }
+    } else {
+        if(topBtn) { topBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); topBtn.classList.remove('opacity-100', 'translate-y-0'); }
+    }
+    
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+}, { passive: true });
+
+const overlay = document.getElementById('overlay');
+const cartOverlay = document.getElementById('cartOverlay');
+const favOverlay = document.getElementById('favOverlay');
+if(overlay) overlay.onclick = () => { if(typeof window.toggleMenu === 'function') window.toggleMenu(); };
+if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'function') window.toggleCart(); };
+if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
