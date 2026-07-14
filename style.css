@@ -2122,129 +2122,81 @@ body {
 
 
 /* ==========================================================================
-   2. ДЕКСТОПНОЕ МЕГА-МЕНЮ (ЗАПРЕТ ПОБУКВЕННОГО ПЕРЕНОСА)
+   ОПТИМИЗИРОВАННОЕ МЕНЮ (ВСЕ В ОДНОМ)
    ========================================================================== */
 
-/* Разрешаем перенос только целыми словами (по пробелам), запрещая побуквенный разрыв */
-.mega-menu, 
-.zlato-categories, 
-.zlato-content,
-.mega-menu a {
-    word-break: normal !important;      /* Запрещает разрывать одиночные слова на буквах */
-    overflow-wrap: normal !important;   /* Перенос строго по пробелам */
-    white-space: normal;                /* Разрешает аккуратный перенос фраз целиком */
-}
-
-/* Тэги и заголовки в десктопном меню — строго в одну строку с троеточием */
-.zlato-tag, 
-.zlato-group-title,
-.mob-tag {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: inline-block;
-}
-
-/* Контейнер для тегов: переносит элементы целиком на новую строку, не разбивая слова внутри них */
-.zlato-tags-container {
-    display: flex;
-    flex-wrap: wrap;                    /* Позволяет тегам как блокам перепрыгивать на новые строки */
-    gap: 8px 12px;                      /* Отступы между тегами */
-}
-
-/* Позволяет элементам занимать ширину своего контента и не сжиматься до уродливого состояния */
-.zlato-categories a,
-.zlato-content a {
-    display: inline-block;
-    min-width: max-content;
-}
-
-
-
-
-/* Делаем ссылку флекс-контейнером */
-.mob-accordion-list a,
-.sub-cat-link {
+/* 1. Главный контейнер меню: ширина 85%, чтобы оставить место для клика снаружи */
+.side-menu.active {
+    width: 85% !important;
+    max-width: 400px !important;
+    left: 0 !important;
+    right: auto !important;
     display: flex !important;
-    align-items: center;      /* Центрируем по вертикали */
-    width: 100% !important;   /* Занимаем всю ширину */
-    padding-right: 15px !important; /* Небольшой отступ от края, чтобы текст не прилипал */
-    overflow: hidden !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
 }
 
-/* Сам текст внутри ссылки */
-.mob-accordion-list a span,
-.sub-cat-link span {
-    flex: 1;                /* Текст занимает всё свободное место */
-    min-width: 0;           /* КРИТИЧЕСКИ ВАЖНО: разрешает тексту сжиматься корректно */
-    white-space: nowrap;    /* Запрет переноса на новую строку */
-    overflow: hidden;       /* Скрываем выход за границы */
-    text-overflow: ellipsis;/* Добавляем ... только если текст уперся в край */
-    display: block;
-}
-
-/* Если есть стрелочки или иконки внутри ссылок, фиксируем их размер */
-.mob-accordion-list a svg,
-.sub-cat-link svg {
-    flex-shrink: 0;         /* Иконка никогда не сжимается */
-    margin-left: 10px;      /* Отступ между текстом и иконкой */
-}
-
-
-/* 1. Класс для контейнеров, где нужен горизонтальный скролл */
-.horizontal-scroll-wrapper {
-    display: flex;
-    flex-wrap: nowrap;          /* Запрещаем перенос элементов на новую строку */
-    overflow-x: auto;           /* Включаем горизонтальную прокрутку */
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-    scrollbar-width: none;      /* Скрываем скроллбар в Firefox */
-    padding-bottom: 5px;        /* Небольшой отступ снизу для красоты */
-}
-
-/* Прячем скроллбар в Chrome, Safari, Edge */
-.horizontal-scroll-wrapper::-webkit-scrollbar {
-    display: none;
-}
-
-/* 2. Применяем это к твоему контейнеру тегов в Mega Menu */
-.zlato-tags-container {
-    display: flex;
-    flex-wrap: nowrap !important; /* Убеждаемся, что nowrap перебивает старый wrap */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 5px;
-}
-
-.zlato-tags-container::-webkit-scrollbar {
-    display: none;
-}
-
-/* 3. Гарантируем, что элементы внутри не будут сжиматься */
-.zlato-tags-container a {
-    flex-shrink: 0; /* Элементы не будут "худеть" при нехватке места */
-    white-space: nowrap;
-}
-
-
-
-/* Применяем для ссылок и спанов внутри них */
-.mob-accordion-list a, 
+/* 2. Ссылки: всегда в строку, не сжимаются, адаптивные */
+.mob-accordion-list a,
 .sub-cat-link,
-.mob-accordion-list a span,
-.sub-cat-link span {
-    display: block !important;        
-    overflow-x: auto !important;      /* Включаем скролл */
-    white-space: nowrap !important;   /* Текст всегда в одну линию */
-    text-overflow: clip !important;   /* УБИРАЕМ ТОЧКИ (троеточие) */
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на мобильных */
-    
-    /* Убираем скроллбар */
-    scrollbar-width: none; 
+.mob-nested-list a,
+.mob-nested-title {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 12px 15px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important; /* Текст не переносится */
+    flex-shrink: 0 !important;      /* Не дает сжиматься */
 }
 
-/* Принудительное скрытие скроллбара для Webkit */
+/* 3. Текст внутри ссылок: полная ширина, без переносов */
+.mob-accordion-list a span,
+.sub-cat-link span,
+.mob-nested-title span,
+.mob-nested-list a span {
+    white-space: nowrap !important;
+    display: block !important;
+    flex: 1 0 auto !important;      /* Тянется, но не сжимается */
+    overflow: visible !important;   /* Показывает полный текст */
+}
+
+/* 4. Контейнеры для скролла: если категория длиннее 85% экрана */
+.mob-accordion-list,
+.mob-nested-list {
+    width: 100% !important;
+    overflow-x: auto !important;    /* Горизонтальный скролл для длинных слов */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 5. Убираем скроллбары везде */
+.mob-accordion-list::-webkit-scrollbar,
+.mob-nested-list::-webkit-scrollbar,
 .mob-accordion-list a::-webkit-scrollbar,
 .sub-cat-link::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+}
+
+/* 6. Иконки: всегда фиксированного размера, не мешают тексту */
+.mob-accordion-list a svg,
+.sub-cat-link svg,
+.mob-nested-title svg {
+    flex-shrink: 0 !important;
+    margin-left: 10px !important;
+}
+
+/* 7. Мега-меню теги (если есть в десктопе) */
+.zlato-tags-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+}
+.zlato-tags-container::-webkit-scrollbar {
+    display: none !important;
+}
+.zlato-tags-container a {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
 }
