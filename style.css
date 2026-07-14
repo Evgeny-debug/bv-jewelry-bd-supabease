@@ -2065,114 +2065,39 @@ body {
     margin-top: auto !important;
     margin-bottom: auto !important;
 }
+/* ==========================================================================
+   1. МОБИЛЬНОЕ МЕНЮ (ПОЛНЫЙ ЗАПРЕТ ПЕРЕНОСОВ И ОФОРМЛЕНИЕ СТРОК)
+   ========================================================================== */
 
-/* ==========================================
-   АККУРАТНЫЙ ПЕРЕНОС ДЛИННЫХ СЛОВ ВО ВЛОЖЕНИЯХ
-   ========================================== */
-#mobCatList a, 
-#mobInfoList a,
-#mobCatList span,
-#mobInfoList span {
-    /* 1. Разрешаем естественный перенос текста */
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    
-    /* 2. Делаем блок блочным, чтобы он уважал правый отступ */
-    display: block !important;
-    
-    /* 3. Обязательный отступ справа (чтобы текст не заплывал под стрелочку) */
-    padding-right: 45px !important;
-    
-    /* 4. Красивое расстояние между перенесенными строчками */
-    line-height: 1.4 !important;
-}
-
-
-
-/* ==========================================
-   АККУРАТНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ ПОДПУНКТАМИ
-   ========================================== */
-
-/* 1. Добавляем тонкую линию снизу для ссылок в каталоге */
-#mobCatList a {
-    border-bottom: 1px solid var(--border) !important;
-    
-    /* Немного увеличиваем отступы, чтобы линия красиво отделяла текст */
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-}
-
-/* 2. Убираем линию у самого последнего вложения в группе, чтобы не было "хвоста" */
-#mobCatList a:last-child {
-    border-bottom: none !important;
-}
-
-/* Отменяем побуквенный перенос для всего мега-меню */
-.mega-menu, 
-.zlato-categories, 
-.zlato-content,
-.mega-menu a {
-    word-break: normal !important;       /* Запрещает разрывать слова на буквах */
-    overflow-wrap: normal !important;    /* Перенос только по пробелам */
-    white-space: normal;                 /* Разрешает перенос, но только целыми словами */
-}
-
-/* Опционально: задаем минимальную ширину элементам, чтобы текст не сжимался слишком сильно */
-.zlato-categories a,
-.zlato-content a {
-    display: inline-block;
-    min-width: max-content;              /* Элемент будет стремиться занять ширину текста */
-}
-
-
-/* Полный запрет на побуквенный разрыв строк в мобильном меню */
-.mob-accordion-list,
-.mob-accordion-list a,
-.sub-cat-link,
-.mob-menu-title {
-    word-break: normal !important;        /* Запрещает разрывать одиночные слова */
-    overflow-wrap: break-word !important; /* Перенос строки только на стыке целых слов */
-    white-space: normal !important;       /* Позволяет переносить длинные фразы на новую строку */
-    hyphens: none !important;             /* Отключает автоматическую расстановку дефисов */
-}
-
-
-/* Полный запрет на перенос строк для всех подпунктов мобильного меню */
+/* Полный запрет на перенос строк для всех ссылок, кнопок и тайтлов в мобильном меню */
 .mob-accordion-list a, 
-.sub-cat-link {
-    white-space: nowrap !important;   /* Жестко в одну строку, никаких переносов */
-    overflow: hidden !important;      /* Скрываем то, что не помещается в экран */
-    text-overflow: ellipsis !important; /* Красивое троеточие на конце длинных фраз (...) */
-    display: block !important;        /* Гарантирует правильную работу обрезки текста */
-    width: 100%;                      /* Ограничиваем ширину рамками меню */
-}
-
-/* 1. Запрещаем перенос для самих ссылок и ЛЮБЫХ вложенных в них элементов */
-.mob-accordion-list a,
 .mob-accordion-list a *,
+.mob-nested-title span,
+.mob-all-btn,
 .sub-cat-link,
 .sub-cat-link * {
-    white-space: nowrap !important;      /* Никаких переносов ни при каких условиях */
-    word-break: keep-all !important;     /* Запрет разрыва слов */
-    hyphens: none !important;            /* Отключаем дефисы */
+    white-space: nowrap !important;     /* Никаких переносов ни при каких условиях */
+    word-break: keep-all !important;    /* Запрет разрыва слов */
+    hyphens: none !important;           /* Отключаем дефисы */
 }
 
-/* 2. Настраиваем правильное скрытие длинного текста */
-.mob-accordion-list a,
+/* Настраиваем правильное скрытие длинного текста с троеточием (...) */
+.mob-accordion-list a, 
+.mob-nested-title span,
+.mob-all-btn,
 .sub-cat-link {
-    display: block !important;           /* Переводим в блочный режим для работы ellipsis */
+    display: block !important;          /* Переводим в блочный режим для работы ellipsis */
     width: 100% !important;
-    max-width: calc(100vw - 40px) !important; /* Ограничиваем ширину экраном (с учетом отступов) */
+    max-width: calc(100vw - 40px) !important; /* Ограничиваем ширину экраном с учетом отступов */
     overflow: hidden !important;         /* Скрываем всё, что вылезает */
     text-overflow: ellipsis !important;  /* Добавляем троеточие (...) */
 }
 
-/* 3. Если внутри ссылок используются флекс-контейнеры (например, текст + иконка в ряд) */
+/* Настройка флекс-контейнеров внутри ссылок (чтобы сжатие работало корректно) */
 .mob-accordion-list a.flex,
 .sub-cat-link.flex {
     display: flex !important;
-    min-width: 0 !important;             /* Снимаем ограничение флекса на сжатие */
+    min-width: 0 !important;             /* Позволяет флекс-элементам сжиматься до нуля */
 }
 
 .mob-accordion-list a.flex > span,
@@ -2180,4 +2105,146 @@ body {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     min-width: 0 !important;
+}
+
+/* Аккуратные разделители между подпунктами в каталоге */
+#mobCatList a {
+    border-bottom: 1px solid var(--border) !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    padding-right: 45px !important;     /* Защитный отступ справа, чтобы текст не наезжал на стрелки */
+}
+
+/* Убираем нижнюю границу у самого последнего элемента в списке, чтобы не было лишней линии */
+#mobCatList a:last-child {
+    border-bottom: none !important;
+}
+
+
+/* ==========================================================================
+   2. ДЕКСТОПНОЕ МЕГА-МЕНЮ (ЗАПРЕТ ПОБУКВЕННОГО ПЕРЕНОСА)
+   ========================================================================== */
+
+/* Разрешаем перенос только целыми словами (по пробелам), запрещая побуквенный разрыв */
+.mega-menu, 
+.zlato-categories, 
+.zlato-content,
+.mega-menu a {
+    word-break: normal !important;      /* Запрещает разрывать одиночные слова на буквах */
+    overflow-wrap: normal !important;   /* Перенос строго по пробелам */
+    white-space: normal;                /* Разрешает аккуратный перенос фраз целиком */
+}
+
+/* Тэги и заголовки в десктопном меню — строго в одну строку с троеточием */
+.zlato-tag, 
+.zlato-group-title,
+.mob-tag {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline-block;
+}
+
+/* Контейнер для тегов: переносит элементы целиком на новую строку, не разбивая слова внутри них */
+.zlato-tags-container {
+    display: flex;
+    flex-wrap: wrap;                    /* Позволяет тегам как блокам перепрыгивать на новые строки */
+    gap: 8px 12px;                      /* Отступы между тегами */
+}
+
+/* Позволяет элементам занимать ширину своего контента и не сжиматься до уродливого состояния */
+.zlato-categories a,
+.zlato-content a {
+    display: inline-block;
+    min-width: max-content;
+}
+
+
+
+
+/* Делаем ссылку флекс-контейнером */
+.mob-accordion-list a,
+.sub-cat-link {
+    display: flex !important;
+    align-items: center;      /* Центрируем по вертикали */
+    width: 100% !important;   /* Занимаем всю ширину */
+    padding-right: 15px !important; /* Небольшой отступ от края, чтобы текст не прилипал */
+    overflow: hidden !important;
+}
+
+/* Сам текст внутри ссылки */
+.mob-accordion-list a span,
+.sub-cat-link span {
+    flex: 1;                /* Текст занимает всё свободное место */
+    min-width: 0;           /* КРИТИЧЕСКИ ВАЖНО: разрешает тексту сжиматься корректно */
+    white-space: nowrap;    /* Запрет переноса на новую строку */
+    overflow: hidden;       /* Скрываем выход за границы */
+    text-overflow: ellipsis;/* Добавляем ... только если текст уперся в край */
+    display: block;
+}
+
+/* Если есть стрелочки или иконки внутри ссылок, фиксируем их размер */
+.mob-accordion-list a svg,
+.sub-cat-link svg {
+    flex-shrink: 0;         /* Иконка никогда не сжимается */
+    margin-left: 10px;      /* Отступ между текстом и иконкой */
+}
+
+
+/* 1. Класс для контейнеров, где нужен горизонтальный скролл */
+.horizontal-scroll-wrapper {
+    display: flex;
+    flex-wrap: nowrap;          /* Запрещаем перенос элементов на новую строку */
+    overflow-x: auto;           /* Включаем горизонтальную прокрутку */
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+    scrollbar-width: none;      /* Скрываем скроллбар в Firefox */
+    padding-bottom: 5px;        /* Небольшой отступ снизу для красоты */
+}
+
+/* Прячем скроллбар в Chrome, Safari, Edge */
+.horizontal-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+/* 2. Применяем это к твоему контейнеру тегов в Mega Menu */
+.zlato-tags-container {
+    display: flex;
+    flex-wrap: nowrap !important; /* Убеждаемся, что nowrap перебивает старый wrap */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 5px;
+}
+
+.zlato-tags-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* 3. Гарантируем, что элементы внутри не будут сжиматься */
+.zlato-tags-container a {
+    flex-shrink: 0; /* Элементы не будут "худеть" при нехватке места */
+    white-space: nowrap;
+}
+
+
+
+/* Применяем для ссылок и спанов внутри них */
+.mob-accordion-list a, 
+.sub-cat-link,
+.mob-accordion-list a span,
+.sub-cat-link span {
+    display: block !important;        
+    overflow-x: auto !important;      /* Включаем скролл */
+    white-space: nowrap !important;   /* Текст всегда в одну линию */
+    text-overflow: clip !important;   /* УБИРАЕМ ТОЧКИ (троеточие) */
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на мобильных */
+    
+    /* Убираем скроллбар */
+    scrollbar-width: none; 
+}
+
+/* Принудительное скрытие скроллбара для Webkit */
+.mob-accordion-list a::-webkit-scrollbar,
+.sub-cat-link::-webkit-scrollbar {
+    display: none;
 }
