@@ -251,14 +251,70 @@
 
         <div id="dynamicHomeBlocksContainer"></div>
         
-        <section class="max-w-[1920px] mx-auto px-0 md:px-4" id="categories-section">
-            <div class="text-center mb-4 md:mb-12 mt-4">
-                <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-2">Our World</h3>
+        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
+            <div class="text-center mb-10 md:mb-16">
+                <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">Our World</h3>
                 <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
             </div>
-            
             <div class="glass-accordion-container" id="glassAccordion">
-                
+                <div class="glass-panel-item group active" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800" alt="Каблучки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Каблучки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wr_gold_red" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wr_silver" class="panel-tag">Срібні</a>
+                                <a href="catalog.html#wr_diamonds" class="panel-tag">З діамантами</a>
+                            </div>
+                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800" alt="Сережки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Сережки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#we_gold" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#we_silver" class="panel-tag">Срібні</a>
+                                <a href="catalog.html#we_studs" class="panel-tag">Пусети</a>
+                            </div>
+                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800" alt="Ланцюжки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Ланцюжки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wn_gold_chains" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wn_silver_chains" class="panel-tag">Срібні</a>
+                            </div>
+                            <a href="catalog.html#necklaces" class="panel-btn">Всі ланцюжки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=800" alt="Браслети" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Браслети</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wb_gold" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wb_silver_hard" class="panel-tag">Срібні</a>
+                            </div>
+                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети →</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
