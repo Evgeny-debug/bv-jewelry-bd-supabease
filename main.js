@@ -1592,3 +1592,46 @@ window.renderGallery = function(category = 'all') {
         `;
     }).join('');
 };
+
+
+
+
+// Функция для загрузки данных галереи
+window.loadGalleryFromDB = async function() {
+    try {
+        // Убедитесь, что таблица называется 'gallery' (или как у вас в админке)
+        const { data, error } = await supabase
+            .from('gallery') // Название таблицы в Supabase
+            .select('*');
+
+        if (error) throw error;
+        
+        // Сохраняем для использования в галерее
+        window.galleryItems = data;
+        console.log("Данные галереи загружены:", data);
+        
+        // Сразу вызываем функцию рендера
+        window.renderGalleryGrid(); 
+    } catch (err) {
+        console.error("Ошибка загрузки галереи:", err);
+    }
+};
+
+// Функция отрисовки
+window.renderGalleryGrid = function() {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid || !window.galleryItems) return;
+
+    grid.innerHTML = window.galleryItems.map(item => {
+        // 'image' — это имя поля в базе данных (соответствует id="gal-img" из админки)
+        const img = item.image || 'placeholder.jpg'; 
+        const name = item.desc_uk || 'Виріб'; 
+
+        return `
+            <div class="card">
+                <img src="${img}" alt="${name}" class="w-full h-auto">
+                <h3>${name}</h3>
+            </div>
+        `;
+    }).join('');
+};
