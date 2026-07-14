@@ -173,6 +173,23 @@
             <p>© <span id="currentYear">2026</span> BV Jewelry. Всі права захищені.</p>
         </div>
     </footer>
-    <script src="main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="main.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Проверяем, загружены ли данные, если нет — пробуем загрузить
+        if (!window.products || window.products.length === 0) {
+            await window.loadCloudData(); // Предполагаем, что эта функция у вас есть
+        }
+        
+        // Запускаем рендер
+        if (typeof window.renderGallery === 'function') {
+            window.renderGallery('all');
+            window.initGalleryFilters();
+        }
+    });
+</script>
 </body>
 </html>

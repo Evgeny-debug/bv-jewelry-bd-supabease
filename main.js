@@ -1555,3 +1555,40 @@ const favOverlay = document.getElementById('favOverlay');
 if(overlay) overlay.onclick = () => { if(typeof window.toggleMenu === 'function') window.toggleMenu(); };
 if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'function') window.toggleCart(); };
 if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
+
+
+
+
+
+
+window.renderGallery = function(category = 'all') {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+
+    // Берем данные (убедитесь, что они лежат в window.products или localStorage)
+    const products = window.products || JSON.parse(localStorage.getItem('products') || '[]');
+
+    // Фильтрация
+    let filtered = category === 'all' ? products : products.filter(p => p.category === category);
+
+    // Рендер
+    grid.innerHTML = filtered.map(p => {
+        // ВОТ ЭТА ЛОГИКА используется в админке для отображения фото
+        // Она проверяет вариации или прямое поле image
+        const img = p.variations?.base?.images?.[0] || p.image || p.img || 'placeholder.jpg';
+        const name = p.name || 'Без названия';
+        const price = p.variations?.base?.price || 0;
+
+        return `
+            <div class="group border border-[var(--border)] overflow-hidden">
+                <div class="aspect-square overflow-hidden bg-gray-100">
+                    <img src="${img}" alt="${name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="p-4 text-center">
+                    <h3 class="font-serif text-lg">${name}</h3>
+                    <p class="text-[var(--gold-muted)]">${price} ₴</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
