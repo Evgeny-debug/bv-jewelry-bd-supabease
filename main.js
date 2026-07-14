@@ -1617,21 +1617,35 @@ window.loadGalleryFromDB = async function() {
     }
 };
 
-// Функция отрисовки
 window.renderGalleryGrid = function() {
     const grid = document.getElementById('galleryGrid');
-    if (!grid || !window.galleryItems) return;
+    if (!grid) return;
 
-    grid.innerHTML = window.galleryItems.map(item => {
-        // 'image' — это имя поля в базе данных (соответствует id="gal-img" из админки)
-        const img = item.image || 'placeholder.jpg'; 
-        const name = item.desc_uk || 'Виріб'; 
+    // Ваши данные уже в переменной, которая загрузилась из облака
+    // (вероятно, window.products или window.galleryItems, проверьте в консоли)
+    const items = window.galleryItems || []; 
+
+    if (items.length === 0) {
+        grid.innerHTML = '<p class="text-white">Поки що немає фото в галереї.</p>';
+        return;
+    }
+
+    grid.innerHTML = items.map(item => {
+        // Берем данные из полей, которые мы видели на скриншоте базы
+        const img = item.image_url || 'placeholder.jpg'; 
+        const title = item.заголовок || 'Без назви';
 
         return `
-            <div class="card">
-                <img src="${img}" alt="${name}" class="w-full h-auto">
-                <h3>${name}</h3>
+            <div class="card overflow-hidden rounded-lg">
+                <img src="${img}" alt="${title}" class="w-full h-64 object-cover">
+                <div class="p-2 text-center text-white">${title}</div>
             </div>
         `;
     }).join('');
+};
+
+window.initGalleryFilters = function() {
+    console.log("Gallery filters initialized");
+    // Если у вас будут фильтры по категориям, они будут здесь.
+    // Пока что оставляем пустым, чтобы страница не ломалась.
 };
