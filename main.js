@@ -164,6 +164,24 @@ window.loadCloudData = async function() {
             }
         }
         
+    try {
+    const { data: galleryData, error: galleryError } = await _supabase
+        .from('gallery') // Замініть 'gallery' на назву вашої таблиці в Supabase, якщо вона інша
+        .select('*');
+        
+    if (!galleryError && galleryData) {
+        API.set('bv_gallery', galleryData); // Зберігаємо в локальний кеш, щоб сторінка галереї могла їх взяти
+        console.log("BV Jewelry: Галерею оновлено з хмари.");
+        
+        // Якщо ми зараз знаходимось на сторінці галереї і там є функція рендеру - викликаємо її
+        if (typeof window.renderGallery === 'function') {
+            window.renderGallery();
+        }
+    }
+} catch (err) {
+    console.error("Помилка завантаження галереї:", err);
+}
+
         // Перемальовуємо, якщо прийшли нові дані
         console.log("BV Jewelry: Дані оновлено з хмари.");
         if(typeof generateMenus === 'function') generateMenus();
