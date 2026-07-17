@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bv-jewelry.com/sitemap.xml
