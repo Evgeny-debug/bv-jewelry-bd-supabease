@@ -164,23 +164,22 @@ window.loadCloudData = async function() {
             }
         }
         
-    try {
-    const { data: galleryData, error: galleryError } = await _supabase
-        .from('gallery') // Замініть 'gallery' на назву вашої таблиці в Supabase, якщо вона інша
-        .select('*');
-        
-    if (!galleryError && galleryData) {
-        API.set('bv_gallery', galleryData); // Зберігаємо в локальний кеш, щоб сторінка галереї могла їх взяти
-        console.log("BV Jewelry: Галерею оновлено з хмари.");
-        
-        // Якщо ми зараз знаходимось на сторінці галереї і там є функція рендеру - викликаємо її
-        if (typeof window.renderGallery === 'function') {
-            window.renderGallery();
+        try {
+            const { data: galleryData, error: galleryError } = await _supabase
+                .from('gallery') 
+                .select('*');
+                
+            if (!galleryError && galleryData) {
+                API.set('bv_gallery', galleryData); 
+                console.log("BV Jewelry: Галерею оновлено з хмари.");
+                
+                if (typeof window.renderGallery === 'function') {
+                    window.renderGallery();
+                }
+            }
+        } catch (err) {
+            console.error("Помилка завантаження галереї:", err);
         }
-    }
-} catch (err) {
-    console.error("Помилка завантаження галереї:", err);
-}
 
         // Перемальовуємо, якщо прийшли нові дані
         console.log("BV Jewelry: Дані оновлено з хмари.");
@@ -1575,24 +1574,22 @@ if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'f
 if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
 
 
-
-
-
+// ==========================================
+// 15. ГАЛЕРЕЯ (ВИПРАВЛЕНО)
+// ==========================================
 
 window.renderGallery = function(category = 'all') {
     const grid = document.getElementById('galleryGrid');
     if (!grid) return;
 
-    // Берем данные (убедитесь, что они лежат в window.products или localStorage)
-    const products = window.products || JSON.parse(localStorage.getItem('products') || '[]');
+    // ВИПРАВЛЕНО: Тепер беремо продукти через фасад API.get для консистентності
+    const products = window.products || API.get('bv_products', []);
 
-    // Фильтрация
+    // Фільтрація
     let filtered = category === 'all' ? products : products.filter(p => p.category === category);
 
     // Рендер
     grid.innerHTML = filtered.map(p => {
-        // ВОТ ЭТА ЛОГИКА используется в админке для отображения фото
-        // Она проверяет вариации или прямое поле image
         const img = p.variations?.base?.images?.[0] || p.image || p.img || 'placeholder.jpg';
         const name = p.name || 'Без названия';
         const price = p.variations?.base?.price || 0;
@@ -1612,39 +1609,38 @@ window.renderGallery = function(category = 'all') {
 };
 
 
-
-
-// Функция для загрузки данных галереи
+// Функція для завантаження даних галереї
 window.loadGalleryFromDB = async function() {
     try {
-        // Убедитесь, что таблица называется 'gallery' (или как у вас в админке)
-        const { data, error } = await supabase
-            .from('gallery') // Название таблицы в Supabase
+        // ВИПРАВЛЕНО: supabase змінено на ініціалізований клієнт _supabase
+        const { data, error } = await _supabase
+            .from('gallery')
             .select('*');
 
         if (error) throw error;
         
-        // Сохраняем для использования в галерее
+        // Зберігаємо для використання в галереї
         window.galleryItems = data;
+        API.set('bv_gallery', data); // Також записуємо у кеш для швидкості
         console.log("Данные галереи загружены:", data);
         
-        // Сразу вызываем функцию рендера
+        // Відразу викликаємо функцію рендеру
         window.renderGalleryGrid(); 
     } catch (err) {
         console.error("Ошибка загрузки галереи:", err);
     }
 };
 
-// Функция отрисовки сетки (с учетом фильтрации по категории)
+// Функція відмальовування сітки (з урахуванням фільтрації по категорії)
 window.renderGalleryGrid = function(category = 'all') {
     const grid = document.getElementById('galleryGrid');
     if (!grid) return;
 
-    // Берем данные, полученные из базы
-    const items = window.galleryItems || []; 
+    // ВИПРАВЛЕНО: якщо window.galleryItems пустий, спробуємо дістати з кешу, куди його міг записати loadCloudData
+    const items = window.galleryItems || API.get('bv_gallery', []); 
 
-    // 1. Фильтруем только опубликованные (is_published === true)
-    // 2. Если выбрана категория, фильтруем по ней
+    // 1. Фільтруємо тільки опубліковані (is_published === true)
+    // 2. Якщо обрано категорію, фільтруємо по ній
     const filtered = items.filter(item => {
         const isPublished = item.is_published === true;
         const matchesCategory = (category === 'all' || item.category === category);
@@ -1657,7 +1653,6 @@ window.renderGalleryGrid = function(category = 'all') {
     }
 
     grid.innerHTML = filtered.map(item => {
-        // Используем ТОЧНЫЕ имена колонок из вашей базы Supabase
         const img = item.image_url || 'placeholder.jpg'; 
         const title = item.title || 'Без назви';
 
@@ -1670,19 +1665,19 @@ window.renderGalleryGrid = function(category = 'all') {
     }).join('');
 };
 
-// Функция инициализации кнопок категорий
+// Функція ініціалізації кнопок категорій
 window.initGalleryFilters = function() {
-    const filterButtons = document.querySelectorAll('.filter-btn'); // Убедитесь, что у кнопок есть этот класс
+    const filterButtons = document.querySelectorAll('.filter-btn'); 
     
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const category = btn.getAttribute('data-category'); // В HTML у кнопок должно быть data-category="rings"
+            const category = btn.getAttribute('data-category'); 
             
-            // Убираем активный класс у всех, добавляем текущей
+            // Прибираємо активний клас у всіх, додаємо поточному
             filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Перерисовываем
+            // Перемальовуємо
             window.renderGalleryGrid(category);
         });
     });
