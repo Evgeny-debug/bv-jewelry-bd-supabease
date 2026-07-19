@@ -164,6 +164,24 @@ window.loadCloudData = async function() {
             }
         }
         
+    try {
+    const { data: galleryData, error: galleryError } = await _supabase
+        .from('gallery') // Замініть 'gallery' на назву вашої таблиці в Supabase, якщо вона інша
+        .select('*');
+        
+    if (!galleryError && galleryData) {
+        API.set('bv_gallery', galleryData); // Зберігаємо в локальний кеш, щоб сторінка галереї могла їх взяти
+        console.log("BV Jewelry: Галерею оновлено з хмари.");
+        
+        // Якщо ми зараз знаходимось на сторінці галереї і там є функція рендеру - викликаємо її
+        if (typeof window.renderGallery === 'function') {
+            window.renderGallery();
+        }
+    }
+} catch (err) {
+    console.error("Помилка завантаження галереї:", err);
+}
+
         // Перемальовуємо, якщо прийшли нові дані
         console.log("BV Jewelry: Дані оновлено з хмари.");
         if(typeof generateMenus === 'function') generateMenus();
@@ -328,70 +346,58 @@ function generateMenus() {
 
         sideMenu.innerHTML = `
             <div class="flex justify-between items-center pb-4 mb-4 border-b border-[var(--border)] pt-4 px-4">
-                <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
-                    <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
-                </a>
-                <div class="flex items-center gap-5">
-                    <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
-                    </button>
-                    
-                    <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
-                        <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
-                        <span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
-                        <span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
-                    </div>
-                    
-                    <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
-                <a href="index.html" class="mob-menu-title" onclick="window.toggleMenu()">Головна</a>
-                
-                <div class="menu-divider"></div>
-                
-                <div>
-                    <div class="mob-menu-title" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
-                        <span data-i18n="m2">Каталог</span>
-                        <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list" id="mobCatList" style="gap: 0; padding-left: 0;">${mobCatHtml}</div>
-                </div>
-                
-                <div>
-                    <div class="mob-menu-title cursor-pointer" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
-                        <span>Бренд</span>
-                        <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
-                        <a href="info.html?p=about" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
-                        <a href="info.html?p=warranty" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
-                        <a href="info.html?p=terms" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
-                        <a href="info.html?p=faq" class="sub-cat-link py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
-                    </div>
-                </div>
-                
-                <a href="services.html" class="mob-menu-title" onclick="window.toggleMenu()"><span data-i18n="m_price">Прайс</span></a>
-                <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" onclick="window.toggleMenu()">
-                        <span data-i18n="m_atelier">Ексклюзив</span>
-                    </a>
-                <div class="menu-divider mt-4"></div>
-                
-                <div class="mt-auto pt-4 pb-4">
-                    <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2">
-                        <a href="tel:+380634540901" class="text-[var(--gold-muted)] font-medium text-sm mb-1">+38 063 45 40 901</a>
-                        <span>Графік роботи: 08:00 - 18:00</span>
-                        <span>м. Ізмаїл, вул. Торгова, 68</span>
-                    </div>
+    <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
+        <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
+    </a>
+    <div class="flex items-center gap-5">
+        <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+            <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
+        </button>
+        
+        <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
+            <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
+            <span class="opacity-30">|</span>
+            <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
+            <span class="opacity-30">|</span>
+            <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
+        </div>
+        
+        <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+    </div>
+</div>
 
-                    
-                </div>
-            </div>
+<div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
+    <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
+    <div>
+        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
+            <span data-i18n="m2">Каталог</span>
+            <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">${mobCatHtml}</div>
+    </div>
+    <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
+    <div>
+        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
+            <span>Бренд</span>
+            <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
+            <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+            <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+            <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+            <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+        </div>
+    </div>
+    <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
+    <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors break-normal" onclick="window.toggleMenu()">
+        <span data-i18n="m_atelier">Ексклюзив</span>
+    </a>
+    <div class="mt-auto pt-4 pb-4">
+        <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2" id="mobMenuContacts"></div>
+    </div>
+</div>
         `;
     }
 }
@@ -1567,3 +1573,118 @@ const favOverlay = document.getElementById('favOverlay');
 if(overlay) overlay.onclick = () => { if(typeof window.toggleMenu === 'function') window.toggleMenu(); };
 if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'function') window.toggleCart(); };
 if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
+
+
+
+
+
+
+window.renderGallery = function(category = 'all') {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+
+    // Берем данные (убедитесь, что они лежат в window.products или localStorage)
+    const products = window.products || JSON.parse(localStorage.getItem('products') || '[]');
+
+    // Фильтрация
+    let filtered = category === 'all' ? products : products.filter(p => p.category === category);
+
+    // Рендер
+    grid.innerHTML = filtered.map(p => {
+        // ВОТ ЭТА ЛОГИКА используется в админке для отображения фото
+        // Она проверяет вариации или прямое поле image
+        const img = p.variations?.base?.images?.[0] || p.image || p.img || 'placeholder.jpg';
+        const name = p.name || 'Без названия';
+        const price = p.variations?.base?.price || 0;
+
+        return `
+            <div class="group border border-[var(--border)] overflow-hidden">
+                <div class="aspect-square overflow-hidden bg-gray-100">
+                    <img src="${img}" alt="${name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="p-4 text-center">
+                    <h3 class="font-serif text-lg">${name}</h3>
+                    <p class="text-[var(--gold-muted)]">${price} ₴</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+
+
+
+// Функция для загрузки данных галереи
+window.loadGalleryFromDB = async function() {
+    try {
+        // Убедитесь, что таблица называется 'gallery' (или как у вас в админке)
+        const { data, error } = await supabase
+            .from('gallery') // Название таблицы в Supabase
+            .select('*');
+
+        if (error) throw error;
+        
+        // Сохраняем для использования в галерее
+        window.galleryItems = data;
+        console.log("Данные галереи загружены:", data);
+        
+        // Сразу вызываем функцию рендера
+        window.renderGalleryGrid(); 
+    } catch (err) {
+        console.error("Ошибка загрузки галереи:", err);
+    }
+};
+
+// Функция отрисовки сетки (с учетом фильтрации по категории)
+window.renderGalleryGrid = function(category = 'all') {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+
+    // Берем данные, полученные из базы
+    const items = window.galleryItems || []; 
+
+    // 1. Фильтруем только опубликованные (is_published === true)
+    // 2. Если выбрана категория, фильтруем по ней
+    const filtered = items.filter(item => {
+        const isPublished = item.is_published === true;
+        const matchesCategory = (category === 'all' || item.category === category);
+        return isPublished && matchesCategory;
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<p class="text-gray-500 text-center col-span-full">У цій категорії поки немає товарів.</p>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map(item => {
+        // Используем ТОЧНЫЕ имена колонок из вашей базы Supabase
+        const img = item.image_url || 'placeholder.jpg'; 
+        const title = item.title || 'Без назви';
+
+        return `
+            <div class="card overflow-hidden rounded-lg shadow-sm border border-gray-100">
+                <img src="${img}" alt="${title}" class="w-full h-64 object-cover">
+                <div class="p-2 text-center text-gray-800 font-serif">${title}</div> 
+            </div>
+        `;
+    }).join('');
+};
+
+// Функция инициализации кнопок категорий
+window.initGalleryFilters = function() {
+    const filterButtons = document.querySelectorAll('.filter-btn'); // Убедитесь, что у кнопок есть этот класс
+    
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const category = btn.getAttribute('data-category'); // В HTML у кнопок должно быть data-category="rings"
+            
+            // Убираем активный класс у всех, добавляем текущей
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Перерисовываем
+            window.renderGalleryGrid(category);
+        });
+    });
+    console.log("Фильтры галереи подключены");
+};
