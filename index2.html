@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk" data-theme="light">
 <head>
-
-
-     <!-- Основная иконка для большинства браузеров -->
+    <!-- Основная иконка для большинства браузеров -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
@@ -12,16 +10,186 @@
 
 <!-- Для Android -->
 <link rel="manifest" href="/site.webmanifest">
-    
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co 'unsafe-inline';">
+    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Галерея робіт | BV Jewelry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+    
+    <script>
+        (function initThemeBeforePaint() {
+            try {
+                const savedTheme = JSON.parse(localStorage.getItem('bv_theme'));
+                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <title>BV Jewelry | Atelier since 1984</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-
+    
     <style>
         
+        /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
+        .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
+            border-radius: 0 !important;
+        }
+        .promo-track, .weekly-track, .product-grid-wide, .glass-accordion-container {
+            gap: 0 !important; 
+        }
+        .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
+        section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
+        .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
+        
+        
+        /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
+        .product-card {
+            border: 1px solid #e5e5e5 !important;
+            box-shadow: none !important;
+            background-color: #fff !important;
+            margin-right: -1px; /* Злиття рамок */
+            margin-bottom: -1px;
+        }
+        [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
+        
+        .product-card .product-img {
+            aspect-ratio: 1 / 1 !important;
+            object-fit: contain !important;
+            padding: 0 !important;
+            background: #fff !important;
+            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
+        }
+        [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
+        
+        .product-card .p-4 { padding: 10px 8px !important; }
+        .product-card ha, .product-card span { line-height: 1.2; }
+
+        /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
+        @media (max-width: 1024px) {
+            #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
+            .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
+        }
+
+        /* Кнопка нагору */
+        #scrollToTopBtn { left: 1rem !important; right: auto !important; }
+        @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
+        
+        /* Футер колонки для моб */
+        .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
+        @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        /* Бокове меню: компактна верхівка */
+        .side-menu { padding-top: 16px !important; }
+        .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
+        .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
+
+
+
+
+
+/* Специфічні стилі каталогу */
+        #sortSelect {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23c7a46a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right center;
+            background-size: 14px;
+            padding-right: 24px;
+            border: none;
+            background-color: transparent;
+            color: var(--text-main);
+        }
+        #sortSelect option { background-color: var(--bg-card); color: var(--text-main); }
+
+        /* Стилі нативного акордеону */
+        details summary::-webkit-details-marker { display: none; }
+        details summary { list-style: none; }
+
+        .filter-link {
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 0;
+            display: inline-block;
+        }
+        .filter-link:hover, .filter-link.active {
+            opacity: 1;
+            color: var(--gold-muted);
+            padding-left: 10px;
+        }
+        .filter-link::before {
+            content: '—';
+            position: absolute;
+            left: -15px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .filter-link.active::before { left: 0; opacity: 1; }
+
+        /* Підсвітка обраних summary */
+        span[data-filter] { cursor: pointer; display: inline-block; }
+        span[data-filter].active { color: var(--gold-muted) !important; font-weight: 700; }
+
+        .chip-filter {
+            padding: 8px 16px; border: 1px solid var(--border); border-radius: 0; 
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--text-muted); transition: all 0.3s;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .chip-filter:hover, .chip-filter.active {
+            border-color: var(--gold-muted); color: var(--gold-muted);
+            background: color-mix(in srgb, var(--gold-muted) 5%, transparent);
+        }
+        .chip-filter.active { background: var(--gold-muted); color: #111; }
+
+        #mobileFilterDrawer {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mobileFilterDrawer.active { transform: translateY(0); }
+
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .size-btn.selected {
+            background-color: var(--gold-muted);
+            color: #111;
+            border-color: var(--gold-muted);
+        }
+
+        .fav-btn-icon { transition: fill 0.3s ease, transform 0.2s ease; }
+        button:active .fav-btn-icon { transform: scale(0.85); }
+        
+        /* Стили для миниатюр */
+        .thumb-btn {
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .thumb-btn:hover, .thumb-btn.active {
+            opacity: 1;
+            border-color: var(--gold-muted);
+        }
+
+
         /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
         .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
             border-radius: 0 !important;
@@ -78,44 +246,16 @@
         .side-menu { padding-top: 16px !important; }
         .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
         .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
+
     </style>
 </head>
-<body class="mobile-padding antialiased">
 
-    <!-- Оверлеї та виїжджаючі панелі -->
-    <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
-    <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
+<body>
 
-    <div class="cart-drawer" id="cartDrawer" role="dialog">
-        <div class="cart-header">
-            <h2 data-i18n="cart_title">Кошик</h2>
-            <button class="cart-close" id="cartClose" onclick="toggleCart()">&times;</button>
-        </div>
-        <div class="cart-body custom-scrollbar" id="cartBody"></div>
-        <div class="cart-footer">
-            <div class="flex justify-end mb-3">
-                <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors flex items-center gap-1">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Очистити
-                </button>
-            </div>
-            <div class="cart-subtotal">
-                <span data-i18n="cart_subtotal">Підсумок:</span>
-                <span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span>
-            </div>
-            <div id="checkoutBtnWrapper" class="w-full mt-4"></div>
-        </div>
-    </div>
 
-    <div class="cart-drawer" id="favDrawer" role="dialog">
-        <div class="cart-header">
-            <h2 data-i18n="fav_title">Улюблене</h2>
-            <button class="cart-close" onclick="toggleFavDrawer()">&times;</button>
-        </div>
-        <div class="cart-body custom-scrollbar" id="favBody"></div>
-    </div>
 
-    <header id="header">
+
+<header id="header">
         <div class="header-left">
             <button class="mobile-only p-2 cursor-pointer text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -193,25 +333,102 @@
         </div>
     </header>
 
-    <!-- Контейнер бокового мобільного меню (Був відсутній!) -->
-    <nav class="side-menu" id="sideMenu" aria-label="Мобільна навігація"></nav>
-
-    <main class="pt-32 pb-20 px-6 max-w-[1400px] mx-auto min-h-[60vh]">
-        <div class="text-center mb-12">
-            <h1 class="font-serif text-4xl md:text-5xl text-[var(--text-main)] italic mb-8">Галерея робіт</h1>
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="#all" class="gal-filter-btn px-6 py-2 border border-[var(--border)] rounded-full text-xs font-bold uppercase tracking-widest transition-all" data-cat="all">Всі</a>
-                <a href="#rings" class="gal-filter-btn px-6 py-2 border border-[var(--border)] rounded-full text-xs font-bold uppercase tracking-widest transition-all" data-cat="rings">Каблучки</a>
-                <a href="#earrings" class="gal-filter-btn px-6 py-2 border border-[var(--border)] rounded-full text-xs font-bold uppercase tracking-widest transition-all" data-cat="earrings">Сережки</a>
-                <a href="#necklaces" class="gal-filter-btn px-6 py-2 border border-[var(--border)] rounded-full text-xs font-bold uppercase tracking-widest transition-all" data-cat="necklaces">Ланцюжки</a>
-                <a href="#bracelets" class="gal-filter-btn px-6 py-2 border border-[var(--border)] rounded-full text-xs font-bold uppercase tracking-widest transition-all" data-cat="bracelets">Браслети</a>
-            </div>
-        </div>
+<nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
+<main id="home">
         
-        <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+        <section class="max-w-[1920px] mx-auto px-0 md:px-8" id="promo-banner-top">
+            <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px] rounded-none">
+                <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
+            </div>
+        </section>
+
+        <section class="max-w-[1920px] mx-auto px-0 md:px-8">
+            <a href="exclusive.html" class="relative block w-full h-[120px] md:h-[400px] overflow-hidden group border-y border-[var(--border)] rounded-none">
+                <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
+                    <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-bold mb-1 block">Individual Order</span>
+                    <h2 class="font-serif text-2xl md:text-4xl text-white font-light tracking-[0.1em] mb-2">ЕКСКЛЮЗИВ</h2>
+                    <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white group-hover:text-[var(--gold-muted)] transition-colors">
+                        <span data-i18n="btn_details">Дізнатися більше</span>
+                        <span class="w-8 h-[1px] bg-[var(--gold-muted)] transition-all duration-700 group-hover:w-16"></span>
+                    </div>
+                </div>
+            </a>
+        </section>
+
+        <div id="dynamicHomeBlocksContainer"></div>
+        
+        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
+            <div class="text-center mb-10 md:mb-16">
+                <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">Our World</h3>
+                <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
+            </div>
+            <div class="glass-accordion-container" id="glassAccordion">
+                <div class="glass-panel-item group active" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800" alt="Каблучки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Каблучки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wr_gold_red" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wr_silver" class="panel-tag">Срібні</a>
+                                <a href="catalog.html#wr_diamonds" class="panel-tag">З діамантами</a>
+                            </div>
+                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800" alt="Сережки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Сережки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#we_gold" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#we_silver" class="panel-tag">Срібні</a>
+                                <a href="catalog.html#we_studs" class="panel-tag">Пусети</a>
+                            </div>
+                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800" alt="Ланцюжки" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Ланцюжки</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wn_gold_chains" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wn_silver_chains" class="panel-tag">Срібні</a>
+                            </div>
+                            <a href="catalog.html#necklaces" class="panel-btn">Всі ланцюжки →</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
+                    <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=800" alt="Браслети" class="panel-bg">
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">Браслети</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                <a href="catalog.html#wb_gold" class="panel-tag">Золоті</a>
+                                <a href="catalog.html#wb_silver_hard" class="panel-tag">Срібні</a>
+                            </div>
+                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <nav class="mobile-bottom-nav">
+	<nav class="mobile-bottom-nav">
         <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span data-i18n="m1">Головна</span>
@@ -240,7 +457,7 @@
         </button>
     </nav>
 
-    <footer id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
+	<footer id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
         <div class="max-w-7xl mx-auto footer-grid">
             <div class="flex flex-col items-start col-span-2 md:col-span-1">
                 <div class="bv-logo mb-4 relative !static !transform-none !items-start !opacity-100">
@@ -297,177 +514,9 @@
         </div>
     </footer>
 
+    <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
-
-    <script>
-    // Глобальний масив для зберігання завантажених фотографій
-    let allGalleryItems = [];
-    let currentCategory = 'all';
-
-    /**
-     * 1. ЗАВАНТАЖЕННЯ ДАНИХ З SUPABASE (АБО ЛОКАЛЬНОГО КЕШУ)
-     */
-    async function fetchGalleryData() {
-        const container = document.getElementById('galleryGrid');
-        if (container) {
-            container.innerHTML = `
-                <div class="col-span-full flex justify-center items-center py-16">
-                    <div class="w-8 h-8 border-2 border-[var(--gold-muted)] border-t-transparent rounded-full animate-spin"></div>
-                </div>`;
-        }
-
-        try {
-            // Спробуємо завантажити свіжі дані безпосередньо з Supabase
-            if (typeof _supabase !== 'undefined') {
-                const { data, error } = await _supabase
-                    .from('gallery')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (data) {
-                    allGalleryItems = data;
-                    // Зберігаємо в кеш на випадок оффлайн-роботи
-                    localStorage.setItem('bv_gallery_cache', JSON.stringify(data));
-                }
-            } else {
-                // Якщо клієнт Supabase ще не ініціалізовано — беремо з кешу або API
-                const cached = localStorage.getItem('bv_gallery_cache');
-                allGalleryItems = cached ? JSON.parse(cached) : (typeof API !== 'undefined' ? API.get('bv_gallery', []) : []);
-            }
-        } catch (err) {
-            console.warn("Не вдалося завантажити з Supabase, використовуємо кеш:", err);
-            const cached = localStorage.getItem('bv_gallery_cache');
-            allGalleryItems = cached ? JSON.parse(cached) : [];
-        }
-
-        // Малюємо галерею
-        renderGallery(currentCategory);
-    }
-
-    /**
-     * 2. ВІДОБРАЖЕННЯ ФОТОГРАФІЙ НА ЕКРАНІ
-     */
-    function renderGallery(category = 'all') {
-        currentCategory = category;
-        const container = document.getElementById('galleryGrid');
-        if (!container) return;
-
-        // Фільтруємо елементи за обраною категорією
-        const filteredItems = category === 'all' 
-            ? allGalleryItems 
-            : allGalleryItems.filter(item => item.category === category);
-
-        // Якщо в категорії немає фотографій
-        if (filteredItems.length === 0) {
-            container.innerHTML = `
-                <div class="col-span-full text-center py-16">
-                    <p class="text-[var(--text-muted)] font-serif italic text-lg">У цій категорії поки немає робіт</p>
-                </div>`;
-            return;
-        }
-
-        // Визначаємо поточну мову сайту (за замовчуванням 'uk')
-        const currentLang = localStorage.getItem('bv_lang') || document.documentElement.lang || 'uk';
-
-        // Генерируємо HTML-картки для кожного фото
-        container.innerHTML = filteredItems.map(item => {
-            // Отримуємо правильне посилання та опис залежно від мови
-            const imageUrl = item.image_url || item.url || item.image || '';
-            const description = item[`desc_${currentLang}`] || item.desc_uk || item.title || '';
-            const categoryLabel = getCategoryName(item.category, currentLang);
-
-            return `
-                <div class="group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-500 hover:border-[var(--gold-muted)] hover:shadow-2xl flex flex-col">
-                    <div class="aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5 relative">
-                        <img 
-                            src="${imageUrl}" 
-                            alt="${description}" 
-                            class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
-                            onerror="this.src='https://via.placeholder.com/400x400?text=BV+Jewelry'"
-                        />
-                    </div>
-                    <div class="p-5 flex flex-col justify-between flex-grow">
-                        <p class="text-sm font-light text-[var(--text-main)] tracking-wide font-['Montserrat'] line-clamp-2">
-                            ${description}
-                        </p>
-                        <div class="mt-3 pt-3 border-t border-[var(--border)]/50 flex justify-between items-center">
-                            <span class="text-[9px] uppercase tracking-widest text-[var(--gold-muted)] font-semibold">
-                                ${categoryLabel}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    /**
-     * 3. ІНІЦІАЛІЗАЦІЯ КНОПОК ФІЛЬТРІВ (Всі, Каблучки, Сережки...)
-     */
-    function initGalleryFilters() {
-        const filterButtons = document.querySelectorAll('.gal-filter-btn');
-        
-        filterButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Знімаємо активний стиль з усіх кнопок
-                filterButtons.forEach(b => {
-                    b.classList.remove('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-                    b.classList.add('border-[var(--border)]', 'text-[var(--text-main)]');
-                });
-
-                // Додаємо активний стиль натиснутій кнопці
-                btn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
-                btn.classList.add('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-
-                // Отримуємо категорію (data-cat) та перемальовуємо сітку
-                const selectedCategory = btn.getAttribute('data-cat') || 'all';
-                renderGallery(selectedCategory);
-            });
-        });
-
-        // Активуємо кнопку "Всі" при завантаженні
-        const defaultBtn = document.querySelector('.gal-filter-btn[data-cat="all"]');
-        if (defaultBtn) {
-            defaultBtn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
-            defaultBtn.classList.add('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-        }
-    }
-
-    /**
-     * 4. ДОПОМІЖНА ФУНКЦІЯ: НАЗВА КАТЕГОРІЇ ОБРАНОЮ МОВОЮ
-     */
-    function getCategoryName(category, lang = 'uk') {
-        const names = {
-            rings: { uk: 'Каблучка', en: 'Ring', ru: 'Кольцо' },
-            earrings: { uk: 'Сережки', en: 'Earrings', ru: 'Серьги' },
-            necklaces: { uk: 'Ланцюжок / Кольє', en: 'Necklace', ru: 'Цепочка / Колье' },
-            bracelets: { uk: 'Браслет', en: 'Bracelet', ru: 'Браслет' }
-        };
-        return names[category] ? (names[category][lang] || names[category]['uk']) : category;
-    }
-
-    /**
-     * 5. ЗАПУСК ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ
-     */
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Підключаємо фільтри
-        initGalleryFilters();
-        // Завантажуємо фотографії
-        await fetchGalleryData();
-
-        // Якщо користувач перемикає мову сайту — перемальовуємо галерею з новими перекладами
-        window.addEventListener('langChanged', () => {
-            renderGallery(currentCategory);
-        });
-    });
-
-    // Робимо функцію доступною глобально (для викликів з main.js, якщо потрібно)
-    window.renderGallery = renderGallery;
-</script>
 </body>
+
 </html>

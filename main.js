@@ -369,14 +369,38 @@ function generateMenus() {
 
 <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
     <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
+    
+
     <div>
+        
+
         <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
             <span data-i18n="m2">Каталог</span>
+
             <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+
         </div>
-        <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">${mobCatHtml}</div>
+
+
+        <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">
+            
+            <a href="catalog.html#" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Всі товари</a>
+            <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Золото</a>
+            <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Срібло</a>
+            <a href="catalog.html#rings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Каблучки</a>
+            <a href="catalog.html#earrings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Сережки</a>
+            <a href="catalog.html#necklaces" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Кольє та Ланцюжки</a>
+            <a href="catalog.html#bracelets" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Браслети</a>
+        </div>
+
+            
     </div>
+
+
+
     <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
+
+
     <div>
         <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
             <span>Бренд</span>
@@ -389,13 +413,41 @@ function generateMenus() {
             <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
         </div>
     </div>
+
+
     <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
-    <a href="exclusive.html" class="block w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 text-center font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors break-normal" onclick="window.toggleMenu()">
+    <a href="exclusive.html" class="text-[var(--gold-muted)]  font-bold " onclick="window.toggleMenu()">
         <span data-i18n="m_atelier">Ексклюзив</span>
     </a>
-    <div class="mt-auto pt-4 pb-4">
-        <div class="flex flex-col gap-1 text-xs text-[var(--text-muted)] font-light mb-6 px-2" id="mobMenuContacts"></div>
+
+
+    <div class="flex flex-col items-start">
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" data-i18n="m4">Адреса та графік роботи</h4>
+                
+                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
+                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
+                <div class="flex items-center gap-4 mt-2">
+                <span class="text-[12px] text-[var(--text-muted)] mb-1">Графік: 08:00 - 18:00</span>    
+                </div>
     </div>
+
+    <div class="flex flex-col items-start">
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-1" data-i18n="m4">Контакти</h4>
+                <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
+                
+                <div class="flex items-center gap-4 mt-2">
+                    <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </a>
+                </div>
+    </div>
+
+
+
+    
 </div>
         `;
     }
