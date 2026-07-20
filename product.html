@@ -515,16 +515,52 @@
         let currentLang = 'uk';
 
         // --- ЛОГІКА ЧИТАННЯ ДАНИХ (УСПАДКУВАННЯ ВІД ОСНОВНОЇ) ---
+        // --- ЛОГІКА ЧИТАННЯ ДАНИХ (З ПІДТРИМКОЮ SUPABASE SNAKE_CASE) ---
         function getVarData(prod, size, field, lang = null) {
+            if (!prod) return '';
             const b = prod.variations ? prod.variations.base : prod;
             const v = (prod.variations && size && prod.variations[size]) ? prod.variations[size] : b;
             
-            if (field === 'images') return (v.images && v.images.length > 0) ? v.images : ((b.images && b.images.length > 0) ? b.images : [prod.img || prod.image]);
-            if (field === 'price' || field === 'discount' || field === 'weight' || field === 'workCost') {
-                return v[field] !== undefined && v[field] !== '' ? v[field] : b[field];
+            // Універсальний помічник для пошуку поля (перевіряє camelCase та snake_case)
+            const getVal = (obj, f) => {
+                if (!obj) return undefined;
+                if (f === 'desc') return obj.desc || obj.description;
+                if (f === 'workCost') return obj.workCost || obj.work_cost;
+                if (f === 'priceType') return obj.priceType || obj.price_type;
+                if (f === 'nameEN') return obj.nameEN || obj.name_en;
+                return obj[f];
+            };
+
+            // 1. Обробка зображень (галерея)
+            if (field === 'images') {
+                let imgs = getVal(v, 'images') || getVal(b, 'images');
+                // Якщо прийшов рядок з бази замість масиву — парсимо його
+                if (typeof imgs === 'string') {
+                    try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
+                }
+                if (Array.isArray(imgs) && imgs.length > 0) return imgs;
+                
+                // Фоллбек на одне фото
+                const singleImg = v.img || v.image || b.img || b.image || prod.img || prod.image;
+                return singleImg ? [singleImg] : [];
             }
-            if (lang) return (v[field] && v[field][lang]) ? v[field][lang] : (b[field] && b[field][lang] ? b[field][lang] : '');
-            return v[field] || b[field] || '';
+
+            // 2. Числові та базові поля
+            if (['price', 'discount', 'weight', 'workCost', 'priceType'].includes(field)) {
+                const valV = getVal(v, field);
+                const valB = getVal(b, field);
+                return valV !== undefined && valV !== '' ? valV : (valB !== undefined ? valB : '');
+            }
+
+            // 3. Локалізація
+            if (lang) {
+                const valV = getVal(v, field);
+                const valB = getVal(b, field);
+                if (valV && typeof valV === 'object' && valV[lang]) return valV[lang];
+                if (valB && typeof valB === 'object' && valB[lang]) return valB[lang];
+            }
+
+            return getVal(v, field) || getVal(b, field) || '';
         }
 
         // --- ЛОГІКА КЛІКУ НА РОЗМІР (ОНОВЛЕННЯ ЦІНИ ТА ВАГИ) ---
