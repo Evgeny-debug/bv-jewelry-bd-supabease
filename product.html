@@ -513,15 +513,14 @@
         let productGallery = [];
         let currentProduct = null;
         let currentLang = 'uk';
+        let allProductsCache = []; // Кеш для рекомендаций
 
-        // --- ЛОГІКА ЧИТАННЯ ДАНИХ (УСПАДКУВАННЯ ВІД ОСНОВНОЇ) ---
-        // --- ЛОГІКА ЧИТАННЯ ДАНИХ (З ПІДТРИМКОЮ SUPABASE SNAKE_CASE) ---
+        // --- ЛОГІКА ЧИТАННЯ ДАНИХ ---
         function getVarData(prod, size, field, lang = null) {
             if (!prod) return '';
             const b = prod.variations ? prod.variations.base : prod;
             const v = (prod.variations && size && prod.variations[size]) ? prod.variations[size] : b;
             
-            // Універсальний помічник для пошуку поля (перевіряє camelCase та snake_case)
             const getVal = (obj, f) => {
                 if (!obj) return undefined;
                 if (f === 'desc') return obj.desc || obj.description;
@@ -531,28 +530,22 @@
                 return obj[f];
             };
 
-            // 1. Обробка зображень (галерея)
             if (field === 'images') {
                 let imgs = getVal(v, 'images') || getVal(b, 'images');
-                // Якщо прийшов рядок з бази замість масиву — парсимо його
                 if (typeof imgs === 'string') {
                     try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
                 }
                 if (Array.isArray(imgs) && imgs.length > 0) return imgs;
-                
-                // Фоллбек на одне фото
                 const singleImg = v.img || v.image || b.img || b.image || prod.img || prod.image;
                 return singleImg ? [singleImg] : [];
             }
 
-            // 2. Числові та базові поля
             if (['price', 'discount', 'weight', 'workCost', 'priceType'].includes(field)) {
                 const valV = getVal(v, field);
                 const valB = getVal(b, field);
                 return valV !== undefined && valV !== '' ? valV : (valB !== undefined ? valB : '');
             }
 
-            // 3. Локалізація
             if (lang) {
                 const valV = getVal(v, field);
                 const valB = getVal(b, field);
@@ -563,7 +556,7 @@
             return getVal(v, field) || getVal(b, field) || '';
         }
 
-        // --- ЛОГІКА КЛІКУ НА РОЗМІР (ОНОВЛЕННЯ ЦІНИ ТА ВАГИ) ---
+        // --- ЛОГІКА КЛІКУ НА РОЗМІР ---
         window.selectSize = function(btn, size) {
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
@@ -578,19 +571,16 @@
             const size = window.currentSelectedSize || 'base';
             currentLang = typeof API !== 'undefined' ? API.get('bv_lang', 'uk') : 'uk';
 
-            // Отримуємо локалізовані та успадковані дані
             const name = getVarData(currentProduct, size, 'name', currentLang) || (window.getLoc ? window.getLoc(currentProduct, 'name') : currentProduct.name);
             const desc = getVarData(currentProduct, size, 'desc', currentLang) || (window.getLoc ? window.getLoc(currentProduct, 'desc') : currentProduct.desc);
             const price = getVarData(currentProduct, size, 'price');
             const discount = getVarData(currentProduct, size, 'discount');
             const weight = getVarData(currentProduct, size, 'weight');
 
-            // 1. Оновлюємо тексти
             document.getElementById('pd-title').innerText = name;
             if(document.getElementById('pd-title-mob')) document.getElementById('pd-title-mob').innerText = name;
             document.getElementById('pd-desc-full').innerText = desc || 'Опис відсутній';
             
-            // 2. Оновлюємо вагу
             if(weight && Number(weight) > 0) {
                 document.getElementById('pd-spec-weight').innerText = weight + ' г';
                 document.getElementById('pd-spec-weight-row')?.classList.remove('hidden');
@@ -598,7 +588,6 @@
                 document.getElementById('pd-spec-weight-row')?.classList.add('hidden');
             }
 
-            // 3. Оновлюємо ціну
             const hasDiscount = discount && Number(discount) > 0;
             const currentPrice = hasDiscount ? discount : price;
             
@@ -609,7 +598,6 @@
             
             if(document.getElementById('pd-price-desktop')) document.getElementById('pd-price-desktop').innerHTML = priceHtmlDesktop;
 
-            // 4. Оновлюємо кнопки та їх onClick
             const isOutOfStock = currentProduct.status === 'out-stock';
             const setupAddBtn = (id) => {
                 const btn = document.getElementById(id);
@@ -640,7 +628,6 @@
             setupAddBtn('pd-add-btn-desktop');
             setupAddBtn('pd-add-btn-mob');
 
-            // 5. Оновлюємо галерею, якщо фото для розміру відрізняються
             const newGallery = getVarData(currentProduct, size, 'images');
             if(JSON.stringify(newGallery) !== JSON.stringify(productGallery)) {
                 productGallery = newGallery;
@@ -729,14 +716,39 @@
             document.body.style.overflow = '';
         };
 
-        // --- РЕНДЕР СТОРІНКИ ТОВАРУ ---
-        window.renderProductPage = function() {
+        // --- РЕНДЕР СТОРІНКИ ТОВАРУ (Адаптовано під Supabase) ---
+        window.renderProductPage = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
-            const allProducts = typeof API !== 'undefined' ? API.get('bv_products', []) : [];
             const categories = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || API.get('bv_categories_flat', [])) : [];
 
-            currentProduct = productId ? allProducts.find(p => p.id === productId) : allProducts[0];
+            // 1. ЗАПРОС К SUPABASE
+            try {
+                if (typeof _supabase !== 'undefined' && productId) {
+                    // Ищем товар в БД (убедитесь, что таблица называется 'products')
+                    const { data: productData, error: productError } = await _supabase
+                        .from('products') 
+                        .select('*')
+                        .eq('id', productId)
+                        .single();
+
+                    if (productData) currentProduct = productData;
+
+                    // Загружаем все товары для блока рекомендаций (опционально, можно ограничить)
+                    const { data: allData } = await _supabase.from('products').select('*');
+                    if (allData) allProductsCache = allData;
+                }
+            } catch (err) {
+                console.warn("Помилка завантаження з бази, використовуємо локальні дані:", err);
+            }
+
+            // Фоллбек, если база недоступна или пуста
+            if (!currentProduct) {
+                const localProducts = typeof API !== 'undefined' ? API.get('bv_products', []) : [];
+                allProductsCache = localProducts;
+                currentProduct = productId ? localProducts.find(p => p.id === productId) : localProducts[0];
+            }
+
             if (!currentProduct) {
                 document.getElementById('pd-title').innerText = 'Товар не знайдено';
                 if(document.getElementById('pd-title-mob')) document.getElementById('pd-title-mob').innerText = 'Товар не знайдено';
@@ -760,7 +772,7 @@
                 galleryContainer.dataset.touchAttached = 'true';
             }
 
-            // Статичні дані (Артикул, Метал, Камені)
+            // Статичні дані
             ['pd-sku', 'pd-spec-sku', 'pd-sku-mob'].forEach(id => {
                 if(document.getElementById(id)) document.getElementById(id).innerText = currentProduct.sku || currentProduct.id;
             });
@@ -792,7 +804,7 @@
                 window.currentSelectedSize = null;
             }
 
-            // Статус (базовий, доки не обрано розмір)
+            // Статус
             let statusHtml = currentProduct.status === 'out-stock' 
                 ? `<span class="text-[10px] uppercase tracking-widest font-bold text-red-500 border border-red-500/20 px-3 py-1 rounded">Немає в наявності</span>`
                 : `<span class="text-[10px] uppercase tracking-widest font-bold text-green-500 border border-green-500/20 px-3 py-1 rounded">В наявності</span>`;
@@ -838,34 +850,29 @@
 
             // Рекомендації
             if (typeof window.renderProductCard === 'function') {
-                let similarProducts = allProducts.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
+                let similarProducts = allProductsCache.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
                 if (similarProducts.length > 0) {
                     document.getElementById('similarGrid').innerHTML = similarProducts.map(p => window.renderProductCard(p)).join('');
                     document.getElementById('similarSection')?.classList.remove('hidden');
                 }
-                let boughtTogether = allProducts.filter(p => p.category !== currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
+                let boughtTogether = allProductsCache.filter(p => p.category !== currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
                 if (boughtTogether.length > 0) {
                     document.getElementById('boughtTogetherGrid').innerHTML = boughtTogether.map(p => window.renderProductCard(p)).join('');
                     document.getElementById('boughtTogetherSection')?.classList.remove('hidden');
                 }
             }
 
-            // Оновлюємо UI (назва, ціна, вага)
             rebuildGallery();
             window.updateProductUI();
         };
 
-        // Запуск при завантаженні (з паузою для підтягування свіжих даних з бази)
+        // Запуск при завантаженні
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(async () => {
-                if (typeof window.loadCloudData === 'function') {
-                    await window.loadCloudData();
-                }
-                if(typeof window.renderProductPage === 'function') {
-                    window.renderProductPage(); 
-                }
-            }, 200); 
+            // Теперь не нужен setTimeout, так как функция асинхронная и сама дождется ответа от базы
+            if(typeof window.renderProductPage === 'function') {
+                window.renderProductPage(); 
+            }
         });
-    </script>
+</script>
 </body>
 </html>
