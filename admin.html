@@ -15,10 +15,36 @@
         --accent-gold-hover: #d8b269;
     }
 
-    body {
+    /* 💎 Глобальный сброс для предотвращения горизонтального скролла */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden; /* Запрещаем выезжать за рамки дисплея */
         background-color: var(--bg-main);
         color: #e5e7eb;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    /* 💎 КРИТИЧЕСКИ ВАЖНО: Дополнительный отступ снизу для главного контента, 
+       чтобы самые нижние карточки и кнопки не перекрывались навигацией телефона */
+    .main-content, .admin-main, main {
+        padding-bottom: max(6rem, calc(4rem + env(safe-area-inset-bottom))) !important;
+        width: 100%;
+        max-width: 100vw;
+    }
+
+    /* 💎 Шапка (Header) с учетом выреза (моноброви) на телефонах */
+    .admin-header, header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+        width: 100%;
     }
 
     /* Эффект матового стекла */
@@ -28,6 +54,7 @@
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 1rem;
+        max-width: 100%; /* Защита от переполнения */
     }
 
     /* Удобные поля ввода для тач-скринов */
@@ -41,6 +68,7 @@
         font-size: 0.875rem;
         transition: all 0.2s;
         min-height: 44px; /* Минимальная высота для пальца */
+        appearance: none; /* Убираем стандартные стили iOS */
     }
     .input-field:focus {
         outline: none;
@@ -49,18 +77,27 @@
     }
 
     /* Кнопки */
-    .btn-primary {
-        background: linear-gradient(135deg, var(--accent-gold), #a68342);
-        color: #000;
-        font-weight: 600;
+    .btn-primary, .btn-secondary {
         padding: 0.75rem 1.25rem;
         border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
         transition: transform 0.1s, opacity 0.2s;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
         min-height: 44px;
+        cursor: pointer;
+        user-select: none;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-gold), #a68342);
+        color: #000;
+        border: none;
     }
     .btn-primary:active { transform: scale(0.98); }
     
@@ -68,13 +105,6 @@
         background: rgba(255, 255, 255, 0.05);
         color: #fff;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.75rem 1.25rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
 
     /* Кастомный скроллбар */
@@ -101,43 +131,66 @@
             top: 0;
             left: -100%;
             width: 280px;
+            max-width: 85vw; /* Чтобы не перекрывало 100% экрана на узких телефонах */
+            /* 💎 Замена vh на dvh решает проблему скрытого низа в Safari/Chrome */
             height: 100vh !important;
+            height: 100dvh !important;
             z-index: 50;
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 0;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            
+            /* 💎 Внутренний скролл и отступ для безопасной зоны снизу */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
         }
         .admin-sidebar.open { left: 0; }
     }
 
-    /* 💎 МАГИЯ ДЛЯ ТЕЛЕФОНОВ: Превращение таблиц в карточки */
+    /* 💎 МАГИЯ ДЛЯ ТЕЛЕФОНОВ: Превращение таблиц в карточки заказов */
     @media (max-width: 768px) {
-        .mobile-card-table thead { display: none; }
-        .mobile-card-table tbody tr {
+        .mobile-card-table {
+            width: 100% !important;
             display: block;
+        }
+        .mobile-card-table thead { display: none; }
+        .mobile-card-table tbody, 
+        .mobile-card-table tr { 
+            display: block; 
+            width: 100%;
+        }
+        
+        .mobile-card-table tbody tr {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 0.75rem;
             padding: 1rem;
             margin-bottom: 1rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            /* Защита карточки от вылезания за дисплей */
+            max-width: 100%;
+            overflow: hidden;
         }
+        
         .mobile-card-table tbody td {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 0 !important;
+            align-items: flex-start; /* flex-start вместо center для многострочного текста */
+            flex-wrap: wrap; /* Разрешаем перенос, если текст не влезает */
+            gap: 0.5rem;
+            padding: 0.75rem 0 !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             text-align: right;
             font-size: 0.875rem;
+            
+            /* Защита длинных слов (ссылки, email, названия) от разрыва верстки */
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
-        .mobile-card-table tbody td:last-child { 
-            border-bottom: none; 
-            padding-top: 0.8rem !important;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-        /* Вывод названия колонки перед значением из атрибута data-label */
+
+        /* Вывод названия колонки из атрибута data-label */
         .mobile-card-table tbody td::before {
             content: attr(data-label);
             font-weight: 600;
@@ -146,15 +199,66 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             text-align: left;
-            margin-right: 1rem;
+            flex-shrink: 0; /* Чтобы заголовок не сжимался */
+            max-width: 45%; /* Ограничиваем ширину заголовка */
+            margin-right: auto; /* Толкает контент вправо */
+        }
+
+        /* 💎 СПЕЦИАЛЬНЫЙ КЛАСС ДЛЯ ДЛИННЫХ СПИСКОВ (Что, куда и сколько) 
+           Ставим этот класс на <td> с адресом, составом заказа или комментарием.
+           Он перестроит блок в аккуратный вертикальный список! */
+        .mobile-card-table tbody td.td-column,
+        .mobile-card-table tbody td[data-label="Заказ"],
+        .mobile-card-table tbody td[data-label="Товары"],
+        .mobile-card-table tbody td[data-label="Адрес"],
+        .mobile-card-table tbody td[data-label="Клиент"] {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem !important;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+        }
+        
+        /* Заголовок сверху для вертикальных блоков */
+        .mobile-card-table tbody td.td-column::before,
+        .mobile-card-table tbody td[data-label="Заказ"]::before,
+        .mobile-card-table tbody td[data-label="Товары"]::before,
+        .mobile-card-table tbody td[data-label="Адрес"]::before,
+        .mobile-card-table tbody td[data-label="Клиент"]::before {
+            max-width: 100%;
+            margin-bottom: 0.35rem;
+            color: var(--accent-gold);
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 0.25rem;
+            width: 100%;
+        }
+
+        /* Блок с кнопками управления внизу карточки */
+        .mobile-card-table tbody td:last-child { 
+            border-bottom: none; 
+            padding-top: 1rem !important;
+            padding-bottom: 0 !important;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+            flex-direction: row;
+        }
+        
+        /* На телефонах кнопки действий растягиваем, чтобы удобно попасть пальцем */
+        .mobile-card-table tbody td:last-child .btn-primary,
+        .mobile-card-table tbody td:last-child .btn-secondary {
+            flex: 1;
         }
     }
 
-    /* Уведомление Toast */
+    /* Уведомление Toast с учетом нижней панели телефона */
     .toast {
         position: fixed;
-        bottom: 1.5rem;
+        bottom: max(1.5rem, env(safe-area-inset-bottom));
         right: 1.5rem;
+        left: auto;
         background: var(--accent-gold);
         color: #000;
         font-weight: 600;
@@ -166,6 +270,16 @@
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    
+    @media (max-width: 640px) {
+        /* На маленьких экранах показываем toast по центру снизу */
+        .toast {
+            left: 1rem;
+            right: 1rem;
+            text-align: center;
+        }
+    }
+    
     .toast.show { transform: translateY(0); opacity: 1; }
 </style>
 </head>
