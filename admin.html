@@ -814,7 +814,39 @@
         async function saveToCloudStorage(key, value) {
             await _supabase.from('site_storage').upsert([{ key: key, value: value }]);
         }
+// ==========================================
+// ФУНКЦІЯ ЗАВАНТАЖЕННЯ В SUPABASE STORAGE
+// ==========================================
+async function uploadToStorage(file, bucketName = 'site-images', folder = 'products') {
+    try {
+        // Генеруємо унікальне ім'я файлу
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const filePath = `${folder}/${fileName}`;
 
+        // Завантажуємо файл у бакет
+        const { data, error } = await _supabase.storage
+            .from(bucketName)
+            .upload(filePath, file, { 
+                cacheControl: '3600', 
+                upsert: false 
+            });
+
+        if (error) throw error;
+
+        // Отримуємо публічне посилання на файл
+        const { data: { publicUrl } } = _supabase.storage
+            .from(bucketName)
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+        
+    } catch (err) {
+        console.error('Помилка завантаження:', err);
+        showNotification('Помилка завантаження файлу!');
+        return null;
+    }
+}
         // ==========================================
         // ЗАВАНТАЖЕННЯ ДАНИХ
         // ==========================================
@@ -1311,24 +1343,31 @@
                 </div>
             `;
             
-            document.getElementById('varImgUpload').addEventListener('change', (e) => {
-                const files = e.target.files;
-                if(!files || files.length === 0) return;
-                if(!actProd.variations[editVar].images) actProd.variations[editVar].images = [];
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        actProd.variations[editVar].images.push(ev.target.result);
-                        renderVarGallery();
-                    };
-                    reader.readAsDataURL(file);
-                });
-                e.target.value = '';
-            });
+            document.getElementById('varImgUpload').addEventListener('change', async (e) => {
+    const files = e.target.files;
+    if(!files || files.length === 0) return;
+    
+    if(!actProd.variations[editVar].images) actProd.variations[editVar].images = [];
+    
+    // Опционально: можно показать уведомление, что загрузка началась
+    showNotification('Загрузка картинок в облако...');
 
-            renderVarGallery();
-        };
-
+    // Используем for...of вместо forEach для корректной работы await
+    for (const file of Array.from(files)) {
+        // Вызываем нашу универсальную функцию
+        // Указываем бакет 'site-images' и папку 'products'
+        const imageUrl = await uploadToStorage(file, 'site-images', 'products');
+        
+        if (imageUrl) {
+            actProd.variations[editVar].images.push(imageUrl);
+        }
+    }
+    
+    renderVarGallery();
+    showNotification('Картинки успешно загружены!');
+});
+// вававававаааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааа
+        // вавававааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааа
         window.toggleVarPriceMode = function(mode) {
             actProd.variations[editVar].priceType = mode;
             if(mode === 'auto') {
@@ -1866,63 +1905,8 @@
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         };
 
-        window.closeGalleryModal = function() {
-            const modal = document.getElementById('galleryModal');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-            document.getElementById('galleryForm').reset();
-        };
-
-        window.saveGalleryItem = async function() {
-            const id = document.getElementById('gal-id').value;
-            const imageUrl = document.getElementById('gal-img').value;
-            const category = document.getElementById('gal-category').value;
-            const descUk = document.getElementById('gal-desc-uk').value;
-            const descRu = document.getElementById('gal-desc-ru').value;
-            const descEn = document.getElementById('gal-desc-en').value;
-
-            // Защита от сохранения, пока фото еще грузится в облако
-            if (!imageUrl || imageUrl.includes("Загрузка")) {
-                return alert("Дождитесь окончания загрузки фотографии в облако!");
-            }
-
-            const itemData = {
-                image_url: imageUrl,
-                category: category,
-                desc_uk: descUk,
-                desc_ru: descRu,
-                desc_en: descEn,
-                updated_at: new Date().toISOString()
-            };
-
-            try {
-                let resultError = null;
-
-                if (id && id !== "") {
-                    // Обновление существующей записи
-                    const { error } = await _supabase
-                        .from('gallery')
-                        .update(itemData)
-                        .eq('id', id);
-                    resultError = error;
-                } else {
-                    // Создание новой записи в базе
-                    const { error } = await _supabase
-                        .from('gallery')
-                        .insert([itemData]);
-                    resultError = error;
-                }
-
-                if (resultError) throw resultError;
-
-                closeGalleryModal();
-                if (typeof showNotification === 'function') showNotification('Фото успешно добавлено в базу!');
-                renderGalleryAdmin(); // Перерисовываем список админки
-            } catch (err) {
-                console.error("Ошибка сохранения в базу:", err);
-                alert("Ошибка сохранения: " + err.message);
-            }
-        };
+        
+        
 
         window.deleteGalleryItem = async function(id) {
             if (confirm('Удалить это фото из базы данных Supabase?')) {
@@ -1946,20 +1930,7 @@
         // ==========================================
         // ІНШІ УТИЛІТИ
         // ==========================================
-        window.handleImageUpload = function(event, previewId, targetInputId, mb = 5) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (file.size > mb * 1024 * 1024) alert(`Розмір більше ${mb}MB. Сайт може працювати повільніше.`);
-            const reader = new FileReader();
-            reader.onload = e => {
-                const preview = document.getElementById(previewId);
-                if(preview) { preview.src = e.target.result; preview.classList.remove('hidden'); }
-                const targetEl = document.getElementById(targetInputId);
-                if(targetEl) targetEl.value = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
+        
         window.loadPageBuilderForm = function() {
             const pageId = document.getElementById('builder-page-select').value;
             const container = document.getElementById('builder-form-container');
@@ -2069,134 +2040,144 @@
             window.location.href = 'index.html'; 
         };
 
-        // 1. ФУНКЦІЯ ЗАВАНТАЖЕННЯ ФОТО В SUPABASE STORAGE
-async function handleImageUpload(event, previewElId, hiddenInputId) {
-    const file = event.target.files[0];
-    if (!file) return;
 
-    // Швидкий локальний попередній перегляд для зручності адміна
-    const previewEl = document.getElementById(previewElId);
-    if (previewEl) {
-        previewEl.src = URL.createObjectURL(file);
-        previewEl.classList.remove('hidden');
-    }
 
-    try {
-        // Генерируємо унікальне ім'я файлу, щоб уникнути конфліктів
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `gallery/${fileName}`;
+        window.closeGalleryModal = function() {
+            const modal = document.getElementById('galleryModal');
+            const form = document.getElementById('galleryForm');
+            const preview = document.getElementById('galPreview');
+            
+            if (modal) {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+            
+            if (form) form.reset();
+            if (preview) {
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+            const idInput = document.getElementById('gal-id');
+            const imgInput = document.getElementById('gal-img');
+            if (idInput) idInput.value = '';
+            if (imgInput) imgInput.value = '';
+        };
 
-        // Завантажуємо файл у корзину (bucket) 'images' в Supabase
-        const { data, error } = await _supabase.storage
-            .from('images') // Замініть на назву вашого бакета, якщо вона інша
-            .upload(filePath, file);
+        window.handleImageUpload = async function(event, previewElId, hiddenInputId, mb = 5) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        if (error) throw error;
+            if (file.size > mb * 1024 * 1024) {
+                alert(`Розмір більше ${mb}MB. Сайт може працювати повільніше.`);
+            }
 
-        // Отримуємо публічне посилання на завантажену картинку
-        const { data: { publicUrl } } = _supabase.storage
-            .from('images')
-            .getPublicUrl(filePath);
+            // Швидкий локальний попередній перегляд
+            const previewEl = document.getElementById(previewElId);
+            if (previewEl) {
+                previewEl.src = URL.createObjectURL(file);
+                previewEl.classList.remove('hidden');
+            }
 
-        // Записуємо URL у прихований інпут вашої форми (#gal-img)
-        document.getElementById(hiddenInputId).value = publicUrl;
+            // Ставимо заглушку, щоб запобігти передчасному збереженню
+            const targetEl = document.getElementById(hiddenInputId);
+            if (targetEl) targetEl.value = "Загрузка...";
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                const filePath = `gallery/${fileName}`;
+
+                // Завантажуємо файл у бакет 'images'
+                const { data, error } = await _supabase.storage
+                    .from('images')
+                    .upload(filePath, file);
+
+                if (error) throw error;
+
+                // Отримуємо публічне посилання
+                const { data: { publicUrl } } = _supabase.storage
+                    .from('images')
+                    .getPublicUrl(filePath);
+
+                if (targetEl) targetEl.value = publicUrl;
+                
+                console.log("Фото успішно завантажено в хмару:", publicUrl);
+            } catch (err) {
+                console.error("Помилка завантаження зображення:", err);
+                alert("Не вдалося завантажити фото: " + err.message);
+                if (targetEl) targetEl.value = ""; // Очищаємо заглушку при помилці
+            }
+        };
+
+        window.saveGalleryItem = async function() {
+            const id = document.getElementById('gal-id').value;
+            const imageUrl = document.getElementById('gal-img').value;
+            const category = document.getElementById('gal-category').value;
+            const descUk = document.getElementById('gal-desc-uk').value;
+            const descRu = document.getElementById('gal-desc-ru').value;
+            const descEn = document.getElementById('gal-desc-en').value;
+
+            // Захист від збереження, поки фото ще вантажиться
+            if (!imageUrl || imageUrl === "Загрузка...") {
+                return alert("Дождитесь окончания загрузки фотографии в облако!");
+            }
+
+            const itemData = {
+                image_url: imageUrl,
+                category: category,
+                desc_uk: descUk,
+                desc_ru: descRu,
+                desc_en: descEn,
+                updated_at: new Date().toISOString()
+            };
+
+            try {
+                let resultError = null;
+
+                if (id && id !== "") {
+                    const { error } = await _supabase
+                        .from('gallery')
+                        .update(itemData)
+                        .eq('id', id);
+                    resultError = error;
+                } else {
+                    const { error } = await _supabase
+                        .from('gallery')
+                        .insert([itemData]);
+                    resultError = error;
+                }
+
+                if (resultError) throw resultError;
+
+                window.closeGalleryModal();
+                
+                // Універсальний виклик повідомлення про успіх
+                if (typeof showNotification === 'function') {
+                    showNotification('Фото успішно додано в базу!');
+                } else {
+                    const toast = document.getElementById('toastMessage');
+                    if (toast) {
+                        toast.classList.add('show');
+                        setTimeout(() => toast.classList.remove('show'), 3000);
+                    }
+                }
+
+                // Перемальовуємо список
+                if (typeof renderGalleryAdmin === 'function') {
+                    renderGalleryAdmin(); 
+                } else if (typeof loadGalleryAdmin === 'function') {
+                    loadGalleryAdmin();
+                }
+                
+            } catch (err) {
+                console.error("Помилка збереження в базу:", err);
+                alert("Помилка збереження: " + err.message);
+            }
+        };
         
-        console.log("Фото успішно завантажено в хмару:", publicUrl);
-    } catch (err) {
-        console.error("Помилка завантаження зображення:", err);
-        alert("Не вдалося завантажити фото: " + err.message);
-    }
-}
-
-// 2. ФУНКЦІЯ ЗБЕРЕЖЕННЯ ДАНИХ У БАЗУ SUPABASE
-async function saveGalleryItem() {
-    // Збираємо дані з полів вашого модального вікна
-    const id = document.getElementById('gal-id').value;
-    const imageUrl = document.getElementById('gal-img').value;
-    const category = document.getElementById('gal-category').value;
-    const descUk = document.getElementById('gal-desc-uk').value;
-    const descRu = document.getElementById('gal-desc-ru').value;
-    const descEn = document.getElementById('gal-desc-en').value;
-
-    // Перевірка наявності обов'язкових полів
-    if (!imageUrl) {
-        alert("Будь ласка, завантажте фотографію!");
-        return;
-    }
-
-    // Формуємо об'єкт для відправки в базу
-    const itemData = {
-        image_url: imageUrl,
-        category: category,
-        desc_uk: descUk,
-        desc_ru: descRu,
-        desc_en: descEn,
-        updated_at: new Date().toISOString()
-    };
-
-    try {
-        let resultError = null;
-
-        if (id) {
-            // Якщо є ID — це ОНОВЛЕННЯ існуючого фото
-            const { error } = await _supabase
-                .from('gallery')
-                .update(itemData)
-                .eq('id', id);
-            resultError = error;
-        } else {
-            // Якщо ID немає — це СТВОРЕННЯ нового фото
-            const { error } = await _supabase
-                .from('gallery')
-                .insert([itemData]);
-            resultError = error;
-        }
-
-        if (resultError) throw resultError;
-
-        // Показуємо повідомлення про успіх (ваш кастомний тост #toastMessage)
-        const toast = document.getElementById('toastMessage');
-        if (toast) {
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Закриваємо модальне вікно та очищуємо форму
-        closeGalleryModal();
-        
-        // Оновлюємо список галереї в адмінці, щоб одразу побачити зміни
-        if (typeof loadGalleryAdmin === 'function') {
-            loadGalleryAdmin();
-        }
-
-    } catch (err) {
-        console.error("Помилка збереження елемента галереї:", err);
-        alert("Помилка збереження: " + err.message);
-    }
-}
-
-// 3. ДОПОМІЖНА ФУНКЦІЯ ЗАКРИТТЯ ТА ОЧИЩЕННЯ МОДАЛКИ
-function closeGalleryModal() {
-    const modal = document.getElementById('galleryModal');
-    const form = document.getElementById('galleryForm');
-    const preview = document.getElementById('galPreview');
-    
-    if (modal) {
-        modal.classList.add('opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-    
-    if (form) form.reset();
-    if (preview) {
-        preview.src = '';
-        preview.classList.add('hidden');
-    }
-    document.getElementById('gal-id').value = '';
-    document.getElementById('gal-img').value = '';
-}
     </script>
 </body>
 </html>
 </body>
 </html>
+
