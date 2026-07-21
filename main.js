@@ -413,42 +413,44 @@ function generateMenus() {
             <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
         </div>
     </div>
-
-
-    <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
-    <a href="exclusive.html" class="text-[var(--gold-muted)]  font-bold " onclick="window.toggleMenu()">
+        <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
+    
+    <div>
+    <i data-lucide="clock" style="width:16px;height:16px" class" border-b border-[var(--border)] break-normal"></i>
+    <a href="exclusive.html" class="text-[var(--gold-muted)]  font-bold ">
         <span data-i18n="m_atelier">Ексклюзив</span>
     </a>
-
-
-    <div class="flex flex-col items-start">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" data-i18n="m4">Адреса та графік роботи</h4>
-                
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
-                <div class="flex items-center gap-4 mt-2">
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">Графік: 08:00 - 18:00</span>    
-                </div>
     </div>
-
-    <div class="flex flex-col items-start">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-1" data-i18n="m4">Контакти</h4>
-                <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
-                
-                <div class="flex items-center gap-4 mt-2">
-                    <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
-                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </a>
-                </div>
-    </div>
-
-
-
     
-</div>
+    
+
+
+    <i data-lucide="clock" style="width:16px;height:16px"></i>
+    <span><a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a></span>
+    
+    
+    <i data-lucide="clock" style="width:16px;height:16px"></i>
+    <span>Пн–Пт: 08:00–18:00</span>
+        
+
+    <i data-lucide="clock" style="width:16px;height:16px"></i>
+    <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
+    
+    
+    <i data-lucide="clock" style="width:16px;height:16px"></i>
+    <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
+    
+
+
+    <div class="flex items-center gap-4 mt-4">
+        <a href="https://www.instagram.com/bv.jewelry_izmail?igsh=ZDNiOGN3aXlrdzlh&utm_source=qr" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        </a>
+        <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </a>
+    </div>
+        
         `;
     }
 }
@@ -1734,4 +1736,68 @@ window.initGalleryFilters = function() {
         });
     });
     console.log("Фильтры галереи подключены");
+};
+
+
+
+
+
+// ///////////////////////////
+// ==========================================
+// СИНХРОНІЗАЦІЯ АДМІНКИ З SUPABASE
+// ==========================================
+
+// Збереження або оновлення товару
+window.saveProductToDB = async function(productData) {
+    if (typeof _supabase === 'undefined') {
+        alert('Помилка: Supabase не підключено');
+        return null;
+    }
+    
+    try {
+        // upsert автоматично оновлює запис, якщо id збігається, або створює новий
+        const { data, error } = await _supabase
+            .from('products')
+            .upsert([productData])
+            .select();
+            
+        if (error) throw error;
+        
+        // Оновлюємо локальний масив (кеш), щоб SPA одразу побачив зміни
+        const currentProducts = window.products || [];
+        const index = currentProducts.findIndex(p => p.id === productData.id);
+        
+        if (index > -1) {
+            currentProducts[index] = data[0];
+        } else {
+            currentProducts.push(data[0]);
+        }
+        
+        window.products = currentProducts;
+        alert('Товар успішно збережено в Supabase!');
+        
+        return data[0];
+    } catch (err) {
+        console.error('Помилка збереження товару:', err);
+        alert('Помилка збереження. Деталі в консолі.');
+        return null;
+    }
+};
+
+// Видалення товару
+window.deleteProductFromDB = async function(productId) {
+    if (typeof _supabase === 'undefined') return;
+    
+    try {
+        const { error } = await _supabase.from('products').delete().eq('id', productId);
+        if (error) throw error;
+        
+        // Вичищаємо товар з локального масиву
+        window.products = (window.products || []).filter(p => p.id !== productId);
+        alert('Товар успішно видалено з бази');
+        
+    } catch (err) {
+        console.error('Помилка видалення товару:', err);
+        alert('Помилка видалення. Деталі в консолі.');
+    }
 };
