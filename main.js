@@ -3,9 +3,13 @@
 // ==========================================
 const supabaseUrl = 'https://trcjsnvcdonlzxprgdzd.supabase.co'; 
 const supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV'; 
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const _supabase = typeof supabase !== 'undefined' ? supabase.createClient(supabaseUrl, supabaseKey) : null;
 
-console.log("BV Jewelry: Підключення до хмари Supabase встановлено.");
+if (_supabase) {
+    console.log("BV Jewelry: Підключення до хмари Supabase встановлено.");
+} else {
+    console.warn("BV Jewelry: Supabase SDK не знайдено. Працюємо в офлайн/локальному режимі.");
+}
 
 // ==========================================
 // 1. API ФАСАД (ЛОКАЛЬНИЙ КЕШ)
@@ -17,7 +21,13 @@ const API = {
             return d ? JSON.parse(d) : def;
         } catch (e) { return def; }
     },
-    set: (key, val) => localStorage.setItem(key, JSON.stringify(val))
+    set: (key, val) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(val));
+        } catch (e) {
+            console.error("Помилка збереження в localStorage:", e);
+        }
+    }
 };
 
 // ==========================================
@@ -130,13 +140,13 @@ function buildTree(flatList) {
 }
 
 // ==========================================
-// БАЗА ДАНИХ ТА СИНХРОНІЗАЦІЯ (SUPABASE)
+// 3. БАЗА ДАНИХ ТА СИНХРОНІЗАЦІЯ (SUPABASE)
 // ==========================================
 
 // Завантаження даних з хмари при старті
 window.loadCloudData = async function() {
-    if (typeof _supabase === 'undefined') {
-        console.warn('Supabase не підключено, працюємо з локальними даними.');
+    if (!navigator.onLine || !_supabase) {
+        console.warn('Supabase не підключено або відсутній інтернет. Працюємо з локальними даними.');
         products = API.get('bv_products', []);
         window.products = products;
         if(typeof window.generateMenus === 'function') window.generateMenus();
@@ -149,9 +159,9 @@ window.loadCloudData = async function() {
         if (error) throw error;
         
         if (data && data.length > 0) {
-            products = data;            // Оновлюємо внутрішню змінну
-            window.products = data;     // Оновлюємо глобальний контекст
-            API.set('bv_products', data); // Кешуємо для кошика та обраного
+            products = data;            
+            window.products = data;     
+            API.set('bv_products', data); 
         }
         
         if(typeof window.generateMenus === 'function') window.generateMenus();
@@ -164,9 +174,10 @@ window.loadCloudData = async function() {
         if(typeof window.generateMenus === 'function') window.generateMenus();
     }
 };
+
 // Збереження/Оновлення товару
 window.saveProductToDB = async function(productData) {
-    if (typeof _supabase === 'undefined') {
+    if (!_supabase) {
         alert('Помилка: Supabase не підключено');
         return null;
     }
@@ -183,7 +194,9 @@ window.saveProductToDB = async function(productData) {
             currentProducts.push(data[0]);
         }
         window.products = currentProducts;
+        API.set('bv_products', currentProducts);
         
+        alert('Товар успішно збережено в Supabase!');
         return data[0];
     } catch (err) {
         console.error('Помилка збереження товару:', err);
@@ -194,12 +207,15 @@ window.saveProductToDB = async function(productData) {
 
 // Видалення товару
 window.deleteProductFromDB = async function(productId) {
-    if (typeof _supabase === 'undefined') return false;
+    if (!_supabase) return false;
     try {
         const { error } = await _supabase.from('products').delete().eq('id', productId);
         if (error) throw error;
         
         window.products = (window.products || []).filter(p => p.id !== productId);
+        API.set('bv_products', window.products);
+        
+        alert('Товар успішно видалено з бази');
         return true;
     } catch (err) {
         console.error('Помилка видалення товару:', err);
@@ -239,12 +255,12 @@ window.setFavs = async function(favs) {
     API.set(getScopedStorageKey('bv_favs'), favs);
     API.set('bv_favs', favs);
     const currentUser = getCurrentUser();
-    if (currentUser && currentUser.id) {
+    if (currentUser && currentUser.id && _supabase) {
         currentUser.favs = favs; 
         API.set('bv_current_user', currentUser);
         await _supabase.from('profiles').update({ favs: favs }).eq('id', currentUser.id);
     }
-}
+};
 
 function getCart() { return API.get(getScopedStorageKey('bv_cart'), []); }
 function setCart(cart) { API.set(getScopedStorageKey('bv_cart'), cart); API.set('bv_cart', cart); }
@@ -367,112 +383,77 @@ function generateMenus() {
 
         sideMenu.innerHTML = `
             <div class="flex justify-between items-center pb-4 mb-4 border-b border-[var(--border)] pt-4 px-4">
-    <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
-        <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
-    </a>
-    <div class="flex items-center gap-5">
-        <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-            <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
-        </button>
-        
-        <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
-            <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
-            <span class="opacity-30">|</span>
-            <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
-            <span class="opacity-30">|</span>
-            <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
-        </div>
-        
-        <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </button>
-    </div>
-</div>
+                <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
+                    <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
+                </a>
+                <div class="flex items-center gap-5">
+                    <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                        <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
+                    </button>
+                    <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
+                        <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
+                        <span class="opacity-30">|</span>
+                        <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
+                        <span class="opacity-30">|</span>
+                        <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
+                    </div>
+                    <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </button>
+                </div>
+            </div>
 
-<div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
-    <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
-    
-
-    <div>
-        
-
-        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
-            <span data-i18n="m2">Каталог</span>
-
-            <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-
-        </div>
-
-
-        <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">
-            
-            <a href="catalog.html#" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Всі товари</a>
-            <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Золото</a>
-            <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Срібло</a>
-            <a href="catalog.html#rings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Каблучки</a>
-            <a href="catalog.html#earrings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Сережки</a>
-            <a href="catalog.html#necklaces" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Кольє та Ланцюжки</a>
-            <a href="catalog.html#bracelets" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Браслети</a>
-        </div>
-
-            
-    </div>
-
-
-
-    <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
-
-
-    <div>
-        <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
-            <span>Бренд</span>
-            <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-        </div>
-        <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
-            <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
-            <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
-            <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
-            <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
-        </div>
-    </div>
-        <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
-    
-    <div>
-    <i data-lucide="clock" style="width:16px;height:16px" class" border-b border-[var(--border)] break-normal"></i>
-    <a href="exclusive.html" class="text-[var(--gold-muted)]  font-bold ">
-        <span data-i18n="m_atelier">Ексклюзив</span>
-    </a>
-    </div>
-    
-    
-
-
-    <i data-lucide="clock" style="width:16px;height:16px"></i>
-    <span><a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a></span>
-    
-    
-    <i data-lucide="clock" style="width:16px;height:16px"></i>
-    <span>Пн–Пт: 08:00–18:00</span>
-        
-
-    <i data-lucide="clock" style="width:16px;height:16px"></i>
-    <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
-    
-    
-    <i data-lucide="clock" style="width:16px;height:16px"></i>
-    <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
-    
-
-
-    <div class="flex items-center gap-4 mt-4">
-        <a href="https://www.instagram.com/bv.jewelry_izmail?igsh=ZDNiOGN3aXlrdzlh&utm_source=qr" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-        </a>
-        <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        </a>
-    </div>
-        
+            <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
+                <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
+                <div>
+                    <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
+                        <span data-i18n="m2">Каталог</span>
+                        <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">
+                        <a href="catalog.html#" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Всі товари</a>
+                        <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Золото</a>
+                        <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Срібло</a>
+                        <a href="catalog.html#rings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Каблучки</a>
+                        <a href="catalog.html#earrings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Сережки</a>
+                        <a href="catalog.html#necklaces" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Кольє та Ланцюжки</a>
+                        <a href="catalog.html#bracelets" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Браслети</a>
+                    </div>
+                </div>
+                <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
+                <div>
+                    <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
+                        <span>Бренд</span>
+                        <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
+                        <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+                        <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+                        <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+                        <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+                    </div>
+                </div>
+                <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
+                <div>
+                    <a href="exclusive.html" class="text-[var(--gold-muted)] font-bold py-3 block">
+                        <span data-i18n="m_atelier">Ексклюзив</span>
+                    </a>
+                </div>
+                <div class="mt-4 flex flex-col gap-2 text-[12px] text-[var(--text-muted)]">
+                    <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium transition hover:opacity-80">+38 063 45 40 901</a>
+                    <span>Пн–Пт: 08:00–18:00</span>
+                    <span>м. Ізмаїл, вул. Торгова, 68</span>
+                    <span>м. Ізмаїл, вул. Покровська, 57</span>
+                </div>
+                <div class="flex items-center gap-4 mt-4">
+                    <a href="https://www.instagram.com/bv.jewelry_izmail" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </a>
+                </div>
+            </div>
         `;
     }
 }
@@ -786,6 +767,7 @@ window.renderProductCard = function(prod) {
         </div>
     `;
 };
+
 window.addToCartById = function(id) {
     const allProducts = window.products || API.get('bv_products', []);
     const prod = allProducts.find(p => p.id === id);
@@ -798,6 +780,7 @@ window.addToCartById = function(id) {
     
     window.addToCart(prod.id, name, prod.variant || '', price, img);
 };
+
 // ==========================================
 // 9. БЕЗКІНЧЕННА БІГУЧА СТРОКА ТА КАРУСЕЛІ
 // ==========================================
@@ -899,7 +882,7 @@ window.initPremiumCarousel = function(track) {
     track.addEventListener('touchstart', startAction, {passive: true}); track.addEventListener('touchend', endAction); track.addEventListener('touchmove', moveAction, {passive: true});
 
     setTimeout(() => { track.scrollLeft = track.scrollWidth / 3; }, 200);
-}
+};
 
 // ==========================================
 // 10. СЛАЙДЕР БАНЕРІВ (ЗАВАНТАЖЕННЯ З БД)
@@ -1032,7 +1015,6 @@ window.renderHomeSections = function() {
         if (items.length > 0) {
             const title = window.getLoc(block.name);
             const trackId = `block-track-${block.id}`;
-            // Строгі відступи, без зазорів, 0 gap, ширина 50%
             const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex">${window.renderProductCard(p)}</div>`;
             
             let blockItems = [...items];
@@ -1211,8 +1193,6 @@ window.renderExclusivePage = function() {
 // ==========================================
 // 12. ГЛОБАЛЬНІ ЕЛЕМЕНТИ ІНТЕРФЕЙСУ ТА НАВІГАЦІЯ
 // ==========================================
-
-// Акордеони
 window.toggleAccordion = function(listId, arrowId) {
     const list = document.getElementById(listId);
     const arrow = document.getElementById(arrowId);
@@ -1234,7 +1214,6 @@ window.toggleAccordion = function(listId, arrowId) {
     if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
 };
 
-// Перемикання теми
 window.toggleTheme = function() {
     const html = document.documentElement;
     const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -1247,7 +1226,6 @@ window.toggleTheme = function() {
     if(iconMob) iconMob.innerHTML = svg;
 };
 
-// Локалізація
 window.changeLang = function(lang) {
     const displayLang = lang === 'uk' ? 'UA' : lang.toUpperCase();
     ['currentFlag', 'currentFlagMob'].forEach(id => { 
@@ -1273,7 +1251,6 @@ window.changeLang = function(lang) {
     if(mobLangList && mobLangList.classList.contains('open')) window.toggleAccordion('mobLangList', 'mobLangArrow');
 };
 
-// SPA Перемикачі секцій (без перезавантаження сторінки)
 window.showAdminPanel = function() {
     const adminSec = document.getElementById('adminSection');
     const mainSec = document.getElementById('mainContent');
@@ -1302,7 +1279,6 @@ window.showClientProfile = function() {
     }
 };
 
-// Модальне вікно авторизації
 window.injectAuthModal = function() {
     if (document.getElementById('authModal')) return;
 
@@ -1334,12 +1310,10 @@ window.injectAuthModal = function() {
                             <span class="flex-shrink-0 mx-4 text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Або</span>
                             <div class="flex-grow border-t border-[var(--border)]"></div>
                         </div>
-                        
                         <button type="button" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
                             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2 6.42 2 12c0 5.59 4.39 10 10.1 10 5.92 0 10.28-4.61 10.28-10.4 0-.83-.07-1.39-.07-1.39z"/></svg>
                             Увійти через Google
                         </button>
-                        
                         <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
                             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
                             Увійти через Apple
@@ -1430,28 +1404,26 @@ window.updateAuthView = function() {
 };
 
 window.loginWithGoogle = async function() {
-    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    if(!_supabase) return alert('Помилка підключення бази даних.');
     await _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
 };
 
 window.loginWithApple = async function() {
-    if(typeof _supabase === 'undefined') return alert('Помилка підключення бази даних.');
+    if(!_supabase) return alert('Помилка підключення бази даних.');
     await _supabase.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: window.location.origin + window.location.pathname } });
 };
 
 window.updateProfileMenu = function() {
     const user = getCurrentUser();
     const dropdownMenu = document.getElementById('profileDropdownMenu');
-    // ДОДАЄМО: оновлюємо подію для кліку на іконку профілю в шапці
     const profileBtn = document.getElementById('headerProfileBtn');
+    
     if (profileBtn) {
-        // Якщо юзер є - перекидаємо в кабінет, якщо нема - відкриваємо модалку
         profileBtn.onclick = function() {
             if (user) location.href = 'profile.html';
             else window.openAuthModal();
         };
     }
-
     
     if(dropdownMenu) {
         if (user) {
@@ -1471,7 +1443,7 @@ window.updateProfileMenu = function() {
 
 window.initRealtime = function() {
     const user = getCurrentUser();
-    if(!user) return;
+    if(!user || !_supabase) return;
 
     _supabase.channel('custom-user-orders')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, (payload) => {
@@ -1488,7 +1460,7 @@ window.initRealtime = function() {
 };
 
 window.logoutUser = async function() {
-    if(typeof _supabase !== 'undefined' && _supabase.auth) {
+    if(_supabase && _supabase.auth) {
         _supabase.removeAllChannels();
         await _supabase.auth.signOut();
     }
@@ -1510,7 +1482,6 @@ window.logoutUser = async function() {
 // 14. ГЛОБАЛЬНИЙ СТАРТ ТА СЛУХАЧІ
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // ВПРИСКУЄМО МОДАЛКУ ОДРАЗУ, ЩОБ ПІДХОПИТИ ПОДІЇ
     if(typeof window.injectAuthModal === 'function') window.injectAuthModal();
 
     const deskSearch = document.querySelector('.search-input.desktop-only') || document.querySelector('.desktop-only .search-input');
@@ -1518,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const overlayInput = document.getElementById('mobSearchOverlayInput');
     if (overlayInput) { overlayInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') window.executeSearch(e.target.value); }); }
 
-    if(window.location.hash && window.location.hash.includes('access_token')) {
+    if(_supabase && window.location.hash && window.location.hash.includes('access_token')) {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
             const { data: profile } = await _supabase.from('profiles').select('*').eq('id', session.user.id).single();
@@ -1536,11 +1507,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Тепер authForm точно існує
     const authForm = document.getElementById('authForm');
     if(authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(!_supabase) return alert("Помилка бази даних: підключення відсутнє.");
+
             const submitBtn = document.getElementById('authSubmitBtn');
             const originalText = submitBtn.innerText;
             submitBtn.innerText = 'Зачекайте...';
@@ -1614,7 +1586,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// window.onload та скролл залишаються без змін
 window.onload = async () => { 
     if(window.location.pathname.includes('admin.html')) return;
 
@@ -1682,74 +1653,30 @@ if(overlay) overlay.onclick = () => { if(typeof window.toggleMenu === 'function'
 if(cartOverlay) cartOverlay.onclick = () => { if(typeof window.toggleCart === 'function') window.toggleCart(); };
 if(favOverlay) favOverlay.onclick = () => { if(typeof window.toggleFavDrawer === 'function') window.toggleFavDrawer(); };
 
-
 // ==========================================
-// 15. ГАЛЕРЕЯ (ВИПРАВЛЕНО)
+// 15. ГАЛЕРЕЯ ТА ІНІЦІАЛІЗАЦІЯ ФІЛЬТРІВ
 // ==========================================
-
-window.renderGallery = function(category = 'all') {
-    const grid = document.getElementById('galleryGrid');
-    if (!grid) return;
-
-    // ВИПРАВЛЕНО: Тепер беремо продукти через фасад API.get для консистентності
-    const products = window.products || API.get('bv_products', []);
-
-    // Фільтрація
-    let filtered = category === 'all' ? products : products.filter(p => p.category === category);
-
-    // Рендер
-    grid.innerHTML = filtered.map(p => {
-        const img = p.variations?.base?.images?.[0] || p.image || p.img || 'placeholder.jpg';
-        const name = p.name || 'Без названия';
-        const price = p.variations?.base?.price || 0;
-
-        return `
-            <div class="group border border-[var(--border)] overflow-hidden">
-                <div class="aspect-square overflow-hidden bg-gray-100">
-                    <img src="${img}" alt="${name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-serif text-lg">${name}</h3>
-                    <p class="text-[var(--gold-muted)]">${price} ₴</p>
-                </div>
-            </div>
-        `;
-    }).join('');
-};
-
-
-// Функція для завантаження даних галереї
 window.loadGalleryFromDB = async function() {
+    if (!_supabase) return;
     try {
-        // ВИПРАВЛЕНО: supabase змінено на ініціалізований клієнт _supabase
-        const { data, error } = await _supabase
-            .from('gallery')
-            .select('*');
-
+        const { data, error } = await _supabase.from('gallery').select('*');
         if (error) throw error;
         
-        // Зберігаємо для використання в галереї
         window.galleryItems = data;
-        API.set('bv_gallery', data); // Також записуємо у кеш для швидкості
-        console.log("Данные галереи загружены:", data);
+        API.set('bv_gallery', data);
+        console.log("Дані галереї завантажено:", data);
         
-        // Відразу викликаємо функцію рендеру
         window.renderGalleryGrid(); 
     } catch (err) {
-        console.error("Ошибка загрузки галереи:", err);
+        console.error("Помилка завантаження галереї:", err);
     }
 };
 
-// Функція відмальовування сітки (з урахуванням фільтрації по категорії)
 window.renderGalleryGrid = function(category = 'all') {
     const grid = document.getElementById('galleryGrid');
     if (!grid) return;
 
-    // ВИПРАВЛЕНО: якщо window.galleryItems пустий, спробуємо дістати з кешу, куди його міг записати loadCloudData
     const items = window.galleryItems || API.get('bv_gallery', []); 
-
-    // 1. Фільтруємо тільки опубліковані (is_published === true)
-    // 2. Якщо обрано категорію, фільтруємо по ній
     const filtered = items.filter(item => {
         const isPublished = item.is_published === true;
         const matchesCategory = (category === 'all' || item.category === category);
@@ -1766,99 +1693,32 @@ window.renderGalleryGrid = function(category = 'all') {
         const title = item.title || 'Без назви';
 
         return `
-            <div class="card overflow-hidden rounded-lg shadow-sm border border-gray-100">
-                <img src="${img}" alt="${title}" class="w-full h-64 object-cover">
-                <div class="p-2 text-center text-gray-800 font-serif">${title}</div> 
+            <div class="card overflow-hidden rounded-lg shadow-sm border border-gray-100 group">
+                <div class="aspect-square overflow-hidden bg-gray-100">
+                    <img src="${img}" alt="${title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="p-4 text-center text-gray-800 font-serif">${title}</div> 
             </div>
         `;
     }).join('');
 };
 
-// Функція ініціалізації кнопок категорій
 window.initGalleryFilters = function() {
     const filterButtons = document.querySelectorAll('.filter-btn'); 
-    
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const category = btn.getAttribute('data-category'); 
-            
-            // Прибираємо активний клас у всіх, додаємо поточному
             filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            // Перемальовуємо
             window.renderGalleryGrid(category);
         });
     });
-    console.log("Фильтры галереи подключены");
+    console.log("Фільтри галереї підключено");
 };
 
-
-
-
-
-// ///////////////////////////
 // ==========================================
-// СИНХРОНІЗАЦІЯ АДМІНКИ З SUPABASE
+// 16. СТИСНЕННЯ ЗОБРАЖЕНЬ ТА UPLOAD (SUPABASE STORAGE)
 // ==========================================
-
-// Збереження або оновлення товару
-window.saveProductToDB = async function(productData) {
-    if (typeof _supabase === 'undefined') {
-        alert('Помилка: Supabase не підключено');
-        return null;
-    }
-    
-    try {
-        // upsert автоматично оновлює запис, якщо id збігається, або створює новий
-        const { data, error } = await _supabase
-            .from('products')
-            .upsert([productData])
-            .select();
-            
-        if (error) throw error;
-        
-        // Оновлюємо локальний масив (кеш), щоб SPA одразу побачив зміни
-        const currentProducts = window.products || [];
-        const index = currentProducts.findIndex(p => p.id === productData.id);
-        
-        if (index > -1) {
-            currentProducts[index] = data[0];
-        } else {
-            currentProducts.push(data[0]);
-        }
-        
-        window.products = currentProducts;
-        alert('Товар успішно збережено в Supabase!');
-        
-        return data[0];
-    } catch (err) {
-        console.error('Помилка збереження товару:', err);
-        alert('Помилка збереження. Деталі в консолі.');
-        return null;
-    }
-};
-
-// Видалення товару
-window.deleteProductFromDB = async function(productId) {
-    if (typeof _supabase === 'undefined') return;
-    
-    try {
-        const { error } = await _supabase.from('products').delete().eq('id', productId);
-        if (error) throw error;
-        
-        // Вичищаємо товар з локального масиву
-        window.products = (window.products || []).filter(p => p.id !== productId);
-        alert('Товар успішно видалено з бази');
-        
-    } catch (err) {
-        console.error('Помилка видалення товару:', err);
-        alert('Помилка видалення. Деталі в консолі.');
-    }
-};
-
-
-// 1. Функція автоматичного стиснення картинки до WebP
 async function compressImage(file, maxWidth = 1200, quality = 0.8) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -1892,37 +1752,35 @@ async function compressImage(file, maxWidth = 1200, quality = 0.8) {
     });
 }
 
-// 2. Функція завантаження в бакет site-images
-async function uploadProductPhoto(file) {
+window.uploadProductPhoto = async function(file) {
+    if (!_supabase) {
+        alert("Помилка: Supabase не підключено!");
+        return null;
+    }
     try {
-        console.log('Сжимаем фото...');
+        console.log('Стискаємо фото...');
         const compressedBlob = await compressImage(file);
-
-        // Унікальна назва файлу
         const fileName = `prod_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
 
-        console.log('Отправляем в Supabase Storage (site-images)...');
+        console.log('Відправляємо в Supabase Storage (site-images)...');
         const { data, error } = await _supabase.storage
-            .from('site-images') // Твій бакет!
+            .from('site-images') 
             .upload(fileName, compressedBlob, {
                 contentType: 'image/webp'
             });
 
         if (error) throw error;
 
-        // Отримуємо публічне посилання
         const { data: publicUrlData } = _supabase.storage
             .from('site-images')
             .getPublicUrl(fileName);
 
-        console.log('Успешно! Ссылка на фото:', publicUrlData.publicUrl);
-        
-        // Повертаємо посилання, яке збережемо в базу товарів
+        console.log('Успішно! Посилання на фото:', publicUrlData.publicUrl);
         return publicUrlData.publicUrl;
 
     } catch (err) {
-        console.error('Ошибка при загрузке фото:', err);
-        alert('Не удалось загрузить картинку!');
+        console.error('Помилка при завантаженні фото:', err);
+        alert('Не вдалося завантажити зображення!');
         return null;
     }
-}
+};
