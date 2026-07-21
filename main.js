@@ -29,7 +29,159 @@ const API = {
         }
     }
 };
+// ==========================================
+// 12. ГЛОБАЛЬНИЙ UI ТА НАВІГАЦІЯ
+// ==========================================
+window.toggleMenu = function() {
+    const burger = document.getElementById('burger');
+    const sideMenu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('overlay');
+    if(burger) burger.classList.toggle('open');
+    if(sideMenu) sideMenu.classList.toggle('active');
+    if(overlay) overlay.classList.toggle('active');
+    document.body.style.overflow = (sideMenu && sideMenu.classList.contains('active')) ? 'hidden' : 'auto';
+    const searchBox = document.getElementById('mobSearchContainer');
+    if(searchBox && !searchBox.classList.contains('hidden')) window.toggleMobileSearch(true);
+};
 
+window.toggleAccordion = function(listId, arrowId) {
+    const list = document.getElementById(listId);
+    const arrow = document.getElementById(arrowId);
+    if (!list) return;
+
+    const isOpening = !list.classList.contains('open');
+
+    if (isOpening && list.classList.contains('mob-accordion-list')) {
+        const openMainLists = document.querySelectorAll('.mob-accordion-list.open');
+        openMainLists.forEach(ol => {
+            if (ol !== list) {
+                ol.classList.remove('open');
+                const title = ol.previousElementSibling;
+                if (title) {
+                    const siblingArrow = title.querySelector('svg');
+                    if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        });
+    }
+
+    list.classList.toggle('open');
+    if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+};
+
+window.toggleTheme = function() {
+    const html = document.documentElement;
+    const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    API.set('bv_theme', newTheme);
+    const svg = newTheme === 'light' ? sunSVG : moonSVG;
+    const icon = document.getElementById('themeIcon');
+    const iconMob = document.getElementById('themeIconMob');
+    if(icon) icon.innerHTML = svg;
+    if(iconMob) iconMob.innerHTML = svg;
+};
+
+window.changeLang = function(lang) {
+    const displayLang = lang === 'uk' ? 'UA' : lang.toUpperCase();
+    ['currentFlag', 'currentFlagMob'].forEach(id => { const el = document.getElementById(id); if(el) el.src = `https://flagcdn.com/${flags[lang]}.svg`; });
+    ['currentLangLabel', 'currentLangLabelMob'].forEach(id => { const el = document.getElementById(id); if(el) el.innerText = displayLang; });
+    document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = i18n[lang][el.dataset.i18n] || el.innerHTML);
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.dataset.i18nPlaceholder] || el.placeholder);
+    API.set('bv_lang', lang);
+    window.renderCart();
+    window.renderFavDrawer();
+    
+    if(document.getElementById('dynamicHomeBlocksContainer') && typeof renderHomeSections === 'function') renderHomeSections();
+    if(typeof window.renderCatalogBatch === 'function') window.renderCatalogBatch(); 
+    if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
+    
+    const mobLangList = document.getElementById('mobLangList');
+    if(mobLangList && mobLangList.classList.contains('open')) window.toggleAccordion('mobLangList', 'mobLangArrow');
+};
+
+// НОВА ФУНКЦІЯ: Глобальне створення модалки авторизації
+window.injectAuthModal = function() {
+    if (document.getElementById('authModal')) return; // Вже існує
+
+    const modalHtml = `
+    <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
+        <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
+            <div id="authFormContainer">
+                <h3 id="authTitle" class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
+                <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-xs mb-6 font-light">Раді бачити вас знову</p>
+                <form id="authForm" class="flex flex-col gap-3">
+                    <div id="nameFieldContainer" class="hidden flex-col gap-1.5">
+                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Ваше ім'я</label>
+                        <input type="text" id="authName" placeholder="Олена" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Email</label>
+                        <input type="email" id="authUser" placeholder="mail@example.com" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Пароль</label>
+                        <input type="password" id="authPass" placeholder="Мінімум 6 символів" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
+                    </div>
+                    <button type="submit" class="btn-solid py-3.5 rounded-none font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-md mt-2" id="authSubmitBtn" data-i18n="login">Увійти</button>
+                    
+                    <div class="mt-4 flex flex-col gap-2.5">
+                        <div class="relative flex py-2 items-center">
+                            <div class="flex-grow border-t border-[var(--border)]"></div>
+                            <span class="flex-shrink-0 mx-4 text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Або</span>
+                            <div class="flex-grow border-t border-[var(--border)]"></div>
+                        </div>
+                        
+                        <button type="button" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2 6.42 2 12c0 5.59 4.39 10 10.1 10 5.92 0 10.28-4.61 10.28-10.4 0-.83-.07-1.39-.07-1.39z"/></svg>
+                            Увійти через Google
+                        </button>
+                        
+                        <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                            Увійти через Apple
+                        </button>
+                    </div>
+
+                    <div class="text-center text-xs text-[var(--text-muted)] mt-4">
+                        <span id="authToggleText">Немає акаунта?</span> 
+                        <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1" id="authToggleLink">Зареєструватися</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="profileView" class="hidden flex-col gap-4">
+                <h3 class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login_mob_title">Кабінет</h3>
+                <div class="flex flex-col items-center justify-center p-5 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-none mb-1 relative overflow-hidden group">
+                    <div class="w-16 h-16 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-2xl font-bold uppercase shadow-md mb-3 relative z-10" id="profAvatar">A</div>
+                    <p class="text-center text-[var(--text-main)] font-semibold text-lg relative z-10" id="profName">User</p>
+                    <p class="text-center text-[var(--text-muted)] text-[11px] mt-1 relative z-10" id="profEmail">user@mail.com</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="location.href='admin.html'" id="adminLinkBtn" class="hidden w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors active:scale-95 text-center">Панель Адміністратора</button>
+                    <button onclick="location.href='profile.html'" id="clientLinkBtn" class="btn-solid py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity active:scale-95 w-full">Мої замовлення</button>
+                    <button onclick="window.logoutUser()" class="w-full py-3 rounded-none border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 bg-transparent mt-1">Вийти з акаунту</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.injectGlobalUI = function() {
+    window.injectAuthModal(); // Створюємо модалку глобально
+    if (!document.getElementById('scrollToTopBtn')) {
+        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
+    }
+};
+
+window.toggleAccordionPanel = function(clickedPanel) {
+    const allPanels = document.querySelectorAll('.glass-panel-item');
+    if (clickedPanel.classList.contains('active')) return;
+    allPanels.forEach(panel => panel.classList.remove('active'));
+    clickedPanel.classList.add('active');
+};
 // ==========================================
 // 2. БАЗОВІ ДАНІ ТА ЛОКАЛІЗАЦІЯ
 // ==========================================
