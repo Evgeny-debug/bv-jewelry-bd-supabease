@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VELOUR — Дім преміального одягу</title>
+<meta name="description" content="VELOUR — преміальний інтернет-магазин одягу та аксесуарів">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ DESIGN TOKENS ============ */
+  :root{
+    --bg-0:#0e0d0c;
+    --bg-1:#141312;
+    --panel:rgba(247,243,236,0.04);
+    --panel-strong:rgba(247,243,236,0.07);
+    --border:rgba(247,243,236,0.08);
+    --border-strong:rgba(247,243,236,0.15);
+    --text-0:#f5f1ea;
+    --text-1:#aba79f;
+    --text-2:#726d64;
+    --bronze:#b48c56;
+    --bronze-2:#d3af7c;
+    --wine:#7c3a3a;
+    --olive:#6f7a5c;
+    --shadow-soft: 0 14px 44px -18px rgba(0,0,0,0.7);
+    --radius-lg: 26px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-0);
+    color:var(--text-0);
+    font-family:'Jost',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+  .font-display{font-family:'Cormorant Garamond',serif; font-weight:600;}
+  .eyebrow{ letter-spacing:.22em; text-transform:uppercase; font-size:11px; font-weight:600; color:var(--text-2); }
+
+  ::selection{background:var(--bronze); color:#0e0d0c;}
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:10px;}
+
+  :focus-visible{
+    outline:2px solid var(--bronze-2);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  /* ============ SOFT AMBIENT BACKGROUND (no neon) ============ */
+  .mesh-bg{ position:fixed; inset:0; z-index:-2; overflow:hidden; background:var(--bg-0); }
+  .mesh-bg::before{
+    content:''; position:absolute; left:50%; top:-10%; width:80vw; height:80vw; max-width:1100px; max-height:1100px;
+    transform:translateX(-50%);
+    background:radial-gradient(circle, rgba(180,140,86,0.10), transparent 65%);
+    filter:blur(70px);
+  }
+  .mesh-bg::after{
+    content:''; position:absolute; right:-10%; bottom:-15%; width:55vw; height:55vw;
+    background:radial-gradient(circle, rgba(124,58,58,0.08), transparent 70%);
+    filter:blur(90px);
+  }
+  .noise-overlay{
+    position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:0.03;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  /* ============ GLASS PRIMITIVES (subtle, matte) ============ */
+  .glass{
+    background:var(--panel);
+    backdrop-filter: blur(16px) saturate(105%);
+    -webkit-backdrop-filter: blur(16px) saturate(105%);
+    border:1px solid var(--border);
+  }
+  .glass-strong{
+    background:var(--panel-strong);
+    backdrop-filter: blur(20px) saturate(110%);
+    -webkit-backdrop-filter: blur(20px) saturate(110%);
+    border:1px solid var(--border-strong);
+  }
+  .hairline{ border:1px solid var(--border); transition:border-color .3s var(--ease); }
+  .hairline:hover{ border-color:var(--border-strong); }
+
+  .text-bronze{ color:var(--bronze-2); }
+
+  /* ============ HEADER ============ */
+  #site-header{ transition: box-shadow .4s var(--ease), border-color .4s var(--ease); }
+  #site-header.scrolled{ box-shadow: var(--shadow-soft); border-bottom:1px solid var(--border); }
+
+  .icon-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:42px; height:42px; border-radius:12px;
+    background:transparent; border:1px solid var(--border);
+    transition: background .25s var(--ease), border-color .25s var(--ease);
+    position:relative;
+  }
+  .icon-btn:hover{ background:var(--panel); border-color:var(--border-strong); }
+  .icon-btn:active{ transform:scale(.96); }
+
+  .badge-pop{
+    position:absolute; top:-6px; right:-6px;
+    min-width:18px; height:18px; padding:0 4px;
+    border-radius:999px; background:var(--bronze);
+    font-size:10px; font-weight:700; color:#0e0d0c;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 3px var(--bg-0);
+  }
+  @keyframes badgePulse{ 0%{transform:scale(1);} 40%{transform:scale(1.25);} 100%{transform:scale(1);} }
+  .badge-bounce{ animation:badgePulse .4s var(--ease); }
+
+  /* ============ BUTTONS ============ */
+  .btn-primary{
+    background:var(--bronze);
+    color:#181410; font-weight:600;
+    padding:14px 28px; border-radius:4px;
+    letter-spacing:.03em;
+    position:relative; overflow:hidden;
+    transition: background .3s var(--ease), transform .3s var(--ease);
+  }
+  .btn-primary:hover{ background:var(--bronze-2); transform:translateY(-1px); }
+  .btn-primary:active{ transform:translateY(0) scale(.99); }
+
+  .btn-ghost{
+    background:transparent; border:1px solid var(--border-strong);
+    padding:14px 28px; border-radius:4px; font-weight:500; letter-spacing:.03em;
+    transition: all .3s var(--ease);
+  }
+  .btn-ghost:hover{ background:var(--panel); border-color:var(--bronze-2); }
+
+  .ripple{ position:relative; overflow:hidden; }
+  .ripple-circle{
+    position:absolute; border-radius:50%; background:rgba(255,255,255,0.25);
+    transform:scale(0); animation:rippleAnim .6s linear; pointer-events:none;
+  }
+  @keyframes rippleAnim{ to{ transform:scale(3); opacity:0; } }
+
+  /* ============ CARDS ============ */
+  .product-card{ transition: transform .5s var(--ease), border-color .5s var(--ease); }
+  .product-card:hover{ transform: translateY(-5px); border-color:var(--border-strong); }
+  .product-card .card-img{ transition: transform .8s var(--ease); }
+  .product-card:hover .card-img{ transform:scale(1.04); }
+
+  .fav-btn{ transition: transform .3s var(--ease), background .3s var(--ease), color .3s var(--ease); }
+  .fav-btn.active{ color: var(--wine); }
+  .fav-btn:active{ transform:scale(1.2); }
+
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+  .animate-fade-up{ animation: fadeUp .7s var(--ease) both; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .animate-fade{ animation: fadeIn .4s var(--ease) both; }
+  @keyframes scaleIn{ from{opacity:0; transform:scale(.97);} to{opacity:1; transform:scale(1);} }
+  .animate-scale{ animation: scaleIn .35s var(--ease) both; }
+
+  /* ============ DRAWERS / OVERLAYS ============ */
+  .drawer{ transition: transform .5s var(--ease); }
+  .overlay-bg{ background:rgba(6,5,4,0.62); backdrop-filter: blur(3px); transition: opacity .4s var(--ease); }
+
+  .search-panel{ transition: opacity .3s var(--ease), transform .3s var(--ease); }
+
+  /* ============ CHIPS ============ */
+  .chip{
+    padding:9px 19px; border-radius:2px; border:1px solid var(--border);
+    background:transparent; font-weight:500; font-size:13px; letter-spacing:.02em; white-space:nowrap;
+    transition: all .3s var(--ease); cursor:pointer;
+  }
+  .chip:hover{ border-color:var(--border-strong); }
+  .chip.active{ background:var(--bronze); color:#181410; border-color:transparent; }
+
+  /* ============ TOASTS ============ */
+  #toast-container{ position:fixed; bottom:24px; right:24px; z-index:200; display:flex; flex-direction:column; gap:10px; }
+  @media (max-width: 640px){ #toast-container{ left:16px; right:16px; bottom:96px; } }
+  .toast{ min-width:280px; max-width:360px; animation: toastIn .4s var(--ease) both; }
+  .toast.leaving{ animation: toastOut .35s var(--ease) both; }
+  @keyframes toastIn{ from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);} }
+  @keyframes toastOut{ from{opacity:1; transform:translateX(0);} to{opacity:0; transform:translateX(30px);} }
+
+  .loader-ring{
+    width:48px; height:48px; border-radius:50%;
+    border:2px solid rgba(247,243,236,0.1);
+    border-top-color: var(--bronze-2);
+    animation: spin .9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ============ GALLERY ZOOM ============ */
+  .zoom-wrap{ overflow:hidden; cursor:zoom-in; border-radius:var(--radius-sm); }
+  .zoom-img{ transition: transform .4s var(--ease); transform-origin: center; will-change:transform; }
+
+  .qty-btn{ transition: background .2s var(--ease); }
+  .qty-btn:hover{ background:var(--panel-strong); }
+
+  #bottom-nav{ transition: transform .4s var(--ease); }
+  .bnav-item{ transition: color .25s var(--ease); color:var(--text-2); }
+  .bnav-item.active{ color: var(--bronze-2); }
+
+  .divider{ height:1px; background:linear-gradient(90deg, transparent, var(--border), transparent); }
+  .price-strike{ text-decoration: line-through; color:var(--text-2); }
+  .clamp-2{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .clamp-3{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+  input[type=text], input[type=email], input[type=tel], textarea{
+    background:var(--panel); border:1px solid var(--border); color:var(--text-0);
+    transition: border-color .25s var(--ease), background .25s var(--ease);
+  }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, textarea:focus{
+    border-color: var(--bronze-2); background:var(--panel-strong); outline:none;
+  }
+  input.field-error{ border-color: var(--wine) !important; }
+
+  .lucide{ width:20px; height:20px; }
+  [data-page]{ display:none; }
+  [data-page].active{ display:block; }
+</style>
+</head>
+<body class="antialiased">
+
+<div class="mesh-bg"></div>
+<div class="noise-overlay"></div>
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 glass">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <button id="btn-menu" class="icon-btn" aria-label="Відкрити меню">
+        <i data-lucide="menu"></i>
+      </button>
+      <a href="#/" class="flex items-center gap-2.5" onclick="Router.go('/')">
+        <span class="font-display font-bold text-2xl tracking-tight">VELOUR</span>
+      </a>
+    </div>
+
+    <nav class="hidden lg:flex items-center gap-1">
+      <button onclick="Router.go('/')" class="px-4 py-2 text-sm hover:text-bronze transition" style="color:var(--text-1)">Головна</button>
+      <button onclick="Router.go('/catalog')" class="px-4 py-2 text-sm hover:text-bronze transition" style="color:var(--text-1)">Колекція</button>
+      <button onclick="Router.go('/catalog?discount=1')" class="px-4 py-2 text-sm hover:text-bronze transition" style="color:var(--text-1)">Знижки</button>
+      <button onclick="Drawers.openInfo('about')" class="px-4 py-2 text-sm hover:text-bronze transition" style="color:var(--text-1)">Про нас</button>
+    </nav>
+
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button id="btn-search" class="icon-btn" aria-label="Пошук"><i data-lucide="search"></i></button>
+      <button id="btn-favorites" class="icon-btn relative" aria-label="Обране">
+        <i data-lucide="heart"></i>
+        <span id="fav-badge" class="badge-pop hidden">0</span>
+      </button>
+      <button id="btn-cart" class="icon-btn relative" aria-label="Кошик">
+        <i data-lucide="shopping-bag"></i>
+        <span id="cart-badge" class="badge-pop hidden">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- =====================================================
+     LEFT DRAWER
+====================================================== -->
+<div id="left-overlay" class="fixed inset-0 z-[70] overlay-bg opacity-0 pointer-events-none"></div>
+<aside id="left-drawer" class="drawer fixed top-0 left-0 h-full w-[85%] max-w-sm z-[80] glass-strong -translate-x-full">
+  <div class="flex flex-col h-full">
+    <div class="flex items-center justify-between p-6 border-b" style="border-color:var(--border)">
+      <span class="font-display font-bold text-xl">Меню</span>
+      <button onclick="Drawers.closeLeft()" class="icon-btn" aria-label="Закрити меню"><i data-lucide="x"></i></button>
+    </div>
+    <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+      <button onclick="Router.go('/'); Drawers.closeLeft();" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="home"></i><span>Головна</span></button>
+      <button onclick="Router.go('/catalog'); Drawers.closeLeft();" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="shirt"></i><span>Колекція</span></button>
+      <button onclick="Drawers.openCategoriesMobile()" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="layers"></i><span>Категорії</span></button>
+      <button onclick="Router.go('/catalog?discount=1'); Drawers.closeLeft();" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="percent"></i><span>Знижки</span></button>
+      <button onclick="Router.go('/favorites'); Drawers.closeLeft();" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="heart"></i><span>Обране</span></button>
+      <div class="divider my-3"></div>
+      <button onclick="Drawers.openInfo('contacts')" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="phone"></i><span>Контакти</span></button>
+      <button onclick="Drawers.openInfo('about')" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="info"></i><span>Про нас</span></button>
+      <button onclick="Drawers.openInfo('delivery')" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="truck"></i><span>Доставка</span></button>
+      <button onclick="Drawers.openInfo('payment')" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm hover:bg-white/5 transition text-left"><i data-lucide="credit-card"></i><span>Оплата</span></button>
+    </nav>
+    <div class="p-6 border-t space-y-4" style="border-color:var(--border)">
+      <div class="flex items-center gap-2 text-sm" style="color:var(--text-1)">
+        <i data-lucide="clock" style="width:16px;height:16px"></i>
+        <span>Пн–Нд: 10:00–20:00</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://t.me" target="_blank" rel="noopener" class="icon-btn" aria-label="Telegram"><i data-lucide="send"></i></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" class="icon-btn" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- =====================================================
+     INFO MODAL
+====================================================== -->
+<div id="info-overlay" class="fixed inset-0 z-[95] overlay-bg opacity-0 pointer-events-none flex items-center justify-center p-4">
+  <div id="info-modal" class="glass-strong rounded-[var(--radius-lg)] max-w-md w-full p-8 relative scale-95 opacity-0 transition-all duration-300">
+    <button onclick="Drawers.closeInfo()" class="icon-btn absolute top-5 right-5" aria-label="Закрити"><i data-lucide="x"></i></button>
+    <div id="info-content"></div>
+  </div>
+</div>
+
+<!-- =====================================================
+     SEARCH PANEL
+====================================================== -->
+<div id="search-overlay" class="fixed inset-0 z-[70] overlay-bg opacity-0 pointer-events-none"></div>
+<div id="search-panel" class="search-panel fixed top-0 left-0 right-0 z-[80] glass-strong opacity-0 pointer-events-none -translate-y-4">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+    <div class="flex items-center gap-3">
+      <i data-lucide="search" style="color:var(--text-2)"></i>
+      <input id="search-input" type="text" placeholder="Пошук: пальто, светр, сукня..." class="flex-1 bg-transparent border-none outline-none text-lg placeholder:text-[color:var(--text-2)]">
+      <button onclick="Search.close()" class="icon-btn" aria-label="Закрити пошук"><i data-lucide="x"></i></button>
+    </div>
+    <div id="search-results" class="mt-6 max-h-[60vh] overflow-y-auto space-y-2"></div>
+  </div>
+</div>
+
+<!-- =====================================================
+     CART DRAWER
+====================================================== -->
+<div id="cart-overlay" class="fixed inset-0 z-[70] overlay-bg opacity-0 pointer-events-none"></div>
+<aside id="cart-drawer" class="drawer fixed top-0 right-0 h-full w-[90%] max-w-md z-[80] glass-strong translate-x-full">
+  <div class="flex flex-col h-full">
+    <div class="flex items-center justify-between p-6 border-b" style="border-color:var(--border)">
+      <span class="font-display font-bold text-xl flex items-center gap-2"><i data-lucide="shopping-bag"></i>Кошик</span>
+      <button onclick="Drawers.closeCart()" class="icon-btn" aria-label="Закрити кошик"><i data-lucide="x"></i></button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+    <div id="cart-summary" class="p-6 border-t space-y-3" style="border-color:var(--border)"></div>
+  </div>
+</aside>
+
+<!-- =====================================================
+     CHECKOUT MODAL
+====================================================== -->
+<div id="checkout-overlay" class="fixed inset-0 z-[95] overlay-bg opacity-0 pointer-events-none flex items-center justify-center p-4">
+  <div id="checkout-modal" class="glass-strong rounded-[var(--radius-lg)] max-w-lg w-full p-6 sm:p-8 relative scale-95 opacity-0 transition-all duration-300 max-h-[92vh] overflow-y-auto">
+    <button onclick="Checkout.close()" class="icon-btn absolute top-5 right-5" aria-label="Закрити оформлення"><i data-lucide="x"></i></button>
+    <div id="checkout-body"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- =====================================================
+     MAIN — SPA ROOT
+====================================================== -->
+<main id="app" class="relative z-0 pt-20 pb-24 lg:pb-0 min-h-screen">
+
+  <!-- ---------- PAGE: HOME ---------- -->
+  <section data-page="home" class="active">
+
+    <!-- HERO -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-14 sm:pt-24 pb-20">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="animate-fade-up">
+          <div class="eyebrow mb-5">Колекція Осінь — Зима</div>
+          <h1 class="font-display text-5xl sm:text-6xl xl:text-7xl leading-[1.05] mb-6">
+            Одяг, що<br>говорить <span class="text-bronze">тихо</span>
+          </h1>
+          <p class="text-lg leading-relaxed mb-8 max-w-md" style="color:var(--text-1)">
+            Вибрані матеріали, бездоганний крій і деталі, які помічають лише уважні. VELOUR — гардероб для тих, хто не поспішає.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <button onclick="Router.go('/catalog')" class="btn-primary ripple">Переглянути колекцію</button>
+            <button onclick="Router.go('/catalog?discount=1')" class="btn-ghost">Знижки сезону</button>
+          </div>
+          <div class="grid grid-cols-3 gap-4 mt-14 max-w-md">
+            <div><div class="font-display text-3xl">8k+</div><div class="text-sm" style="color:var(--text-2)">Клієнтів</div></div>
+            <div><div class="font-display text-3xl">4.9</div><div class="text-sm" style="color:var(--text-2)">Рейтинг</div></div>
+            <div><div class="font-display text-3xl">100%</div><div class="text-sm" style="color:var(--text-2)">Натуральні тканини</div></div>
+          </div>
+        </div>
+
+        <div class="relative h-[440px] sm:h-[560px] hidden md:block">
+          <div class="absolute top-0 right-0 w-72 glass rounded-[var(--radius-md)] overflow-hidden hairline">
+            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=700&q=80&auto=format&fit=crop" alt="Пальто" class="w-full h-80 object-cover" loading="lazy">
+            <div class="p-4">
+              <div class="font-medium text-sm">Вовняне пальто</div>
+              <div class="text-sm mt-1" style="color:var(--text-2)">від 6 990 ₴</div>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 w-60 glass rounded-[var(--radius-md)] overflow-hidden hairline">
+            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700&q=80&auto=format&fit=crop" alt="Светр" class="w-full h-64 object-cover" loading="lazy">
+            <div class="p-4">
+              <div class="font-medium text-sm">Кашеміровий светр</div>
+              <div class="text-sm mt-1" style="color:var(--text-2)">від 3 490 ₴</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BENEFITS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+      <div class="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x" style="border-color:var(--border)">
+        <div class="p-6 sm:px-8">
+          <i data-lucide="truck" style="color:var(--bronze-2)" class="mb-3"></i>
+          <div class="font-medium mb-1">Швидка доставка</div>
+          <div class="text-sm" style="color:var(--text-2)">По Україні за 1–3 дні</div>
+        </div>
+        <div class="p-6 sm:px-8">
+          <i data-lucide="leaf" style="color:var(--olive)" class="mb-3"></i>
+          <div class="font-medium mb-1">Натуральні тканини</div>
+          <div class="text-sm" style="color:var(--text-2)">Вовна, кашемір, шовк, бавовна</div>
+        </div>
+        <div class="p-6 sm:px-8">
+          <i data-lucide="rotate-ccw" style="color:var(--bronze-2)" class="mb-3"></i>
+          <div class="font-medium mb-1">Легке повернення</div>
+          <div class="text-sm" style="color:var(--text-2)">14 днів на обмін чи повернення</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+      <div class="flex items-end justify-between mb-6">
+        <h2 class="font-display text-2xl sm:text-3xl">Категорії</h2>
+      </div>
+      <div id="home-categories" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+    </div>
+
+    <!-- FEATURED PRODUCTS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+      <div class="flex items-end justify-between mb-6">
+        <h2 class="font-display text-2xl sm:text-3xl">Популярні речі</h2>
+        <button onclick="Router.go('/catalog')" class="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all text-bronze">Вся колекція <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+      </div>
+      <div id="featured-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+    </div>
+
+    <!-- PROMO BANNER -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+      <div class="relative overflow-hidden rounded-[var(--radius-lg)] glass p-10 sm:p-14 hairline">
+        <div class="relative max-w-lg">
+          <div class="eyebrow mb-4">Обмежена пропозиція</div>
+          <h3 class="font-display text-3xl sm:text-4xl mb-3">До −30% на обрані речі сезону</h3>
+          <p class="mb-6" style="color:var(--text-1)">Встигніть оновити гардероб за спеціальними цінами, поки триває розпродаж.</p>
+          <button onclick="Router.go('/catalog?discount=1')" class="btn-primary ripple">Переглянути знижки</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- PAGE: CATALOG ---------- -->
+  <section data-page="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex items-center gap-3 mb-2">
+      <button onclick="Router.go('/')" class="icon-btn"><i data-lucide="arrow-left"></i></button>
+      <h1 class="font-display text-3xl">Колекція</h1>
+    </div>
+    <p class="mb-6" style="color:var(--text-2)">Знайдіть ідеальну річ у нашій добірці</p>
+
+    <div id="category-chips" class="flex gap-3 overflow-x-auto pb-3 mb-6 -mx-1 px-1"></div>
+
+    <div id="catalog-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+    <div id="catalog-empty" class="hidden flex-col items-center text-center py-24">
+      <i data-lucide="search-x" style="width:52px;height:52px; color:var(--text-2)" class="mb-4"></i>
+      <div class="font-display text-xl mb-2">Нічого не знайдено</div>
+      <p style="color:var(--text-2)">Спробуйте змінити фільтри або пошуковий запит</p>
+    </div>
+  </section>
+
+  <!-- ---------- PAGE: PRODUCT DETAIL ---------- -->
+  <section data-page="product" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div id="product-detail"></div>
+    <div class="mt-16">
+      <h3 class="font-display text-2xl mb-6">Схожі речі</h3>
+      <div id="related-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+    </div>
+  </section>
+
+  <!-- ---------- PAGE: FAVORITES ---------- -->
+  <section data-page="favorites" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex items-center gap-3 mb-2">
+      <button onclick="Router.go('/')" class="icon-btn"><i data-lucide="arrow-left"></i></button>
+      <h1 class="font-display text-3xl flex items-center gap-2"><i data-lucide="heart" style="color:var(--wine)"></i>Обране</h1>
+    </div>
+    <p class="mb-6" style="color:var(--text-2)">Речі, які вам сподобались</p>
+    <div id="favorites-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+    <div id="favorites-empty" class="hidden flex-col items-center text-center py-24">
+      <i data-lucide="heart-crack" style="width:52px;height:52px; color:var(--text-2)" class="mb-4"></i>
+      <div class="font-display text-xl mb-2">Список обраного порожній</div>
+      <p style="color:var(--text-2)" class="mb-6">Додавайте речі, натискаючи на сердечко</p>
+      <button onclick="Router.go('/catalog')" class="btn-primary">До колекції</button>
+    </div>
+  </section>
+
+  <!-- ---------- PAGE: 404 ---------- -->
+  <section data-page="notfound" class="max-w-7xl mx-auto px-4 sm:px-6 py-32 flex flex-col items-center text-center">
+    <div class="font-display text-8xl text-bronze mb-4">404</div>
+    <div class="font-display text-2xl mb-2">Сторінку не знайдено</div>
+    <p class="mb-8" style="color:var(--text-2)">Схоже, такої сторінки не існує або її було переміщено</p>
+    <button onclick="Router.go('/')" class="btn-primary">На головну</button>
+  </section>
+</main>
+
+<!-- =====================================================
+     BOTTOM NAV (mobile)
+====================================================== -->
+<nav id="bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong px-2 py-2">
+  <div class="grid grid-cols-4">
+    <button data-nav="home" onclick="Router.go('/')" class="bnav-item flex flex-col items-center gap-1 py-2"><i data-lucide="home"></i><span class="text-[11px] font-medium">Головна</span></button>
+    <button data-nav="catalog" onclick="Router.go('/catalog')" class="bnav-item flex flex-col items-center gap-1 py-2"><i data-lucide="shirt"></i><span class="text-[11px] font-medium">Колекція</span></button>
+    <button data-nav="favorites" onclick="Router.go('/favorites')" class="bnav-item flex flex-col items-center gap-1 py-2"><i data-lucide="heart"></i><span class="text-[11px] font-medium">Обране</span></button>
+    <button data-nav="cart" onclick="Drawers.openCart()" class="bnav-item flex flex-col items-center gap-1 py-2"><i data-lucide="shopping-bag"></i><span class="text-[11px] font-medium">Кошик</span></button>
+  </div>
+</nav>
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+<footer class="relative z-10 mt-10 glass-strong border-t" style="border-color:var(--border)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div>
+        <div class="font-display text-2xl mb-4">VELOUR</div>
+        <p class="text-sm leading-relaxed" style="color:var(--text-2)">Дім преміального одягу та аксесуарів для тих, хто цінує деталі.</p>
+        <div class="flex items-center gap-3 mt-5">
+          <a href="https://t.me" target="_blank" rel="noopener" class="icon-btn" aria-label="Telegram"><i data-lucide="send"></i></a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" class="icon-btn" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <div class="font-medium mb-4">Навігація</div>
+        <div class="flex flex-col gap-2.5 text-sm" style="color:var(--text-2)">
+          <button onclick="Router.go('/')" class="text-left hover:text-white transition">Головна</button>
+          <button onclick="Router.go('/catalog')" class="text-left hover:text-white transition">Колекція</button>
+          <button onclick="Router.go('/favorites')" class="text-left hover:text-white transition">Обране</button>
+          <button onclick="Router.go('/catalog?discount=1')" class="text-left hover:text-white transition">Знижки</button>
+        </div>
+      </div>
+      <div>
+        <div class="font-medium mb-4">Інформація</div>
+        <div class="flex flex-col gap-2.5 text-sm" style="color:var(--text-2)">
+          <button onclick="Drawers.openInfo('about')" class="text-left hover:text-white transition">Про нас</button>
+          <button onclick="Drawers.openInfo('delivery')" class="text-left hover:text-white transition">Доставка</button>
+          <button onclick="Drawers.openInfo('payment')" class="text-left hover:text-white transition">Оплата</button>
+          <button onclick="Drawers.openInfo('contacts')" class="text-left hover:text-white transition">Контакти</button>
+        </div>
+      </div>
+      <div>
+        <div class="font-medium mb-4">Контакти</div>
+        <div class="flex flex-col gap-2.5 text-sm" style="color:var(--text-2)">
+          <span class="flex items-center gap-2"><i data-lucide="phone" style="width:16px;height:16px"></i>+380 (44) 123-45-67</span>
+          <span class="flex items-center gap-2"><i data-lucide="mail" style="width:16px;height:16px"></i>hello@velour.store</span>
+          <span class="flex items-center gap-2"><i data-lucide="map-pin" style="width:16px;height:16px"></i>Київ, вул. Хрещатик, 1</span>
+        </div>
+      </div>
+    </div>
+    <div class="divider my-10"></div>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm" style="color:var(--text-2)">
+      <span>© 2026 VELOUR. Усі права захищено.</span>
+      <span>Розробка та дизайн: <a href="https://t.me/evsdev" target="_blank" rel="noopener" class="hover:text-white transition" style="color:var(--text-1)">tg:@evsdev</a> | <span style="color:var(--text-1)">EWS.pro</span></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   VELOUR CLOTHING SPA — VANILLA JS ARCHITECTURE
+   Sections: DATA, UTILS, LOCAL STORAGE, RENDER, ROUTER/SPA, DRAWERS,
+             SEARCH, CART, FAVORITES, CHECKOUT, TOASTS, ANIMATIONS, EVENTS, INIT
+========================================================================= */
+
+/* ================= DATA ================= */
+const CATEGORIES = [
+  { id:'outerwear', name:'Верхній одяг', icon:'shirt' },
+  { id:'knitwear', name:'Светри та трикотаж', icon:'shirt' },
+  { id:'shirts', name:'Сорочки', icon:'shirt' },
+  { id:'denim', name:'Джинси', icon:'square' },
+  { id:'dresses', name:'Сукні', icon:'sparkles' },
+  { id:'accessories', name:'Аксесуари', icon:'gem' },
+];
+
+const PRODUCTS = [
+  {
+    id:'p1', title:'Вовняне пальто Marlow', brand:'VELOUR',
+    category:'outerwear',
+    description:'Прямий крій, чиста вовна, підкладка з віскози.',
+    longDescription:'Пальто Marlow пошите з італійської вовняної тканини щільного плетіння, що тримає форму та зберігає тепло у прохолодну погоду. Прямий силует, приховані ґудзики та внутрішня кишеня для телефону роблять його однаково доречним і в офісі, і на прогулянці містом.',
+    price:6990, oldPrice:8490, discount:18, rating:4.8, reviews:96, stock:14,
+    sizes:['XS','S','M','L','XL'],
+    specifications:[
+      {k:'Склад', v:'80% вовна, 20% поліамід'},
+      {k:'Підкладка', v:'100% віскоза'},
+      {k:'Крій', v:'Прямий, на ґудзиках'},
+      {k:'Догляд', v:'Тільки хімчистка'},
+      {k:'Країна виробництва', v:'Італія'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1544923246-77307dd654cb?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p2', title:'Кашеміровий светр Aria', brand:'VELOUR',
+    category:'knitwear',
+    description:'М\'який кашемір, округлий виріз, вільний силует.',
+    longDescription:'Светр Aria в\'яжеться зі 100% монгольського кашеміру — легкий, теплий і надзвичайно приємний до тіла. Округлий виріз та трохи занижена лінія плеча надають образу невимушеної елегантності.',
+    price:3490, oldPrice:null, discount:0, rating:4.9, reviews:134, stock:22,
+    sizes:['XS','S','M','L'],
+    specifications:[
+      {k:'Склад', v:'100% кашемір'},
+      {k:'Крій', v:'Вільний, округлий виріз'},
+      {k:'Щільність в\'язки', v:'12-gauge'},
+      {k:'Догляд', v:'Ручне прання при 30°C'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p3', title:'Шовкова сорочка Noor', brand:'VELOUR',
+    category:'shirts',
+    description:'Натуральний шовк, класичний комір, перламутрові ґудзики.',
+    longDescription:'Сорочка Noor виготовлена з натурального шовку-крепдешину — тканини, яка м\'яко струменіє по тілу та має легкий природний блиск. Класичний комір і перламутрові ґудзики додають довершеності як діловому, так і вечірньому образу.',
+    price:2790, oldPrice:3290, discount:15, rating:4.7, reviews:88, stock:31,
+    sizes:['XS','S','M','L','XL'],
+    specifications:[
+      {k:'Склад', v:'100% шовк'},
+      {k:'Комір', v:'Класичний'},
+      {k:'Ґудзики', v:'Перламутрові'},
+      {k:'Догляд', v:'Хімчистка або делікатне прання'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p4', title:'Джинси прямого крою Dune', brand:'VELOUR',
+    category:'denim',
+    description:'Щільний деним, високу посадка, прямі штанини.',
+    longDescription:'Джинси Dune пошиті з щільного японського деніму, який з часом набуває унікальної фактури зношування. Висока посадка та прямі штанини — універсальний вибір, що поєднується практично з будь-яким верхом.',
+    price:2390, oldPrice:2790, discount:14, rating:4.6, reviews:171, stock:38,
+    sizes:['26','27','28','29','30','31'],
+    specifications:[
+      {k:'Склад', v:'100% бавовна (деним 14 oz)'},
+      {k:'Посадка', v:'Висока'},
+      {k:'Крій', v:'Прямий'},
+      {k:'Країна виробництва', v:'Японія'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1475178626620-a4d074967452?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1582418702059-97ebafb35d09?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p5', title:'Шкіряна куртка Rider', brand:'VELOUR',
+    category:'outerwear',
+    description:'Натуральна шкіра ягняти, коротка довжина, асиметрична блискавка.',
+    longDescription:'Куртка Rider з м\'якої шкіри ягняти поєднує спадкову класику байкерського крою з сучасним, стриманим силуетом. З часом шкіра набуває власного патину, роблячи кожну куртку по-своєму унікальною.',
+    price:8990, oldPrice:null, discount:0, rating:4.8, reviews:64, stock:9,
+    sizes:['S','M','L','XL'],
+    specifications:[
+      {k:'Матеріал', v:'Натуральна шкіра ягняти'},
+      {k:'Підкладка', v:'Віскоза'},
+      {k:'Застібка', v:'Асиметрична блискавка'},
+      {k:'Догляд', v:'Спеціалізована чистка шкіри'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1520975954732-35dd22299614?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p6', title:'Вовняні брюки Sereno', brand:'VELOUR',
+    category:'denim',
+    description:'Тейлорований крій, стрілки, еластичний пояс.',
+    longDescription:'Брюки Sereno пошиті з тонкої вовняної тканини з легким еластаном для комфорту руху. Чіткі стрілки та тейлорований крій надають діловому образу вишуканої строгості, не жертвуючи зручністю.',
+    price:3190, oldPrice:3690, discount:14, rating:4.7, reviews:57, stock:26,
+    sizes:['44','46','48','50','52'],
+    specifications:[
+      {k:'Склад', v:'96% вовна, 4% еластан'},
+      {k:'Крій', v:'Тейлорований, звужений донизу'},
+      {k:'Пояс', v:'З частковою еластичною вставкою'},
+      {k:'Догляд', v:'Хімчистка'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1584865288642-42078afe6942?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1602293589930-45821bd6e1b1?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p7', title:'Плаття Camille', brand:'VELOUR',
+    category:'dresses',
+    description:'Шовкова креп-тканина, довжина міді, косий крій.',
+    longDescription:'Плаття Camille скроєне по косій з шовкової креп-тканини, яка м\'яко облягає силует, не сковуючи рухів. Довжина міді та мінімум декору роблять його самодостатнім вибором для вечірніх подій.',
+    price:4590, oldPrice:5390, discount:15, rating:4.9, reviews:112, stock:17,
+    sizes:['XS','S','M','L'],
+    specifications:[
+      {k:'Склад', v:'100% шовк-креп'},
+      {k:'Довжина', v:'Міді'},
+      {k:'Крій', v:'Косий (bias-cut)'},
+      {k:'Догляд', v:'Тільки хімчистка'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+  {
+    id:'p8', title:'Шкіряний пояс Aldo', brand:'VELOUR',
+    category:'accessories',
+    description:'Італійська шкіра, латунна пряжка, ручна робота.',
+    longDescription:'Пояс Aldo виготовлений вручну з італійської шкіри рослинного дублення. Латунна пряжка з часом набуває благородної патини, а шкіра стає м\'якшою та виразнішою з кожним роком носіння.',
+    price:1490, oldPrice:null, discount:0, rating:4.8, reviews:73, stock:44,
+    sizes:['85','90','95','100','105'],
+    specifications:[
+      {k:'Матеріал', v:'Натуральна шкіра, рослинне дублення'},
+      {k:'Пряжка', v:'Латунь'},
+      {k:'Виробництво', v:'Ручна робота, Італія'},
+      {k:'Ширина', v:'3.5 см'},
+    ],
+    images:[
+      'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1000&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=1000&q=80&auto=format&fit=crop',
+    ]
+  },
+];
+
+/* ================= UTILS ================= */
+const Utils = {
+  formatPrice(n){ return new Intl.NumberFormat('uk-UA').format(n) + ' ₴'; },
+  byId(id){ return PRODUCTS.find(p => p.id === id); },
+  qs(sel, root=document){ return root.querySelector(sel); },
+  qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)); },
+  debounce(fn, ms=250){
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), ms); };
+  },
+  starString(rating){
+    const full = Math.round(rating);
+    return '★'.repeat(full) + '☆'.repeat(5-full);
+  },
+  categoryName(id){ const c = CATEGORIES.find(c=>c.id===id); return c ? c.name : id; },
+  ripple(e, el){
+    const circle = document.createElement('span');
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    circle.className = 'ripple-circle';
+    circle.style.width = circle.style.height = size + 'px';
+    circle.style.left = (e.clientX - rect.left - size/2) + 'px';
+    circle.style.top = (e.clientY - rect.top - size/2) + 'px';
+    el.appendChild(circle);
+    setTimeout(()=>circle.remove(), 650);
+  },
+  refreshIcons(){ if (window.lucide) lucide.createIcons(); }
+};
+
+/* ================= LOCAL STORAGE ================= */
+const Store = {
+  KEYS:{ CART:'velour_cart', FAV:'velour_favorites' },
+  getCart(){ try{ return JSON.parse(localStorage.getItem(this.KEYS.CART)) || []; }catch(e){ return []; } },
+  setCart(cart){ localStorage.setItem(this.KEYS.CART, JSON.stringify(cart)); },
+  getFav(){ try{ return JSON.parse(localStorage.getItem(this.KEYS.FAV)) || []; }catch(e){ return []; } },
+  setFav(fav){ localStorage.setItem(this.KEYS.FAV, JSON.stringify(fav)); },
+};
+
+/* ================= TOASTS ================= */
+const Toast = {
+  icons:{ success:'check-circle', error:'alert-circle', info:'info', cart:'shopping-bag', heart:'heart' },
+  show(message, type='success'){
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast glass-strong rounded-sm px-4 py-3.5 flex items-center gap-3';
+    const colorMap = { success:'#8fae7a', error:'var(--wine)', info:'var(--bronze-2)', cart:'var(--bronze-2)', heart:'var(--wine)' };
+    el.innerHTML = `
+      <i data-lucide="${this.icons[type]||'info'}" style="color:${colorMap[type]||'var(--bronze-2)'}; width:20px; height:20px; flex-shrink:0"></i>
+      <span class="text-sm font-medium">${message}</span>
+    `;
+    container.appendChild(el);
+    Utils.refreshIcons();
+    setTimeout(()=>{
+      el.classList.add('leaving');
+      setTimeout(()=>el.remove(), 350);
+    }, 3000);
+  }
+};
+
+/* ================= RENDER ================= */
+const Render = {
+  productCard(p){
+    const isFav = Favorites.has(p.id);
+    const priceHtml = p.discount > 0
+      ? `<span class="font-semibold text-lg">${Utils.formatPrice(p.price)}</span>
+         <span class="price-strike text-sm ml-2">${Utils.formatPrice(p.oldPrice)}</span>`
+      : `<span class="font-semibold text-lg">${Utils.formatPrice(p.price)}</span>`;
+
+    return `
+    <div class="product-card glass rounded-[var(--radius-sm)] overflow-hidden group cursor-pointer hairline" data-id="${p.id}">
+      <div class="relative aspect-[4/5] overflow-hidden" onclick="Router.go('/product/${p.id}')">
+        <img src="${p.images[0]}" alt="${p.title}" loading="lazy" class="card-img w-full h-full object-cover">
+        ${p.discount > 0 ? `<span class="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold" style="background:var(--wine); color:#f5f1ea">−${p.discount}%</span>` : ''}
+        <button onclick="event.stopPropagation(); Favorites.toggle('${p.id}')" class="fav-btn ${isFav?'active':''} icon-btn absolute top-3 right-3 !bg-black/30 backdrop-blur" aria-label="Додати в обране">
+          <i data-lucide="heart" style="width:18px;height:18px" ${isFav?'fill="currentColor"':''}></i>
+        </button>
+      </div>
+      <div class="p-4">
+        <div class="text-xs mb-1" style="color:var(--text-2)">${Utils.categoryName(p.category)}</div>
+        <div onclick="Router.go('/product/${p.id}')" class="font-medium mb-1.5 clamp-2 leading-snug">${p.title}</div>
+        <div class="flex items-center gap-1.5 text-xs mb-3" style="color:var(--bronze-2)">
+          <span>${Utils.starString(p.rating)}</span>
+          <span style="color:var(--text-2)">(${p.reviews})</span>
+        </div>
+        <div class="flex items-end justify-between">
+          <div>${priceHtml}</div>
+        </div>
+        <button onclick="event.stopPropagation(); Cart.add('${p.id}', 1, this); Utils.ripple(event, this);" class="ripple btn-primary w-full mt-3 !py-2.5 text-sm flex items-center justify-center gap-2">
+          <i data-lucide="shopping-bag" style="width:16px;height:16px"></i>Додати
+        </button>
+      </div>
+    </div>`;
+  },
+
+  grid(container, products){
+    const el = typeof container === 'string' ? document.getElementById(container) : container;
+    if (!el) return;
+    if (products.length === 0){ el.innerHTML = ''; return; }
+    el.innerHTML = products.map((p,i) => `<div class="animate-fade-up" style="animation-delay:${i*0.05}s">${this.productCard(p)}</div>`).join('');
+    Utils.refreshIcons();
+  },
+
+  categoriesHome(){
+    const el = document.getElementById('home-categories');
+    const icons = { outerwear:'shirt', knitwear:'shirt', shirts:'shirt', denim:'square', dresses:'sparkles', accessories:'gem' };
+    el.innerHTML = CATEGORIES.map(c => `
+      <button onclick="Router.go('/catalog?cat=${c.id}')" class="glass hairline rounded-[var(--radius-md)] p-6 flex flex-col items-center gap-3 transition">
+        <i data-lucide="${icons[c.id]}" style="width:26px;height:26px; color:var(--bronze-2)"></i>
+        <span class="font-medium text-sm text-center">${c.name}</span>
+      </button>
+    `).join('');
+    Utils.refreshIcons();
+  },
+
+  categoryChips(activeCat){
+    const el = document.getElementById('category-chips');
+    const all = [{id:'', name:'Вся колекція'}, ...CATEGORIES];
+    el.innerHTML = all.map(c => `<button class="chip ${activeCat===c.id ? 'active':''}" onclick="Catalog.setCategory('${c.id}')">${c.name}</button>`).join('');
+  },
+
+  productDetail(p){
+    const el = document.getElementById('product-detail');
+    const isFav = Favorites.has(p.id);
+    el.innerHTML = `
+      <button onclick="Router.go('/catalog')" class="icon-btn mb-6"><i data-lucide="arrow-left"></i></button>
+      <div class="grid lg:grid-cols-2 gap-10 animate-fade-up">
+        <div>
+          <div class="zoom-wrap glass hairline rounded-[var(--radius-lg)] mb-4" id="zoom-wrap">
+            <img id="main-gallery-img" src="${p.images[0]}" alt="${p.title}" class="zoom-img w-full aspect-[4/5] object-cover">
+          </div>
+          <div class="flex gap-3">
+            ${p.images.map((img,i)=>`
+              <button onclick="ProductPage.setImage(${i})" data-thumb="${i}" class="thumb-btn glass hairline rounded-sm overflow-hidden w-20 h-20 flex-shrink-0 ${i===0?'ring-2':''}" style="${i===0?'--tw-ring-color:var(--bronze-2)':''}">
+                <img src="${img}" class="w-full h-full object-cover" alt="Мініатюра ${i+1}">
+              </button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="text-sm mb-2" style="color:var(--text-2)">${p.brand} • ${Utils.categoryName(p.category)}</div>
+          <h1 class="font-display text-3xl sm:text-4xl mb-3">${p.title}</h1>
+          <div class="flex items-center gap-3 mb-5">
+            <span style="color:var(--bronze-2)">${Utils.starString(p.rating)}</span>
+            <span class="text-sm" style="color:var(--text-2)">${p.rating} (${p.reviews} відгуків)</span>
+            <span class="text-sm flex items-center gap-1" style="color:${p.stock>0?'#8fae7a':'var(--wine)'}">
+              <i data-lucide="circle" style="width:8px;height:8px" fill="currentColor"></i>${p.stock>0?`В наявності: ${p.stock}`:'Немає в наявності'}
+            </span>
+          </div>
+          <div class="flex items-end gap-3 mb-6">
+            <span class="font-display text-4xl">${Utils.formatPrice(p.price)}</span>
+            ${p.discount>0?`<span class="price-strike text-lg mb-1">${Utils.formatPrice(p.oldPrice)}</span><span class="px-2.5 py-1 text-xs font-semibold mb-1.5" style="background:var(--wine); color:#f5f1ea">−${p.discount}%</span>`:''}
+          </div>
+          <p class="leading-relaxed mb-6" style="color:var(--text-1)">${p.longDescription}</p>
+
+          <div class="mb-6">
+            <span class="font-medium text-sm block mb-2">Розмір:</span>
+            <div class="flex flex-wrap gap-2">
+              ${p.sizes.map((s,i)=>`<button data-size="${s}" onclick="ProductPage.selectSize('${s}', this)" class="size-btn chip ${i===0?'active':''}">${s}</button>`).join('')}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 mb-6">
+            <span class="font-medium text-sm">Кількість:</span>
+            <div class="flex items-center glass hairline overflow-hidden">
+              <button onclick="ProductPage.changeQty(-1)" class="qty-btn w-11 h-11 flex items-center justify-center" aria-label="Зменшити"><i data-lucide="minus" style="width:16px;height:16px"></i></button>
+              <span id="pd-qty" class="w-12 text-center font-semibold">1</span>
+              <button onclick="ProductPage.changeQty(1)" class="qty-btn w-11 h-11 flex items-center justify-center" aria-label="Збільшити"><i data-lucide="plus" style="width:16px;height:16px"></i></button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3 mb-8">
+            <button onclick="ProductPage.addToCart('${p.id}', this); Utils.ripple(event, this);" class="ripple btn-primary flex-1 flex items-center justify-center gap-2 min-w-[200px]" ${p.stock===0?'disabled style="opacity:.5;cursor:not-allowed"':''}>
+              <i data-lucide="shopping-bag" style="width:18px;height:18px"></i>Додати в кошик
+            </button>
+            <button onclick="Favorites.toggle('${p.id}')" id="pd-fav-btn" class="fav-btn ${isFav?'active':''} icon-btn !w-14 !h-14"><i data-lucide="heart" ${isFav?'fill="currentColor"':''}></i></button>
+            <button onclick="ProductPage.share('${p.id}')" class="icon-btn !w-14 !h-14" aria-label="Поділитись"><i data-lucide="share-2"></i></button>
+          </div>
+
+          <div class="glass hairline rounded-[var(--radius-md)] p-5">
+            <div class="font-medium mb-3">Характеристики</div>
+            <div class="space-y-2.5">
+              ${p.specifications.map(s => `
+                <div class="flex items-center justify-between text-sm py-1.5 border-b" style="border-color:var(--border)">
+                  <span style="color:var(--text-2)">${s.k}</span>
+                  <span class="font-medium text-right">${s.v}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    Utils.refreshIcons();
+  }
+};
+
+/* ================= FAVORITES ================= */
+const Favorites = {
+  list: Store.getFav(),
+  has(id){ return this.list.includes(id); },
+  toggle(id){
+    if (this.has(id)){
+      this.list = this.list.filter(x => x !== id);
+      Toast.show('Видалено з обраного', 'info');
+    } else {
+      this.list.push(id);
+      Toast.show('Додано в обране', 'heart');
+    }
+    Store.setFav(this.list);
+    this.updateBadge();
+    Render.grid('featured-grid', PRODUCTS.slice(0,4));
+    if (Router.current.path === '/catalog') Catalog.render();
+    if (Router.current.path === '/favorites') FavoritesPage.render();
+    if (Router.current.path.startsWith('/product/')){
+      const btn = document.getElementById('pd-fav-btn');
+      if (btn) btn.classList.toggle('active', this.has(id));
+      const icon = btn ? btn.querySelector('i') : null;
+      if (icon) this.has(id) ? icon.setAttribute('fill','currentColor') : icon.removeAttribute('fill');
+    }
+  },
+  updateBadge(){
+    const badge = document.getElementById('fav-badge');
+    badge.textContent = this.list.length;
+    badge.classList.toggle('hidden', this.list.length === 0);
+  }
+};
+
+const FavoritesPage = {
+  render(){
+    const products = PRODUCTS.filter(p => Favorites.has(p.id));
+    Render.grid('favorites-grid', products);
+    document.getElementById('favorites-empty').classList.toggle('flex', products.length===0);
+    document.getElementById('favorites-empty').classList.toggle('hidden', products.length>0);
+  }
+};
+
+/* ================= CART ================= */
+const Cart = {
+  items: Store.getCart(),
+
+  add(id, qty=1, sourceEl=null){
+    const existing = this.items.find(i => i.id === id);
+    if (existing){ existing.qty += qty; } else { this.items.push({ id, qty }); }
+    Store.setCart(this.items);
+    this.updateBadge(true);
+    Cart.renderDrawer();
+    const p = Utils.byId(id);
+    Toast.show(`«${p.title}» додано в кошик`, 'cart');
+  },
+  remove(id){
+    this.items = this.items.filter(i => i.id !== id);
+    Store.setCart(this.items);
+    this.updateBadge();
+    this.renderDrawer();
+    Toast.show('Товар видалено з кошика', 'info');
+  },
+  setQty(id, qty){
+    const item = this.items.find(i => i.id === id);
+    if (!item) return;
+    item.qty = Math.max(1, qty);
+    Store.setCart(this.items);
+    this.updateBadge();
+    this.renderDrawer();
+  },
+  count(){ return this.items.reduce((a,i)=>a+i.qty, 0); },
+  subtotal(){ return this.items.reduce((a,i)=>{ const p = Utils.byId(i.id); return a + (p ? p.price*i.qty : 0); }, 0); },
+  savings(){ return this.items.reduce((a,i)=>{ const p = Utils.byId(i.id); return a + (p && p.oldPrice ? (p.oldPrice-p.price)*i.qty : 0); }, 0); },
+  deliveryFee(){ const sub = this.subtotal(); return sub === 0 || sub >= 3000 ? 0 : 149; },
+  total(){ return this.subtotal() + this.deliveryFee(); },
+
+  updateBadge(bounce=false){
+    const badge = document.getElementById('cart-badge');
+    const n = this.count();
+    badge.textContent = n;
+    badge.classList.toggle('hidden', n === 0);
+    if (bounce){ badge.classList.remove('badge-bounce'); void badge.offsetWidth; badge.classList.add('badge-bounce'); }
+  },
+
+  renderDrawer(){
+    const itemsEl = document.getElementById('cart-items');
+    const summaryEl = document.getElementById('cart-summary');
+
+    if (this.items.length === 0){
+      itemsEl.innerHTML = `
+        <div class="flex flex-col items-center text-center py-20">
+          <i data-lucide="shopping-bag" style="width:52px;height:52px; color:var(--text-2)" class="mb-4"></i>
+          <div class="font-display text-lg mb-2">Кошик порожній</div>
+          <p class="text-sm mb-6" style="color:var(--text-2)">Додайте речі, щоб оформити замовлення</p>
+          <button onclick="Drawers.closeCart(); Router.go('/catalog');" class="btn-primary">До колекції</button>
+        </div>`;
+      summaryEl.innerHTML = '';
+      Utils.refreshIcons();
+      return;
+    }
+
+    itemsEl.innerHTML = this.items.map(item => {
+      const p = Utils.byId(item.id);
+      if (!p) return '';
+      return `
+      <div class="glass hairline rounded-sm p-3 flex gap-3 animate-fade">
+        <img src="${p.images[0]}" alt="${p.title}" class="w-20 h-20 rounded-sm object-cover flex-shrink-0">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="font-medium text-sm clamp-2">${p.title}</div>
+            <button onclick="Cart.remove('${p.id}')" class="icon-btn !w-8 !h-8 flex-shrink-0" aria-label="Видалити"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div class="flex items-center glass hairline overflow-hidden">
+              <button onclick="Cart.setQty('${p.id}', ${item.qty-1})" class="qty-btn w-8 h-8 flex items-center justify-center"><i data-lucide="minus" style="width:12px;height:12px"></i></button>
+              <span class="w-8 text-center text-sm font-semibold">${item.qty}</span>
+              <button onclick="Cart.setQty('${p.id}', ${item.qty+1})" class="qty-btn w-8 h-8 flex items-center justify-center"><i data-lucide="plus" style="width:12px;height:12px"></i></button>
+            </div>
+            <span class="font-semibold text-sm">${Utils.formatPrice(p.price*item.qty)}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const savings = this.savings();
+    const delivery = this.deliveryFee();
+    summaryEl.innerHTML = `
+      <div class="flex justify-between text-sm"><span style="color:var(--text-2)">Проміжна сума</span><span class="font-medium">${Utils.formatPrice(this.subtotal())}</span></div>
+      ${savings>0?`<div class="flex justify-between text-sm"><span style="color:var(--text-2)">Ви заощадили</span><span class="font-medium" style="color:#8fae7a">−${Utils.formatPrice(savings)}</span></div>`:''}
+      <div class="flex justify-between text-sm"><span style="color:var(--text-2)">Доставка</span><span class="font-medium">${delivery===0?'Безкоштовно':Utils.formatPrice(delivery)}</span></div>
+      <div class="divider my-1"></div>
+      <div class="flex justify-between items-center"><span class="font-medium">Разом</span><span class="font-display text-xl">${Utils.formatPrice(this.total())}</span></div>
+      <button onclick="Checkout.open()" class="btn-primary w-full mt-2 flex items-center justify-center gap-2"><i data-lucide="lock" style="width:16px;height:16px"></i>Оформити замовлення</button>
+    `;
+    Utils.refreshIcons();
+  }
+};
+
+/* ================= CHECKOUT ================= */
+const Checkout = {
+  open(){
+    if (Cart.items.length === 0) return;
+    Drawers.closeCart();
+    this.renderForm();
+    const overlay = document.getElementById('checkout-overlay');
+    const modal = document.getElementById('checkout-modal');
+    overlay.classList.remove('pointer-events-none');
+    requestAnimationFrame(()=>{
+      overlay.style.opacity = '1';
+      modal.classList.remove('scale-95','opacity-0');
+    });
+  },
+  close(){
+    const overlay = document.getElementById('checkout-overlay');
+    const modal = document.getElementById('checkout-modal');
+    overlay.style.opacity = '0';
+    modal.classList.add('scale-95','opacity-0');
+    setTimeout(()=> overlay.classList.add('pointer-events-none'), 300);
+  },
+  renderForm(){
+    const body = document.getElementById('checkout-body');
+    body.innerHTML = `
+      <h2 class="font-display text-2xl mb-1">Оформлення замовлення</h2>
+      <p class="text-sm mb-6" style="color:var(--text-2)">Заповніть дані для доставки</p>
+      <form id="checkout-form" class="space-y-4" novalidate>
+        <div>
+          <label class="text-sm font-medium mb-1.5 block">Ім'я та прізвище</label>
+          <input type="text" id="ck-name" placeholder="Олена Коваленко" class="w-full rounded-sm px-4 py-3">
+          <div class="text-xs mt-1 hidden" data-error-for="ck-name" style="color:var(--wine)">Вкажіть ваше ім'я</div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium mb-1.5 block">Телефон</label>
+            <input type="tel" id="ck-phone" placeholder="+380 XX XXX XX XX" class="w-full rounded-sm px-4 py-3">
+            <div class="text-xs mt-1 hidden" data-error-for="ck-phone" style="color:var(--wine)">Введіть коректний номер</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium mb-1.5 block">Email</label>
+            <input type="email" id="ck-email" placeholder="mail@example.com" class="w-full rounded-sm px-4 py-3">
+            <div class="text-xs mt-1 hidden" data-error-for="ck-email" style="color:var(--wine)">Введіть коректний email</div>
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium mb-1.5 block">Місто</label>
+            <input type="text" id="ck-city" placeholder="Київ" class="w-full rounded-sm px-4 py-3">
+            <div class="text-xs mt-1 hidden" data-error-for="ck-city" style="color:var(--wine)">Вкажіть місто</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium mb-1.5 block">Адреса / відділення</label>
+            <input type="text" id="ck-address" placeholder="Відділення №1" class="w-full rounded-sm px-4 py-3">
+            <div class="text-xs mt-1 hidden" data-error-for="ck-address" style="color:var(--wine)">Вкажіть адресу</div>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-medium mb-1.5 block">Коментар до замовлення (необов'язково)</label>
+          <textarea id="ck-comment" rows="3" placeholder="Наприклад, зручний час доставки" class="w-full rounded-sm px-4 py-3 resize-none"></textarea>
+        </div>
+        <div class="glass hairline rounded-sm p-4 flex justify-between items-center">
+          <span class="text-sm" style="color:var(--text-2)">До сплати</span>
+          <span class="font-display text-xl">${Utils.formatPrice(Cart.total())}</span>
+        </div>
+        <button type="submit" class="btn-primary w-full flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" style="width:18px;height:18px"></i>Підтвердити замовлення
+        </button>
+      </form>
+    `;
+    Utils.refreshIcons();
+    document.getElementById('checkout-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      this.validateAndSubmit();
+    });
+  },
+  validateAndSubmit(){
+    let valid = true;
+    const fields = {
+      'ck-name': v => v.trim().length >= 2,
+      'ck-phone': v => /^[\d\s\+\-\(\)]{7,}$/.test(v.trim()),
+      'ck-email': v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+      'ck-city': v => v.trim().length >= 2,
+      'ck-address': v => v.trim().length >= 2,
+    };
+    Object.entries(fields).forEach(([id, test]) => {
+      const input = document.getElementById(id);
+      const errorEl = document.querySelector(`[data-error-for="${id}"]`);
+      const ok = test(input.value);
+      input.classList.toggle('field-error', !ok);
+      if (errorEl) errorEl.classList.toggle('hidden', ok);
+      if (!ok) valid = false;
+    });
+    if (!valid){
+      Toast.show('Перевірте правильність заповнення полів', 'error');
+      return;
+    }
+    this.showSuccess();
+  },
+  showSuccess(){
+    const body = document.getElementById('checkout-body');
+    body.innerHTML = `
+      <div class="flex flex-col items-center text-center py-8 animate-scale">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center mb-6" style="background:var(--bronze)">
+          <i data-lucide="check" style="width:40px;height:40px; color:#181410"></i>
+        </div>
+        <h2 class="font-display text-2xl mb-2">Замовлення прийнято!</h2>
+        <p class="mb-6" style="color:var(--text-1)">Дякуємо за покупку. Наш менеджер зв'яжеться з вами найближчим часом для підтвердження замовлення.</p>
+        <button onclick="Checkout.finish()" class="btn-primary">Чудово!</button>
+      </div>
+    `;
+    Utils.refreshIcons();
+    Toast.show('Замовлення успішно оформлено', 'success');
+  },
+  finish(){
+    Cart.items = [];
+    Store.setCart([]);
+    Cart.updateBadge();
+    Cart.renderDrawer();
+    this.close();
+  }
+};
+
+/* ================= SEARCH ================= */
+const Search = {
+  open(){
+    const overlay = document.getElementById('search-overlay');
+    const panel = document.getElementById('search-panel');
+    overlay.classList.remove('pointer-events-none');
+    panel.classList.remove('pointer-events-none');
+    requestAnimationFrame(()=>{
+      overlay.style.opacity = '1';
+      panel.style.opacity = '1';
+      panel.style.transform = 'translateY(0)';
+    });
+    setTimeout(()=> document.getElementById('search-input').focus(), 350);
+    this.renderResults('');
+  },
+  close(){
+    const overlay = document.getElementById('search-overlay');
+    const panel = document.getElementById('search-panel');
+    overlay.style.opacity = '0';
+    panel.style.opacity = '0';
+    panel.style.transform = 'translateY(-16px)';
+    setTimeout(()=>{ overlay.classList.add('pointer-events-none'); panel.classList.add('pointer-events-none'); }, 300);
+    document.getElementById('search-input').value = '';
+  },
+  renderResults(query){
+    const el = document.getElementById('search-results');
+    const q = query.trim().toLowerCase();
+    if (q === ''){
+      el.innerHTML = `<div class="text-sm px-2" style="color:var(--text-2)">Почніть вводити, щоб знайти речі...</div>`;
+      return;
+    }
+    const results = PRODUCTS.filter(p =>
+      p.title.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      Utils.categoryName(p.category).toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    );
+    if (results.length === 0){
+      el.innerHTML = `<div class="text-sm px-2 flex items-center gap-2" style="color:var(--text-2)"><i data-lucide="search-x" style="width:16px;height:16px"></i>Нічого не знайдено за запитом «${query}»</div>`;
+      Utils.refreshIcons();
+      return;
+    }
+    el.innerHTML = results.map(p => `
+      <button onclick="Router.go('/product/${p.id}'); Search.close();" class="w-full flex items-center gap-3 p-3 rounded-sm hover:bg-white/5 transition text-left animate-fade">
+        <img src="${p.images[0]}" class="w-12 h-12 rounded-sm object-cover" alt="${p.title}">
+        <div class="flex-1 min-w-0">
+          <div class="font-medium text-sm truncate">${p.title}</div>
+          <div class="text-xs" style="color:var(--text-2)">${Utils.categoryName(p.category)}</div>
+        </div>
+        <span class="font-semibold text-sm">${Utils.formatPrice(p.price)}</span>
+      </button>
+    `).join('');
+    Utils.refreshIcons();
+  }
+};
+
+/* ================= CATALOG PAGE ================= */
+const Catalog = {
+  activeCategory:'', showDiscountOnly:false,
+  setCategory(cat){
+    this.activeCategory = cat;
+    Render.categoryChips(cat);
+    this.render();
+  },
+  render(){
+    let list = PRODUCTS.slice();
+    if (this.activeCategory) list = list.filter(p => p.category === this.activeCategory);
+    if (this.showDiscountOnly) list = list.filter(p => p.discount > 0);
+    Render.grid('catalog-grid', list);
+    document.getElementById('catalog-empty').classList.toggle('hidden', list.length>0);
+    document.getElementById('catalog-empty').classList.toggle('flex', list.length===0);
+  }
+};
+
+/* ================= PRODUCT PAGE ================= */
+const ProductPage = {
+  currentQty:1, currentSize:null,
+  render(id){
+    const p = Utils.byId(id);
+    if (!p){ Router.go('/404'); return; }
+    this.currentQty = 1;
+    this.currentSize = p.sizes ? p.sizes[0] : null;
+    Render.productDetail(p);
+    const related = PRODUCTS.filter(x => x.category === p.category && x.id !== p.id).slice(0,4);
+    Render.grid('related-grid', related.length ? related : PRODUCTS.filter(x=>x.id!==p.id).slice(0,4));
+    window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
+    this.bindZoom();
+  },
+  setImage(i){
+    const p = Utils.byId(Router.current.params.id);
+    document.getElementById('main-gallery-img').src = p.images[i];
+    Utils.qsa('.thumb-btn').forEach((btn,idx)=>{
+      btn.classList.toggle('ring-2', idx===i);
+      btn.style.setProperty('--tw-ring-color', idx===i ? 'var(--bronze-2)' : '');
+    });
+  },
+  selectSize(size, el){
+    this.currentSize = size;
+    Utils.qsa('.size-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  },
+  changeQty(delta){
+    this.currentQty = Math.max(1, this.currentQty + delta);
+    document.getElementById('pd-qty').textContent = this.currentQty;
+  },
+  addToCart(id, el){
+    Cart.add(id, this.currentQty, el);
+  },
+  share(id){
+    const url = `${location.origin}${location.pathname}#/product/${id}`;
+    if (navigator.share){
+      navigator.share({ title:'VELOUR', url }).catch(()=>{});
+    } else if (navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=> Toast.show('Посилання скопійовано', 'info'));
+    } else {
+      Toast.show('Посилання: ' + url, 'info');
+    }
+  },
+  bindZoom(){
+    const wrap = document.getElementById('zoom-wrap');
+    const img = document.getElementById('main-gallery-img');
+    if (!wrap || !img) return;
+    wrap.onmousemove = (e) => {
+      const rect = wrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      img.style.transformOrigin = `${x}% ${y}%`;
+      img.style.transform = 'scale(1.5)';
+    };
+    wrap.onmouseleave = () => { img.style.transform = 'scale(1)'; };
+  }
+};
+
+/* ================= DRAWERS ================= */
+const Drawers = {
+  openLeft(){
+    document.getElementById('left-overlay').classList.remove('pointer-events-none');
+    requestAnimationFrame(()=>{
+      document.getElementById('left-overlay').style.opacity = '1';
+      document.getElementById('left-drawer').style.transform = 'translateX(0)';
+    });
+  },
+  closeLeft(){
+    document.getElementById('left-overlay').style.opacity = '0';
+    document.getElementById('left-drawer').style.transform = 'translateX(-100%)';
+    setTimeout(()=> document.getElementById('left-overlay').classList.add('pointer-events-none'), 400);
+  },
+  openCategoriesMobile(){
+    this.closeLeft();
+    Router.go('/catalog');
+  },
+  openCart(){
+    document.getElementById('cart-overlay').classList.remove('pointer-events-none');
+    requestAnimationFrame(()=>{
+      document.getElementById('cart-overlay').style.opacity = '1';
+      document.getElementById('cart-drawer').style.transform = 'translateX(0)';
+    });
+    Cart.renderDrawer();
+  },
+  closeCart(){
+    document.getElementById('cart-overlay').style.opacity = '0';
+    document.getElementById('cart-drawer').style.transform = 'translateX(100%)';
+    setTimeout(()=> document.getElementById('cart-overlay').classList.add('pointer-events-none'), 400);
+  },
+  infoContent:{
+    about:{ icon:'info', title:'Про нас', text:'VELOUR — дім преміального одягу, який з 2019 року допомагає клієнтам обирати якісні речі з натуральних тканин. Ми співпрацюємо з європейськими виробництвами та перевіряємо кожну модель перед тим, як вона потрапляє у наш каталог.' },
+    delivery:{ icon:'truck', title:'Доставка', text:'Доставляємо по всій Україні Новою Поштою та кур\'єром за 1–3 робочі дні. Безкоштовна доставка при замовленні від 3000 ₴. Самовивіз доступний з нашого шоуруму в Києві.' },
+    payment:{ icon:'credit-card', title:'Оплата', text:'Приймаємо оплату карткою онлайн, накладеним платежем при отриманні, а також через Apple Pay та Google Pay. Усі платежі захищені сучасним шифруванням.' },
+    contacts:{ icon:'phone', title:'Контакти', text:'Телефон: +380 (44) 123-45-67\nEmail: hello@velour.store\nАдреса: Київ, вул. Хрещатик, 1\nПн–Нд: 10:00–20:00' },
+  },
+  openInfo(key){
+    const data = this.infoContent[key];
+    document.getElementById('info-content').innerHTML = `
+      <div class="w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:var(--bronze)">
+        <i data-lucide="${data.icon}" style="color:#181410"></i>
+      </div>
+      <h3 class="font-display text-2xl mb-3">${data.title}</h3>
+      <p class="leading-relaxed whitespace-pre-line" style="color:var(--text-1)">${data.text}</p>
+    `;
+    Utils.refreshIcons();
+    const overlay = document.getElementById('info-overlay');
+    const modal = document.getElementById('info-modal');
+    overlay.classList.remove('pointer-events-none');
+    requestAnimationFrame(()=>{
+      overlay.style.opacity = '1';
+      modal.classList.remove('scale-95','opacity-0');
+    });
+  },
+  closeInfo(){
+    const overlay = document.getElementById('info-overlay');
+    const modal = document.getElementById('info-modal');
+    overlay.style.opacity = '0';
+    modal.classList.add('scale-95','opacity-0');
+    setTimeout(()=> overlay.classList.add('pointer-events-none'), 300);
+  },
+  closeAll(){
+    this.closeLeft(); this.closeCart(); this.closeInfo(); Search.close(); Checkout.close();
+  }
+};
+
+/* ================= ROUTER / SPA ================= */
+const Router = {
+  current:{ path:'/', params:{} },
+
+  parse(){
+    let hash = location.hash.replace(/^#/, '') || '/';
+    const [pathAndQuery] = [hash];
+    const [path, queryStr] = pathAndQuery.split('?');
+    const params = {};
+    if (queryStr){
+      new URLSearchParams(queryStr).forEach((v,k)=> params[k]=v);
+    }
+    return { path: path || '/', params };
+  },
+
+  go(path){
+    location.hash = path;
+  },
+
+  render(){
+    const { path, params } = this.parse();
+    this.current = { path, params };
+
+    Utils.qsa('[data-page]').forEach(p => p.classList.remove('active'));
+
+    let productId = null;
+    if (path.startsWith('/product/')) productId = path.split('/product/')[1];
+
+    if (path === '/' || path === ''){
+      Utils.qs('[data-page="home"]').classList.add('active');
+      Render.categoriesHome();
+      Render.grid('featured-grid', PRODUCTS.slice(0,4));
+    } else if (path === '/catalog'){
+      Utils.qs('[data-page="catalog"]').classList.add('active');
+      Catalog.activeCategory = params.cat || '';
+      Catalog.showDiscountOnly = params.discount === '1';
+      Render.categoryChips(Catalog.activeCategory);
+      Catalog.render();
+    } else if (productId){
+      Utils.qs('[data-page="product"]').classList.add('active');
+      this.current.params.id = productId;
+      ProductPage.render(productId);
+    } else if (path === '/favorites'){
+      Utils.qs('[data-page="favorites"]').classList.add('active');
+      FavoritesPage.render();
+    } else {
+      Utils.qs('[data-page="notfound"]').classList.add('active');
+    }
+
+    Drawers.closeAll();
+    window.scrollTo({ top:0, behavior:'auto' });
+    this.updateBottomNav(path, productId);
+    Utils.refreshIcons();
+  },
+
+  updateBottomNav(path, productId){
+    const map = { '/':'home', '/catalog':'catalog', '/favorites':'favorites' };
+    const active = map[path] || (productId ? 'catalog' : '');
+    Utils.qsa('.bnav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.nav === active));
+  }
+};
+
+/* ================= ANIMATIONS (header scroll) ================= */
+const Animations = {
+  initHeaderScroll(){
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', Utils.debounce(()=>{
+      header.classList.toggle('scrolled', window.scrollY > 8);
+    }, 30));
+  }
+};
+
+/* ================= EVENTS / INIT ================= */
+function initEvents(){
+  document.getElementById('btn-menu').addEventListener('click', Drawers.openLeft.bind(Drawers));
+  document.getElementById('left-overlay').addEventListener('click', Drawers.closeLeft.bind(Drawers));
+
+  document.getElementById('btn-cart').addEventListener('click', Drawers.openCart.bind(Drawers));
+  document.getElementById('cart-overlay').addEventListener('click', Drawers.closeCart.bind(Drawers));
+
+  document.getElementById('btn-favorites').addEventListener('click', ()=> Router.go('/favorites'));
+
+  document.getElementById('btn-search').addEventListener('click', Search.open.bind(Search));
+  document.getElementById('search-overlay').addEventListener('click', Search.close.bind(Search));
+  document.getElementById('search-input').addEventListener('input', Utils.debounce((e)=> Search.renderResults(e.target.value), 200));
+
+  document.getElementById('checkout-overlay').addEventListener('click', (e)=>{
+    if (e.target.id === 'checkout-overlay') Checkout.close();
+  });
+  document.getElementById('info-overlay').addEventListener('click', (e)=>{
+    if (e.target.id === 'info-overlay') Drawers.closeInfo();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') Drawers.closeAll();
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT'){ e.preventDefault(); Search.open(); }
+  });
+
+  window.addEventListener('hashchange', Router.render.bind(Router));
+}
+
+function init(){
+  Utils.refreshIcons();
+  Cart.updateBadge();
+  Favorites.updateBadge();
+  Animations.initHeaderScroll();
+  initEvents();
+  Router.render();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
