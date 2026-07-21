@@ -1342,175 +1342,175 @@ window.renderExclusivePage = function() {
     }
 };
 
-// ==========================================
-// 12. ГЛОБАЛЬНІ ЕЛЕМЕНТИ ІНТЕРФЕЙСУ ТА НАВІГАЦІЯ
-// ==========================================
-window.toggleAccordion = function(listId, arrowId) {
-    const list = document.getElementById(listId);
-    const arrow = document.getElementById(arrowId);
-    if (!list) return;
+// // ==========================================
+// // 12. ГЛОБАЛЬНІ ЕЛЕМЕНТИ ІНТЕРФЕЙСУ ТА НАВІГАЦІЯ
+// // ==========================================
+// window.toggleAccordion = function(listId, arrowId) {
+//     const list = document.getElementById(listId);
+//     const arrow = document.getElementById(arrowId);
+//     if (!list) return;
 
-    const parent = list.parentElement;
-    if (parent) {
-        const openLists = parent.querySelectorAll('.accordion-content.open');
-        openLists.forEach(openList => {
-            if (openList !== list) {
-                openList.classList.remove('open');
-                const siblingArrow = document.getElementById(openList.id.replace('List', 'Arrow'));
-                if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
-            }
-        });
-    }
+//     const parent = list.parentElement;
+//     if (parent) {
+//         const openLists = parent.querySelectorAll('.accordion-content.open');
+//         openLists.forEach(openList => {
+//             if (openList !== list) {
+//                 openList.classList.remove('open');
+//                 const siblingArrow = document.getElementById(openList.id.replace('List', 'Arrow'));
+//                 if (siblingArrow) siblingArrow.style.transform = 'rotate(0deg)';
+//             }
+//         });
+//     }
 
-    list.classList.toggle('open');
-    if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
-};
+//     list.classList.toggle('open');
+//     if (arrow) arrow.style.transform = list.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+// };
 
-window.toggleTheme = function() {
-    const html = document.documentElement;
-    const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    html.setAttribute('data-theme', newTheme);
-    API.set('bv_theme', newTheme);
-    const svg = newTheme === 'light' ? sunSVG : moonSVG;
-    const icon = document.getElementById('themeIcon');
-    const iconMob = document.getElementById('themeIconMob');
-    if(icon) icon.innerHTML = svg;
-    if(iconMob) iconMob.innerHTML = svg;
-};
+// window.toggleTheme = function() {
+//     const html = document.documentElement;
+//     const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+//     html.setAttribute('data-theme', newTheme);
+//     API.set('bv_theme', newTheme);
+//     const svg = newTheme === 'light' ? sunSVG : moonSVG;
+//     const icon = document.getElementById('themeIcon');
+//     const iconMob = document.getElementById('themeIconMob');
+//     if(icon) icon.innerHTML = svg;
+//     if(iconMob) iconMob.innerHTML = svg;
+// };
 
-window.changeLang = function(lang) {
-    const displayLang = lang === 'uk' ? 'UA' : lang.toUpperCase();
-    ['currentFlag', 'currentFlagMob'].forEach(id => { 
-        const el = document.getElementById(id); 
-        if(el) el.src = `https://flagcdn.com/${flags[lang]}.svg`; 
-    });
-    ['currentLangLabel', 'currentLangLabelMob'].forEach(id => { 
-        const el = document.getElementById(id); 
-        if(el) el.innerText = displayLang; 
-    });
-    document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = i18n[lang][el.dataset.i18n] || el.innerHTML);
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.dataset.i18nPlaceholder] || el.placeholder);
-    API.set('bv_lang', lang);
+// window.changeLang = function(lang) {
+//     const displayLang = lang === 'uk' ? 'UA' : lang.toUpperCase();
+//     ['currentFlag', 'currentFlagMob'].forEach(id => { 
+//         const el = document.getElementById(id); 
+//         if(el) el.src = `https://flagcdn.com/${flags[lang]}.svg`; 
+//     });
+//     ['currentLangLabel', 'currentLangLabelMob'].forEach(id => { 
+//         const el = document.getElementById(id); 
+//         if(el) el.innerText = displayLang; 
+//     });
+//     document.querySelectorAll('[data-i18n]').forEach(el => el.innerHTML = i18n[lang][el.dataset.i18n] || el.innerHTML);
+//     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.dataset.i18nPlaceholder] || el.placeholder);
+//     API.set('bv_lang', lang);
     
-    if(typeof window.renderCart === 'function') window.renderCart();
-    if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+//     if(typeof window.renderCart === 'function') window.renderCart();
+//     if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
     
-    if(document.getElementById('dynamicHomeBlocksContainer') && typeof renderHomeSections === 'function') renderHomeSections();
-    if(typeof window.renderCatalogBatch === 'function') window.renderCatalogBatch(); 
-    if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
+//     if(document.getElementById('dynamicHomeBlocksContainer') && typeof renderHomeSections === 'function') renderHomeSections();
+//     if(typeof window.renderCatalogBatch === 'function') window.renderCatalogBatch(); 
+//     if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
     
-    const mobLangList = document.getElementById('mobLangList');
-    if(mobLangList && mobLangList.classList.contains('open')) window.toggleAccordion('mobLangList', 'mobLangArrow');
-};
+//     const mobLangList = document.getElementById('mobLangList');
+//     if(mobLangList && mobLangList.classList.contains('open')) window.toggleAccordion('mobLangList', 'mobLangArrow');
+// };
 
-window.showAdminPanel = function() {
-    const adminSec = document.getElementById('adminSection');
-    const mainSec = document.getElementById('mainContent');
-    const profileSec = document.getElementById('profileSection');
-    if (adminSec) {
-        if (mainSec) mainSec.classList.add('hidden');
-        if (profileSec) profileSec.classList.add('hidden');
-        adminSec.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        location.href = 'admin.html';
-    }
-};
+// window.showAdminPanel = function() {
+//     const adminSec = document.getElementById('adminSection');
+//     const mainSec = document.getElementById('mainContent');
+//     const profileSec = document.getElementById('profileSection');
+//     if (adminSec) {
+//         if (mainSec) mainSec.classList.add('hidden');
+//         if (profileSec) profileSec.classList.add('hidden');
+//         adminSec.classList.remove('hidden');
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     } else {
+//         location.href = 'admin.html';
+//     }
+// };
 
-window.showClientProfile = function() {
-    const profileSec = document.getElementById('profileSection');
-    const mainSec = document.getElementById('mainContent');
-    const adminSec = document.getElementById('adminSection');
-    if (profileSec) {
-        if (mainSec) mainSec.classList.add('hidden');
-        if (adminSec) adminSec.classList.add('hidden');
-        profileSec.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        location.href = 'profile.html';
-    }
-};
+// window.showClientProfile = function() {
+//     const profileSec = document.getElementById('profileSection');
+//     const mainSec = document.getElementById('mainContent');
+//     const adminSec = document.getElementById('adminSection');
+//     if (profileSec) {
+//         if (mainSec) mainSec.classList.add('hidden');
+//         if (adminSec) adminSec.classList.add('hidden');
+//         profileSec.classList.remove('hidden');
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     } else {
+//         location.href = 'profile.html';
+//     }
+// };
 
-window.injectAuthModal = function() {
-    if (document.getElementById('authModal')) return;
+// window.injectAuthModal = function() {
+//     if (document.getElementById('authModal')) return;
 
-    const modalHtml = `
-    <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
-        <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
-            <div id="authFormContainer">
-                <h3 id="authTitle" class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
-                <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-xs mb-6 font-light">Раді бачити вас знову</p>
-                <form id="authForm" class="flex flex-col gap-3">
-                    <div id="nameFieldContainer" class="hidden flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Ваше ім'я</label>
-                        <input type="text" id="authName" placeholder="Олена" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full">
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Email</label>
-                        <input type="email" id="authUser" placeholder="mail@example.com" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Пароль</label>
-                        <input type="password" id="authPass" placeholder="Мінімум 6 символів" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
-                    </div>
-                    <button type="submit" class="btn-solid py-3.5 rounded-none font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-md mt-2" id="authSubmitBtn" data-i18n="login">Увійти</button>
+//     const modalHtml = `
+//     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
+//         <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+//             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">&times;</button>
+//             <div id="authFormContainer">
+//                 <h3 id="authTitle" class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Вхід</h3>
+//                 <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-xs mb-6 font-light">Раді бачити вас знову</p>
+//                 <form id="authForm" class="flex flex-col gap-3">
+//                     <div id="nameFieldContainer" class="hidden flex-col gap-1.5">
+//                         <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Ваше ім'я</label>
+//                         <input type="text" id="authName" placeholder="Олена" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full">
+//                     </div>
+//                     <div class="flex flex-col gap-1.5">
+//                         <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Email</label>
+//                         <input type="email" id="authUser" placeholder="mail@example.com" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
+//                     </div>
+//                     <div class="flex flex-col gap-1.5">
+//                         <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Пароль</label>
+//                         <input type="password" id="authPass" placeholder="Мінімум 6 символів" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required>
+//                     </div>
+//                     <button type="submit" class="btn-solid py-3.5 rounded-none font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-md mt-2" id="authSubmitBtn" data-i18n="login">Увійти</button>
                     
-                    <div class="mt-4 flex flex-col gap-2.5">
-                        <div class="relative flex py-2 items-center">
-                            <div class="flex-grow border-t border-[var(--border)]"></div>
-                            <span class="flex-shrink-0 mx-4 text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Або</span>
-                            <div class="flex-grow border-t border-[var(--border)]"></div>
-                        </div>
-                        <button type="button" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2 6.42 2 12c0 5.59 4.39 10 10.1 10 5.92 0 10.28-4.61 10.28-10.4 0-.83-.07-1.39-.07-1.39z"/></svg>
-                            Увійти через Google
-                        </button>
-                        <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                            Увійти через Apple
-                        </button>
-                    </div>
+//                     <div class="mt-4 flex flex-col gap-2.5">
+//                         <div class="relative flex py-2 items-center">
+//                             <div class="flex-grow border-t border-[var(--border)]"></div>
+//                             <span class="flex-shrink-0 mx-4 text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Або</span>
+//                             <div class="flex-grow border-t border-[var(--border)]"></div>
+//                         </div>
+//                         <button type="button" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
+//                             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2 6.42 2 12c0 5.59 4.39 10 10.1 10 5.92 0 10.28-4.61 10.28-10.4 0-.83-.07-1.39-.07-1.39z"/></svg>
+//                             Увійти через Google
+//                         </button>
+//                         <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
+//                             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+//                             Увійти через Apple
+//                         </button>
+//                     </div>
 
-                    <div class="text-center text-xs text-[var(--text-muted)] mt-4">
-                        <span id="authToggleText">Немає акаунта?</span> 
-                        <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1" id="authToggleLink">Зареєструватися</button>
-                    </div>
-                </form>
-            </div>
+//                     <div class="text-center text-xs text-[var(--text-muted)] mt-4">
+//                         <span id="authToggleText">Немає акаунта?</span> 
+//                         <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1" id="authToggleLink">Зареєструватися</button>
+//                     </div>
+//                 </form>
+//             </div>
             
-            <div id="profileView" class="hidden flex-col gap-4">
-                <h3 class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login_mob_title">Кабінет</h3>
-                <div class="flex flex-col items-center justify-center p-5 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-none mb-1 relative overflow-hidden group">
-                    <div class="w-16 h-16 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-2xl font-bold uppercase shadow-md mb-3 relative z-10" id="profAvatar">A</div>
-                    <p class="text-center text-[var(--text-main)] font-semibold text-lg relative z-10" id="profName">User</p>
-                    <p class="text-center text-[var(--text-muted)] text-[11px] mt-1 relative z-10" id="profEmail">user@mail.com</p>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <button onclick="window.showAdminPanel(); closeAuthModal();" id="adminLinkBtn" class="hidden w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)] transition-colors active:scale-95 text-center">Панель Адміністратора</button>
-                    <button onclick="window.showClientProfile(); closeAuthModal();" id="clientLinkBtn" class="btn-solid py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity active:scale-95 w-full">Мої замовлення</button>
-                    <button onclick="window.logoutUser()" class="w-full py-3 rounded-none border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 bg-transparent mt-1">Вийти з акаунту</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-};
+//             <div id="profileView" class="hidden flex-col gap-4">
+//                 <h3 class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login_mob_title">Кабінет</h3>
+//                 <div class="flex flex-col items-center justify-center p-5 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-none mb-1 relative overflow-hidden group">
+//                     <div class="w-16 h-16 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-2xl font-bold uppercase shadow-md mb-3 relative z-10" id="profAvatar">A</div>
+//                     <p class="text-center text-[var(--text-main)] font-semibold text-lg relative z-10" id="profName">User</p>
+//                     <p class="text-center text-[var(--text-muted)] text-[11px] mt-1 relative z-10" id="profEmail">user@mail.com</p>
+//                 </div>
+//                 <div class="flex flex-col gap-2">
+//                     <button onclick="window.showAdminPanel(); closeAuthModal();" id="adminLinkBtn" class="hidden w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)] transition-colors active:scale-95 text-center">Панель Адміністратора</button>
+//                     <button onclick="window.showClientProfile(); closeAuthModal();" id="clientLinkBtn" class="btn-solid py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity active:scale-95 w-full">Мої замовлення</button>
+//                     <button onclick="window.logoutUser()" class="w-full py-3 rounded-none border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 bg-transparent mt-1">Вийти з акаунту</button>
+//                 </div>
+//             </div>
+//         </div>
+//     </div>
+//     `;
+//     document.body.insertAdjacentHTML('beforeend', modalHtml);
+// };
 
-window.injectGlobalUI = function() {
-    window.injectAuthModal();
-    if (!document.getElementById('scrollToTopBtn')) {
-        document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
-    }
-};
+// window.injectGlobalUI = function() {
+//     window.injectAuthModal();
+//     if (!document.getElementById('scrollToTopBtn')) {
+//         document.body.insertAdjacentHTML('beforeend', `<button id="scrollToTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})" aria-label="Вверх" class="btn-cross fixed bottom-[165px] left-4 z-[4800] w-12 h-12 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-none flex items-center justify-center text-[var(--gold-muted)] shadow-[0_5px_20px_rgba(0,0,0,0.3)] opacity-0 translate-y-4 pointer-events-none transition-all duration-300 active:scale-95 md:bottom-10 md:left-10 hover:bg-[var(--gold-muted)] hover:text-[var(--bg-body)]"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>`);
+//     }
+// };
 
-window.toggleAccordionPanel = function(clickedPanel) {
-    const allPanels = document.querySelectorAll('.glass-panel-item');
-    if (clickedPanel.classList.contains('active')) return;
-    allPanels.forEach(panel => panel.classList.remove('active'));
-    clickedPanel.classList.add('active');
-};
+// window.toggleAccordionPanel = function(clickedPanel) {
+//     const allPanels = document.querySelectorAll('.glass-panel-item');
+//     if (clickedPanel.classList.contains('active')) return;
+//     allPanels.forEach(panel => panel.classList.remove('active'));
+//     clickedPanel.classList.add('active');
+// };
 
 // ==========================================
 // 13. ПОШУК, АВТОРИЗАЦІЯ ТА REALTIME (SUPABASE)
@@ -1936,3 +1936,392 @@ window.uploadProductPhoto = async function(file) {
         return null;
     }
 };
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    initDynamicMegaMenu();
+});
+
+/**
+ * Одночасне завантаження bv_categories_tree та bv_categories_flat з site_storage
+ */
+async function initDynamicMegaMenu() {
+    const megaCol1 = document.getElementById('megaCol1');
+    const megaCol2 = document.getElementById('megaCol2');
+    if (!megaCol1 || !megaCol2) return;
+
+    let categoriesTree = [];
+    let categoriesFlat = [];
+
+    // 1. Миттєве відтворення з кешу
+    const cachedTree = localStorage.getItem('bv_storage_categories_tree');
+    const cachedFlat = localStorage.getItem('bv_storage_categories_flat');
+    if (cachedTree) {
+        try {
+            categoriesTree = JSON.parse(cachedTree);
+            categoriesFlat = cachedFlat ? JSON.parse(cachedFlat) : [];
+            renderMegaMenuUI(categoriesTree, categoriesFlat);
+        } catch (e) {
+            console.error("Помилка читання кешу меню:", e);
+        }
+    }
+
+    // 2. Фонове завантаження з Supabase (беремо одразу і дерево, і плоский список)
+    if (typeof _supabase !== 'undefined') {
+        try {
+            const { data, error } = await _supabase
+                .from('site_storage')
+                .select('key, value')
+                .in('key', ['bv_categories_tree', 'bv_categories_flat']);
+
+            if (!error && data) {
+                data.forEach(item => {
+                    const val = typeof item.value === 'string' ? JSON.parse(item.value) : item.value;
+                    if (item.key === 'bv_categories_tree') categoriesTree = val || [];
+                    if (item.key === 'bv_categories_flat') categoriesFlat = val || [];
+                });
+
+                if (categoriesTree.length > 0) {
+                    localStorage.setItem('bv_storage_categories_tree', JSON.stringify(categoriesTree));
+                    localStorage.setItem('bv_storage_categories_flat', JSON.stringify(categoriesFlat));
+                    renderMegaMenuUI(categoriesTree, categoriesFlat);
+                }
+            }
+        } catch (err) {
+            console.warn("Помилка завантаження категорій з site_storage:", err);
+        }
+    }
+
+    // Оновлення при зміні мови
+    window.addEventListener('langChanged', () => {
+        if (Array.isArray(categoriesTree) && categoriesTree.length > 0) {
+            renderMegaMenuUI(categoriesTree, categoriesFlat);
+        }
+    });
+}
+
+/**
+ * Універсальний помічник для отримання локалізованого тексту
+ */
+function getLocalizedText(field, lang = 'uk') {
+    if (!field) return '';
+    if (typeof field === 'object') {
+        return field[lang] || field.uk || field.ru || field.en || Object.values(field)[0] || '';
+    }
+    return String(field);
+}
+
+/**
+ * Розумний пошук підкатегорій: перевіряє всі можливі назви полів у дереві та плоскому списку
+ */
+function getSubcategoriesForCategory(cat, categoriesFlat) {
+    // Варіант А: Підкатегорії лежать всередині об'єкта категорії (у tree)
+    const nested = cat.highlights || cat.subcategories || cat.children || cat.items || cat.sub_categories || cat.list;
+    if (Array.isArray(nested) && nested.length > 0) {
+        return nested;
+    }
+
+    // Варіант Б: Підкатегорії лежать у flat-списку і посилаються на ID родича
+    if (Array.isArray(categoriesFlat) && categoriesFlat.length > 0) {
+        const catId = cat.id || cat.slug;
+        const foundInFlat = categoriesFlat.filter(item => 
+            item.parent_id === catId || 
+            item.parent === catId || 
+            item.category_id === catId ||
+            item.parentSlug === catId
+        );
+        if (foundInFlat.length > 0) return foundInFlat;
+    }
+
+    return [];
+}
+
+/**
+ * Побудова інтерфейсу
+ */
+function renderMegaMenuUI(categoriesTree, categoriesFlat = []) {
+    const megaCol1 = document.getElementById('megaCol1');
+    const megaCol2 = document.getElementById('megaCol2');
+    if (!megaCol1 || !megaCol2 || !Array.isArray(categoriesTree) || !categoriesTree.length) return;
+
+    const currentLang = localStorage.getItem('bv_lang') || document.documentElement.lang || 'uk';
+
+    // 1. Ліві кнопки (Головні категорії)
+    megaCol1.innerHTML = categoriesTree.map((cat, index) => {
+        const title = getLocalizedText(cat.name || cat.title || cat.label, currentLang) || 'Категорія';
+        const catId = cat.id || cat.slug || '';
+        const isActive = index === 0 ? 'bg-black/10 dark:bg-white/10 text-[var(--gold-muted)] font-bold shadow-sm' : 'text-[var(--text-main)]';
+
+        return `
+            <button type="button" 
+                    class="mega-cat-btn w-full text-left px-3 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-all duration-200 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--gold-muted)] ${isActive}" 
+                    data-index="${index}"
+                    onclick="location.href='catalog.html#${catId}'">
+                <span class="truncate">${title}</span>
+                <svg class="w-3 h-3 flex-shrink-0 opacity-50 transform -rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+        `;
+    }).join('');
+
+    // 2. Права колонка (Підкатегорії + Банер)
+    const updateCol2 = (catIndex) => {
+        const cat = categoriesTree[catIndex];
+        if (!cat) return;
+
+        const title = getLocalizedText(cat.name || cat.title || cat.label, currentLang) || 'Категорія';
+        const catId = cat.id || cat.slug || '';
+        
+        // Знаходимо підкатегорії через універсальний пошук
+        const subItems = getSubcategoriesForCategory(cat, categoriesFlat);
+        const bannerImg = cat.image || cat.banner_url || cat.img || '';
+
+        // Генеруємо список підкатегорій
+        let subLinksHtml = '';
+        if (subItems.length > 0) {
+            subLinksHtml = subItems.map(sub => {
+                // Підтримка як об'єктів {name: "..."}, так і простих рядків "Каблучки з діамантами"
+                const subTitle = typeof sub === 'string' 
+                    ? sub 
+                    : getLocalizedText(sub.name || sub.title || sub.label || sub.text || sub, currentLang);
+                
+                // Формуємо коректне посилання або якір на фільтр
+                const subUrl = typeof sub === 'string'
+                    ? `catalog.html#${sub}`
+                    : (sub.link || sub.url || sub.href || `catalog.html#${sub.slug || sub.id || catId}`);
+
+                return `
+                    <a href="${subUrl}" class="text-xs text-[var(--text-muted)] hover:text-[var(--gold-muted)] transition-colors py-1.5 flex items-center gap-2 group/link">
+                        <span class="w-1 h-1 rounded-full bg-[var(--border)] group-hover/link:bg-[var(--gold-muted)] transition-colors flex-shrink-0"></span>
+                        <span class="truncate">${subTitle || 'Переглянути'}</span>
+                    </a>
+                `;
+            }).join('');
+        } else {
+            subLinksHtml = `<p class="text-xs text-[var(--text-muted)] font-light col-span-2 py-2">Переглянути всі прикраси у розділі «${title}»</p>`;
+        }
+
+        // Рендер вмісту правої частини
+        megaCol2.innerHTML = `
+            <div class="flex flex-col justify-between h-full animate-fadeIn">
+                <div>
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
+                        <h4 class="font-serif text-base text-[var(--text-main)] tracking-wide">${title}</h4>
+                        <a href="catalog.html#${catId}" class="text-[10px] uppercase tracking-widest text-[var(--gold-muted)] hover:underline font-semibold">Всі прикраси &rarr;</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 max-h-[160px] overflow-y-auto custom-scrollbar pr-2">
+                        ${subLinksHtml}
+                    </div>
+                </div>
+
+                ${bannerImg ? `
+                <div class="mt-4 relative rounded-lg overflow-hidden border border-[var(--border)] h-24 group/banner cursor-pointer" onclick="location.href='catalog.html#${catId}'">
+                    <img src="${bannerImg}" class="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-105" alt="${title}" loading="lazy" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-3">
+                        <span class="text-white text-[11px] font-medium tracking-wider uppercase font-['Montserrat']">Колекція: ${title}</span>
+                    </div>
+                </div>` : `
+                <div class="mt-4 p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border)] flex items-center justify-between">
+                    <span class="text-xs font-serif text-[var(--text-main)]">Ексклюзивні вироби BV Jewelry</span>
+                    <a href="catalog.html#${catId}" class="px-3 py-1.5 bg-[var(--gold-muted)] text-[#111] text-[9px] font-bold uppercase tracking-widest rounded hover:opacity-90 transition">Перейти</a>
+                </div>`}
+            </div>
+        `;
+    };
+
+    // Відмальовуємо першу категорію за замовчуванням
+    updateCol2(0);
+
+    // Додаємо слухачі наведення миші
+    const buttons = megaCol1.querySelectorAll('.mega-cat-btn');
+    buttons.forEach((btn, idx) => {
+        btn.addEventListener('mouseenter', () => {
+            buttons.forEach(b => b.className = b.className.replace('bg-black/10 dark:bg-white/10 text-[var(--gold-muted)] font-bold shadow-sm', 'text-[var(--text-main)]'));
+            btn.className = btn.className.replace('text-[var(--text-main)]', 'bg-black/10 dark:bg-white/10 text-[var(--gold-muted)] font-bold shadow-sm');
+            updateCol2(idx);
+        });
+    });
+}
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    initDynamicGallery();
+});
+
+/**
+ * Динамическая галерея BV Jewelry с максимальной оптимизацией
+ */
+async function initDynamicGallery() {
+    // Ищем контейнер галереи по ID или стандартным классам
+    const galleryContainer = document.getElementById('galleryGrid') || document.querySelector('.gallery-grid') || document.querySelector('#gallery');
+    if (!galleryContainer) return;
+
+    let galleryData = [];
+
+    // 1. МИГНОВЕННЫЙ РЕНДЕР ИЗ КЕША (Без ожидания ответа сервера)
+    const cached = localStorage.getItem('bv_storage_gallery');
+    if (cached) {
+        try {
+            galleryData = JSON.parse(cached);
+            renderGalleryUI(galleryContainer, galleryData);
+        } catch (e) {
+            console.error("Ошибка чтения кеша галереи:", e);
+        }
+    }
+
+    // 2. ФОНОВАЯ ЗАГРУЗКА АКТУАЛЬНЫХ ФОТО ИЗ SUPABASE
+    if (typeof _supabase !== 'undefined') {
+        try {
+            // Приоритет 1: Ищем в site_storage (ключ: bv_gallery)
+            const { data, error } = await _supabase
+                .from('site_storage')
+                .select('value')
+                .eq('key', 'bv_gallery')
+                .single();
+
+            if (!error && data && data.value) {
+                galleryData = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+            } else {
+                // Приоритет 2 (Фоллбек): Если в site_storage пусто, проверяем отдельную таблицу 'gallery'
+                const { data: tableData, error: tableError } = await _supabase
+                    .from('gallery')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (!tableError && tableData) {
+                    galleryData = tableData;
+                }
+            }
+
+            // Если данные получены и они отличаются от кеша — перерисовываем и сохраняем
+            if (Array.isArray(galleryData) && galleryData.length > 0) {
+                localStorage.setItem('bv_storage_gallery', JSON.stringify(galleryData));
+                renderGalleryUI(galleryContainer, galleryData);
+            }
+        } catch (err) {
+            console.warn("Не удалось обновить галерею из Supabase:", err);
+        }
+    }
+
+    // Инициализируем один глобальный слушатель для открытия фото во весь экран
+    initGalleryLightbox(galleryContainer);
+}
+
+/**
+ * Оптимизированный рендер через DocumentFragment
+ */
+function renderGalleryUI(container, items) {
+    if (!container || !Array.isArray(items) || !items.length) return;
+
+    // Очищаем контейнер перед вставкой
+    container.innerHTML = '';
+
+    // Создаем виртуальный фрагмент (в DOM добавляется только 1 раз в самом конце!)
+    const fragment = document.createDocumentFragment();
+
+    items.forEach((item, idx) => {
+        // Поддерживаем разные форматы именования в БД (img, image, url, src)
+        const imgSrc = item.img || item.image || item.url || item.src || '';
+        if (!imgSrc) return;
+
+        const title = item.title || item.name || item.alt || 'BV Jewelry Atelier';
+
+        const card = document.createElement('div');
+        card.className = 'gallery-item group relative overflow-hidden rounded-xl bg-black/20 border border-[var(--border,rgba(255,255,255,0.08))] cursor-pointer aspect-square shadow-lg transition-all duration-500 hover:border-[var(--gold-muted,#D4AF37)]';
+        card.setAttribute('data-img', imgSrc);
+        card.setAttribute('data-title', title);
+
+        card.innerHTML = `
+            <img src="${imgSrc}" 
+                 alt="${title}" 
+                 loading="lazy" 
+                 decoding="async" 
+                 class="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-110 select-none" />
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                <span class="text-[var(--gold-muted,#D4AF37)] text-[10px] uppercase tracking-widest font-semibold mb-0.5 font-['Montserrat']">BV Atelier</span>
+                <p class="text-white text-xs font-serif truncate">${title}</p>
+            </div>
+            
+            <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-white/10">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+            </div>
+        `;
+
+        fragment.appendChild(card);
+    });
+
+    // Единоразовая вставка готового фрагмента в реальный DOM
+    container.appendChild(fragment);
+}
+
+/**
+ * Делегированное управление Lightbox (просмотр фото без нагрузки на память)
+ */
+function initGalleryLightbox(container) {
+    // Проверяем, не повесили ли мы уже слушатель
+    if (container.dataset.lightboxInit) return;
+    container.dataset.lightboxInit = 'true';
+
+    container.addEventListener('click', (e) => {
+        const card = e.target.closest('.gallery-item');
+        if (!card) return;
+
+        const imgSrc = card.getAttribute('data-img');
+        const title = card.getAttribute('data-title');
+        if (imgSrc) openLightboxModal(imgSrc, title);
+    });
+}
+
+/**
+ * Генерация и показ модального окна просмотра
+ */
+function openLightboxModal(imgSrc, title) {
+    // Удаляем старое модальное окно, если есть
+    const existing = document.getElementById('bv-lightbox');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'bv-lightbox';
+    modal.className = 'fixed inset-0 z-[99999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-8 opacity-0 transition-opacity duration-300 select-none';
+    
+    modal.innerHTML = `
+        <button type="button" class="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="max-w-5xl max-h-[85vh] flex flex-col items-center justify-center relative transform scale-95 transition-transform duration-300">
+            <img src="${imgSrc}" alt="${title}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-white/10" />
+            ${title && title !== 'BV Jewelry Atelier' ? `<p class="text-white/80 text-sm font-serif mt-4 text-center tracking-wide">${title}</p>` : ''}
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden'; // Блокируем скролл сайта
+
+    // Плавное появление
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+    });
+
+    // Закрытие по клику на фон, крестик или клавишу ESC
+    const closeModal = () => {
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = '';
+        }, 300);
+    };
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.closest('button')) closeModal();
+    });
+
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            window.removeEventListener('keydown', escHandler);
+        }
+    };
+    window.addEventListener('keydown', escHandler);
+}
