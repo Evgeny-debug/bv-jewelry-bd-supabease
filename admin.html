@@ -1933,51 +1933,359 @@ window.closeOrderModal = function() {
             showNotification('Контент сторінки збережено!');
         };
 
-        // ==========================================
-// ПРАЙС-ЛИСТ (РЕАГУВАННЯ ЧЕРЕЗ JSON-РЕДАТОР)
-// ==========================================
+        // ==========================================================
+// ПРАЙС-ЛИСТ (РЕАГУВАННЯ TA РОБОТА ЧЕРЕЗ JSON-РЕДАКТОР)
+// ==========================================================
 
-// Функція для заповнення текстового редактора JSON із бази
+// Ініціалізація глобального масиву, якщо він ще не створений
+if (typeof window.priceListDB === 'undefined' || !Array.isArray(window.priceListDB)) {
+    window.priceListDB = [];
+}
+
+/**
+ * 1. Заповнення текстового редактора JSON даними з бази
+ */
 window.populatePriceEditor = function() {
     const editor = document.getElementById('price-json-editor');
-    if (!editor) return;
-    editor.value = JSON.stringify(priceListDB, null, 4);
+    if (!editor) {
+        console.warn("Елемент 'price-json-editor' не знайдено на сторінці.");
+        return;
+    }
+    // Красиве форматування з відступами у 4 пробіли
+    editor.value = JSON.stringify(window.priceListDB, null, 4);
 };
 
-// Додавання нової категорії з оновленням textarea
+/**
+ * 2. Додавання нової категорії з оновленням textarea та збереженням
+ */
 window.addPriceCategory = async function() {
-    console.log("Кнопка додавання категорії натиснута"); // Лог для перевірки в консолі
+    console.log("-> Натиснуто: Додавання нової категорії прайс-листа");
     
-    if (typeof priceListDB === 'undefined' || !Array.isArray(priceListDB)) {
-        priceListDB = [];
+    if (!Array.isArray(window.priceListDB)) {
+        window.priceListDB = [];
     }
     
-    // Додаємо нову категорію у вигляді об'єкта
-    priceListDB.push({
-        category: "Нова категорія",
+    // Додаємо нову категорію у вашому форматі (gold / silver)
+    window.priceListDB.push({
+        category: "Нова категорія (Змініть назву)",
         items: [
             { 
                 name: { ua: "Нова послуга", ru: "Новая услуга", en: "New service" }, 
-                gold: "Від 500", 
-                silver: "Від 300" 
+                gold: "Від 500 ₴", 
+                silver: "Від 300 ₴" 
             }
         ]
     });
 
-    // Оновлюємо вміст textarea, щоб ти бачив зміни в редакторі
-    populatePriceEditor();
+    // Оновлюємо вміст textarea на екрані
+    window.populatePriceEditor();
 
-    // Зберігаємо в локальне сховище та хмару
-    localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+    // Зберігаємо в локальне сховище
+    localStorage.setItem('bv_price_list', JSON.stringify(window.priceListDB));
     
+    // Зберігаємо в хмару Supabase з обробкою помилок
     if (typeof saveToCloudStorage === 'function') {
-        await saveToCloudStorage('bv_price_list', priceListDB);
-    }
-    
-    if (typeof showNotification === 'function') {
-        showNotification('Нову категорію додано до JSON!');
+        try {
+            await saveToCloudStorage('bv_price_list', window.priceListDB);
+            if (typeof showNotification === 'function') {
+                showNotification('✅ Нову категорію додано та збережено в хмару!');
+            }
+        } catch (error) {
+            console.error("Помилка при збереженні в хмару:", error);
+            alert("Категорію додано локально, але сталася помилка збереження в хмару. Перевірте з'єднання.");
+        }
+    } else {
+        if (typeof showNotification === 'function') {
+            showNotification('Нову категорію додано (локально)!');
+        }
     }
 };
+
+/**
+ * 3. НОВЕ: Збереження ручних змін з JSON-редактора в базу даних
+ * Викличте цю функцію при натисканні кнопки "Зберегти прайс-лист"
+ */
+window.savePriceListFromEditor = async function(buttonElement) {
+    const editor = document.getElementById('price-json-editor');
+    if (!editor) return;
+
+    // Зміна тексту кнопки для візуального відгуку
+    let originalBtnText = "";
+    if (buttonElement) {
+        originalBtnText = buttonElement.innerText;
+        buttonElement.innerText = "Збереження...";
+        buttonElement.disabled = true;
+    }
+
+    try {
+        // 1. Перевіряємо, чи немає синтаксичних помилок у написаному JSON
+        const parsedJSON = JSON.parse(editor.value);
+        
+        if (!Array.isArray(parsedJSON)) {
+            throw new Error("Кореневий елемент прайс-листа повинен бути масивом [ ... ]");
+        }
+
+        // 2. Оновлюємо робочий масив
+        window.priceListDB = parsedJSON;
+
+        // 3. Форматуємо текст в редакторі, щоб він виглядав охайно
+        editor.value = JSON.stringify(window.priceListDB, null, 4);
+
+        // 4. Зберігаємо локально
+        localStorage.setItem('bv_price_list', JSON.stringify(window.priceListDB));
+
+        // 5. Відправляємо на сервер
+        if (typeof saveToCloudStorage === 'function') {
+            await saveToCloudStorage('bv_price_list', window.priceListDB);
+        }
+
+        if (typeof showNotification === 'function') {
+            showNotification('✅ Прайс-лист успішно оновлено та збережено!');
+        }
+    } catch (error) {
+        console.error("Помилка валідації JSON прайс-листа:", error);
+        // Зрозуміле повідомлення для адміністратора, якщо він забув кому чи лапку
+        alert(`❌ Помилка в синтаксисі JSON!\n\nДеталі: ${error.message}\n\nБудь ласка, перевірте чи не пропущені коми, лапки або закриваючі дужки та спробуйте знову.`);
+    } finally {
+        // Повертаємо кнопку в початковий стан
+        if (buttonElement) {
+            buttonElement.innerText = originalBtnText;
+            buttonElement.disabled = false;
+        }
+    }
+};
+
+// ==========================================================
+// ВІЗУАЛЬНИЙ КОНСТРУКТОР ПРАЙС-ЛИСТА (ЗОЛОТО / СРІБЛО)
+// ==========================================================
+
+// Ініціалізація глобального масиву
+if (typeof window.priceListDB === 'undefined' || !Array.isArray(window.priceListDB)) {
+    window.priceListDB = [];
+}
+
+/**
+ * 1. Головна функція рендеру візуальних карток у #priceBuilderContainer
+ */
+window.renderPriceBuilder = function() {
+    const container = document.getElementById('priceBuilderContainer');
+    const hiddenEditor = document.getElementById('price-json-editor');
+    if (!container) return;
+
+    // Завжди синхронізуємо прихований textarea для сумісності зі старим кодом
+    if (hiddenEditor) {
+        hiddenEditor.value = JSON.stringify(window.priceListDB, null, 4);
+    }
+
+    // Якщо список порожній
+    if (!window.priceListDB || window.priceListDB.length === 0) {
+        container.innerHTML = `
+            <div class="bg-white/5 border border-dashed border-white/10 rounded-2xl p-8 text-center text-gray-400">
+                <p class="mb-3 text-sm">Прайс-лист наразі порожній.</p>
+                <button type="button" onclick="addPriceCategory()" class="px-4 py-2 bg-[#c5a059] text-black font-semibold rounded-lg text-xs hover:bg-[#b08d4b] transition">
+                    + Додати першу категорію
+                </button>
+            </div>`;
+        return;
+    }
+
+    // Генерація карток
+    container.innerHTML = window.priceListDB.map((cat, catIdx) => {
+        // Підтримка як простого рядка, так і об'єкта з мовами для назви категорії
+        const catNameUa = typeof cat.category === 'object' ? (cat.category.ua || '') : (cat.category || '');
+        const catNameRu = typeof cat.category === 'object' ? (cat.category.ru || '') : '';
+        const catNameEn = typeof cat.category === 'object' ? (cat.category.en || '') : '';
+
+        return `
+        <div class="bg-black/40 backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-white/10 relative group shadow-xl">
+            <!-- Шапка категорії: Номер та кнопка видалення -->
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#c5a059]"></span>
+                    <span class="text-xs font-mono font-bold text-[#c5a059] uppercase tracking-wider">Категорія #${catIdx + 1}</span>
+                </div>
+                <button type="button" onclick="deletePriceCategory(${catIdx})" class="text-xs text-red-400 hover:text-red-300 transition py-1 px-2.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/20">
+                    Видалити категорію
+                </button>
+            </div>
+
+            <!-- Назва категорії (3 мови) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 bg-white/[0.02] p-3.5 rounded-xl border border-white/5">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Назва категорії [UA] *</label>
+                    <input type="text" class="w-full bg-black/50 border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#c5a059] focus:outline-none" 
+                           value="${catNameUa}" oninput="updateCategoryTitle(${catIdx}, 'ua', this.value)" placeholder="Напр: Ремонт каблучок">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Назва категорії [RU]</label>
+                    <input type="text" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-[#c5a059] focus:outline-none" 
+                           value="${catNameRu}" oninput="updateCategoryTitle(${catIdx}, 'ru', this.value)" placeholder="Напр: Ремонт колец">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Назва категорії [EN]</label>
+                    <input type="text" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-[#c5a059] focus:outline-none" 
+                           value="${catNameEn}" oninput="updateCategoryTitle(${catIdx}, 'en', this.value)" placeholder="e.g.: Ring Repair">
+                </div>
+            </div>
+
+            <!-- Список послуг у цій категорії -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-gray-300">Послуги та ціни (${cat.items?.length || 0}):</span>
+                    <button type="button" onclick="addPriceItem(${catIdx})" class="text-xs text-[#c5a059] hover:underline font-bold flex items-center gap-1">
+                        + Додати послугу
+                    </button>
+                </div>
+
+                <div class="space-y-2.5">
+                    ${(cat.items || []).map((item, itemIdx) => `
+                        <div class="bg-white/5 p-3.5 rounded-xl border border-white/5 hover:border-white/15 transition flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+                            <!-- Назви послуги (UA / RU / EN) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-grow">
+                                <input type="text" class="bg-black/60 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-[#c5a059] focus:outline-none font-medium" 
+                                       value="${item.name?.ua || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'name', 'ua', this.value)" placeholder="Послуга [UA]">
+                                <input type="text" class="bg-black/60 border border-white/10 rounded px-2.5 py-1.5 text-xs text-gray-300 focus:border-[#c5a059] focus:outline-none" 
+                                       value="${item.name?.ru || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'name', 'ru', this.value)" placeholder="Услуга [RU]">
+                                <input type="text" class="bg-black/60 border border-white/10 rounded px-2.5 py-1.5 text-xs text-gray-300 focus:border-[#c5a059] focus:outline-none" 
+                                       value="${item.name?.en || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'name', 'en', this.value)" placeholder="Service [EN]">
+                            </div>
+
+                            <!-- Ціни: Золото / Срібло + Кнопка видалення -->
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 border-t lg:border-t-0 pt-2 lg:pt-0 border-white/10">
+                                <div class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 rounded px-2 py-1">
+                                    <span class="text-[10px] text-amber-400 font-bold uppercase">Au:</span>
+                                    <input type="text" class="w-20 bg-transparent text-xs text-amber-300 font-bold focus:outline-none text-right" 
+                                           value="${item.gold || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'gold', null, this.value)" placeholder="від 500 ₴">
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-400/10 border border-slate-400/20 rounded px-2 py-1">
+                                    <span class="text-[10px] text-slate-300 font-bold uppercase">Ag:</span>
+                                    <input type="text" class="w-20 bg-transparent text-xs text-slate-200 font-bold focus:outline-none text-right" 
+                                           value="${item.silver || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'silver', null, this.value)" placeholder="від 300 ₴">
+                                </div>
+                                <button type="button" onclick="deletePriceItem(${catIdx}, ${itemIdx})" 
+                                        class="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition ml-1" title="Видалити послугу">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `}).join('');
+};
+
+/**
+ * 2. Допоміжні функції для зміни даних
+ */
+window.addPriceCategory = function() {
+    window.priceListDB.push({
+        category: { ua: "Нова категорія", ru: "Новая категория", en: "New category" },
+        items: [
+            { 
+                name: { ua: "Нова послуга", ru: "Новая услуга", en: "New service" }, 
+                gold: "від 500 ₴", 
+                silver: "від 300 ₴" 
+            }
+        ]
+    });
+    window.renderPriceBuilder();
+};
+
+window.deletePriceCategory = function(catIdx) {
+    if (confirm('Видалити цю категорію та всі її послуги?')) {
+        window.priceListDB.splice(catIdx, 1);
+        window.renderPriceBuilder();
+    }
+};
+
+window.addPriceItem = function(catIdx) {
+    if (!window.priceListDB[catIdx].items) window.priceListDB[catIdx].items = [];
+    window.priceListDB[catIdx].items.push({
+        name: { ua: "", ru: "", en: "" },
+        gold: "від 0 ₴",
+        silver: "від 0 ₴"
+    });
+    window.renderPriceBuilder();
+};
+
+window.deletePriceItem = function(catIdx, itemIdx) {
+    window.priceListDB[catIdx].items.splice(itemIdx, 1);
+    window.renderPriceBuilder();
+};
+
+// Оновлення тексту без перемальовування DOM (щоб не збивався фокус курсора при вводі)
+window.updateCategoryTitle = function(catIdx, lang, value) {
+    let cat = window.priceListDB[catIdx];
+    if (typeof cat.category !== 'object') {
+        cat.category = { ua: cat.category || '', ru: '', en: '' };
+    }
+    cat.category[lang] = value;
+    
+    // Синхронізуємо прихований textarea
+    const hiddenEditor = document.getElementById('price-json-editor');
+    if (hiddenEditor) hiddenEditor.value = JSON.stringify(window.priceListDB, null, 4);
+};
+
+window.updatePriceItem = function(catIdx, itemIdx, field, lang, value) {
+    const item = window.priceListDB[catIdx].items[itemIdx];
+    if (lang) {
+        if (!item[field]) item[field] = {};
+        item[field][lang] = value;
+    } else {
+        item[field] = value;
+    }
+    
+    // Синхронізуємо прихований textarea
+    const hiddenEditor = document.getElementById('price-json-editor');
+    if (hiddenEditor) hiddenEditor.value = JSON.stringify(window.priceListDB, null, 4);
+};
+
+/**
+ * 3. Прив'язка кнопок з вашого HTML (після завантаження сторінки)
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Кнопка "+ Додати категорію"
+    const btnAdd = document.getElementById('btnAddPriceCategory');
+    if (btnAdd) {
+        btnAdd.addEventListener('click', window.addPriceCategory);
+    }
+
+    // Кнопка "Зберегти зміни"
+    const btnSave = document.getElementById('btnSavePriceList');
+    if (btnSave) {
+        btnSave.addEventListener('click', async function() {
+            const originalText = this.innerText;
+            this.innerText = 'Збереження...';
+            this.disabled = true;
+
+            try {
+                // Зберігаємо локально
+                localStorage.setItem('bv_price_list', JSON.stringify(window.priceListDB));
+                
+                // Зберігаємо в Supabase хмару
+                if (typeof saveToCloudStorage === 'function') {
+                    await saveToCloudStorage('bv_price_list', window.priceListDB);
+                }
+                
+                if (typeof showNotification === 'function') {
+                    showNotification('✅ Прайс-лист успішно збережено!');
+                } else {
+                    alert('✅ Прайс-лист збережено!');
+                }
+            } catch (error) {
+                console.error("Помилка збереження:", error);
+                alert("Помилка при збереженні в хмару. Перевірте консоль.");
+            } finally {
+                this.innerText = originalText;
+                this.disabled = false;
+            }
+        });
+    }
+
+    // Первинний запуск (якщо дані вже завантажились)
+    window.renderPriceBuilder();
+});
         // ==========================================
         // ГАЛЕРЕЯ
         // ==========================================
