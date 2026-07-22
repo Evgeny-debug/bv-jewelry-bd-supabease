@@ -389,69 +389,67 @@
         }
     ];
 
+    // Універсальна функція для витягування тексту з урахуванням мови
+    function getLocalizedText(field, lang) {
+        if (!field) return '';
+        if (typeof field === 'string') return field;
+        
+        // Підтримка різних форматів ключів мови (ua/uk)
+        if (lang === 'ua' || lang === 'uk') return field.ua || field.uk || field.ru || field.en || '';
+        if (lang === 'ru') return field.ru || field.ua || field.uk || field.en || '';
+        if (lang === 'en') return field.en || field.ua || field.uk || field.ru || '';
+        
+        return field.ua || field.uk || field.ru || field.en || Object.values(field)[0] || '';
+    }
+
+    // Отримання актуального прайс-листа з Supabase (таблиця site_storage)
     async function fetchPriceListFromSupabase() {
         try {
-            // Гарантована ініціалізація клієнта, якщо глобальний ще не піднявся
-            if (!window.supabaseClient && window.supabase && window.supabase.createClient) {
-                // Вставте сюди ваші актуальні дані підключення до Supabase, якщо вони не підтягуються з main.js
-                const SUPABASE_URL = 'ВАШ_SUPABASE_URL'; 
-                const SUPABASE_KEY = 'ВАШ_SUPABASE_ANON_KEY';
-                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-
-            let attempts = 0;
-            while (!window.supabaseClient && attempts < 15) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
-            }
-
-            if (!window.supabaseClient) {
-                console.warn("Supabase клієнт так і не з'явився.");
-                return null;
-            }
-
-            const { data, error } = await window.supabaseClient
-                .from('site_storage')
+            const { data, error } = await _supabase
+                .from('site_storage') 
                 .select('value')
                 .eq('key', 'bv_price_list')
-                .maybeSingle();
+                .single();
 
-            if (error) {
-                console.error("Помилка Supabase при завантаженні прайсу:", error);
-                return null;
+            if (error) throw error;
+            
+            if (data && data.value) {
+                return Array.isArray(data.value) ? data.value : [data.value];
             }
-
-            console.log("Успішно отримані дані прайсу з бази:", data);
-            return data ? data.value : null;
+            return null;
         } catch (err) {
-            console.error("Виняток при завантаженні прайсу:", err);
+            console.error('Виняток при завантаженні прайсу:', err);
             return null;
         }
     }
 
+    // Рендеринг прайс-листа на сторінці
     function renderPriceList(searchQuery = '') {
         const container = document.getElementById('priceListContainer');
         if (!container) return;
         
         const q = searchQuery.toLowerCase().trim();
         let html = '';
-        const lang = typeof currentLang !== 'undefined' ? currentLang : 'ua';
+        
+        // Визначаємо поточну мову
+        let lang = 'ua';
+        if (typeof currentLang !== 'undefined') {
+            lang = currentLang;
+        } else if (localStorage.getItem('bv_lang')) {
+            lang = localStorage.getItem('bv_lang');
+        } else if (localStorage.getItem('app_lang')) {
+            lang = localStorage.getItem('app_lang');
+        }
+        lang = lang.replace('uk', 'ua'); // Нормалізуємо для json-даних
 
         const listToRender = (priceListDB && priceListDB.length > 0) ? priceListDB : fallbackPriceList;
 
         listToRender.forEach(cat => {
-            const catTitle = cat.title || cat.category || 'Послуги';
-            const items = cat.items || [];
+            const catTitle = getLocalizedText(cat.title || cat.category || cat.name, lang) || 'Послуги';
+            const items = cat.items || cat.services || [];
 
             const filteredItems = items.filter(item => {
-                let itemName = '';
-                if (typeof item.name === 'object' && item.name !== null) {
-                    itemName = (item.name[lang] || item.name.ua || item.name.ru || item.name.en || '').toLowerCase();
-                } else if (typeof item.name === 'string') {
-                    itemName = item.name.toLowerCase();
-                } else if (item.title) {
-                    itemName = String(item.title).toLowerCase();
-                }
+                const itemName = getLocalizedText(item.name || item.title, lang).toLowerCase();
                 return itemName.includes(q);
             });
             
@@ -462,28 +460,43 @@
                     <div class="flex flex-col border-t border-[var(--border)]">
                         <div class="hidden md:flex justify-between items-center py-3 border-b border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-4">
                             <span class="w-3/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Послуга</span>
-                            <span class="w-2/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Ціна / Золото / Срібло</span>
+                            <span class="w-2/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Вартість</span>
                         </div>
                 `;
 
                 filteredItems.forEach(item => {
-                    let displayName = '';
-                    if (typeof item.name === 'object' && item.name !== null) {
-                        displayName = item.name[lang] || item.name.ua || item.name.ru || item.name.en || '';
-                    } else {
-                        displayName = item.name || item.title || 'Послуга';
-                    }
-
-                    const priceVal = item.price || item.gold || '';
-                    const silverVal = item.silver || '';
+                    const displayName = getLocalizedText(item.name || item.title, lang) || 'Послуга';
+                    const displayDesc = getLocalizedText(item.desc || item.description, lang);
+                    
+                    // Підтримка різних форматів ціни (старі поля або нові з адмінки: price_gold / price_silver)
+                    const priceVal = item.price || item.gold || item.price_gold || '';
+                    const silverVal = item.silver || item.price_silver || '';
 
                     html += `
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center py-4 md:py-5 border-b border-[var(--border)] px-2 md:px-4 hover:bg-[rgba(255,255,255,0.01)] transition-colors group">
-                            <span class="w-full md:w-3/5 font-medium text-[var(--text-main)] text-sm md:text-base leading-snug mb-3 md:mb-0 pr-4">${displayName}</span>
+                            <div class="w-full md:w-3/5 pr-4 mb-3 md:mb-0">
+                                <span class="font-medium text-[var(--text-main)] text-sm md:text-base leading-snug block">${displayName}</span>
+                                ${displayDesc ? `<span class="text-xs text-[var(--text-muted)] mt-1 block opacity-70">${displayDesc}</span>` : ''}
+                            </div>
                             
-                            <div class="w-full md:w-2/5 flex justify-end gap-6 text-right">
-                                ${priceVal ? `<span class="text-[var(--text-main)] font-semibold"><span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923] mr-2">Ціна:</span>${priceVal}</span>` : ''}
-                                ${silverVal ? `<span class="text-[var(--text-main)] font-semibold"><span class="md:hidden text-[10px] uppercase tracking-widest text-[#c0c0c0] mr-2">Срібло:</span>${silverVal}</span>` : ''}
+                            <div class="w-full md:w-2/5 flex flex-wrap justify-start md:justify-end gap-4 md:gap-6 text-left md:text-right items-center mt-2 md:mt-0">
+                                ${priceVal ? `
+                                    <span class="text-[var(--text-main)] font-semibold flex items-center gap-2">
+                                        ${silverVal ? `<span class="text-[10px] uppercase tracking-widest text-[#e8b923]">Золото:</span>` : `<span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923]">Ціна:</span>`}
+                                        ${priceVal} ${!isNaN(parseFloat(priceVal)) ? '<span class="text-[10px] text-[var(--text-muted)] ml-1">₴</span>' : ''}
+                                    </span>
+                                ` : ''}
+                                
+                                ${silverVal ? `
+                                    <span class="text-[var(--text-main)] font-semibold flex items-center gap-2">
+                                        <span class="text-[10px] uppercase tracking-widest text-[#c0c0c0]">Срібло:</span>
+                                        ${silverVal} ${!isNaN(parseFloat(silverVal)) ? '<span class="text-[10px] text-[var(--text-muted)] ml-1">₴</span>' : ''}
+                                    </span>
+                                ` : ''}
+                                
+                                ${!priceVal && !silverVal ? `
+                                    <span class="text-[var(--text-muted)] text-sm italic">За домовленістю</span>
+                                ` : ''}
                             </div>
                         </div>
                     `;
@@ -500,6 +513,7 @@
         container.innerHTML = html;
     }
 
+    // Ініціалізація при завантаженні сторінки
     document.addEventListener('DOMContentLoaded', async () => {
         sessionStorage.setItem('on_price_page', 'true');
         
