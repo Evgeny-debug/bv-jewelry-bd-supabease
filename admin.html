@@ -1726,6 +1726,107 @@
             }
         });
 
+
+        // Завантаження прайсу в адмінку для редагування
+async function initAdminPriceEditor() {
+    try {
+        const { data, error } = await _supabase
+            .from('site_storage')
+            .select('value')
+            .eq('key', 'bv_price_list')
+            .single();
+
+        if (error) throw error;
+
+        const priceData = data && data.value ? data.value : [];
+        renderAdminEditorForm(priceData);
+    } catch (err) {
+        console.error('Помилка завантаження прайсу в адмінку:', err);
+    }
+}
+
+// Рендеринг інпутів для кожного пункту прайсу
+function renderAdminEditorForm(categories) {
+    const container = document.getElementById('adminPriceEditorContainer');
+    if (!container) return;
+
+    let html = '';
+
+    categories.forEach((cat, catIndex) => {
+        html += `
+            <div class="admin-category-block mb-6 p-4 bg-white/5 rounded-lg border border-white/10" data-cat-index="${catIndex}">
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-widest text-[#c5a059] mb-1 font-bold">Назва категорії</label>
+                    <input type="text" class="cat-title-input w-full bg-black/40 border border-white/20 rounded p-2 text-white" value="${cat.category || ''}">
+                </div>
+                <div class="space-y-3 items-container">
+        `;
+
+        if (cat.items && Array.isArray(cat.items)) {
+            cat.items.forEach((item, itemIndex) => {
+                html += `
+                    <div class="admin-item-row flex flex-col md:flex-row gap-2 items-center bg-black/20 p-3 rounded border border-white/5" data-item-index="${itemIndex}">
+                        <input type="text" class="item-name-input w-full md:w-3/5 bg-black/40 border border-white/20 rounded p-2 text-sm text-white" value="${item.name || ''}" placeholder="Назва послуги">
+                        <input type="text" class="item-gold-input w-full md:w-1/5 bg-black/40 border border-white/20 rounded p-2 text-sm text-yellow-500" value="${item.gold || ''}" placeholder="Золото">
+                        <input type="text" class="item-silver-input w-full md:w-1/5 bg-black/40 border border-white/20 rounded p-2 text-sm text-gray-300" value="${item.silver || ''}" placeholder="Срібло">
+                    </div>
+                `;
+            });
+        }
+
+        html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+
+async function savePriceListFromAdmin() {
+    const container = document.getElementById('adminPriceEditorContainer');
+    if (!container) return;
+
+    const categoryBlocks = container.querySelectorAll('.admin-category-block');
+    const updatedPriceList = [];
+
+    categoryBlocks.forEach(catBlock => {
+        const categoryName = catBlock.querySelector('.cat-title-input').value;
+        const itemRows = catBlock.querySelectorAll('.admin-item-row');
+        const items = [];
+
+        itemRows.forEach(row => {
+            const name = row.querySelector('.item-name-input').value;
+            const gold = row.querySelector('.item-gold-input').value;
+            const silver = row.querySelector('.item-silver-input').value;
+
+            if (name.trim() !== '') {
+                items.push({ name, gold, silver });
+            }
+        });
+
+        updatedPriceList.push({
+            category: categoryName,
+            items: items
+        });
+    });
+
+    try {
+        // Зберігаємо оновлений масив у таблицю site_storage за ключем bv_price_list
+        const { error } = await _supabase
+            .from('site_storage')
+            .upsert({ 
+                key: 'bv_price_list', 
+                value: updatedPriceList 
+            }, { onConflict: 'key' });
+
+        if (error) throw error;
+        
+        alert('Прайс-лист успішно збережено та оновлено в хмарі!');
+    } catch (err) {
+        console.error('Помилка збереження прайсу:', err);
+        alert('Помилка при збереженні. Дивіться консоль.');
+    }
+}
+
         // 💎 ВОССТАНОВЛЕНО: Удаление товаров
         window.deleteProduct = async function(id) {
             if(confirm('Точно видалити цей товар?')) {
