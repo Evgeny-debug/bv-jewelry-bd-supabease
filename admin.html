@@ -1563,72 +1563,168 @@
                     actProd.variations[editVar].workCost = document.getElementById('var-workCost').value;
                     actProd.variations[editVar].price = document.getElementById('var-price').value;
                     actProd.variations[editVar].discount = document.getElementById('var-discount').value;
-                    actProd.variations[editVar].priceType = document.getElementById('var-price-type').value;
-                    actProd.variations[editVar].name[editLang] = document.getElementById('var-name').value;
-                    actProd.variations[editVar].desc[editLang] = document.getElementById('var-desc').value;
                 }
-
-                actProd.sku = document.getElementById('prod-sku').value.trim();
+                
+                actProd.sku = document.getElementById('prod-sku').value;
                 actProd.category = document.getElementById('prod-category').value;
                 actProd.status = document.getElementById('prod-status').value;
                 actProd.badge = document.getElementById('prod-badge').value;
                 actProd.variant = document.getElementById('prod-variant').value;
                 actProd.stones = document.getElementById('prod-stones').value;
-                actProd.blocks = Array.from(document.querySelectorAll('.prod-block-cb:checked')).map(cb => cb.value);
-
-                if(!actProd.sku) throw new Error('Артикул обов\'язковий!');
-                if(!actProd.variations.base.name.uk) throw new Error('Базова назва (UA) обов\'язкова!');
-
-                const base = actProd.variations.base;
-                let currWeight = Number(base.weight) || 0;
-                let currWorkCost = Number(base.workCost) || 0;
-                let currDiscount = (base.discount && String(base.discount).trim() !== '') ? Number(base.discount) : null;
-                let currPriceType = base.priceType || 'manual';
                 
-                if (currPriceType === 'auto') base.price = Math.round((currWeight * Number(siteSettings.goldRate || 0)) + currWorkCost);
-                else base.price = Number(base.price) || 0;
+                const selectedBlocks = Array.from(document.querySelectorAll('.prod-block-cb:checked')).map(cb => cb.value);
+                actProd.blocks = selectedBlocks;
 
-                if (actProd.sizes && actProd.sizes.length > 0) {
-                    [...actProd.sizes].sort((a, b) => parseFloat(a) - parseFloat(b)).forEach(size => {
-                        const v = actProd.variations[size];
-                        if (!v.priceType || v.priceType.trim() === '') v.priceType = currPriceType;
-                        currPriceType = v.priceType;
-                        if (v.weight && String(v.weight).trim() !== '') currWeight = Number(v.weight);
-                        v.weight = currWeight;
-                        if (v.workCost && String(v.workCost).trim() !== '') currWorkCost = Number(v.workCost);
-                        v.workCost = currWorkCost;
-                        
-                        if (v.discount && String(v.discount).trim() !== '') currDiscount = Number(v.discount);
-                        else if (String(v.discount).trim() === '0') currDiscount = null; 
-                        v.discount = currDiscount;
-
-                        if (currPriceType === 'auto') v.price = Math.round((currWeight * Number(siteSettings.goldRate || 0)) + currWorkCost);
-                        else if(!v.price || String(v.price).trim() === '') v.price = base.price; 
-                    });
+                if (!actProd.id) {
+                    actProd.id = actProd.sku.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const { error } = await _supabase.from('products').insert([actProd]);
+                    if(error) throw error;
+                    products.push(actProd);
+                } else {
+                    const { error } = await _supabase.from('products').update(actProd).eq('id', actProd.id);
+                    if(error) throw error;
+                    const idx = products.findIndex(p => p.id === actProd.id);
+                    if (idx !== -1) products[idx] = actProd;
                 }
-
-                actProd.name = actProd.variations.base.name.uk;
-                actProd.price = actProd.variations.base.price || 0;
-                actProd.img = (actProd.variations.base.images && actProd.variations.base.images.length > 0) ? actProd.variations.base.images[0] : '';
-                const safeSkuId = actProd.sku.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || Date.now();
-                actProd.id = actProd.id || `prod_${safeSkuId}_${Date.now()}`;
-
-                const { error } = await _supabase.from('products').upsert(actProd);
-                if(error) throw new Error(error.message);
-
-                const i = products.findIndex(p => p.id === actProd.id);
-                if (i !== -1) products[i] = actProd; else products.unshift(actProd);
                 
                 filteredProducts = [...products];
                 renderProducts();
                 closeProductModal();
                 showNotification('Товар збережено!');
             } catch (err) {
-                alert("Увага: " + err.message);
+                alert('Помилка: ' + err.message);
             } finally {
                 if(submitBtn) { submitBtn.innerText = 'Зберегти товар'; submitBtn.disabled = false; }
             }
         };
+
+        // ==========================================
+        // ПРАЙС-ЛИСТ (Ремонт та Послуги - Золото/Срібло, 3 мови)
+        // ==========================================
+        window.renderPriceBuilder = function() {
+            const container = document.getElementById('priceBuilderContainer');
+            if (!container) return;
+            
+            if (!priceListDB || priceListDB.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-sm p-4 text-center border border-white/10 rounded-lg">Прайс-лист порожній. Додайте першу категорію.</div>';
+                return;
+            }
+
+            container.innerHTML = priceListDB.map((cat, cIdx) => `
+                <div class="glass-panel p-4 lg:p-6 mb-4 border border-[#c5a059]/20">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-white/10 pb-4">
+                        <div class="w-full sm:w-2/3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Категорія UA</label><input type="text" class="input-field text-xs font-bold text-[#c5a059]" value="${cat.name?.uk || ''}" oninput="updatePriceCategory(${cIdx}, 'uk', this.value)"></div>
+                            <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Категорія RU</label><input type="text" class="input-field text-xs" value="${cat.name?.ru || ''}" oninput="updatePriceCategory(${cIdx}, 'ru', this.value)"></div>
+                            <div><label class="text-[10px] uppercase text-gray-400 block mb-1">Категорія EN</label><input type="text" class="input-field text-xs" value="${cat.name?.en || ''}" oninput="updatePriceCategory(${cIdx}, 'en', this.value)"></div>
+                        </div>
+                        <button type="button" onclick="removePriceCategory(${cIdx})" class="btn-danger text-xs py-1.5 px-3">Видалити категорію</button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="hidden sm:grid grid-cols-12 gap-2 px-2 text-[10px] uppercase font-bold text-gray-400 mb-1">
+                            <div class="col-span-4">Послуга (UA / RU / EN)</div>
+                            <div class="col-span-3 text-center text-yellow-500">Ціна Золото (₴)</div>
+                            <div class="col-span-3 text-center text-gray-300">Ціна Срібло (₴)</div>
+                            <div class="col-span-2 text-right">Дії</div>
+                        </div>
+                        
+                        ${(cat.items || []).map((item, iIdx) => `
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start sm:items-center bg-white/5 p-2 rounded border border-white/5">
+                                <div class="sm:col-span-4 flex flex-col gap-1">
+                                    <input type="text" placeholder="Назва UA" class="input-field text-xs py-1.5 px-2" value="${item.name?.uk || ''}" oninput="updatePriceItem(${cIdx}, ${iIdx}, 'name', 'uk', this.value)">
+                                    <input type="text" placeholder="Назва RU" class="input-field text-xs py-1.5 px-2" value="${item.name?.ru || ''}" oninput="updatePriceItem(${cIdx}, ${iIdx}, 'name', 'ru', this.value)">
+                                    <input type="text" placeholder="Назва EN" class="input-field text-xs py-1.5 px-2" value="${item.name?.en || ''}" oninput="updatePriceItem(${cIdx}, ${iIdx}, 'name', 'en', this.value)">
+                                </div>
+                                <div class="sm:col-span-3 flex justify-center items-center gap-2 h-full">
+                                    <span class="sm:hidden text-[10px] text-gray-400 uppercase w-16">Золото:</span>
+                                    <input type="number" placeholder="0" class="input-field text-xs py-1.5 px-2 w-full text-center text-yellow-500 font-bold border-yellow-500/30 focus:border-yellow-500" value="${item.price_gold || ''}" oninput="updatePriceItem(${cIdx}, ${iIdx}, 'price_gold', null, this.value)">
+                                </div>
+                                <div class="sm:col-span-3 flex justify-center items-center gap-2 h-full">
+                                    <span class="sm:hidden text-[10px] text-gray-400 uppercase w-16">Срібло:</span>
+                                    <input type="number" placeholder="0" class="input-field text-xs py-1.5 px-2 w-full text-center text-gray-300 font-bold border-gray-400/30 focus:border-gray-300" value="${item.price_silver || ''}" oninput="updatePriceItem(${cIdx}, ${iIdx}, 'price_silver', null, this.value)">
+                                </div>
+                                <div class="sm:col-span-2 text-right mt-2 sm:mt-0">
+                                    <button type="button" onclick="removePriceItem(${cIdx}, ${iIdx})" class="text-red-400 hover:text-red-300 text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-red-500/10 rounded">Видалити</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <button type="button" onclick="addPriceItem(${cIdx})" class="mt-4 text-xs text-[#c5a059] hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
+                        <span>+ Додати послугу</span>
+                    </button>
+                </div>
+            `).join('');
+            
+            const jsonEditor = document.getElementById('price-json-editor');
+            if (jsonEditor) jsonEditor.value = JSON.stringify(priceListDB, null, 4);
+        };
+
+        window.updatePriceCategory = function(cIdx, lang, value) {
+            if(!priceListDB[cIdx].name) priceListDB[cIdx].name = {uk:'', ru:'', en:''};
+            priceListDB[cIdx].name[lang] = value;
+            const jsonEditor = document.getElementById('price-json-editor');
+            if (jsonEditor) jsonEditor.value = JSON.stringify(priceListDB, null, 4);
+        };
+
+        window.updatePriceItem = function(cIdx, iIdx, field, lang, value) {
+            if (field === 'name') {
+                if(!priceListDB[cIdx].items[iIdx].name) priceListDB[cIdx].items[iIdx].name = {uk:'', ru:'', en:''};
+                priceListDB[cIdx].items[iIdx].name[lang] = value;
+            } else {
+                priceListDB[cIdx].items[iIdx][field] = Number(value) || 0;
+            }
+            const jsonEditor = document.getElementById('price-json-editor');
+            if (jsonEditor) jsonEditor.value = JSON.stringify(priceListDB, null, 4);
+        };
+
+        window.addPriceItem = function(cIdx) {
+            if(!priceListDB[cIdx].items) priceListDB[cIdx].items = [];
+            priceListDB[cIdx].items.push({ name: {uk:'', ru:'', en:''}, price_gold: '', price_silver: '' });
+            renderPriceBuilder();
+        };
+
+        window.removePriceItem = function(cIdx, iIdx) {
+            if(confirm('Видалити послугу з прайс-листа?')) {
+                priceListDB[cIdx].items.splice(iIdx, 1);
+                renderPriceBuilder();
+            }
+        };
+
+        window.removePriceCategory = function(cIdx) {
+            if(confirm('Видалити цілу категорію послуг? Це безповоротно.')) {
+                priceListDB.splice(cIdx, 1);
+                renderPriceBuilder();
+            }
+        };
+
+        document.getElementById('btnAddPriceCategory')?.addEventListener('click', () => {
+            priceListDB.push({
+                id: 'cat_' + Date.now(),
+                name: {uk: '', ru: '', en: ''},
+                items: []
+            });
+            renderPriceBuilder();
+        });
+
+        document.getElementById('btnSavePriceList')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btnSavePriceList');
+            const originalText = btn.innerText;
+            btn.innerText = 'Зберігаю...';
+            btn.disabled = true;
+            try {
+                // Зберігаємо структуру прайсу в базу (ключ 'bv_price_list')
+                await saveToCloudStorage('bv_price_list', priceListDB);
+                showNotification('Прайс-лист успішно збережено в базі!');
+            } catch (err) {
+                alert('Помилка збереження прайс-листа: ' + err.message);
+                console.error(err);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
 
         // 💎 ВОССТАНОВЛЕНО: Удаление товаров
         window.deleteProduct = async function(id) {
