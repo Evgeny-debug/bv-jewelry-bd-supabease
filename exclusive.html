@@ -436,6 +436,9 @@
             }
         };
 
+
+
+
         // Функція перемикання матеріалів
         window.selectMaterial = function(id, btnElement) {
             selectedMaterial = id;
@@ -466,6 +469,87 @@
             document.getElementById('fileNameDisplay').classList.remove('text-[var(--gold-muted)]');
         };
 
+
+        async function submitExclusiveOrder(event) {
+    event.preventDefault();
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : 'Відправити';
+    if (submitBtn) { submitBtn.innerText = 'Відправка...'; submitBtn.disabled = true; }
+
+    try {
+        // 1. Збираємо дані клієнта
+        const name = document.getElementById('exc-client-name').value.trim();
+        const phone = document.getElementById('exc-client-phone').value.trim();
+        const comment = document.getElementById('exc-client-comment')?.value.trim() || '';
+        const fileInput = document.getElementById('exc-file-input');
+        
+        if (!name || !phone) {
+            alert('Будь ласка, вкажіть ваше ім\'я та номер телефону!');
+            return;
+        }
+
+        // 2. Збираємо обрані кнопки (уподобання/матеріали)
+        // Шукаємо всі активні кнопки з класом або атрибутом вибору, наприклад, .material-btn.active або чекбокси
+        const selectedPreferences = Array.from(document.querySelectorAll('.exc-pref-btn.active, input[name="exc-pref"]:checked'))
+            .map(el => el.dataset.value || el.value || el.innerText.trim());
+
+        // 3. Завантажуємо фото в Supabase (якщо воно додане)
+        let customPhotoUrl = null;
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `exclusive_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const filePath = `exclusive_orders/${fileName}`;
+
+            const { error: uploadError } = await _supabase.storage
+                .from('site-images')
+                .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw new Error('Помилка завантаження фото: ' + uploadError.message);
+
+            const { data: { publicUrl } } = _supabase.storage
+                .from('site-images')
+                .getPublicUrl(filePath);
+                
+            customPhotoUrl = publicUrl;
+        }
+
+        // 4. Формуємо об'єкт замовлення для таблиці orders
+        const newOrder = {
+            id: `EXC-${Math.floor(100000 + Math.random() * 900000)}`,
+            client_name: name,
+            phone: phone,
+            comment: comment,
+            total_price: 0, // Розраховується індивідуально менеджером
+            status: 'new',
+            is_exclusive: true, // Флаг для адмінки
+            type: 'exclusive',
+            custom_photo: customPhotoUrl,
+            preferences: selectedPreferences,
+            created_at: new Date().toISOString()
+        };
+
+        // 5. Відправляємо в базу
+        const { error: dbError } = await _supabase.from('orders').insert([newOrder]);
+        if (dbError) throw new Error('Помилка створення замовлення: ' + dbError.message);
+
+        alert('Ваше індивідуальне замовлення успішно прийнято! Ми зв\'яжемося з вами найближчим часом.');
+        event.target.reset(); // Очищаємо форму
+        
+        // Скидаємо стилі активних кнопок та прев'ю фото
+        document.querySelectorAll('.exc-pref-btn.active').forEach(b => b.classList.remove('active'));
+        const previewEl = document.getElementById('exc-photo-preview');
+        if (previewEl) previewEl.classList.add('hidden');
+
+    } catch (err) {
+        console.error(err);
+        alert('Сталася помилка: ' + err.message);
+    } finally {
+        if (submitBtn) { submitBtn.innerText = originalBtnText; submitBtn.disabled = false; }
+    }
+}
+        
         // Ініціалізація сторінки при завантаженні DOM
         window.addEventListener('DOMContentLoaded', () => {
             let processData = [];

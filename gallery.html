@@ -4,8 +4,10 @@
 
 
      <!-- Основная иконка для большинства браузеров -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<!-- Замініть прямі слеші на крапку з крапкою/слешем -->
+<link rel="manifest" href="./site.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
 
 <!-- Иконка для Apple устройств -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -508,7 +510,42 @@
     // Робимо функцію доступною глобально (для викликів з main.js, якщо потрібно)
     window.renderGallery = renderGallery;
 
-    
+
+async function loadClientGallery() {
+    const grid = document.getElementById('client-gallery-grid');
+    if (!grid) return;
+
+    try {
+        // Отримуємо дані безпосередньо з Supabase Storage
+        const { data: storage, error } = await _supabase.from('site_storage').select('value').eq('key', 'bv_gallery').single();
+        if (error || !storage || !storage.value) {
+            grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-12">Галерея порожня.</div>';
+            return;
+        }
+
+        const items = storage.value;
+        // КЛЮЧОВЕ ВИПРАВЛЕННЯ: прибираємо анімаційні класи зникнення (opacity-0 / fade-in), які конфліктують із завантаженням зображень
+        grid.innerHTML = items.map(item => `
+            <div class="break-inside-avoid mb-4 rounded-xl overflow-hidden glass-panel border border-white/10 group relative bg-[#121216]">
+                <img src="${item.img}" alt="${item.desc?.uk || 'Ювелірна робота'}" 
+                     class="w-full h-auto block object-cover transform transition-transform duration-700 group-hover:scale-105"
+                     loading="eager" 
+                     onerror="this.style.display='none'">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                    <span class="text-[#c5a059] text-[10px] font-bold uppercase tracking-widest">${item.category || 'Atelier'}</span>
+                    <p class="text-white text-xs font-medium mt-1">${item.desc?.uk || ''}</p>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        console.error('Помилка завантаження галереї:', err);
+    }
+}
+
+// Викликаємо тільки один раз після повного завантаження DOM
+document.addEventListener('DOMContentLoaded', loadClientGallery);
+
 </script>
 <!-- Модальне вікно (Лайтбокс) для збільшення фото -->
 <div id="lightboxModal" class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeLightbox()">
