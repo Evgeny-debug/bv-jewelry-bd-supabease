@@ -374,92 +374,83 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
-    <script>
-    // БАГАТОМОВНІ ДАНІ ПРАЙС-ЛИСТА (UA / RU / EN)
-    let priceListDB = JSON.parse(localStorage.getItem('bv_price_list')) || [
-            {
-                category: "Ремонт ланцюгів та браслетів",
-                items: [
-                    { name: "Запаяти одне місце зламу ланцюга", gold: "Від 600", silver: "Від 400" },
-                    { name: "Запаяти одне місце зламу ланцюга з відновленням малюнку", gold: "Від 1000", silver: "Від 600" },
-                    { name: "Перебирання замку «Карабін» (замiна пружини)", gold: "Від 300", silver: "Від 300" },
-                    { name: "Перебирання замку «Карабін» з реставрацією протертих частин, замiна пружини", gold: "Від 1500", silver: "Від 800" },
-                    { name: "Відновлення протертих кінцевих ланцюга (1 кінцевик)", gold: "Від 600", silver: "Від 400" },
-                    { name: "Замок «Карабін»", gold: "Від 2000", silver: "Від 800" },
-                    { name: "Замок «Шпренгельний»", gold: "Від 1500", silver: "Від 600" },
-                    { name: "Ремонт роз’ємних з’єднань ланцюгів (штифтування)", gold: "Від 800", silver: "Від 400" },
-                    { name: "Вкорочення браслетів, ланцюжкiв", gold: "Від 1000", silver: "Від 600" }
-                ]
-            },
-            {
-                category: "Ремонт каблучок, сережок та підвісок",
-                items: [
-                    { name: "Запаяти одне місце зламу каблучки", gold: "Від 800", silver: "Від 500" },
-                    { name: "Запаяти одне місце зламу (каблучки, сережки, підвіски зі вставками)", gold: "Від 1000", silver: "Від 700" },
-                    { name: "Реставрація протертих сережок та підвісок (1 з’єднання)", gold: "Від 750", silver: "Від 500" },
-                    { name: "Лазерна пайка одного зламу", gold: "Від 800", silver: "Від 500" }
-                ]
-            },
-            {
-                category: "Збільшення та зменшення розміру каблучок",
-                items: [
-                    { name: "Збільшити каблучку з камiнням (розтягування/прокатка до 1 розм.)", gold: "Від 800", silver: "Від 500" },
-                    { name: "Збільшити обручку шляхом доповнення", gold: "Від 4000", silver: "Від 1000" },
-                    { name: "Зменшити обручку шляхом вирізки незалежно від розміру", gold: "Від 1000", silver: "Від 600" },
-                    { name: "Зменшити шлюбну обручку шляхом стиснення (до 1 розм.)", gold: "Від 800", silver: "Від 500" },
-                    { name: "Збільшити шлюбну обручку шляхом прокатки по колу (до 1 розм.)", gold: "Від 800", silver: "Від 500" }
-                ]
-            },
-            {
-                category: "Закріплення Камiння",
-                items: [
-                    { name: "Закріпити одну вставку (каміння) з підготовкою поверхні", gold: "Від 400", silver: "Від 400" },
-                    { name: "Вiдновлення 1-го крапану", gold: "Від 800", silver: "Від 800" },
-                    { name: "Закріплення діамантів", gold: "Договірна", silver: "Договірна" }
-                ]
-            },
-            {
-                category: "Чищення, полірування та догляд",
-                items: [
-                    { name: "Виправити деформовану шинку каблучки, сережки", gold: "Від 600", silver: "Від 400" },
-                    { name: "Відполірувати каблучку, брошку, підвіску", gold: "Від 400", silver: "Від 300" },
-                    { name: "Відполірувати сережки", gold: "Від 600", silver: "Від 300" },
-                    { name: "Відполірувати ланцюг, браслет", gold: "Від 600", silver: "Від 300" }
-                ]
-            },
-            {
-                category: "Інші послуги",
-                items: [
-                    { name: "Родіювання локальне", gold: "Від 2000", silver: "Від 2000" },
-                    { name: "Родіювання загальне (мін. 2000 грн)", gold: "Від 600/г", silver: "Від 600/г" },
-                    { name: "Позолочення (мін. 2000 грн)", gold: "Від 600/г", silver: "Від 600/г" },
-                    { name: "Гравіювання лазерне", gold: "Від 2000", silver: "Від 1000" },
-                    { name: "Пiдклеювання вставок, перлин, канатiв, бiрюзы", gold: "Від 200", silver: "Від 200" },
-                    { name: "Замiна канату на новий з штифтуванням кінцевих", gold: "Від 1600", silver: "Від 800" },
-                    { name: "Замiна канату на новий без штифтування", gold: "Від 800", silver: "Від 800" }
-                ]
-            }
-        ];
+    
+<script>
+    let priceListDB = [];
 
-    // Оновлена функція рендеру прайсу (виправлено виведення назви категорії)
+    // Резервні дані на випадок відсутності інтернет-зв'язку
+    const fallbackPriceList = [
+        {
+            category: "Ремонт ланцюгів та браслетів",
+            items: [
+                { name: { ua: "Запаяти одне місце зламу ланцюга", ru: "Запаять одно место излома цепи", en: "Solder one break point of the chain" }, gold: "Від 600", silver: "Від 400" },
+                { name: { ua: "Перебирання замку «Карабін» (замiна пружини)", ru: "Переборка замка «Карабин» (замена пружины)", en: "Overhaul of 'Carabiner' lock (spring replacement)" }, gold: "Від 300", silver: "Від 300" }
+            ]
+        }
+    ];
+
+    async function fetchPriceListFromSupabase() {
+        try {
+            // Гарантована ініціалізація клієнта, якщо глобальний ще не піднявся
+            if (!window.supabaseClient && window.supabase && window.supabase.createClient) {
+                // Вставте сюди ваші актуальні дані підключення до Supabase, якщо вони не підтягуються з main.js
+                const SUPABASE_URL = 'ВАШ_SUPABASE_URL'; 
+                const SUPABASE_KEY = 'ВАШ_SUPABASE_ANON_KEY';
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+
+            let attempts = 0;
+            while (!window.supabaseClient && attempts < 15) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+
+            if (!window.supabaseClient) {
+                console.warn("Supabase клієнт так і не з'явився.");
+                return null;
+            }
+
+            const { data, error } = await window.supabaseClient
+                .from('site_storage')
+                .select('value')
+                .eq('key', 'bv_price_list')
+                .maybeSingle();
+
+            if (error) {
+                console.error("Помилка Supabase при завантаженні прайсу:", error);
+                return null;
+            }
+
+            console.log("Успішно отримані дані прайсу з бази:", data);
+            return data ? data.value : null;
+        } catch (err) {
+            console.error("Виняток при завантаженні прайсу:", err);
+            return null;
+        }
+    }
+
     function renderPriceList(searchQuery = '') {
         const container = document.getElementById('priceListContainer');
         if (!container) return;
         
         const q = searchQuery.toLowerCase().trim();
         let html = '';
-
         const lang = typeof currentLang !== 'undefined' ? currentLang : 'ua';
 
-        priceListDB.forEach(cat => {
-            const catTitle = cat.title || cat.category || '';
+        const listToRender = (priceListDB && priceListDB.length > 0) ? priceListDB : fallbackPriceList;
 
-            const filteredItems = cat.items.filter(item => {
+        listToRender.forEach(cat => {
+            const catTitle = cat.title || cat.category || 'Послуги';
+            const items = cat.items || [];
+
+            const filteredItems = items.filter(item => {
                 let itemName = '';
                 if (typeof item.name === 'object' && item.name !== null) {
                     itemName = (item.name[lang] || item.name.ua || item.name.ru || item.name.en || '').toLowerCase();
-                } else {
-                    itemName = (item.name || '').toLowerCase();
+                } else if (typeof item.name === 'string') {
+                    itemName = item.name.toLowerCase();
+                } else if (item.title) {
+                    itemName = String(item.title).toLowerCase();
                 }
                 return itemName.includes(q);
             });
@@ -471,8 +462,7 @@
                     <div class="flex flex-col border-t border-[var(--border)]">
                         <div class="hidden md:flex justify-between items-center py-3 border-b border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-4">
                             <span class="w-3/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Послуга</span>
-                            <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Золото (₴)</span>
-                            <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#c0c0c0] font-bold">Срібло (₴)</span>
+                            <span class="w-2/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Ціна / Золото / Срібло</span>
                         </div>
                 `;
 
@@ -481,25 +471,19 @@
                     if (typeof item.name === 'object' && item.name !== null) {
                         displayName = item.name[lang] || item.name.ua || item.name.ru || item.name.en || '';
                     } else {
-                        displayName = item.name || '';
+                        displayName = item.name || item.title || 'Послуга';
                     }
 
-                    const goldPrice = item.gold || item.price || '—';
-                    const silverPrice = item.silver || '—';
+                    const priceVal = item.price || item.gold || '';
+                    const silverVal = item.silver || '';
 
                     html += `
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center py-4 md:py-5 border-b border-[var(--border)] px-2 md:px-4 hover:bg-[rgba(255,255,255,0.01)] transition-colors group">
                             <span class="w-full md:w-3/5 font-medium text-[var(--text-main)] text-sm md:text-base leading-snug mb-3 md:mb-0 pr-4">${displayName}</span>
                             
-                            <div class="w-full md:w-2/5 flex justify-between md:justify-end gap-4 md:gap-0">
-                                <div class="flex flex-col md:w-1/2 md:text-right">
-                                    <span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923] mb-1 font-bold">Золото</span>
-                                    <span class="text-[var(--text-main)] font-semibold">${goldPrice}</span>
-                                </div>
-                                <div class="flex flex-col md:w-1/2 md:text-right">
-                                    <span class="md:hidden text-[10px] uppercase tracking-widest text-[#c0c0c0] mb-1 font-bold">Срібло</span>
-                                    <span class="text-[var(--text-main)] font-semibold">${silverPrice}</span>
-                                </div>
+                            <div class="w-full md:w-2/5 flex justify-end gap-6 text-right">
+                                ${priceVal ? `<span class="text-[var(--text-main)] font-semibold"><span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923] mr-2">Ціна:</span>${priceVal}</span>` : ''}
+                                ${silverVal ? `<span class="text-[var(--text-main)] font-semibold"><span class="md:hidden text-[10px] uppercase tracking-widest text-[#c0c0c0] mr-2">Срібло:</span>${silverVal}</span>` : ''}
                             </div>
                         </div>
                     `;
@@ -516,9 +500,17 @@
         container.innerHTML = html;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         sessionStorage.setItem('on_price_page', 'true');
         
+        const remoteData = await fetchPriceListFromSupabase();
+        if (remoteData && Array.isArray(remoteData) && remoteData.length > 0) {
+            priceListDB = remoteData;
+        } else {
+            console.warn("Дані з Supabase пусті або формат масиву невірний. Використовуємо fallback.");
+            priceListDB = fallbackPriceList;
+        }
+
         renderPriceList();
 
         const searchInput = document.getElementById('priceSearchInput');
