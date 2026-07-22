@@ -2547,3 +2547,109 @@ async function initMainBanners() {
 }
 
 initMainBanners();
+
+
+
+// ==========================================
+// ВІЗУАЛЬНИЙ РЕДАКТОР ПРАЙС-ЛИСТА
+// ==========================================
+
+function renderPriceBuilder() {
+    const container = document.getElementById('priceBuilderContainer');
+    if (!container) return;
+    
+    if (!Array.isArray(priceListDB)) priceListDB = [];
+    
+    if (priceListDB.length === 0) {
+        container.innerHTML = `
+            <div class="glass-panel p-8 text-center text-gray-400 text-xs">
+                Прайс-лист порожній. Натисніть «+ Додати категорію», щоб почати.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = priceListDB.map((cat, catIdx) => {
+        const catTitle = cat.title || cat.category || 'Категорія';
+        const items = cat.items || [];
+        
+        return `
+            <div class="glass-panel p-4 lg:p-6 space-y-4 border border-white/10">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-white/10">
+                    <div class="w-full sm:w-1/2">
+                        <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Назва категорії</label>
+                        <input type="text" class="input-field text-xs font-semibold" value="${catTitle}" oninput="updatePriceCatTitle(${catIdx}, this.value)">
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="addPriceItem(${catIdx})" class="btn-secondary text-xs py-1.5 px-3">+ Послуга</button>
+                        <button type="button" onclick="deletePriceCat(${catIdx})" class="btn-danger text-xs py-1.5 px-3">Видалити категорію</button>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="text-[10px] uppercase font-bold text-gray-400">Послуги та ціни</div>
+                    ${items.length === 0 ? '<div class="text-xs text-gray-500 italic py-2">У цій категорії поки немає послуг.</div>' : ''}
+                    ${items.map((item, itemIdx) => `
+                        <div class="flex flex-col sm:flex-row gap-2 items-center bg-black/20 p-2.5 rounded-lg border border-white/5">
+                            <input type="text" class="input-field text-xs flex-1" placeholder="Назва послуги (напр. Лазерне паяння)" value="${item.name || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'name', this.value)">
+                            <input type="text" class="input-field text-xs w-full sm:w-48 font-mono text-[#c5a059]" placeholder="Ціна (напр. від 300 ₴)" value="${item.price || ''}" oninput="updatePriceItem(${catIdx}, ${itemIdx}, 'price', this.value)">
+                            <button type="button" onclick="deletePriceItem(${catIdx}, ${itemIdx})" class="btn-danger text-xs p-2 h-10 w-full sm:w-auto flex items-center justify-center" title="Видалити">&times;</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.addPriceCategory = function() {
+    if (!Array.isArray(priceListDB)) priceListDB = [];
+    priceListDB.push({ title: 'Нова категорія', items: [] });
+    renderPriceBuilder();
+};
+
+window.deletePriceCat = function(catIdx) {
+    if (confirm('Видалити всю категорію разом із послугами?')) {
+        priceListDB.splice(catIdx, 1);
+        renderPriceBuilder();
+    }
+};
+
+window.updatePriceCatTitle = function(catIdx, val) {
+    if (priceListDB[catIdx]) {
+        priceListDB[catIdx].title = val;
+        priceListDB[catIdx].category = val;
+    }
+};
+
+window.addPriceItem = function(catIdx) {
+    if (!priceListDB[catIdx].items) priceListDB[catIdx].items = [];
+    priceListDB[catIdx].items.push({ name: '', price: '' });
+    renderPriceBuilder();
+};
+
+window.deletePriceItem = function(catIdx, itemIdx) {
+    priceListDB[catIdx].items.splice(itemIdx, 1);
+    renderPriceBuilder();
+};
+
+window.updatePriceItem = function(catIdx, itemIdx, field, val) {
+    if (priceListDB[catIdx] && priceListDB[catIdx].items[itemIdx]) {
+        priceListDB[catIdx].items[itemIdx][field] = val;
+    }
+};
+
+window.saveVisualPriceList = async function() {
+    // Синхронізуємо зі старим скриптом, якщо десь використовується textarea
+    const priceEditor = document.getElementById('price-json-editor');
+    if (priceEditor) priceEditor.value = JSON.stringify(priceListDB, null, 4);
+
+    // Зберігаємо в Supabase у таблицю site_storage
+    await saveToCloudStorage('bv_price_list', priceListDB);
+    showNotification('Прайс-лист успішно збережено!');
+};
+
+// Залишаємо сумісність для виклику старої функції збереження якщо потрібно
+window.savePriceList = function() {
+    saveVisualPriceList();
+};

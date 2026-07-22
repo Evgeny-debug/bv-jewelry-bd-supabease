@@ -511,14 +511,25 @@
         </section>
 
         <!-- РЕДАКТОР ПРАЙСА -->
-        <section id="content-price-builder" class="tab-content hidden h-full">
-            <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide mb-6">Прайс-лист (Ремонт та Послуги)</h2>
-            <div class="glass-panel p-4 lg:p-6">
-                <p class="text-xs text-gray-400 mb-4">Формат JSON. Будьте уважні зі знаками пунктуації.</p>
-                <textarea id="price-json-editor" class="input-field h-[50vh] lg:h-[60vh] font-mono text-xs leading-relaxed p-4" spellcheck="false"></textarea>
-                <button onclick="savePriceList()" class="btn-primary mt-4 w-full sm:w-auto text-xs py-2.5">Зберегти Прайс</button>
-            </div>
-        </section>
+<section id="content-price-builder" class="tab-content hidden h-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+            <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide">Прайс-лист (Ремонт та Послуги)</h2>
+            <p class="text-xs text-gray-400 mt-1">Зручне додавання категорій та послуг без ручного редагування JSON.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button onclick="addPriceCategory()" class="btn-secondary flex-1 sm:flex-none text-xs py-2.5">+ Додати категорію</button>
+            <button onclick="saveVisualPriceList()" class="btn-primary flex-1 sm:flex-none text-xs py-2.5">Зберегти зміни</button>
+        </div>
+    </div>
+    
+    <div class="space-y-4 pb-20" id="priceBuilderContainer">
+        <!-- Динамічний генератор карток прайсу -->
+    </div>
+    
+    <!-- Прихований textarea для повної сумісності зі старим кодом -->
+    <textarea id="price-json-editor" class="hidden"></textarea>
+</section>
 
         <!-- НАСТРОЙКИ -->
         <section id="content-settings" class="tab-content hidden h-full pb-12">
