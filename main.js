@@ -2653,3 +2653,103 @@ window.saveVisualPriceList = async function() {
 window.savePriceList = function() {
     saveVisualPriceList();
 };
+
+
+
+// Безпечна ініціалізація подій прайс-листа
+document.addEventListener('DOMContentLoaded', () => {
+    const addCatBtn = document.getElementById('btnAddPriceCategory');
+    if (addCatBtn) {
+        addCatBtn.addEventListener('click', addPriceCategory);
+    }
+
+    const savePriceBtn = document.getElementById('btnSavePriceList');
+    if (savePriceBtn) {
+        savePriceBtn.addEventListener('click', saveVisualPriceList);
+    }
+});
+
+
+
+// ==========================================
+// УПРАВЛІННЯ НАЛАШТУВАННЯМИ ТА АДРЕСАМИ
+// ==========================================
+
+window.renderAddresses = function(addresses = []) {
+    const container = document.getElementById('addressesContainer');
+    if (!container) return;
+    
+    if (!Array.isArray(addresses)) addresses = [];
+
+    if (addresses.length === 0) {
+        container.innerHTML = '<div class="text-xs text-gray-500 italic">Адреси не додано</div>';
+        return;
+    }
+
+    container.innerHTML = addresses.map((addr, idx) => `
+        <div class="flex gap-2 items-center">
+            <input type="text" class="input-field text-xs flex-1 address-input" placeholder="Адреса бутіка (напр. вул. Хрещатик, 1)" value="${addr || ''}">
+            <button type="button" onclick="removeAddressField(${idx})" class="btn-danger text-xs p-2 h-10 w-10 flex items-center justify-center shrink-0" title="Видалити">&times;</button>
+        </div>
+    `).join('');
+};
+
+window.addAddressField = function() {
+    const container = document.getElementById('addressesContainer');
+    if (!container) return;
+    
+    const inputs = container.querySelectorAll('.address-input');
+    const currentValues = Array.from(inputs).map(input => input.value);
+    currentValues.push('');
+    renderAddresses(currentValues);
+};
+
+window.removeAddressField = function(idx) {
+    const container = document.getElementById('addressesContainer');
+    if (!container) return;
+    
+    const inputs = container.querySelectorAll('.address-input');
+    const currentValues = Array.from(inputs).map(input => input.value);
+    currentValues.splice(idx, 1);
+    renderAddresses(currentValues);
+};
+
+window.loadSiteSettings = function(settingsData) {
+    if (!settingsData) return;
+    
+    if (document.getElementById('set-gold-rate')) document.getElementById('set-gold-rate').value = settingsData.goldRate || '';
+    if (document.getElementById('set-phone')) document.getElementById('set-phone').value = settingsData.phone || '';
+    if (document.getElementById('set-tg')) document.getElementById('set-tg').value = settingsData.telegram || '';
+    if (document.getElementById('set-inst')) document.getElementById('set-inst').value = settingsData.instagram || '';
+    
+    renderAddresses(settingsData.addresses || []);
+};
+
+window.saveSiteSettings = async function() {
+    const addressInputs = document.querySelectorAll('.address-input');
+    const addresses = Array.from(addressInputs).map(input => input.value.trim()).filter(Boolean);
+
+    const settingsData = {
+        goldRate: document.getElementById('set-gold-rate') ? document.getElementById('set-gold-rate').value : '',
+        phone: document.getElementById('set-phone') ? document.getElementById('set-phone').value : '',
+        telegram: document.getElementById('set-tg') ? document.getElementById('set-tg').value : '',
+        instagram: document.getElementById('set-inst') ? document.getElementById('set-inst').value : '',
+        addresses: addresses
+    };
+
+    await saveToCloudStorage('bv_site_settings', settingsData);
+    showNotification('Налаштування успішно збережено!');
+};
+
+// Безпечна прив'язка подій
+document.addEventListener('DOMContentLoaded', () => {
+    const addAddressBtn = document.getElementById('btnAddAddress');
+    if (addAddressBtn) {
+        addAddressBtn.addEventListener('click', addAddressField);
+    }
+
+    const saveSettingsBtn = document.getElementById('btnSaveSettings');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveSiteSettings);
+    }
+});

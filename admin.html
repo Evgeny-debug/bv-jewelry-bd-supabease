@@ -533,41 +533,41 @@
 
         <!-- НАСТРОЙКИ -->
         <section id="content-settings" class="tab-content hidden h-full pb-12">
-            <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide mb-6">Налаштування</h2>
-            <div class="glass-panel p-4 lg:p-6 mb-6">
-                <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-3">Курс золота (ГРН / грам)</h3>
-                <input type="number" id="set-gold-rate" class="input-field text-lg font-bold text-[#c5a059] w-full sm:w-64">
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-panel p-4 lg:p-6">
-                    <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-4 pb-2 border-b border-white/10">Контакти та Соцмережі</h3>
-                    <div class="flex flex-col gap-3">
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Телефон</label>
-                            <input type="text" id="set-phone" class="input-field text-xs" placeholder="+38 (000) 000-00-00">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Telegram Link</label>
-                            <input type="text" id="set-tg" class="input-field text-xs" placeholder="https://t.me/...">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Instagram Link</label>
-                            <input type="text" id="set-inst" class="input-field text-xs" placeholder="https://instagram.com/...">
-                        </div>
-                    </div>
+    <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide mb-6">Налаштування</h2>
+    <div class="glass-panel p-4 lg:p-6 mb-6">
+        <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-3">Курс золота (ГРН / грам)</h3>
+        <input type="number" id="set-gold-rate" class="input-field text-lg font-bold text-[#c5a059] w-full sm:w-64">
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-4 lg:p-6">
+            <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-4 pb-2 border-b border-white/10">Контакти та Соцмережі</h3>
+            <div class="flex flex-col gap-3">
+                <div>
+                    <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Телефон</label>
+                    <input type="text" id="set-phone" class="input-field text-xs" placeholder="+38 (000) 000-00-00">
                 </div>
-                <div class="glass-panel p-4 lg:p-6">
-                    <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-4 pb-2 border-b border-white/10">Адреси бутіків</h3>
-                    <div id="addressesContainer" class="flex flex-col gap-3"></div>
-                    <button type="button" onclick="addAddressField()" class="mt-4 text-xs text-[#c5a059] hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
-                        <span>+ Додати філіал</span>
-                    </button>
+                <div>
+                    <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Telegram Link</label>
+                    <input type="text" id="set-tg" class="input-field text-xs" placeholder="https://t.me/...">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase text-gray-500 block mb-1 font-semibold">Instagram Link</label>
+                    <input type="text" id="set-inst" class="input-field text-xs" placeholder="https://instagram.com/...">
                 </div>
             </div>
-            <div class="mt-6 text-right">
-                <button onclick="saveSiteSettings()" class="btn-primary w-full sm:w-auto text-xs py-3 px-6 shadow-lg shadow-[#c5a059]/10">Зберегти налаштування</button>
-            </div>
-        </section>
+        </div>
+        <div class="glass-panel p-4 lg:p-6">
+            <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-4 pb-2 border-b border-white/10">Адреси бутіків</h3>
+            <div id="addressesContainer" class="flex flex-col gap-3"></div>
+            <button type="button" id="btnAddAddress" class="mt-4 text-xs text-[#c5a059] hover:underline font-bold uppercase tracking-wider inline-flex items-center gap-1">
+                <span>+ Додати філіал</span>
+            </button>
+        </div>
+    </div>
+    <div class="mt-6 text-right">
+        <button type="button" id="btnSaveSettings" class="btn-primary w-full sm:w-auto text-xs py-3 px-6 shadow-lg shadow-[#c5a059]/10">Зберегти налаштування</button>
+    </div>
+</section>
 
         <!-- ГАЛЕРЕЯ -->
         <section id="content-gallery" class="tab-content hidden h-full">
