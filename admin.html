@@ -2125,6 +2125,84 @@ window.deleteGalleryItem = async function(id) {
         showNotification('Фото видалено!');
     }
 };
+
+
+
+// Додавання нової категорії
+window.addPriceCategory = async function() {
+    if (!Array.isArray(priceListDB)) priceListDB = [];
+    
+    priceListDB.push({
+        category: "Нова категорія",
+        title: "Нова категорія",
+        items: []
+    });
+
+    if (typeof renderPriceBuilder === 'function') {
+        renderPriceBuilder();
+    }
+    
+    // Зберігаємо в localStorage та Supabase (якщо налаштовано)
+    localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+    if (typeof saveToCloudStorage === 'function') {
+        await saveToCloudStorage('bv_price_list', priceListDB);
+    }
+    
+    if (typeof showNotification === 'function') {
+        showNotification('Нову категорію створено!');
+    }
+};
+
+// Оновлення назви категорії при введенні тексту в інпут
+window.updatePriceCatTitle = async function(catIdx, newTitle) {
+    if (priceListDB[catIdx]) {
+        priceListDB[catIdx].category = newTitle;
+        priceListDB[catIdx].title = newTitle;
+        
+        localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+        if (typeof saveToCloudStorage === 'function') {
+            await saveToCloudStorage('bv_price_list', priceListDB);
+        }
+    }
+};
+
+// Видалення категорії
+window.deletePriceCat = async function(catIdx) {
+    if (confirm('Ви дійсно хочете видалити цю категорію разом з усіма послугами?')) {
+        priceListDB.splice(catIdx, 1);
+        if (typeof renderPriceBuilder === 'function') {
+            renderPriceBuilder();
+        }
+        
+        localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+        if (typeof saveToCloudStorage === 'function') {
+            await saveToCloudStorage('bv_price_list', priceListDB);
+        }
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Категорію видалено!');
+        }
+    }
+};
+
+// Видалення окремої послуги всередині категорії
+window.deletePriceItem = async function(catIdx, itemIdx) {
+    if (priceListDB[catIdx] && priceListDB[catIdx].items) {
+        priceListDB[catIdx].items.splice(itemIdx, 1);
+        if (typeof renderPriceBuilder === 'function') {
+            renderPriceBuilder();
+        }
+        
+        localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+        if (typeof saveToCloudStorage === 'function') {
+            await saveToCloudStorage('bv_price_list', priceListDB);
+        }
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Послугу видалено!');
+        }
+    }
+};
     </script>
 
 
