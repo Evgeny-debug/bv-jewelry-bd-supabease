@@ -2325,3 +2325,225 @@ function openLightboxModal(imgSrc, title) {
     };
     window.addEventListener('keydown', escHandler);
 }
+
+
+
+
+// ==========================================
+// МОДУЛЬ БАНЕРІВ (SPA & Admin)
+// ==========================================
+
+let banners = [];
+
+// 1. ВИВЕДЕННЯ БАНЕРІВ НА ГОЛОВНІЙ СТОРІНЦІ
+// Викликайте цю функцію всередині вашого роутера/функції генерації головної сторінки,
+// коли блок #homeBannersSlider вже з'явився в DOM.
+async function renderHomeBanners() {
+    const sliderContainer = document.getElementById('homeBannersSlider');
+    if (!sliderContainer) return;
+
+    try {
+        const { data, error } = await _supabase
+            .from('site_storage')
+            .select('value')
+            .eq('key', 'bv_banners')
+            .single();
+
+        if (error || !data || !data.value || data.value.length === 0) {
+            sliderContainer.innerHTML = '';
+            return;
+        }
+
+        sliderContainer.innerHTML = data.value.map(b => `
+            <div class="banner-slide relative rounded-2xl overflow-hidden shadow-lg group">
+                <a href="${b.link || '#'}" target="_blank" class="block">
+                    <img src="${b.image}" alt="Banner" class="w-full aspect-[21/9] object-cover transition-transform duration-500 group-hover:scale-105">
+                </a>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error('Помилка завантаження банерів:', err);
+    }
+}
+
+
+// 2. ЗАВАНТАЖЕННЯ БАНЕРІВ В АДМІНКУ
+// Викликайте цю функцію при перемиканні на вкладку управління візуалами/банерами в адмінці.
+async function loadBannersAdmin() {
+    try {
+        const { data } = await _supabase
+            .from('site_storage')
+            .select('value')
+            .eq('key', 'bv_banners')
+            .single();
+        
+        banners = (data && data.value) ? data.value : [];
+        renderBannersAdmin();
+    } catch (err) {
+        banners = [];
+        renderBannersAdmin();
+    }
+}
+
+
+// 3. РЕНДЕРИНГ СІТКИ БАНЕРІВ В АДМІНЦІ
+function renderBannersAdmin() {
+    const container = document.getElementById('bannersListContainer');
+    if (!container) return;
+
+    if (banners.length === 0) {
+        container.innerHTML = '<div class="text-xs text-gray-500 col-span-full">Банерів поки немає. Додайте перший банер.</div>';
+        return;
+    }
+
+    container.innerHTML = banners.map((banner, index) => `
+        <div class="glass-panel p-3 relative group overflow-hidden border border-white/10 rounded-xl bg-white/5">
+            <img src="${banner.image}" class="w-full aspect-[21/9] object-cover rounded-lg border border-white/10 mb-3">
+            <div class="text-[11px] text-gray-300 truncate mb-3">
+                <span class="text-[#c5a059] font-bold">Посилання:</span> ${banner.link || 'Не вказано'}
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="openBannerModal(${index})" class="flex-1 btn-secondary text-xs py-1.5">Редагувати</button>
+                <button type="button" onclick="deleteBanner(${index})" class="btn-danger text-xs py-1.5 px-3">Видалити</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+
+// 4. КЕРУВАННЯ МОДАЛЬНИМ ВІКНОМ АДМІНКИ
+window.openBannerModal = function(index = null) {
+    const form = document.getElementById('bannerForm');
+    if (form) form.reset();
+    
+    document.getElementById('banner-id').value = '';
+    const preview = document.getElementById('bannerPreview');
+    if (preview) {
+        preview.src = '';
+        preview.classList.add('hidden');
+    }
+
+    if (index !== null && banners[index]) {
+        const b = banners[index];
+        document.getElementById('banner-id').value = index;
+        document.getElementById('banner-img').value = b.image || '';
+        document.getElementById('banner-link').value = b.link || '';
+        
+        if (b.image) {
+            preview.src = b.image;
+            preview.classList.remove('hidden');
+        }
+        document.getElementById('bannerModalTitle').innerText = 'Редагувати банер';
+    } else {
+        document.getElementById('bannerModalTitle').innerText = 'Додати банер';
+    }
+
+    document.getElementById('bannerModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('bannerModal').classList.remove('opacity-0'), 10);
+};
+
+window.closeBannerModal = function() {
+    document.getElementById('bannerModal').classList.add('opacity-0');
+    setTimeout(() => document.getElementById('bannerModal').classList.add('hidden'), 300);
+};
+
+
+// 5. ЗБЕРЕЖЕННЯ ТА ВИДАЛЕННЯ (СИНХРОНІЗАЦІЯ З SUPABASE)
+document.addEventListener('DOMContentLoaded', () => {
+    const bannerForm = document.getElementById('bannerForm');
+    if (bannerForm) {
+        bannerForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const indexStr = document.getElementById('banner-id').value;
+            const imgUrl = document.getElementById('banner-img').value;
+            const link = document.getElementById('banner-link').value;
+
+            if (!imgUrl) {
+                alert('Вкажіть посилання на зображення!');
+                return;
+            }
+
+            const bannerData = { image: imgUrl, link: link };
+
+            if (indexStr !== '' && !isNaN(indexStr)) {
+                banners[Number(indexStr)] = bannerData;
+            } else {
+                banners.push(bannerData);
+            }
+
+            // Зберігаємо масив у Supabase
+            const { error } = await _supabase
+                .from('site_storage')
+                .upsert({ key: 'bv_banners', value: banners });
+
+            if (error) {
+                console.error(error);
+                alert('Помилка збереження в базу!');
+                return;
+            }
+
+            renderBannersAdmin();
+            closeBannerModal();
+            if (typeof showNotification === 'function') showNotification('Зміни успішно збережено!');
+        };
+    }
+});
+
+window.deleteBanner = async function(index) {
+    if (confirm('Ви впевнені, що хочете видалити цей банер?')) {
+        banners.splice(index, 1);
+        
+        const { error } = await _supabase
+            .from('site_storage')
+            .upsert({ key: 'bv_banners', value: banners });
+
+        if (error) {
+            alert('Помилка при видаленні!');
+            return;
+        }
+
+        renderBannersAdmin();
+        if (typeof showNotification === 'function') showNotification('Банер видалено!');
+    }
+};
+
+
+
+// Функція завантаження та виведення банерів на головній сторінці
+async function initMainBanners() {
+    const container = document.getElementById('mainBannerContainer');
+    if (!container) return;
+
+    try {
+        const { data, error } = await _supabase
+            .from('site_storage')
+            .select('value')
+            .eq('key', 'bv_banners')
+            .single();
+
+        if (error || !data || !data.value || data.value.length === 0) {
+            container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs tracking-widest uppercase">Банери відсутні</div>';
+            return;
+        }
+
+        const banners = data.value;
+
+        // Використовуємо клас .banner-slide для зв'язку з CSS стилями
+        container.innerHTML = banners.map(b => {
+            const imgSrc = b.image || b.img || b.url || b.imageUrl;
+            if (!imgSrc) return '';
+
+            return `
+                <a href="${b.link || '#'}" class="banner-slide block relative w-full h-full group">
+                    <img src="${imgSrc}" alt="Banner">
+                </a>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('Помилка завантаження банерів:', err);
+    }
+}
+
+initMainBanners();
