@@ -1934,60 +1934,50 @@ window.closeOrderModal = function() {
         };
 
         // ==========================================
-        // ПРАЙС-ЛИСТ ТА НАЛАШТУВАННЯ
-        // ==========================================
-        window.savePriceList = async function() {
-            try {
-                const raw = document.getElementById('price-json-editor').value;
-                priceListDB = JSON.parse(raw);
-                await saveToCloudStorage('bv_price_list', priceListDB);
-                showNotification('Прайс-лист успішно збережено!');
-            } catch (err) {
-                alert('Помилка в форматі JSON! Перевірте коми та дужки.\nДеталі: ' + err.message);
+// ПРАЙС-ЛИСТ (РЕАГУВАННЯ ЧЕРЕЗ JSON-РЕДАТОР)
+// ==========================================
+
+// Функція для заповнення текстового редактора JSON із бази
+window.populatePriceEditor = function() {
+    const editor = document.getElementById('price-json-editor');
+    if (!editor) return;
+    editor.value = JSON.stringify(priceListDB, null, 4);
+};
+
+// Додавання нової категорії з оновленням textarea
+window.addPriceCategory = async function() {
+    console.log("Кнопка додавання категорії натиснута"); // Лог для перевірки в консолі
+    
+    if (typeof priceListDB === 'undefined' || !Array.isArray(priceListDB)) {
+        priceListDB = [];
+    }
+    
+    // Додаємо нову категорію у вигляді об'єкта
+    priceListDB.push({
+        category: "Нова категорія",
+        items: [
+            { 
+                name: { ua: "Нова послуга", ru: "Новая услуга", en: "New service" }, 
+                gold: "Від 500", 
+                silver: "Від 300" 
             }
-        };
+        ]
+    });
 
-        window.populateSettings = function() {
-            if (!siteSettings) siteSettings = {};
-            document.getElementById('set-gold-rate').value = siteSettings.goldRate || '';
-            document.getElementById('set-phone').value = siteSettings.phone || '';
-            document.getElementById('set-tg').value = siteSettings.tg || '';
-            document.getElementById('set-inst').value = siteSettings.inst || '';
-            
-            const ratioSelect = document.getElementById('set-banner-ratio');
-            if (ratioSelect && siteSettings.bannerRatio) ratioSelect.value = siteSettings.bannerRatio;
+    // Оновлюємо вміст textarea, щоб ти бачив зміни в редакторі
+    populatePriceEditor();
 
-            currentAddresses = Array.isArray(siteSettings.addresses) ? [...siteSettings.addresses] : [];
-            renderAddressFields();
-        };
-
-        function renderAddressFields() {
-            const cont = document.getElementById('addressesContainer');
-            if (!cont) return;
-            cont.innerHTML = currentAddresses.map((addr, idx) => `
-                <div class="flex gap-2 items-center">
-                    <input type="text" class="input-field text-xs flex-1 addr-input" value="${addr}" placeholder="М. Київ, вул..." oninput="currentAddresses[${idx}] = this.value">
-                    <button type="button" onclick="removeAddressField(${idx})" class="p-2.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">&times;</button>
-                </div>
-            `).join('');
-        }
-
-        window.addAddressField = function() { currentAddresses.push(''); renderAddressFields(); };
-        window.removeAddressField = function(idx) { currentAddresses.splice(idx, 1); renderAddressFields(); };
-
-        window.saveSiteSettings = async function() {
-            siteSettings = {
-                goldRate: Number(document.getElementById('set-gold-rate').value) || 0,
-                phone: document.getElementById('set-phone').value.trim(),
-                tg: document.getElementById('set-tg').value.trim(),
-                inst: document.getElementById('set-inst').value.trim(),
-                bannerRatio: document.getElementById('set-banner-ratio')?.value || '3/1',
-                addresses: currentAddresses.filter(a => a.trim() !== '')
-            };
-            await saveToCloudStorage('bv_settings', siteSettings);
-            showNotification('Налаштування успішно збережено!');
-        };
-
+    // Зберігаємо в локальне сховище та хмару
+    localStorage.setItem('bv_price_list', JSON.stringify(priceListDB));
+    
+    if (typeof saveToCloudStorage === 'function') {
+        await saveToCloudStorage('bv_price_list', priceListDB);
+    }
+    
+    if (typeof showNotification === 'function') {
+        showNotification('Нову категорію додано до JSON!');
+    }
+};
         // ==========================================
         // ГАЛЕРЕЯ
         // ==========================================
