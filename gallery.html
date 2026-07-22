@@ -325,6 +325,7 @@
 
     /**
      * 1. ЗАВАНТАЖЕННЯ ДАНИХ З SUPABASE (АБО ЛОКАЛЬНОГО КЕШУ)
+     * Скрипт перевіряє як сховище site_storage, так і окрему таблицю gallery
      */
     async function fetchGalleryData() {
         const container = document.getElementById('galleryGrid');
@@ -336,21 +337,35 @@
         }
 
         try {
-            // Спробуємо завантажити свіжі дані безпосередньо з Supabase
             if (typeof _supabase !== 'undefined') {
-                const { data, error } = await _supabase
-                    .from('gallery')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                // Спробуємо спочатку завантажити з site_storage (ключ bv_gallery)
+                const { data: storageData, error: storageError } = await _supabase
+                    .from('site_storage')
+                    .select('value')
+                    .eq('key', 'bv_gallery')
+                    .single();
 
-                if (error) throw error;
-                if (data) {
-                    allGalleryItems = data;
-                    // Зберігаємо в кеш на випадок оффлайн-роботи
-                    localStorage.setItem('bv_gallery_cache', JSON.stringify(data));
+                if (!storageError && storageData && storageData.value && Array.isArray(storageData.value)) {
+                    allGalleryItems = storageData.value;
+                } else {
+                    // Якщо в site_storage пусто або помилка, запитуємо таблицю gallery
+                    const { data: tableData, error: tableError } = await _supabase
+                        .from('gallery')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (!tableError && tableData) {
+                        allGalleryItems = tableData;
+                    }
                 }
-            } else {
-                // Якщо клієнт Supabase ще не ініціалізовано — беремо з кешу або API
+
+                if (allGalleryItems.length > 0) {
+                    localStorage.setItem('bv_gallery_cache', JSON.stringify(allGalleryItems));
+                }
+            }
+            
+            // Якщо Supabase недоступний або повернув пустий масив — беремо з кешу або API
+            if (!allGalleryItems.length) {
                 const cached = localStorage.getItem('bv_gallery_cache');
                 allGalleryItems = cached ? JSON.parse(cached) : (typeof API !== 'undefined' ? API.get('bv_gallery', []) : []);
             }
@@ -360,7 +375,6 @@
             allGalleryItems = cached ? JSON.parse(cached) : [];
         }
 
-        // Малюємо галерею
         renderGallery(currentCategory);
     }
 
@@ -387,21 +401,29 @@
         const currentLang = localStorage.getItem('bv_lang') || document.documentElement.lang || 'uk';
 
         container.innerHTML = filteredItems.map(item => {
-            const imageUrl = item.image_url || item.url || item.image || '';
-            const description = item[`desc_${currentLang}`] || item.desc_uk || item.title || '';
-            const categoryLabel = getCategoryName(item.category, currentLang);
+            // Підтримка різних варіантів ключів (і для site_storage, і для таблиці gallery)
+            const imageUrl = item.img || item.image_url || item.url || item.image || '';
+            
+            let description = '';
+            if (typeof item.desc === 'object' && item.desc !== null) {
+                description = item.desc[currentLang] || item.desc.uk || '';
+            } else {
+                description = item[`desc_${currentLang}`] || item.desc_uk || item.title || '';
+            }
 
-            // Додаємо виклик функції openLightbox при кліку на картку
+            const categoryLabel = getCategoryName(item.category, currentLang);
+            const safeDesc = description.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
             return `
-                <div onclick="openLightbox('${imageUrl}', '${description.replace(/'/g, "\\'")}')" 
+                <div onclick="openLightbox('${imageUrl}', '${safeDesc}')" 
                      class="group relative overflow-hidden rounded-lg bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-300 hover:border-[var(--gold-muted)] hover:shadow-xl flex flex-col cursor-pointer">
                     <div class="aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5 relative">
                         <img 
                             src="${imageUrl}" 
-                            alt="${description}" 
+                            alt="${safeDesc}" 
                             class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
-                            onerror="this.src='https://via.placeholder.com/400x400?text=BV+Jewelry'"
+                            onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#1a1a1a';"
                         />
                         <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <svg class="w-8 h-8 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
@@ -425,19 +447,21 @@
     // Функції керування лайтбоксом
     function openLightbox(url, caption) {
         const modal = document.getElementById('lightboxModal');
+        if (!modal) return;
         const img = document.getElementById('lightboxImg');
         const cap = document.getElementById('lightboxCaption');
         
         img.src = url;
         cap.textContent = caption;
         modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Блокуємо скрол сторінки під модалкою
+        document.body.style.overflow = 'hidden';
     }
 
     function closeLightbox() {
         const modal = document.getElementById('lightboxModal');
+        if (!modal) return;
         modal.classList.add('hidden');
-        document.body.style.overflow = ''; // Повертаємо скрол
+        document.body.style.overflow = '';
     }
 
     // Закриття по Esc
@@ -455,23 +479,19 @@
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 
-                // Знімаємо активний стиль з усіх кнопок
                 filterButtons.forEach(b => {
                     b.classList.remove('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
                     b.classList.add('border-[var(--border)]', 'text-[var(--text-main)]');
                 });
 
-                // Додаємо активний стиль натиснутій кнопці
                 btn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
                 btn.classList.add('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
 
-                // Отримуємо категорію (data-cat) та перемальовуємо сітку
                 const selectedCategory = btn.getAttribute('data-cat') || 'all';
                 renderGallery(selectedCategory);
             });
         });
 
-        // Активуємо кнопку "Всі" при завантаженні
         const defaultBtn = document.querySelector('.gal-filter-btn[data-cat="all"]');
         if (defaultBtn) {
             defaultBtn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
@@ -496,64 +516,15 @@
      * 5. ЗАПУСК ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ
      */
     document.addEventListener('DOMContentLoaded', async () => {
-        // Підключаємо фільтри
         initGalleryFilters();
-        // Завантажуємо фотографії
         await fetchGalleryData();
 
-        // Якщо користувач перемикає мову сайту — перемальовуємо галерею з новими перекладами
         window.addEventListener('langChanged', () => {
             renderGallery(currentCategory);
         });
     });
 
-    // Робимо функцію доступною глобально (для викликів з main.js, якщо потрібно)
     window.renderGallery = renderGallery;
-
-
-async function loadClientGallery() {
-    const grid = document.getElementById('client-gallery-grid');
-    if (!grid) return;
-
-    try {
-        // Отримуємо дані безпосередньо з Supabase Storage
-        const { data: storage, error } = await _supabase.from('site_storage').select('value').eq('key', 'bv_gallery').single();
-        if (error || !storage || !storage.value) {
-            grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-12">Галерея порожня.</div>';
-            return;
-        }
-
-        const items = storage.value;
-        // КЛЮЧОВЕ ВИПРАВЛЕННЯ: прибираємо анімаційні класи зникнення (opacity-0 / fade-in), які конфліктують із завантаженням зображень
-        grid.innerHTML = items.map(item => `
-            <div class="break-inside-avoid mb-4 rounded-xl overflow-hidden glass-panel border border-white/10 group relative bg-[#121216]">
-                <img src="${item.img}" alt="${item.desc?.uk || 'Ювелірна робота'}" 
-                     class="w-full h-auto block object-cover transform transition-transform duration-700 group-hover:scale-105"
-                     loading="eager" 
-                     onerror="this.style.display='none'">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
-                    <span class="text-[#c5a059] text-[10px] font-bold uppercase tracking-widest">${item.category || 'Atelier'}</span>
-                    <p class="text-white text-xs font-medium mt-1">${item.desc?.uk || ''}</p>
-                </div>
-            </div>
-        `).join('');
-
-    } catch (err) {
-        console.error('Помилка завантаження галереї:', err);
-    }
-}
-
-// Викликаємо тільки один раз після повного завантаження DOM
-document.addEventListener('DOMContentLoaded', loadClientGallery);
-
-</script>
-<!-- Модальне вікно (Лайтбокс) для збільшення фото -->
-<div id="lightboxModal" class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeLightbox()">
-    <button class="absolute top-6 right-6 text-white text-4xl hover:text-[var(--gold-muted)] transition-colors focus:outline-none" onclick="closeLightbox()">&times;</button>
-    <div class="relative max-w-5xl max-h-[90vh] overflow-hidden flex flex-col items-center" onclick="event.stopPropagation()">
-        <img id="lightboxImg" src="" alt="" class="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl">
-        <p id="lightboxCaption" class="mt-4 text-white text-sm font-light tracking-wide text-center font-['Montserrat']"></p>
-    </div>
-</div>
+    </script>
 </body>
 </html>
