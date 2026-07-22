@@ -2753,3 +2753,163 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSettingsBtn.addEventListener('click', saveSiteSettings);
     }
 });
+
+
+
+let currentEditingCatIdx = null;
+let currentEditingItemIdx = null;
+
+// Відкриття модального вікна (для додавання або редагування)
+window.openServiceModal = function(catIdx, itemIdx = null) {
+    currentEditingCatIdx = catIdx;
+    currentEditingItemIdx = itemIdx;
+
+    const modal = document.getElementById('serviceModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const inputRu = document.getElementById('modalNameRu');
+    const inputUa = document.getElementById('modalNameUa');
+    const inputEn = document.getElementById('modalNameEn');
+    const inputPrice = document.getElementById('modalPrice');
+
+    if (!modal) return;
+
+    if (itemIdx !== null) {
+        // Редагування існуючої послуги
+        modalTitle.textContent = 'Редагувати послугу';
+        const item = priceListDB[catIdx].items[itemIdx];
+        
+        // Підтримка як старого формату (рядок), так і нового (об'єкт мов)
+        if (typeof item.name === 'object' && item.name !== null) {
+            inputRu.value = item.name.ru || '';
+            inputUa.value = item.name.ua || '';
+            inputEn.value = item.name.en || '';
+        } else {
+            inputUa.value = item.name || ''; // За замовчуванням ставимо в українську
+            inputRu.value = '';
+            inputEn.value = '';
+        }
+        inputPrice.value = item.price || '';
+    } else {
+        // Додавання нової послуги
+        modalTitle.textContent = 'Додати нову послугу';
+        inputRu.value = '';
+        inputUa.value = '';
+        inputEn.value = '';
+        inputPrice.value = '';
+    }
+
+    modal.classList.remove('hidden');
+};
+
+window.closeServiceModal = function() {
+    const modal = document.getElementById('serviceModal');
+    if (modal) modal.classList.add('hidden');
+};
+
+// Збереження послуги з модального вікна
+window.saveServiceFromModal = async function() {
+    if (currentEditingCatIdx === null) return;
+
+    const nameRu = document.getElementById('modalNameRu').value.trim();
+    const nameUa = document.getElementById('modalNameUa').value.trim();
+    const nameEn = document.getElementById('modalNameEn').value.trim();
+    const price = document.getElementById('modalPrice').value.trim();
+
+    if (!nameUa && !nameRu && !nameEn) {
+        alert('Будь ласка, заповніть назву послуги хоча б однією мовою.');
+        return;
+    }
+
+    const serviceData = {
+        name: {
+            ru: nameRu || nameUa,
+            ua: nameUa || nameRu,
+            en: nameEn || nameUa
+        },
+        price: price
+    };
+
+    if (!priceListDB[currentEditingCatIdx].items) {
+        priceListDB[currentEditingCatIdx].items = [];
+    }
+
+    if (currentEditingItemIdx !== null) {
+        priceListDB[currentEditingCatIdx].items[currentEditingItemIdx] = serviceData;
+    } else {
+        priceListDB[currentEditingCatIdx].items.push(serviceData);
+    }
+
+    closeServiceModal();
+    renderPriceBuilder();
+    
+    // Автоматичне збереження в Supabase
+    await saveToCloudStorage('bv_price_list', priceListDB);
+    showNotification('Послугу успішно збережено!');
+};
+
+// Оновлений рендер карток у візуальному редакторі адмінки
+window.renderPriceBuilder = function() {
+    const container = document.getElementById('priceBuilderContainer');
+    if (!container) return;
+    
+    if (!Array.isArray(priceListDB)) priceListDB = [];
+    
+    if (priceListDB.length === 0) {
+        container.innerHTML = `
+            <div class="glass-panel p-8 text-center text-gray-400 text-xs">
+                Прайс-лист порожній. Натисніть «+ Додати категорію», щоб почати.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = priceListDB.map((cat, catIdx) => {
+        const catTitle = cat.title || cat.category || 'Категорія';
+        const items = cat.items || [];
+        
+        return `
+            <div class="glass-panel p-4 lg:p-6 space-y-4 border border-white/10">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-white/10">
+                    <div class="w-full sm:w-1/2">
+                        <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Назва категорії</label>
+                        <input type="text" class="input-field text-xs font-semibold" value="${catTitle}" oninput="updatePriceCatTitle(${catIdx}, this.value)">
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="openServiceModal(${catIdx})" class="btn-secondary text-xs py-1.5 px-3">+ Послуга</button>
+                        <button type="button" onclick="deletePriceCat(${catIdx})" class="btn-danger text-xs py-1.5 px-3">Видалити категорію</button>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="text-[10px] uppercase font-bold text-gray-400">Послуги та ціни (3 мови)</div>
+                    ${items.length === 0 ? '<div class="text-xs text-gray-500 italic py-2">У цій категорії поки немає послуг.</div>' : ''}
+                    ${items.map((item, itemIdx) => {
+                        const displayName = (typeof item.name === 'object') ? (item.name.ua || item.name.ru || item.name.en) : item.name;
+                        return `
+                            <div class="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-white/5 gap-2">
+                                <div class="flex-1">
+                                    <div class="text-xs text-white font-medium">${displayName}</div>
+                                    <div class="text-[10px] text-gray-400">UA: ${item.name?.ua || '—'} | RU: ${item.name?.ru || '—'} | EN: ${item.name?.en || '—'}</div>
+                                </div>
+                                <div class="text-xs font-mono text-[#c5a059] font-bold shrink-0">${item.price || ''}</div>
+                                <div class="flex gap-1 shrink-0">
+                                    <button type="button" onclick="openServiceModal(${catIdx}, ${itemIdx})" class="btn-secondary text-xs p-1.5 px-2.5">Редагувати</button>
+                                    <button type="button" onclick="deletePriceItem(${catIdx}, ${itemIdx})" class="btn-danger text-xs p-1.5 px-2.5">&times;</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+// Прив'язка подій модального вікна при завантаженні сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('closeServiceModalBtn');
+    const saveBtn = document.getElementById('saveServiceModalBtn');
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeServiceModal);
+    if (saveBtn) saveBtn.addEventListener('click', saveServiceFromModal);
+});

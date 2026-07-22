@@ -455,58 +455,85 @@
             }
         ];
 
-        // Функція рендеру прайсу
-        function renderPriceList(searchQuery = '') {
-            const container = document.getElementById('priceListContainer');
-            const q = searchQuery.toLowerCase().trim();
-            let html = '';
+        // Функція рендеру прайсу з підтримкою багатомовності та пошуку
+function renderPriceList(searchQuery = '') {
+    const container = document.getElementById('priceListContainer');
+    if (!container) return;
+    
+    const q = searchQuery.toLowerCase().trim();
+    let html = '';
 
-            priceListDB.forEach(cat => {
-                // Фільтруємо послуги в категорії
-                const filteredItems = cat.items.filter(item => item.name.toLowerCase().includes(q));
-                
-                // Якщо після фільтрації є послуги, малюємо категорію
-                if (filteredItems.length > 0) {
-                    html += `
-                    <div class="mb-2">
-                        <h2 class="text-xl md:text-2xl font-serif text-[var(--gold-muted)] mb-6 border-b border-white/10 pb-4 inline-block">${cat.category}</h2>
-                        <div class="flex flex-col border-t border-[var(--border)]">
-                            <div class="hidden md:flex justify-between items-center py-3 border-b border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-4">
-                                <span class="w-3/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Послуга</span>
-                                <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Золото (₴)</span>
-                                <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#c0c0c0] font-bold">Срібло (₴)</span>
-                            </div>
-                    `;
+    // Перевірка поточної мови (за замовчуванням 'ua', якщо не задано інакше)
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'ua';
 
-                    filteredItems.forEach(item => {
-                        html += `
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center py-4 md:py-5 border-b border-[var(--border)] px-2 md:px-4 hover:bg-[rgba(255,255,255,0.01)] transition-colors group">
-                                <span class="w-full md:w-3/5 font-medium text-[var(--text-main)] text-sm md:text-base leading-snug mb-3 md:mb-0 pr-4">${item.name}</span>
-                                
-                                <div class="w-full md:w-2/5 flex justify-between md:justify-end gap-4 md:gap-0">
-                                    <div class="flex flex-col md:w-1/2 md:text-right">
-                                        <span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923] mb-1 font-bold">Золото</span>
-                                        <span class="text-[var(--text-main)] font-semibold">${item.gold}</span>
-                                    </div>
-                                    <div class="flex flex-col md:w-1/2 md:text-right">
-                                        <span class="md:hidden text-[10px] uppercase tracking-widest text-[#c0c0c0] mb-1 font-bold">Срібло</span>
-                                        <span class="text-[var(--text-main)] font-semibold">${item.silver}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
+    priceListDB.forEach(cat => {
+        const catTitle = cat.title || cat.category || '';
 
-                    html += `</div></div>`;
+        // Фільтруємо послуги в категорії з урахуванням об'єкта мов або старого рядка
+        const filteredItems = cat.items.filter(item => {
+            let itemName = '';
+            if (typeof item.name === 'object' && item.name !== null) {
+                itemName = (item.name[lang] || item.name.ua || item.name.ru || item.name.en || '').toLowerCase();
+            } else {
+                itemName = (item.name || '').toLowerCase();
+            }
+            return itemName.includes(q);
+        });
+        
+        // Якщо після фільтрації є послуги, малюємо категорію
+        if (filteredItems.length > 0) {
+            html += `
+            <div class="mb-8">
+                <h2 class="text-xl md:text-2xl font-serif text-[var(--gold-muted)] mb-6 border-b border-white/10 pb-4 inline-block">${catTitle}</h2>
+                <div class="flex flex-col border-t border-[var(--border)]">
+                    <div class="hidden md:flex justify-between items-center py-3 border-b border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-4">
+                        <span class="w-3/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Послуга</span>
+                        <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#e8b923] font-bold">Золото (₴)</span>
+                        <span class="w-1/5 text-right text-[10px] uppercase tracking-widest text-[#c0c0c0] font-bold">Срібло (₴)</span>
+                    </div>
+            `;
+
+            filteredItems.forEach(item => {
+                // Витягуємо назву послуги для поточної мови
+                let displayName = '';
+                if (typeof item.name === 'object' && item.name !== null) {
+                    displayName = item.name[lang] || item.name.ua || item.name.ru || item.name.en || '';
+                } else {
+                    displayName = item.name || '';
                 }
+
+                // Підтримка різних варіантів полів ціни (gold/silver або єдина price)
+                const goldPrice = item.gold || item.price || '—';
+                const silverPrice = item.silver || '—';
+
+                html += `
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center py-4 md:py-5 border-b border-[var(--border)] px-2 md:px-4 hover:bg-[rgba(255,255,255,0.01)] transition-colors group">
+                        <span class="w-full md:w-3/5 font-medium text-[var(--text-main)] text-sm md:text-base leading-snug mb-3 md:mb-0 pr-4">${displayName}</span>
+                        
+                        <div class="w-full md:w-2/5 flex justify-between md:justify-end gap-4 md:gap-0">
+                            <div class="flex flex-col md:w-1/2 md:text-right">
+                                <span class="md:hidden text-[10px] uppercase tracking-widest text-[#e8b923] mb-1 font-bold">Золото</span>
+                                <span class="text-[var(--text-main)] font-semibold">${goldPrice}</span>
+                            </div>
+                            <div class="flex flex-col md:w-1/2 md:text-right">
+                                <span class="md:hidden text-[10px] uppercase tracking-widest text-[#c0c0c0] mb-1 font-bold">Срібло</span>
+                                <span class="text-[var(--text-main)] font-semibold">${silverPrice}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
 
-            if (html === '') {
-                html = `<div class="text-center py-20 text-[var(--text-muted)] text-lg italic">На жаль, послуг за запитом "${searchQuery}" не знайдено.</div>`;
-            }
-
-            container.innerHTML = html;
+            html += `</div></div>`;
         }
+    });
+
+    if (html === '') {
+        html = `<div class="text-center py-20 text-[var(--text-muted)] text-lg italic">На жаль, послуг за запитом "${searchQuery}" не знайдено.</div>`;
+    }
+
+    container.innerHTML = html;
+}
 
         document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('on_price_page', 'true');
