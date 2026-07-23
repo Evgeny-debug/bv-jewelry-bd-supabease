@@ -1455,49 +1455,61 @@
             if(!cont) return;
             
             cont.innerHTML = `
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="text-[10px] uppercase font-bold tracking-widest text-[#c5a059] block mb-1">Назва [${editLang.toUpperCase()}] ${!isBase?'<span class="text-gray-400 font-normal normal-case">(Пусто = як в Основній)</span>':''}</label>
-                        <input type="text" id="var-name" class="input-field" value="${vData.name[editLang] || ''}" placeholder="${isBase ? 'Назва товару' : (baseData.name[editLang] || 'Від Основної')}" oninput="actProd.variations['${editVar}'].name['${editLang}'] = this.value">
-                    </div>
-                    <div>
-                        <label class="text-[10px] uppercase font-bold tracking-widest text-[#c5a059] block mb-1">Опис [${editLang.toUpperCase()}]</label>
-                        <textarea id="var-desc" class="input-field h-24 resize-none" placeholder="${isBase ? 'Опис товару...' : (baseData.desc[editLang] || 'Від Основної')}" oninput="actProd.variations['${editVar}'].desc['${editLang}'] = this.value">${vData.desc[editLang] || ''}</textarea>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 border-t border-white/10 pt-4 items-end">
-                    <div class="md:col-span-1">
-                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Тип розрахунку</label>
-                        <select id="var-price-type" class="input-field bg-[#1a1a1a] font-semibold text-[#c5a059]" onchange="toggleVarPriceMode(this.value)">
-                            <option value="manual" ${vData.priceType === 'manual' ? 'selected' : ''}>Вручну</option>
-                            <option value="auto" ${vData.priceType === 'auto' ? 'selected' : ''}>Авто (по вазі)</option>
-                        </select>
-                    </div>
-                    <div id="var-price-manual-box" class="${vData.priceType === 'auto' ? 'hidden' : ''}">
-                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Ціна (ГРН)</label>
-                        <input type="number" id="var-price" class="input-field" value="${vData.price || ''}" placeholder="${isBase ? '0' : (baseData.price || 'Від Основної')}" oninput="actProd.variations['${editVar}'].price = this.value">
-                    </div>
-                    <div id="var-price-auto-box" class="${vData.priceType === 'auto' ? 'flex' : 'hidden'} gap-4 md:col-span-2">
-                        <div class="w-1/2">
-                            <label class="text-[10px] uppercase text-gray-400 block mb-1">Вага (г)</label>
-                            <input type="number" step="0.01" id="var-weight" class="input-field border-[#c5a059]" value="${vData.weight || ''}" placeholder="${isBase?'':(baseData.weight||'Від Основної')}" oninput="actProd.variations['${editVar}'].weight = this.value">
-                        </div>
-                        <div class="w-1/2">
-                            <label class="text-[10px] uppercase text-gray-400 block mb-1">Робота (ГРН)</label>
-                            <input type="number" id="var-workCost" class="input-field border-[#c5a059]" value="${vData.workCost || ''}" placeholder="${isBase?'0':(baseData.workCost||'Від Основної')}" oninput="actProd.variations['${editVar}'].workCost = this.value">
-                        </div>
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="text-[10px] uppercase text-gray-400 block mb-1">Акційна ціна</label>
-                        <input type="number" id="var-discount" class="input-field" value="${vData.discount || ''}" placeholder="${isBase?'Немає':(baseData.discount||'Від Основної')}" oninput="actProd.variations['${editVar}'].discount = this.value">
-                    </div>
-                </div>
-                <div class="mt-4 border-t border-white/10 pt-4">
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-[#c5a059] block mb-2">Фото ${isBase?'основного товару':`для розміру ${editVar}`} <span class="text-gray-400 normal-case ml-1">${!isBase?'(Пусто = фото Основної)':''}</span></label>
-                    <input type="file" accept="image/png, image/jpeg, image/webp" multiple class="input-field file-input bg-[#1a1a1a]" id="varImgUpload">
-                    <div id="varGalleryPreview" class="flex gap-3 mt-4 overflow-x-auto pb-2 custom-scrollbar"></div>
-                </div>
-            `;
+    <div class="grid grid-cols-1 gap-4">
+        <div>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-[#c5a059] block mb-1">Назва [${editLang.toUpperCase()}] ${!isBase?'<span class="text-gray-400 font-normal normal-case">(Пусто = як в Основній)</span>':''}</label>
+            <input type="text" id="var-name" class="input-field" value="${vData.name[editLang] || ''}" placeholder="${isBase ? 'Назва товару' : (baseData.name[editLang] || 'Від Основної')}" oninput="actProd.variations['${editVar}'].name['${editLang}'] = this.value">
+        </div>
+        <div>
+            <label class="text-[10px] uppercase font-bold tracking-widest text-[#c5a059] block mb-1">Опис [${editLang.toUpperCase()}]</label>
+            <textarea id="var-desc" class="input-field h-24 resize-none" placeholder="${isBase ? 'Опис товару...' : (baseData.desc[editLang] || 'Від Основної')}" oninput="actProd.variations['${editVar}'].desc['${editLang}'] = this.value">${vData.desc[editLang] || ''}</textarea>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 border-t border-white/10 pt-4 items-end">
+        <div class="md:col-span-1">
+            <label class="text-[10px] uppercase text-gray-400 block mb-1">Тип розрахунку</label>
+            <select id="var-price-type" class="input-field bg-[#1a1a1a] font-semibold text-[#c5a059]" onchange="toggleVarPriceMode(this.value)">
+                <option value="manual" ${vData.priceType === 'manual' ? 'selected' : ''}>Вручну</option>
+                <option value="auto" ${vData.priceType === 'auto' ? 'selected' : ''}>Авто (по вазі)</option>
+            </select>
+        </div>
+
+        <!-- Ручний ввід ціни -->
+        <div id="var-price-manual-box" class="${vData.priceType === 'auto' ? 'hidden' : ''}">
+            <label class="text-[10px] uppercase text-gray-400 block mb-1">Ціна (ГРН)</label>
+            <input type="number" id="var-price" class="input-field" value="${vData.price || ''}" placeholder="${isBase ? '0' : (baseData.price || 'Від Основної')}" oninput="actProd.variations['${editVar}'].price = this.value">
+        </div>
+
+        <!-- Авторозрахунок по вазі -->
+        <div id="var-price-auto-box" class="${vData.priceType === 'auto' ? 'flex' : 'hidden'} gap-3 md:col-span-2 items-end">
+            <div class="w-1/3">
+                <label class="text-[10px] uppercase text-gray-400 block mb-1">Вага (г)</label>
+                <input type="number" step="0.01" id="var-weight" class="input-field border-[#c5a059]" value="${vData.weight || ''}" placeholder="${isBase?'':(baseData.weight||'Від Основної')}" oninput="actProd.variations['${editVar}'].weight = this.value; recalculateCurrentVarPrice();">
+            </div>
+            <div class="w-1/3">
+                <label class="text-[10px] uppercase text-gray-400 block mb-1">Робота (ГРН)</label>
+                <input type="number" id="var-workCost" class="input-field border-[#c5a059]" value="${vData.workCost || ''}" placeholder="${isBase?'0':(baseData.workCost||'Від Основної')}" oninput="actProd.variations['${editVar}'].workCost = this.value; recalculateCurrentVarPrice();">
+            </div>
+            <!-- Плашка підсумкової розрахованої ціни -->
+            <div class="w-1/3 bg-black/40 border border-[#c5a059]/30 rounded p-2 text-center">
+                <span class="text-[9px] uppercase text-gray-400 block">Разом:</span>
+                <span id="auto-price-preview" class="text-xs font-bold text-[#c5a059]">${vData.price || 0} ₴</span>
+            </div>
+        </div>
+
+        <div class="md:col-span-1">
+            <label class="text-[10px] uppercase text-gray-400 block mb-1">Акційна ціна</label>
+            <input type="number" id="var-discount" class="input-field" value="${vData.discount || ''}" placeholder="${isBase?'Немає':(baseData.discount||'Від Основної')}" oninput="actProd.variations['${editVar}'].discount = this.value">
+        </div>
+    </div>
+
+    <div class="mt-4 border-t border-white/10 pt-4">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-[#c5a059] block mb-2">Фото ${isBase?'основного товару':`для розміру ${editVar}`} <span class="text-gray-400 normal-case ml-1">${!isBase?'(Пусто = фото Основної)':''}</span></label>
+        <input type="file" accept="image/png, image/jpeg, image/webp" multiple class="input-field file-input bg-[#1a1a1a]" id="varImgUpload">
+        <div id="varGalleryPreview" class="flex gap-3 mt-4 overflow-x-auto pb-2 custom-scrollbar"></div>
+    </div>
+`;
             
             document.getElementById('varImgUpload').addEventListener('change', async (e) => {
                 const files = e.target.files;
@@ -1518,19 +1530,58 @@
             renderVarGallery();
         };
 
-        window.toggleVarPriceMode = function(mode) {
-            actProd.variations[editVar].priceType = mode;
-            if(mode === 'auto') {
-                document.getElementById('var-price-manual-box').classList.add('hidden');
-                document.getElementById('var-price-auto-box').classList.remove('hidden');
-                document.getElementById('var-price-auto-box').classList.add('flex');
-            } else {
-                document.getElementById('var-price-auto-box').classList.add('hidden');
-                document.getElementById('var-price-auto-box').classList.remove('flex');
-                document.getElementById('var-price-manual-box').classList.remove('hidden');
-            }
-        };
+        // Перемикання режиму (Manual / Auto)
+window.toggleVarPriceMode = function(mode) {
+    if (!actProd || !actProd.variations || !actProd.variations[editVar]) return;
 
+    const vData = actProd.variations[editVar];
+    vData.priceType = mode;
+
+    const priceInput = document.getElementById('var-price');
+    
+    if (mode === 'auto') {
+        // Робимо поле ціни недоступним для ручного вводу
+        if (priceInput) {
+            priceInput.readOnly = true;
+            priceInput.classList.add('opacity-60', 'cursor-not-allowed');
+        }
+        // Перераховуємо ціну
+        recalculateCurrentVarPrice();
+    } else {
+        // Повертаємо можливість вводити ціну вручну
+        if (priceInput) {
+            priceInput.readOnly = false;
+            priceInput.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+    }
+};
+
+// "Живий" перерахунок ціни при зміні ваги або вартості роботи
+window.recalculateCurrentVarPrice = function() {
+    if (!actProd || !actProd.variations || !actProd.variations[editVar]) return;
+    
+    const vData = actProd.variations[editVar];
+    
+    // Перераховуємо лише якщо увімкнено режим "auto"
+    if (vData.priceType === 'auto') {
+        const weight = parseFloat(document.getElementById('var-weight')?.value) || 0;
+        const workCost = parseFloat(document.getElementById('var-workCost')?.value) || 0;
+        const goldRate = parseFloat(siteSettings?.goldRate) || 0;
+
+        // Формула розрахунку
+        const calculatedPrice = Math.round((weight * goldRate) + workCost);
+
+        // Оновлюємо дані в пам'яті та в DOM
+        vData.weight = weight;
+        vData.workCost = workCost;
+        vData.price = calculatedPrice;
+
+        const priceInput = document.getElementById('var-price');
+        if (priceInput) {
+            priceInput.value = calculatedPrice;
+        }
+    }
+};
         function renderVarGallery() {
             const cont = document.getElementById('varGalleryPreview');
             const imgs = actProd.variations[editVar].images || [];
