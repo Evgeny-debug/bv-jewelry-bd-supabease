@@ -156,10 +156,7 @@ window.injectAuthModal = function() {
                             Увійти через Google
                         </button>
                         
-                        <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                            Увійти через Apple
-                        </button>
+                        
                     </div>
 
                     <div class="text-center text-xs text-[var(--text-muted)] mt-4">
@@ -902,28 +899,88 @@ window.renderFavDrawer = function() {
 // ==========================================
 // 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
 // ==========================================
+window.handleFavClick = function(id) {
+    const isRegistered = window.isLoggedIn || localStorage.getItem('user_token') || window.currentUser;
+    
+    if (!isRegistered) {
+        if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal();
+        } else if (typeof window.showAuth === 'function') {
+            window.showAuth();
+        } else {
+            const authModal = document.getElementById('auth-modal') || document.getElementById('register-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+            } else {
+                alert('Будь ласка, зареєструйтеся, щоб додати товар до обраного.');
+            }
+        }
+        return;
+    }
+    
+    if (typeof window.toggleFav === 'function') {
+        window.toggleFav(id);
+    }
+};
+
+// Обробник кліку на кошик для товарів "під замовлення"
+window.handlePreOrderClick = function() {
+    const modal = document.getElementById('preorder-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    } else {
+        alert('Цей товар доступний лише під замовлення.');
+    }
+};
+
+
+window.closePreOrderModal = function() {
+    const modal = document.getElementById('preorder-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+};
+
 window.renderProductCard = function(prod) {
     const lang = API.get('bv_lang', 'uk');
     const base = prod.variations ? prod.variations.base : prod; 
     
     const isOutOfStock = prod.status === 'out-stock';
     const isPreOrder = prod.status === 'pre-order';
-    const isFav = getFavs().includes(prod.id);
     
-    let badgesHtml = '<div class="flex flex-wrap gap-1 justify-end items-center">';
-    if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sold_out}</div>`;
-    else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_pre_order}</div>`;
-    if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_new}</div>`;
-    if(prod.badge === 'exclusive') badgesHtml += `<div class="prod-badge badge-exclusive rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_exclusive}</div>`;
-    if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sale}</div>`;
-    badgesHtml += '</div>';
+    const isRegistered = window.isLoggedIn || localStorage.getItem('user_token') || window.currentUser;
+    const isFav = isRegistered && getFavs().includes(prod.id);
 
     const price = base.price || 0;
     const discount = base.discount || null;
+    
+    let badgesHtml = '<div class="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">';
+    if (isOutOfStock) {
+        badgesHtml += `<div class="prod-badge badge-sold-out rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sold_out}</div>`;
+    } else if (isPreOrder) {
+        badgesHtml += `<div class="prod-badge badge-pre-order rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_pre_order}</div>`;
+    }
+    if (prod.badge === 'new') {
+        badgesHtml += `<div class="prod-badge badge-new rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_new}</div>`;
+    }
+    if (prod.badge === 'exclusive') {
+        badgesHtml += `<div class="prod-badge badge-exclusive rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_exclusive}</div>`;
+    }
+    if (prod.badge === 'sale') {
+        let badgeText = 'SALE';
+        if (discount && Number(discount) > 0 && price > discount) {
+            const percent = Math.round(((price - discount) / price) * 100);
+            if (percent > 0) {
+                badgeText = `-${percent}%`;
+            }
+        }
+        badgesHtml += `<div class="rounded-none text-[11px] px-2 py-0.5 font-bold shadow-sm" style="background-color: #dc2626 !important; color: #ffffff !important;">${badgeText}</div>`;
+    }
+    badgesHtml += '</div>';
 
     let priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
     if (discount && Number(discount) > 0) {
-        priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[9px] md:text-[11px] text-[var(--text-muted)] line-through ml-1.5 opacity-70">${formatterPrice.format(price)} ₴</span>`;
+        priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[9px] md:text-[11px] text-[#888] dark:text-[#aaa] line-through ml-1.5 opacity-70">${formatterPrice.format(price)} ₴</span>`;
     }
 
     const safeId = escapeHtml(prod.id);
@@ -932,30 +989,37 @@ window.renderProductCard = function(prod) {
     const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
 
     return `
-        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] transition-colors duration-300 border border-[#f0f0f0]">
-            <a href="product.html?id=${safeId}" class="relative w-full aspect-square overflow-hidden bg-[#fafafa] block p-2">
-                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-500 group-hover:scale-105" loading="lazy">
-            </a>
-            
-            <div class="px-2.5 md:px-3 pt-2 pb-1.5 flex flex-col gap-0.5 flex-grow bg-white">
-                ${safeVariant ? `<a href="product.html?id=${safeId}" class="text-[9px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-colors line-clamp-1">${safeVariant}</a>` : ''}
-                <a href="product.html?id=${safeId}" class="text-[11px] md:text-[13px] font-medium text-[#222] leading-tight hover:text-[var(--gold-muted)] transition-colors line-clamp-2">${safeName}</a>
-                <div class="mt-auto pt-1.5 flex items-center">${priceHtml}</div>
+        <div class="product-card group relative flex flex-col w-full h-full bg-white dark:bg-[#1a1a1a] border border-[#f0f0f0] dark:border-[#333] overflow-hidden transition-colors duration-300">
+            <!-- Блок фото: розтягнуте по краях без фонів -->
+            <div class="relative w-full aspect-square bg-transparent overflow-hidden">
+                <a href="product.html?id=${safeId}" class="block w-full h-full m-0 p-0">
+                    <img src="${safeImg}" class="w-full h-full m-0 p-0 object-cover" loading="lazy">
+                </a>
+                ${badgesHtml}
+                <!-- Кнопка обраного з перевіркою реєстрації -->
+                <button class="absolute top-2 right-2 z-25 p-1.5 bg-transparent border-none outline-none transition-transform active:scale-95 ${isFav ? 'text-red-500' : 'text-[#888] dark:text-[#aaa]'}" data-id="${safeId}" onclick="handleFavClick('${safeId}')" title="У вибране">
+                    <svg width="18" height="18" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
             </div>
-
-            <div class="px-2.5 md:px-3 py-2 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
-                <div class="flex items-center">
-                    ${!isOutOfStock ? `
-                    <button onclick="window.addToCartById('${safeId}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#222] hover:text-[var(--gold-muted)] transition-all active:scale-95 group/btn">
-                        <span>${i18n[lang].btn_buy}</span><span class="text-[13px] font-light mb-[1px] transition-transform group-hover/btn:rotate-90">+</span>
-                    </button>
-                    ` : `<span class="text-[9px] font-bold uppercase tracking-widest text-[#888]">${i18n[lang].out_stock}</span>`}
+            
+            <!-- Текстовий блок фіксованої висоти -->
+            <div class="card-text-block px-2.5 md:px-3 pt-2 pb-2.5 bg-white dark:bg-[#1a1a1a]">
+                <div class="flex flex-col gap-0.5">
+                    ${safeVariant ? `<a href="product.html?id=${safeId}" class="product-variant text-[9px] uppercase tracking-widest line-clamp-1">${safeVariant}</a>` : ''}
+                    <a href="product.html?id=${safeId}" class="product-title text-[11px] md:text-[13px] font-medium leading-tight line-clamp-2">${safeName}</a>
                 </div>
-                <div class="flex items-center gap-2">
-                    ${badgesHtml}
-                    <button class="fav-btn-inline btn-cross ${isFav ? 'text-[var(--danger)]' : 'text-[#888] hover:text-[#222]'} transition-all active:scale-95 p-1" data-id="${safeId}" onclick="toggleFav('${safeId}')">
-                        <svg width="16" height="16" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
+                
+                <div class="pt-1 flex items-center justify-between">
+                    <div>${priceHtml}</div>
+                    <div>
+                        ${!isOutOfStock ? `
+                        <button onclick="${isPreOrder ? 'window.handlePreOrderClick()' : `window.addToCartById('${safeId}')`}" class="w-8 h-8 flex items-center justify-center shrink-0 ${isPreOrder ? 'text-gray-400 dark:text-gray-500 hover:opacity-80' : ''}" title="${isPreOrder ? 'Під замовлення' : 'Купити'}">
+                            <svg class="w-5 h-5" fill="none" stroke="${isPreOrder ? 'currentColor' : 'var(--gold-muted, #C5A059)'}" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </button>
+                        ` : `
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-[#888] dark:text-[#aaa] shrink-0">${i18n[lang].out_stock}</span>
+                        `}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1238,7 +1302,8 @@ window.renderHomeSections = function() {
 
             // Было: const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] ...">...</div>`
 // Стало (карточки меньше, помещается больше):
-const cardWrapper = (p) => `<div class="flex-none w-[38%] sm:w-[28%] md:w-[22%] lg:w-[18%] xl:w-[15%] snap-start flex px-1">${window.renderProductCard(p)}</div>`;
+// Змінюємо ширину карток у каруселі: на мобільних рівно 50% (2 картки в ряд)
+const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex px-1">${window.renderProductCard(p)}</div>`;
             let blockItems = [...items];
             while(blockItems.length < 12 && blockItems.length > 0) { 
                 blockItems = blockItems.concat(items); 
@@ -1251,7 +1316,7 @@ const cardWrapper = (p) => `<div class="flex-none w-[38%] sm:w-[28%] md:w-[22%] 
                     <h2 class="hero-title text-[var(--text-main)] !text-[24px] md:!text-[32px]">${title}</h2>
                 </div>
                 <div class="promo-carousel-container select-none group relative">
-                    <div id="${trackId}" class="flex overflow-x-auto gap-0 snap-x snap-mandatory no-scrollbar min-h-[300px]">
+                    <div id="${trackId}" class="flex overflow-x-auto gap-0 snap-x snap-mandatory no-scrollbar min-h-[200px]">
                         ${blockItems.map(cardWrapper).join('')}
                     </div>
                 </div>
@@ -3115,3 +3180,19 @@ window.switchZlatoTab = function(catId) {
 document.addEventListener('DOMContentLoaded', () => {
     initZlatoMegaMenu();
 });
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.injectAuthModal === 'function') {
+        window.injectAuthModal();
+    }
+});
+
+
+
+
+
+
+
+

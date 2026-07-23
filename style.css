@@ -2311,123 +2311,6 @@ header {
 
 
 /* --- ВИПРАВЛЕННЯ ВИСОТИ ТА НАПОВНЕННЯ КАРТОК ТОВАРІВ --- */
-.product-card {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    overflow: hidden;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.product-card:hover {
-    border-color: var(--gold-muted) !important;
-}
-
-/* Зображення товару */
-.product-card .product-img-wrapper,
-.product-card a.relative.block {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    background: #fff;
-}
-
-[data-theme="dark"] .product-card .product-img-wrapper,
-[data-theme="dark"] .product-card a.relative.block {
-    background: transparent !important;
-}
-
-.product-card .product-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 8px;
-    mix-blend-mode: multiply;
-    transition: transform 0.5s ease;
-}
-
-[data-theme="dark"] .product-card .product-img {
-    mix-blend-mode: normal;
-}
-
-.product-card:hover .product-img {
-    transform: scale(1.03);
-}
-
-/* Текстовий блок та кнопки всередині картки */
-.product-card .product-info, 
-.product-card .p-4,
-.product-card > div:not(.relative) {
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-    justify-content: space-between !important;
-    padding: 12px !important;
-    gap: 8px !important;
-}
-
-/* Заголовок товару: обмежуємо до 2 рядків для акуратності */
-.product-card h3, 
-.product-card .product-title {
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    font-weight: 500 !important;
-    color: var(--text-main) !important;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0 0 4px 0 !important;
-}
-
-/* Блок ціни та кнопки */
-.product-card .product-bottom,
-.product-card .flex.items-center.justify-between {
-    margin-top: auto !important;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-}
-
-
-
-/* Фиксация нижнего блока (цена и кнопка), чтобы исключить нежелательный перенос */
-.product-card .product-bottom,
-.product-card .flex.items-center.justify-between {
-    margin-top: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 8px !important;
-    flex-wrap: nowrap !important; /* Запрещаем элементам переноситься на новую строку */
-}
-
-/* Цена и кнопка внутри нижнего блока не должны ломаться или сжиматься */
-.product-card .product-bottom > *,
-.product-card .flex.items-center.justify-between > * {
-    flex-shrink: 0 !important; /* Запрещаем элементам сжиматься */
-    white-space: nowrap !important; /* Запрещаем перенос текста внутри цен и кнопок */
-}
-
-/* Дополнительно для кнопок и цен */
-.product-card button,
-.product-card .btn,
-.product-card .price {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-}
-
-
-/* --- УНІВЕРСАЛЬНИЙ ТА НАДІЙНИЙ КОД КАРТКИ --- */
 
 /* 1. Сітка для вирівнювання висоти карток у рядку */
 .products-grid, 
@@ -2436,10 +2319,10 @@ header {
     align-items: stretch !important;
 }
 
-/* 2. Сама картка як сітка: Картинка -> Контент -> Низ */
+/* 2. Сама картка (має 2 блоки: картинка зверху, контент знизу) */
 .product-card {
-    display: grid !important;
-    grid-template-rows: auto 1fr auto !important;
+    display: flex !important;
+    flex-direction: column !important;
     height: 100% !important;
     position: relative !important;
     background-color: var(--bg-card) !important;
@@ -2463,7 +2346,6 @@ header {
     overflow: hidden !important;
     background: #fff !important;
     display: block !important;
-    grid-row: 1 !important;
 }
 
 [data-theme="dark"] .product-card .product-img-wrapper,
@@ -2484,10 +2366,10 @@ header {
     mix-blend-mode: normal !important;
 }
 
-/* 4. Кнопка "Улюблене" (сердечко) — примусово зверху справа з глазморфізмом */
-.product-card button:has(svg),
+/* 4. Кнопка "Улюблене" (сердечко) — зверху справа на фото */
 .product-card .fav-btn,
-.product-card .product-fav-btn {
+.product-card .product-fav-btn,
+.product-card .fav-btn-inline {
     position: absolute !important;
     top: 10px !important;
     right: 10px !important;
@@ -2508,15 +2390,27 @@ header {
     cursor: pointer !important;
 }
 
-/* 5. Текстовий контент у середній частині */
+/* 5. Текстовий контент + ціна та кнопка купити в одному блоці */
 .product-card .product-content,
 .product-card .p-4,
-.product-card > div:not(.product-bottom) {
-    grid-row: 2 !important;
+.product-card > div:not(a) {
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
-    padding: 12px !important;
+    flex-grow: 1 !important;
+    justify-content: space-between !important;
+    padding: 10px 12px 12px 12px !important;
+    background: var(--bg-card) !important;
+}
+
+/* Артикул / Варіант товару */
+.product-card .product-variant,
+.product-card a.text-\[9px\] {
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: var(--text-muted, #888) !important;
+    margin-bottom: 2px !important;
+    display: block !important;
 }
 
 /* Назва товару (максимум 2 рядки) */
@@ -2531,70 +2425,53 @@ header {
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    margin: 0 0 8px 0 !important;
+    margin: 0 0 6px 0 !important;
 }
 
-/* 6. Нижній блок (ціна + кнопка купити) — суворо внизу на одному рядку */
-.product-card .product-bottom,
-.product-card .flex.items-center.justify-between,
-.product-card > div:last-child {
-    grid-row: 3 !important;
+/* Блок ціни та кнопки в правому нижньому кутку */
+.product-card .product-price-row,
+.product-card .mt-auto.pt-2 {
+    margin-top: auto !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
-    flex-wrap: nowrap !important;
-    white-space: nowrap !important;
-    padding: 10px 12px !important;
-    border-top: 1px solid var(--border) !important;
-    background: var(--bg-card) !important;
-    width: 100% !important;
-    margin-top: 0 !important;
-}
-
-.product-card .product-bottom > *,
-.product-card .flex.items-center.justify-between > * {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
+    padding-top: 6px !important;
 }
 
 /* Ціна */
 .product-card .price,
-.product-card .product-price {
+.product-card .product-price,
+.product-card span.font-bold {
     font-size: 14px !important;
     font-weight: 700 !important;
     color: var(--gold-muted) !important;
     white-space: nowrap !important;
 }
 
-/* Кнопка купити */
-.product-card button.buy-btn,
-.product-card .product-buy-btn {
-    background: var(--text-main) !important;
-    color: var(--bg-body) !important;
-    padding: 8px 14px !important;
-    font-size: 10px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    font-weight: 600 !important;
+/* Кнопка купити (квадратна іконка кошика праворуч від ціни) */
+.product-card button[onclick*="addToCartById"],
+.product-card .buy-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+    background: var(--gold-muted, #C5A059) !important;
+    color: #000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     border-radius: 0 !important;
     cursor: pointer !important;
-    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-
+.product-card button[onclick*="addToCartById"]:hover {
+    transform: scale(1.05);
+}
 
 
 /* --- БЕЙДЖИ ЗВЕРХУ ЗЛІВА НА ФОТО --- */
 
-/* Обгортка зображення має бути точкою відліку для абсолютних елементів */
-.product-card .product-img-wrapper,
-.product-card a.relative.block,
-.product-card > a:first-child {
-    position: relative !important;
-}
-
-/* Контейнер бейджів або їх ряд */
 .product-card .badges-row,
 .product-card .flex.flex-wrap.gap-1,
 .product-card .absolute.top-2.left-2 {
@@ -2610,10 +2487,9 @@ header {
     margin: 0 !important;
 }
 
-/* Зовнішній вигляд самих бейджів поверх фото з ефектом глазморфізму */
 .product-card .badges-row > *,
 .product-card .flex.flex-wrap.gap-1 > *,
-.product-card .badge {
+.product-card .prod-badge {
     pointer-events: auto !important;
     font-size: 9px !important;
     padding: 3px 6px !important;
@@ -2629,73 +2505,214 @@ header {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-/* Якщо якийсь бейдж має специфічний колір (наприклад Sale червоний) */
+/* Специфічні бейджи */
 .product-card .badge-sale,
-.product-card .bg-red-600,
-.product-card .sale-badge {
-    background: var(--danger, #dc2626) !important;
-    color: #fff !important;
+.product-card .badge-sold-out {
     border-color: transparent !important;
 }
 
 
 
-/* --- ПОЗИЦІОНУВАННЯ БЕЙДЖІВ З ЗБЕРЕЖЕННЯМ ЇХНІХ КОЛЬОРІВ --- */
-
-/* Зона фото як точка відліку */
-.product-card .product-img-wrapper,
-.product-card a.relative.block,
-.product-card > a:first-child {
-    position: relative !important;
+.product-card:hover img,
+.product-card .group:hover img {
+    transform: none !important;
 }
 
-/* Контейнер бейджів у верхньому лівому кутку фото */
-.product-card .badges-row,
-.product-card .flex.flex-wrap.gap-1,
-.product-card .absolute.top-2.left-2 {
-    position: absolute !important;
-    top: 8px !important;
-    left: 8px !important;
-    z-index: 25 !important;
+
+
+/* Глобальні стилі для карток товарів */
+.product-card {
+    background-color: #ffffff;
+    border: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .product-card,
+[data-theme="dark"] .product-card {
+    background-color: #1a1a1a;
+    border-color: #333;
+}
+
+/* Розтягування фото по краях без рамок і фонів */
+.product-card .aspect-square {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+}
+
+.product-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Текстовий блок завжди однакової висоти */
+.product-card .card-text-block {
+    height: 95px !important;
+    min-height: 95px !important;
+    max-height: 95px !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 4px !important;
-    pointer-events: none !important;
-    margin: 0 !important;
+    justify-content: space-between !important;
 }
 
-/* Самі бейжі: залишаємо їхні рідні класи та кольори, додаємо лише тінь і форму */
-.product-card .badges-row > *,
-.product-card .flex.flex-wrap.gap-1 > *,
-.product-card .badge {
-    pointer-events: auto !important;
-    border-radius: 0 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-    /* Кольори фону і тексту тут не чіпаються, браузер бере їх із ваших оригінальних класів */
+/* Колір тексту на світлій темі НЕ змінюється при наведенні */
+:root:not(.dark) .product-card a:hover {
+    color: inherit !important;
+}
+:root:not(.dark) .product-card a.product-title-link:hover {
+    color: #222 !important;
 }
 
-
-
-
-/* --- СТИЛІ ДЛЯ ТОВАРІВ «ПІД ЗАМОВЛЕННЯ» --- */
-
-/* Виділення рамки картки під замовлення (наприклад, м'який бронзовий/золотистий відтінок) */
-.product-card.is-order,
-.product-card:has(.badge-order) {
-    border-color: var(--gold-muted) !important;
-}
-
-/* Зміна стилю та тексту кнопки для товарів під замовлення */
-.product-card.is-order .buy-btn,
-.product-card:has(.badge-order) .buy-btn {
+/* Кнопка кошика ЗАВЖДИ золота і без зайвих фонів */
+.product-card button[onclick*="addToCartById"] {
     background: transparent !important;
-    color: var(--text-main) !important;
-    border: 1px solid var(--text-main) !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    cursor: pointer !important;
+    color: var(--gold-muted, #C5A059) !important;
+}
+.product-card button[onclick*="addToCartById"] svg {
+    color: var(--gold-muted, #C5A059) !important;
+    stroke: var(--gold-muted, #C5A059) !important;
+    transition: transform 0.15s ease;
+}
+.product-card button[onclick*="addToCartById"]:hover svg {
+    transform: scale(1.1);
 }
 
-.product-card.is-order .buy-btn:hover,
-.product-card:has(.badge-order) .buy-btn:hover {
-    background: var(--text-main) !important;
-    color: var(--bg-body) !important;
+/* Кнопка "Обране" без фону */
+.product-card button[onclick*="handleFavClick"] {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 25 !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 6px !important;
 }
+
+
+
+/* Глобальні стилі для карток товарів */
+.product-card {
+    background-color: #ffffff;
+    border: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .product-card,
+[data-theme="dark"] .product-card {
+    background-color: #1a1a1a;
+    border-color: #333;
+}
+
+/* Розтягування фото по краях без рамок і фонів */
+.product-card .aspect-square {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+}
+
+.product-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Текстовий блок завжди однакової висоти */
+.product-card .card-text-block {
+    height: 95px !important;
+    min-height: 95px !important;
+    max-height: 95px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+/* ЗАБОРОНА зміни кольору тексту та посилань при наведенні */
+.product-card a,
+.product-card a:hover,
+.product-card span,
+.product-card span:hover {
+    transition: none !important;
+}
+
+.product-card .product-title {
+    color: #222 !important;
+}
+.dark .product-card .product-title,
+[data-theme="dark"] .product-card .product-title {
+    color: #fff !important;
+}
+
+.product-card .product-variant {
+    color: #888 !important;
+}
+.dark .product-card .product-variant,
+[data-theme="dark"] .product-card .product-variant {
+    color: #aaa !important;
+}
+
+/* Кнопка кошика ЗАВЖДИ золота */
+.product-card button[onclick*="addToCartById"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    cursor: pointer !important;
+}
+.product-card button[onclick*="addToCartById"] svg {
+    color: var(--gold-muted, #C5A059) !important;
+    stroke: var(--gold-muted, #C5A059) !important;
+    transition: transform 0.15s ease;
+}
+.product-card button[onclick*="addToCartById"]:hover svg {
+    transform: scale(1.1);
+}
+
+/* Кнопка "Обране" */
+.product-card button[onclick*="handleFavClick"] {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 25 !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+}
+
+
+

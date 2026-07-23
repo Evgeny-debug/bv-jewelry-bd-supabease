@@ -62,7 +62,7 @@
             border-color: var(--gold-muted);
         }
 
-        /* --- СТРОГИЙ ДИЗАЙН --- */
+        /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
         .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
             border-radius: 0 !important;
         }
@@ -167,7 +167,7 @@
         window.prompt = function(msg) { console.warn('Системний prompt заблоковано:', msg); return null; };
     </script>
 
-    <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
+    <!-- <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[32px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]">
             <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors" aria-label="Закрити">×</button>
             <div id="authFormContainer">
@@ -194,7 +194,7 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div id="lightboxModal" class="fixed inset-0 bg-black/95 z-[9000] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
         <button class="absolute top-6 right-6 text-white text-4xl hover:text-[var(--danger)] transition-colors" onclick="closeLightbox()">&times;</button>
@@ -1128,5 +1128,35 @@
         }
     });
 </script>
+
+
+<!-- Преміальне модальне вікно "Під замовлення" -->
+<div id="preorder-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden transition-all duration-300">
+    <div class="relative w-full max-w-sm p-8 bg-white dark:bg-[#0a0a0a] border border-[#d4af37]/30 shadow-2xl">
+        
+        <!-- Кнопка закриття -->
+        <button onclick="closePreOrderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black dark:hover:text-white transition-colors" aria-label="Закрити">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Контент -->
+        <div class="text-center">
+            <span class="text-[9px] tracking-[0.3em] uppercase text-[#C5A059] block mb-2 font-light">BV Jewelry</span>
+            <h3 class="text-sm font-light uppercase tracking-widest text-gray-900 dark:text-white mb-3">Виготовлення під замовлення</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-light leading-relaxed mb-6">
+                Ця модель доступна для індивідуального замовлення. Напишіть нам у Telegram, і ми узгодимо всі деталі та терміни.
+            </p>
+
+            <!-- Головна дія (Telegram) -->
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="block w-full py-3 bg-[#C5A059] text-black text-[10px] font-medium uppercase tracking-[0.2em] transition-opacity hover:opacity-90 mb-3">
+                Обговорити в Telegram
+            </a>
+
+            <!-- Альтернатива (Телефон / Viber) -->
+            <a href="viber://chat?number=%2B380634540901" class="block w-full py-2.5 bg-transparent border border-gray-300 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-medium uppercase tracking-[0.15em] transition-colors hover:border-[#C5A059]">
+                Viber / Звонок (+38 063 45 40 901)
+            </a>
+        </div>
+    </div>
 </body>
 </html>

@@ -38,13 +38,26 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-    /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
+    /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень --- */
     .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
         border-radius: 0 !important;
     }
-    .promo-track, .weekly-track, .product-grid-wide, .glass-accordion-container {
-        gap: 0 !important; 
+    
+    /* Адаптивні зменшені відступи сітки для мобільних (більше товарів в ряду) */
+    .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
+        gap: 6px !important;
     }
+    @media (min-width: 640px) {
+        .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
+            gap: 12px !important;
+        }
+    }
+    @media (min-width: 768px) {
+        .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
+            gap: 20px !important;
+        }
+    }
+
     .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
     section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
     .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
@@ -55,27 +68,52 @@
         opacity: 1 !important;
     }
 
-    /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
+    /* --- КАРТКИ ТОВАРІВ (Строга сітка, фіксовані пропорції) --- */
     .product-card {
         border: 1px solid #e5e5e5 !important;
         box-shadow: none !important;
         background-color: #fff !important;
-        margin-right: -1px; /* Злиття рамок */
-        margin-bottom: -1px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
-    [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
-    
-    .product-card .product-img {
-        aspect-ratio: 1 / 1 !important;
-        object-fit: contain !important;
-        padding: 0 !important;
-        background: #fff !important;
-        mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
+    [data-theme="dark"] .product-card { 
+        border-color: #262626 !important; 
+        background-color: #161616 !important; 
     }
-    [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
     
-    .product-card .p-4 { padding: 10px 8px !important; }
-    .product-card h3, .product-card span { line-height: 1.2; }
+    /* Стабільні пропорції фотографій у картках товарів */
+    .product-card .aspect-\[4\/5\], 
+    .product-card .aspect-square, 
+    .product-card .product-img-wrap {
+        aspect-ratio: 4 / 5 !important;
+        width: 100% !important;
+        position: relative;
+        overflow: hidden;
+        background: #F7F7F7 !important;
+    }
+    [data-theme="dark"] .product-card .aspect-\[4\/5\], 
+    [data-theme="dark"] .product-card .aspect-square, 
+    [data-theme="dark"] .product-card .product-img-wrap {
+        background: #1a1a1a !important;
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .product-card .p-2, .product-card .p-2\.5, .product-card .p-3 { 
+        padding: 6px 8px !important; 
+    }
+    @media (min-width: 640px) {
+        .product-card .p-2, .product-card .p-2\.5, .product-card .p-3 { 
+            padding: 12px !important; 
+        }
+    }
+    .product-card h3, .product-card h4, .product-card span { line-height: 1.2; }
 
     /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
     @media (max-width: 1024px) {
@@ -158,7 +196,6 @@
         display: none;
     }
 
-    /* Група категорії та її підкатегорій */
     .category-group {
         display: flex;
         align-items: center;
@@ -166,7 +203,6 @@
         flex-shrink: 0;
     }
 
-    /* Вертикальний розділювач між категоріями */
     .category-group:not(:last-child)::after {
         content: "" !important;
         position: absolute !important;
@@ -183,7 +219,6 @@
         background-color: #3f3f46 !important;
     }
 
-    /* Головна категорія */
     .main-category {
         background: transparent !important;
         border: none !important;
@@ -200,7 +235,6 @@
         color: var(--text-main, #f3f4f6) !important;
     }
 
-    /* Контейнер для підкатегорій, який виїжджає */
     .subcategories-container {
         display: flex;
         align-items: center;
@@ -211,7 +245,6 @@
         transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     }
 
-    /* Стиль кожної підкатегорії */
     .sub-category {
         background: transparent !important;
         border: none !important;
@@ -231,7 +264,6 @@
         opacity: 0.7;
     }
 
-    /* Ефект виїзду при наведенні на ПК (для пристроїв з мишкою) */
     @media (hover: hover) {
         .category-group:hover .subcategories-container {
             max-width: 800px;
@@ -239,13 +271,11 @@
         }
     }
 
-    /* Для мобільних або при кліку на ПК (клас .active додається скриптом) */
     .category-group.active .subcategories-container {
         max-width: 800px;
         opacity: 1;
     }
 
-    /* Ефект при наведенні на текст */
     .main-category:hover, .sub-category:hover {
         color: var(--gold-muted, #c5a059) !important;
     }
@@ -253,9 +283,73 @@
 
 
 
+/* Примусово робимо рівно 2 колонки на мобільних для всіх сіток у цих контейнерах */
+#dynamicHomeBlocksContainer .grid, 
+#glassAccordion .grid,
+#dynamicHomeBlocksContainer div[class*="grid"], 
+#glassAccordion div[class*="grid"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+}
+
+@media (min-width: 640px) {
+    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
+    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (min-width: 768px) {
+    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
+    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
+    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+}
 
 
 
+/* Жорстке перенаправлення для будь-яких сіток, що створюються JS у цих контейнерах */
+#dynamicHomeBlocksContainer div[class*="grid-cols-"],
+#glassAccordion div[class*="grid-cols-"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+}
+
+@media (min-width: 640px) {
+    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
+    #glassAccordion div[class*="grid-cols-"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (min-width: 768px) {
+    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
+    #glassAccordion div[class*="grid-cols-"] {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
+    #glassAccordion div[class*="grid-cols-"] {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+}
 
 
     
@@ -387,69 +481,75 @@
 
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
-    <main class="pt-6 md:pt-10 pb-20 px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
-        <section class="max-w-[1920px] mx-auto px-0 md:px-8 relative group overflow-hidden" id="promo-banner-top">
-    <!-- Стрілка вліво -->
-    <button type="button" onclick="window.scrollBanner(-1)" class="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
+   <main class="pt-6 md:pt-10 pb-20 px-2 sm:px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
+    
+    <!-- Топ-банєр -->
+    <section class="max-w-[1920px] mx-auto px-0 md:px-8 relative group overflow-hidden mb-6" id="promo-banner-top">
+        <!-- Стрілка вліво -->
+        <button type="button" onclick="window.scrollBanner(-1)" class="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
 
-    <!-- Контейнер фейд-слайдера -->
-    <div id="mainBannerContainer" class="banner-fade-container relative min-h-[150px] md:min-h-[400px] w-full overflow-hidden rounded-none">
-        <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
-    </div>
-
-    <!-- Стрілка вправо -->
-    <button type="button" onclick="window.scrollBanner(1)" class="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>
-
-    <!-- Блок навігації (Без квадрата, ідеально внизу банера) -->
-    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
-        <!-- Тонкий індикатор часу (прогрес-бар) -->
-        <div class="w-32 md:w-48 h-[2px] bg-white/30 overflow-hidden shadow-sm">
-            <div id="bannerTimeProgress" class="h-full bg-[var(--gold-muted)] w-0 transition-all duration-75"></div>
+        <!-- Контейнер фейд-слайдера -->
+        <div id="mainBannerContainer" class="banner-fade-container relative min-h-[150px] md:min-h-[400px] w-full overflow-hidden rounded-none">
+            <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
         </div>
-        <!-- Елегантні точки-індикатори -->
-        <div class="flex justify-center items-center gap-3" id="bannerDots"></div>
-    </div>
-</section>
-        <section id="heroBannerSection" class="max-w-[1920px] mx-auto px-0 md:px-8">
-            <a href="exclusive.html" class="relative block w-full h-[120px] md:h-[400px] overflow-hidden group border-y border-[var(--border)] rounded-none">
-                <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
-                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500"></div>
-                <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
-                    <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-bold mb-1 block">Individual Order</span>
-                    <h2 class="font-serif text-2xl md:text-4xl text-white font-light tracking-[0.1em] mb-2">ЕКСКЛЮЗИВ</h2>
-                    <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white group-hover:text-[var(--gold-muted)] transition-colors">
-                        <span data-i18n="btn_details">Дізнатися більше</span>
-                        <span class="w-8 h-[1px] bg-[var(--gold-muted)] transition-all duration-700 group-hover:w-16"></span>
-                    </div>
+
+        <!-- Стрілка вправо -->
+        <button type="button" onclick="window.scrollBanner(1)" class="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+
+        <!-- Блок навігації банера -->
+        <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
+            <div class="w-32 md:w-48 h-[2px] bg-white/30 overflow-hidden shadow-sm">
+                <div id="bannerTimeProgress" class="h-full bg-[var(--gold-muted)] w-0 transition-all duration-75"></div>
+            </div>
+            <div class="flex justify-center items-center gap-3" id="bannerDots"></div>
+        </div>
+    </section>
+
+    <!-- Ексклюзив промо-блок -->
+    <section id="heroBannerSection" class="max-w-[1920px] mx-auto px-0 md:px-8 mb-6">
+        <a href="exclusive.html" class="relative block w-full h-[120px] md:h-[400px] overflow-hidden group border-y border-[var(--border)] rounded-none">
+            <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500"></div>
+            <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
+                <span class="text-[9px] tracking-[0.4em] uppercase text-[var(--gold-muted)] font-bold mb-1 block">Individual Order</span>
+                <h2 class="font-serif text-2xl md:text-4xl text-white font-light tracking-[0.1em] mb-2">ЕКСКЛЮЗИВ</h2>
+                <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white group-hover:text-[var(--gold-muted)] transition-colors">
+                    <span data-i18n="btn_details">Дізнатися більше</span>
+                    <span class="w-8 h-[1px] bg-[var(--gold-muted)] transition-all duration-700 group-hover:w-16"></span>
                 </div>
-            </a>
-        </section>
-        <!-- Горизонтальний скрол категорій -->
-<!-- Ультра-мінімалістичний горизонтальний скрол категорій -->
-<!-- Горизонтальний скрол категорій -->
-<section class="w-full bg-[var(--bg-main, #fff)] dark:bg-[var(--bg-card, #121212)] py-2.5 border-b border-[var(--border, #f5f5f5)] transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4">
-        <div id="homeCategoriesScroll" class="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth py-1">
-            <!-- Динамічний контент категорій підлаштовуватиметься автоматично через класи Tailwind з урахуванням конфігурації вище -->
+            </div>
+        </a>
+    </section>
+
+    <!-- Горизонтальний скрол категорій -->
+    <section class="w-full bg-[var(--bg-main,#fff)] dark:bg-[var(--bg-card,#121212)] py-2.5 border-b border-[var(--border,#f5f5f5)] transition-colors duration-300 mb-6">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4">
+            <div id="homeCategoriesScroll" class="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth py-1">
+                <!-- Динамічний контент категорій -->
+            </div>
         </div>
-    </div>
-</section>
-        <div id="dynamicHomeBlocksContainer"></div>
+    </section>
+
+    <!-- Динамічні блоки товарів із захищеною сіткою (grid-cols-2 або більше на вузьких екранах із мінімальними відступами) -->
+    <!-- Оновлені контейнери для динамічних блоків і каталогу -->
+<div id="dynamicHomeBlocksContainer" class="space-y-10 mb-12 [&_.grid]:!grid-cols-2 [&_.grid]:sm:!grid-cols-3 [&_.grid]:md:!grid-cols-4 [&_.grid]:lg:!grid-cols-5 [&_.grid]:gap-2 [&_.grid]:sm:gap-4"></div>
         
-        <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
-            <div class="text-center mb-10 md:mb-16">
-                <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-4">Our World</h3>
-                <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
-            </div>
-            <div class="glass-accordion-container" id="glassAccordion">
-                <!-- Динамічно заповнюється скриптом нижче -->
-            </div>
-        </section>
-    </main>
+    <!-- Каталог / Акорд на головній -->
+    <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-6 md:py-16" id="categories-section">
+        <div class="text-center mb-8 md:mb-12">
+            <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-3">Our World</h3>
+            <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
+        </div>
+        <div class="glass-accordion-container [&_.grid]:!grid-cols-2 [&_.grid]:sm:!grid-cols-3 [&_.grid]:md:!grid-cols-4 [&_.grid]:lg:!grid-cols-5 [&_.grid]:gap-2 [&_.grid]:sm:gap-4" id="glassAccordion">
+            <!-- Динамічно заповнюється скриптом -->
+        </div>
+    </section>
+
+</main>
 
     <nav class="mobile-bottom-nav">
         <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
@@ -536,6 +636,10 @@
     <script src="main.js"></script>
 
     <script>// --- РЕНДЕРИНГ ГОЛОВНОГО АККОРДЕОНУ КАТЕГОРІЙ ---
+
+
+
+    
 async function renderHomeCategories() {
     const accordionContainer = document.getElementById('glassAccordion');
     if (!accordionContainer) return;
@@ -845,6 +949,9 @@ function initFadeBannerSlider() {
 }
 
 
+
+
+
 // --- ЗАПУСК УСІХ СКРИПТІВ ПРИ ЗАВАНТАЖЕННІ ---
 document.addEventListener('DOMContentLoaded', () => {
     renderHomeCategories();
@@ -852,12 +959,54 @@ document.addEventListener('DOMContentLoaded', () => {
     initFadeBannerSlider();
 
 });
-
+document.addEventListener("DOMContentLoaded", () => {
+        const fixGrids = () => {
+            const containers = document.querySelectorAll('#dynamicHomeBlocksContainer .grid, #glassAccordion .grid, #dynamicHomeBlocksContainer div[class*="grid-cols-"], #glassAccordion div[class*="grid-cols-"]');
+            containers.forEach(el => {
+                el.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 w-full";
+            });
+        };
+        fixGrids();
+        // Запускаємо ще раз на випадок динамічного завантаження даних із Supabase
+        setTimeout(fixGrids, 500);
+        setTimeout(fixGrids, 1500);
+    });
 
 
     </script>
 
     
-</script>
+
+
+
+<!-- Преміальне модальне вікно "Під замовлення" -->
+<div id="preorder-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden transition-all duration-300">
+    <div class="relative w-full max-w-sm p-8 bg-white dark:bg-[#0a0a0a] border border-[#d4af37]/30 shadow-2xl">
+        
+        <!-- Кнопка закриття -->
+        <button onclick="closePreOrderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black dark:hover:text-white transition-colors" aria-label="Закрити">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Контент -->
+        <div class="text-center">
+            <span class="text-[9px] tracking-[0.3em] uppercase text-[#C5A059] block mb-2 font-light">BV Jewelry</span>
+            <h3 class="text-sm font-light uppercase tracking-widest text-gray-900 dark:text-white mb-3">Виготовлення під замовлення</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-light leading-relaxed mb-6">
+                Ця модель доступна для індивідуального замовлення. Напишіть нам у Telegram, і ми узгодимо всі деталі та терміни.
+            </p>
+
+            <!-- Головна дія (Telegram) -->
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="block w-full py-3 bg-[#C5A059] text-black text-[10px] font-medium uppercase tracking-[0.2em] transition-opacity hover:opacity-90 mb-3">
+                Обговорити в Telegram
+            </a>
+
+            <!-- Альтернатива (Телефон / Viber) -->
+            <a href="viber://chat?number=%2B380634540901" class="block w-full py-2.5 bg-transparent border border-gray-300 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-medium uppercase tracking-[0.15em] transition-colors hover:border-[#C5A059]">
+                Viber / Звонок (+38 063 45 40 901)
+            </a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
