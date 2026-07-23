@@ -1535,50 +1535,61 @@ window.toggleVarPriceMode = function(mode) {
     if (!actProd || !actProd.variations || !actProd.variations[editVar]) return;
 
     const vData = actProd.variations[editVar];
+    
+    // 1. Одразу оновлюємо тип розрахунку в пам'яті товару
     vData.priceType = mode;
 
-    const priceInput = document.getElementById('var-price');
-    
+    // 2. Отримуємо елементи блоків
+    const manualBox = document.getElementById('var-price-manual-box');
+    const autoBox = document.getElementById('var-price-auto-box');
+
+    // 3. Перемикаємо видимість блоків
     if (mode === 'auto') {
-        // Робимо поле ціни недоступним для ручного вводу
-        if (priceInput) {
-            priceInput.readOnly = true;
-            priceInput.classList.add('opacity-60', 'cursor-not-allowed');
-        }
-        // Перераховуємо ціну
+        manualBox?.classList.add('hidden');
+        autoBox?.classList.remove('hidden');
+        autoBox?.classList.add('flex');
+
+        // Автоматично вираховуємо ціну за вагою прямо зараз
         recalculateCurrentVarPrice();
     } else {
-        // Повертаємо можливість вводити ціну вручну
+        manualBox?.classList.remove('hidden');
+        autoBox?.classList.add('hidden');
+        autoBox?.classList.remove('flex');
+
+        // Повертаємо збережену ручну ціну в інпут
+        const priceInput = document.getElementById('var-price');
         if (priceInput) {
-            priceInput.readOnly = false;
-            priceInput.classList.remove('opacity-60', 'cursor-not-allowed');
+            priceInput.value = vData.price || '';
         }
     }
 };
 
-// "Живий" перерахунок ціни при зміні ваги або вартості роботи
+// Хелпер для живого розрахунку авто-ціни
 window.recalculateCurrentVarPrice = function() {
     if (!actProd || !actProd.variations || !actProd.variations[editVar]) return;
-    
+
     const vData = actProd.variations[editVar];
     
-    // Перераховуємо лише якщо увімкнено режим "auto"
+    // Зчитуємо актуальні значення з інпутів модалки
+    const weightInput = document.getElementById('var-weight');
+    const workCostInput = document.getElementById('var-workCost');
+
+    if (weightInput) vData.weight = weightInput.value;
+    if (workCostInput) vData.workCost = workCostInput.value;
+
     if (vData.priceType === 'auto') {
-        const weight = parseFloat(document.getElementById('var-weight')?.value) || 0;
-        const workCost = parseFloat(document.getElementById('var-workCost')?.value) || 0;
+        const weight = parseFloat(vData.weight) || 0;
+        const workCost = parseFloat(vData.workCost) || 0;
         const goldRate = parseFloat(siteSettings?.goldRate) || 0;
 
         // Формула розрахунку
         const calculatedPrice = Math.round((weight * goldRate) + workCost);
-
-        // Оновлюємо дані в пам'яті та в DOM
-        vData.weight = weight;
-        vData.workCost = workCost;
         vData.price = calculatedPrice;
 
-        const priceInput = document.getElementById('var-price');
-        if (priceInput) {
-            priceInput.value = calculatedPrice;
+        // Оновлюємо плашку підсумку
+        const previewEl = document.getElementById('auto-price-preview');
+        if (previewEl) {
+            previewEl.innerText = `${calculatedPrice} ₴`;
         }
     }
 };
