@@ -307,15 +307,29 @@ window.loadCloudData = async function() {
     }
     
     try {
-        const { data, error } = await _supabase.from('products').select('*');
-        if (error) throw error;
+        // 1. Завантажуємо товари з Supabase
+        const { data: prodData, error: prodError } = await _supabase.from('products').select('*');
+        if (prodError) throw prodError;
         
-        if (data && data.length > 0) {
-            products = data;            
-            window.products = data;     
-            API.set('bv_products', data); 
+        if (prodData && prodData.length > 0) {
+            products = prodData;            
+            window.products = prodData;     
+            API.set('bv_products', prodData); 
+        }
+
+        // 2. Завантажуємо конфігурацію блоків із таблиці site_storage в Supabase
+        const { data: storageData, error: storageError } = await _supabase
+            .from('site_storage')
+            .select('*')
+            .eq('key', 'bv_home_blocks')
+            .single();
+            
+        if (!storageError && storageData) {
+            const blocksValue = storageData.value !== undefined ? storageData.value : storageData;
+            API.set('bv_home_blocks', blocksValue);
         }
         
+        // 3. Запускаємо генерацію інтерфейсу
         if(typeof window.generateMenus === 'function') window.generateMenus();
         if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
         
@@ -323,7 +337,10 @@ window.loadCloudData = async function() {
         console.error('Помилка завантаження даних з Supabase:', err);
         products = API.get('bv_products', []);
         window.products = products;
+        
         if(typeof window.generateMenus === 'function') window.generateMenus();
+        // ВАЖЛИВО: Тепер рендер викликається і тут, щоб блоки будувалися навіть при збої мережі
+        if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
     }
 };
 
@@ -869,19 +886,19 @@ window.renderProductCard = function(prod) {
     const isFav = getFavs().includes(prod.id);
     
     let badgesHtml = '<div class="flex flex-wrap gap-1 justify-end items-center">';
-    if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out rounded-none">${i18n[lang].badge_sold_out}</div>`;
-    else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order rounded-none">${i18n[lang].badge_pre_order}</div>`;
-    if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new rounded-none">${i18n[lang].badge_new}</div>`;
-    if(prod.badge === 'exclusive') badgesHtml += `<div class="prod-badge badge-exclusive rounded-none">${i18n[lang].badge_exclusive}</div>`;
-    if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale rounded-none">${i18n[lang].badge_sale}</div>`;
+    if (isOutOfStock) badgesHtml += `<div class="prod-badge badge-sold-out rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sold_out}</div>`;
+    else if (isPreOrder) badgesHtml += `<div class="prod-badge badge-pre-order rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_pre_order}</div>`;
+    if(prod.badge === 'new') badgesHtml += `<div class="prod-badge badge-new rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_new}</div>`;
+    if(prod.badge === 'exclusive') badgesHtml += `<div class="prod-badge badge-exclusive rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_exclusive}</div>`;
+    if(prod.badge === 'sale') badgesHtml += `<div class="prod-badge badge-sale rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sale}</div>`;
     badgesHtml += '</div>';
 
     const price = base.price || 0;
     const discount = base.discount || null;
 
-    let priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
+    let priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
     if (discount && Number(discount) > 0) {
-        priceHtml = `<span class="text-[14px] md:text-[16px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[10px] md:text-[12px] text-[var(--text-muted)] line-through ml-2 opacity-70">${formatterPrice.format(price)} ₴</span>`;
+        priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[9px] md:text-[11px] text-[var(--text-muted)] line-through ml-1.5 opacity-70">${formatterPrice.format(price)} ₴</span>`;
     }
 
     const safeId = escapeHtml(prod.id);
@@ -890,29 +907,29 @@ window.renderProductCard = function(prod) {
     const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
 
     return `
-        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] transition-colors duration-300">
-            <a href="product.html?id=${safeId}" class="relative w-full aspect-square overflow-hidden bg-white block p-2 md:p-4">
-                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-700 group-hover:scale-105" loading="lazy">
+        <div class="product-card group relative overflow-hidden flex flex-col w-full h-full bg-[#ffffff] transition-colors duration-300 border border-[#f0f0f0]">
+            <a href="product.html?id=${safeId}" class="relative w-full aspect-square overflow-hidden bg-[#fafafa] block p-2">
+                <img src="${safeImg}" class="product-img w-full h-full object-contain transition duration-500 group-hover:scale-105" loading="lazy">
             </a>
             
-            <div class="px-3 md:px-4 pb-1 pt-2 flex flex-col gap-1 flex-grow bg-white border-t border-[#f5f5f5]">
-                <a href="product.html?id=${safeId}" class="text-[9px] md:text-[10px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-all duration-300">${safeVariant}</a>
-                <a href="product.html?id=${safeId}" class="text-[12px] md:text-[14px] font-medium text-[#222] leading-snug hover:text-[var(--gold-muted)] transition-all duration-300 line-clamp-2 mt-1 min-h-[36px] md:min-h-[44px]">${safeName}</a>
-                <div class="mt-auto pt-2 mb-1 flex items-center">${priceHtml}</div>
+            <div class="px-2.5 md:px-3 pt-2 pb-1.5 flex flex-col gap-0.5 flex-grow bg-white">
+                ${safeVariant ? `<a href="product.html?id=${safeId}" class="text-[9px] uppercase tracking-widest text-[#888] hover:text-[var(--gold-muted)] transition-colors line-clamp-1">${safeVariant}</a>` : ''}
+                <a href="product.html?id=${safeId}" class="text-[11px] md:text-[13px] font-medium text-[#222] leading-tight hover:text-[var(--gold-muted)] transition-colors line-clamp-2">${safeName}</a>
+                <div class="mt-auto pt-1.5 flex items-center">${priceHtml}</div>
             </div>
 
-            <div class="px-3 md:px-4 py-3 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
-                <div class="flex items-center gap-2">
+            <div class="px-2.5 md:px-3 py-2 border-t border-[#f5f5f5] flex justify-between items-center mt-auto bg-white">
+                <div class="flex items-center">
                     ${!isOutOfStock ? `
-                    <button onclick="window.addToCartById('${safeId}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#222] hover:text-[var(--gold-muted)] transition-all duration-300 active:scale-95 group/btn">
-                        <span>${i18n[lang].btn_buy}</span><span class="text-[14px] font-light mb-[2px] transition-transform group-hover/btn:rotate-90">+</span>
+                    <button onclick="window.addToCartById('${safeId}')" class="btn-cross flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#222] hover:text-[var(--gold-muted)] transition-all active:scale-95 group/btn">
+                        <span>${i18n[lang].btn_buy}</span><span class="text-[13px] font-light mb-[1px] transition-transform group-hover/btn:rotate-90">+</span>
                     </button>
-                    ` : `<span class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#888]">${i18n[lang].out_stock}</span>`}
+                    ` : `<span class="text-[9px] font-bold uppercase tracking-widest text-[#888]">${i18n[lang].out_stock}</span>`}
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     ${badgesHtml}
-                    <button class="fav-btn-inline btn-cross ${isFav ? 'text-[var(--danger)]' : 'text-[#888] hover:text-[#222]'} transition-all duration-300 active:scale-95" data-id="${safeId}" onclick="toggleFav('${safeId}')">
-                        <svg width="18" height="18" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <button class="fav-btn-inline btn-cross ${isFav ? 'text-[var(--danger)]' : 'text-[#888] hover:text-[#222]'} transition-all active:scale-95 p-1" data-id="${safeId}" onclick="toggleFav('${safeId}')">
+                        <svg width="16" height="16" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
                 </div>
             </div>
@@ -932,7 +949,6 @@ window.addToCartById = function(id) {
     
     window.addToCart(prod.id, name, prod.variant || '', price, img);
 };
-
 // ==========================================
 // 9. БЕЗКІНЧЕННА БІГУЧА СТРОКА ТА КАРУСЕЛІ
 // ==========================================
@@ -1147,30 +1163,61 @@ window.goToBanner = function(index, e) {
 // 11. ГОЛОВНА ТА ПІДВАЛ: РЕНДЕР ДИНАМІЧНИХ СЕКЦІЙ 
 // ==========================================
 window.renderHomeSections = function() {
-    const homeBlocks = API.get('bv_home_blocks', [
-        { id: 'hits', name: {uk: 'Хіти місяця', ru: 'Хиты', en: 'Hits'}, active: true },
-        { id: 'weekly', name: {uk: 'Вибір тижня', ru: 'Выбор недели', en: 'Weekly Choice'}, active: true }
-    ]);
-    
     let container = document.getElementById('dynamicHomeBlocksContainer');
     if (!container) return;
-    
+
+    // Чередуем получение данных: сначала проверяем глобальную переменную из админки, затем API
+    let homeBlocks = [];
+    if (typeof window.homeBlocks !== 'undefined' && Array.isArray(window.homeBlocks)) {
+        homeBlocks = window.homeBlocks;
+    } else if (typeof API !== 'undefined' && typeof API.get === 'function') {
+        homeBlocks = API.get('bv_home_blocks', []);
+    }
+
+    if (typeof products === 'undefined' || !Array.isArray(products) || products.length === 0) {
+        console.warn('⚠️ Масив products ще не завантажений.');
+        return;
+    }
+
+    if (!Array.isArray(homeBlocks) || homeBlocks.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
     let html = '';
-    homeBlocks.filter(b => b.active).forEach(block => {
+    const activeBlocks = homeBlocks.filter(b => b.active);
+
+    activeBlocks.forEach(block => {
+        // Умная фильтрация: поддерживает массив blocks у товара, строки и прямые свойства
         let items = products.filter(p => {
-            if (p.blocks && p.blocks.includes(block.id)) return true;
-            if (block.id === 'hits' && (p.isSpecial === true || p.isSpecial === 'true')) return true;
-            if (block.id === 'weekly' && (p.isWeekly === true || p.isWeekly === 'true')) return true;
+            if (!p) return false;
+
+            if (Array.isArray(p.blocks) && p.blocks.includes(block.id)) return true;
+            if (typeof p.blocks === 'string' && p.blocks.includes(block.id)) return true;
+            if (p[block.id] === true || p[block.id] === 'true' || p[block.id] === 1 || p[block.id] === '1') return true;
+
             return false;
         });
-        
+
         if (items.length > 0) {
-            const title = window.getLoc(block.name);
+            // Безопасное получение перевода названия блока
+            let title = block.id;
+            if (block.name) {
+                const currentLang = (typeof window.getCurrentLang === 'function') ? window.getCurrentLang() : 'uk';
+                title = block.name[currentLang] || block.name.uk || block.name.ru || block.name.en || block.id;
+            }
+
             const trackId = `block-track-${block.id}`;
-            const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex">${window.renderProductCard(p)}</div>`;
             
+            if (typeof window.renderProductCard !== 'function') return;
+
+            // Было: const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] ...">...</div>`
+// Стало (карточки меньше, помещается больше):
+const cardWrapper = (p) => `<div class="flex-none w-[38%] sm:w-[28%] md:w-[22%] lg:w-[18%] xl:w-[15%] snap-start flex px-1">${window.renderProductCard(p)}</div>`;
             let blockItems = [...items];
-            while(blockItems.length < 12 && blockItems.length > 0) { blockItems = blockItems.concat(items); }
+            while(blockItems.length < 12 && blockItems.length > 0) { 
+                blockItems = blockItems.concat(items); 
+            }
             
             html += `
             <section class="max-w-[1920px] mx-auto px-0 py-4 md:py-6 border-t border-[var(--border)]">
@@ -1189,61 +1236,13 @@ window.renderHomeSections = function() {
     
     container.innerHTML = html;
     
-    homeBlocks.filter(b => b.active).forEach(block => {
+    activeBlocks.forEach(block => {
         const track = document.getElementById(`block-track-${block.id}`);
         if (track && typeof window.initPremiumCarousel === 'function') {
             window.initPremiumCarousel(track);
         }
     });
 };
-
-window.applyAdminSettings = function() {
-    const settings = API.get('bv_settings', null);
-    const pages = API.get('bv_pages_content', {});
-    
-    if (pages.home_hero) {
-        const heroBg = document.querySelector('.hero-img-bg');
-        const heroOverlay = document.querySelector('.hero-overlay');
-        const heroTitle = document.querySelector('.hero-title');
-        const heroSub = document.querySelector('.hero-subtitle');
-
-        if (heroBg && pages.home_hero.heroBg) heroBg.style.backgroundImage = `url('${pages.home_hero.heroBg}')`;
-        if (heroOverlay && pages.home_hero.heroOpacity !== undefined) heroOverlay.style.backgroundColor = `rgba(0, 0, 0, ${pages.home_hero.heroOpacity})`;
-        
-        if (heroTitle) {
-            if (pages.home_hero.title) heroTitle.innerText = pages.home_hero.title;
-            if (pages.home_hero.titleColor) heroTitle.style.color = pages.home_hero.titleColor;
-        }
-        if (heroSub) {
-            if (pages.home_hero.subtitle) heroSub.innerText = pages.home_hero.subtitle;
-            if (pages.home_hero.subColor) heroSub.style.color = pages.home_hero.subColor;
-        }
-    }
-
-    if (settings) {
-        if (settings.phone) {
-            document.querySelectorAll('.header-phone-link, .phone-num').forEach(link => { link.href = `tel:${settings.phone.replace(/\s+/g, '')}`; });
-            document.querySelectorAll('.header-phone-text, .phone-num span').forEach(span => { span.innerText = settings.phone; });
-        }
-        if(settings.tgLink) document.querySelectorAll('.tg-link').forEach(link => link.href = settings.tgLink);
-        if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
-        
-        const footerAddrBlock = document.getElementById('footerAddressesBlock');
-        if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
-            let html = '';
-            html += `<a href="http://maps.google.com/?q=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
-                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        <span>${settings.addresses[0]}</span>
-                    </a>`;
-            
-            if (settings.addresses.length > 1) {
-                html += `<button onclick="window.showBranchesModal()" class="btn-cross text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
-            }
-            footerAddrBlock.innerHTML = html;
-        }
-    }
-};
-
 window.showBranchesModal = function() {
     const settings = API.get('bv_settings', {});
     const addrs = settings.addresses || [];
@@ -2912,4 +2911,182 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (closeBtn) closeBtn.addEventListener('click', closeServiceModal);
     if (saveBtn) saveBtn.addEventListener('click', saveServiceFromModal);
+});
+
+
+
+
+
+
+/* ==========================================
+   ZLATO MEGA MENU SCRIPT - TEXT ONLY
+   ========================================== */
+
+async function initZlatoMegaMenu() {
+    const parentMenu = document.querySelector('.zlato-style');
+    if (!parentMenu) {
+        console.error('Елемент .zlato-style не знайдено в DOM!');
+        return;
+    }
+
+    let categoriesCol = parentMenu.querySelector('.zlato-categories');
+    if (!categoriesCol) {
+        categoriesCol = document.createElement('div');
+        categoriesCol.className = 'zlato-categories';
+        parentMenu.prepend(categoriesCol);
+    }
+
+    parentMenu.querySelectorAll('.zlato-content').forEach(el => el.remove());
+
+    const fallbackCategories = [
+      { id: "rings", name: { en: "Каблучки", ru: "Каблучки", uk: "Каблучки" }, parentId: null },
+      { id: "women_rings", name: { en: "Жіночі", ru: "Жіночі", uk: "Жіночі" }, parentId: "rings" },
+      { id: "wr_gold_red", name: { en: "Червоне золото", ru: "Червоне золото", uk: "Червоне золото" }, parentId: "women_rings" },
+      { id: "wr_gold_white", name: { en: "Біле золото", ru: "Біле золото", uk: "Біле золото" }, parentId: "women_rings" },
+      { id: "wr_silver", name: { en: "Срібні", ru: "Срібні", uk: "Срібні" }, parentId: "women_rings" },
+      { id: "wr_diamonds", name: { en: "З діамантами", ru: "З діамантами", uk: "З діамантами" }, parentId: "women_rings" },
+      { id: "wr_engagement", name: { en: "На заручини", ru: "На заручини", uk: "На заручини" }, parentId: "women_rings" },
+      { id: "men_rings", name: { en: "Чоловічі", ru: "Чоловічі", uk: "Чоловічі" }, parentId: "rings" },
+      { id: "mr_gold", name: { en: "Золоті печатки", ru: "Золоті печатки", uk: "Золоті печатки" }, parentId: "men_rings" },
+      { id: "mr_silver", name: { en: "Срібні персні", ru: "Срібні персні", uk: "Срібні персні" }, parentId: "men_rings" },
+      { id: "mr_wedding", name: { en: "Обручки", ru: "Обручки", uk: "Обручки" }, parentId: "men_rings" },
+      { id: "mr_enamel", name: { en: "З емаллю/оніксом", ru: "З емаллю/оніксом", uk: "З емаллю/оніксом" }, parentId: "men_rings" },
+      { id: "kids_rings", name: { en: "Дитячі", ru: "Дитячі", uk: "Дитячі" }, parentId: "rings" },
+      { id: "kr_gold", name: { en: "Золоті", ru: "Золоті", uk: "Золоті" }, parentId: "kids_rings" },
+      { id: "kr_silver", name: { en: "Срібні", ru: "Срібні", uk: "Срібні" }, parentId: "kids_rings" },
+      { id: "kr_enamel", name: { en: "З кольоровою емаллю", ru: "З кольоровою емаллю", uk: "З кольоровою емаллю" }, parentId: "kids_rings" },
+      { id: "earrings", name: { en: "Сережки", ru: "Сережки", uk: "Сережки" }, parentId: null },
+      { id: "women_earrings", name: { en: "Жіночі", ru: "Жіночі", uk: "Жіночі" }, parentId: "earrings" },
+      { id: "we_gold", name: { en: "Золоті", ru: "Золоті", uk: "Золоті" }, parentId: "women_earrings" },
+      { id: "we_silver", name: { en: "Срібні", ru: "Срібні", uk: "Срібні" }, parentId: "women_earrings" },
+      { id: "we_studs", name: { en: "Пусети (Гвоздики)", ru: "Пусети (Гвоздики)", uk: "Пусети (Гвоздики)" }, parentId: "women_earrings" },
+      { id: "we_english", name: { en: "Англійський замок", ru: "Англійський замок", uk: "Англійський замок" }, parentId: "women_earrings" },
+      { id: "we_diamonds", name: { en: "З діамантами", ru: "З діамантами", uk: "З діамантами" }, parentId: "women_earrings" },
+      { id: "kids_earrings", name: { en: "Дитячі", ru: "Дитячі", uk: "Дитячі" }, parentId: "earrings" },
+      { id: "ke_gold_french", name: { en: "Золоті (Французький замок)", ru: "Золоті (Французький замок)", uk: "Золоті (Французький замок)" }, parentId: "kids_earrings" },
+      { id: "ke_silver_studs", name: { en: "Срібні пусети", ru: "Срібні пусети", uk: "Срібні пусети" }, parentId: "kids_earrings" },
+      { id: "ke_animals", name: { en: "З тваринками/емаллю", ru: "З тваринками/емаллю", uk: "З тваринками/емаллю" }, parentId: "kids_earrings" },
+      { id: "men_earrings", name: { en: "Чоловічі", ru: "Чоловічі", uk: "Чоловічі" }, parentId: "earrings" },
+      { id: "me_gold", name: { en: "Золоті моносережки", ru: "Золоті моносережки", uk: "Золоті моносережки" }, parentId: "men_earrings" },
+      { id: "me_silver", name: { en: "Срібні моносережки", ru: "Срібні моносережки", uk: "Срібні моносережки" }, parentId: "men_earrings" },
+      { id: "necklaces", name: { en: "Кольє та Ланцюжки", ru: "Кольє та Ланцюжки", uk: "Кольє та Ланцюжки" }, parentId: null },
+      { id: "women_necklaces", name: { en: "Жіночі", ru: "Жіночі", uk: "Жіночі" }, parentId: "necklaces" },
+      { id: "wn_gold_chains", name: { en: "Золоті ланцюжки", ru: "Золоті ланцюжки", uk: "Золоті ланцюжки" }, parentId: "women_necklaces" },
+      { id: "wn_silver_chains", name: { en: "Срібні ланцюжки", ru: "Срібні ланцюжки", uk: "Срібні ланцюжки" }, parentId: "women_necklaces" },
+      { id: "wn_pendants", name: { en: "З підвіскою", ru: "З підвіскою", uk: "З підвіскою" }, parentId: "women_necklaces" },
+      { id: "wn_diamonds", name: { en: "Діамантові кольє", ru: "Діамантові кольє", uk: "Діамантові кольє" }, parentId: "women_necklaces" },
+      { id: "men_necklaces", name: { en: "Чоловічі", ru: "Чоловічі", uk: "Чоловічі" }, parentId: "necklaces" },
+      { id: "mn_gold_massive", name: { en: "Масивні золоті", ru: "Масивні золоті", uk: "Масивні золоті" }, parentId: "men_necklaces" },
+      { id: "mn_silver_bismarck", name: { en: "Срібні (Бісмарк)", ru: "Срібні (Бісмарк)", uk: "Срібні (Бісмарк)" }, parentId: "men_necklaces" },
+      { id: "mn_crosses", name: { en: "Хрестики та ладанки", ru: "Хрестики та ладанки", uk: "Хрестики та ладанки" }, parentId: "men_necklaces" },
+      { id: "kids_necklaces", name: { en: "Дитячі", ru: "Дитячі", uk: "Дитячі" }, parentId: "necklaces" },
+      { id: "kn_thin_silver", name: { en: "Тонкі срібні ланцюжки", ru: "Тонкі срібні ланцюжки", uk: "Тонкі срібні ланцюжки" }, parentId: "kids_necklaces" },
+      { id: "kn_gold_crosses", name: { en: "Золоті хрестики", ru: "Золоті хрестики", uk: "Золоті хрестики" }, parentId: "kids_necklaces" },
+      { id: "bracelets", name: { en: "Браслети", ru: "Браслети", uk: "Браслети" }, parentId: null },
+      { id: "women_bracelets", name: { en: "Жіночі", ru: "Жіночі", uk: "Жіночі" }, parentId: "bracelets" },
+      { id: "wb_gold", name: { en: "Золоті гнучкі", ru: "Золоті гнучкі", uk: "Золоті гнучкі" }, parentId: "women_bracelets" },
+      { id: "wb_silver_hard", name: { en: "Срібні жорсткі", ru: "Срібні жорсткі", uk: "Срібні жорсткі" }, parentId: "women_bracelets" },
+      { id: "wb_tennis", name: { en: "Тенісні браслети", ru: "Тенісні браслети", uk: "Тенісні браслети" }, parentId: "women_bracelets" },
+      { id: "wb_charms", name: { en: "З шармами", ru: "З шармами", uk: "З шармами" }, parentId: "women_bracelets" },
+      { id: "men_bracelets", name: { en: "Чоловічі", ru: "Чоловічі", uk: "Чоловічі" }, parentId: "bracelets" },
+      { id: "mb_leather_gold", name: { en: "Шкіряні з золотом", ru: "Шкіряні з золотом", uk: "Шкіряні з золотом" }, parentId: "men_bracelets" },
+      { id: "mb_silver_massive", name: { en: "Срібні масивні", ru: "Срібні масивні", uk: "Срібні масивні" }, parentId: "men_bracelets" },
+      { id: "kids_bracelets", name: { en: "Дитячі", ru: "Дитячі", uk: "Дитячі" }, parentId: "bracelets" },
+      { id: "kb_red_thread", name: { en: "Червона нитка з золотом", ru: "Червона нитка з золотом", uk: "Червона нитка з золотом" }, parentId: "kids_bracelets" },
+      { id: "kb_silver_plate", name: { en: "Срібні з пластинкою", ru: "Срібні з пластинкою", uk: "Срібні з пластинкою" }, parentId: "kids_bracelets" }
+    ];
+
+    let categories = [];
+
+    try {
+        if (typeof _supabase !== 'undefined') {
+            const { data: catRes } = await _supabase.from('site_storage').select('*').eq('key', 'bv_categories_flat').single();
+            categories = catRes ? (catRes.value || catRes.data || catRes) : [];
+        }
+    } catch (err) {
+        console.warn('Supabase warning:', err);
+    }
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+        categories = fallbackCategories;
+    }
+
+    const getText = (nameField) => {
+        if (!nameField) return '';
+        if (typeof nameField === 'string') return nameField;
+        if (typeof nameField === 'object') {
+            return nameField.uk || nameField.ru || nameField.en || Object.values(nameField)[0] || '';
+        }
+        return String(nameField);
+    };
+
+    const getAllSubcategories = (catId, allCats) => {
+        let subs = allCats.filter(c => String(c.parentId) === String(catId));
+        let result = [...subs];
+        subs.forEach(sub => {
+            result.push(...getAllSubcategories(sub.id, allCats));
+        });
+        return result;
+    };
+
+    const mainCategories = categories.filter(c => c.parentId === null || c.parentId === undefined);
+
+    let col1HTML = '';
+    let contentsHTML = '';
+
+    mainCategories.forEach((mainCat, index) => {
+        const isActive = index === 0 ? 'active' : '';
+        const mainName = getText(mainCat.name);
+
+        col1HTML += `
+            <button class="zlato-cat-item ${isActive}" data-target="zlato-cat-${mainCat.id}" onmouseenter="switchZlatoTab('${mainCat.id}')">
+                <span>${mainName}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        `;
+
+        const subCategories = getAllSubcategories(mainCat.id, categories);
+
+        let subcatsHTML = '';
+        if (subCategories.length > 0) {
+            subcatsHTML = subCategories.map(sub => {
+                const subName = getText(sub.name);
+                return `
+                    <a href="catalog.html?cat=${sub.id}" class="zlato-subcat-card">
+                        <div class="zlato-subcat-title">${subName}</div>
+                    </a>
+                `;
+            }).join('');
+        } else {
+            subcatsHTML = `<div style="grid-column: span 4; text-align: center; padding: 30px; font-size: 12px; color: var(--text-muted);">Підкатегорій не знайдено</div>`;
+        }
+
+        contentsHTML += `
+            <div class="zlato-content ${isActive}" id="zlato-cat-${mainCat.id}">
+                <div class="zlato-subcats-grid">
+                    ${subcatsHTML}
+                </div>
+            </div>
+        `;
+    });
+
+    categoriesCol.innerHTML = col1HTML;
+    parentMenu.insertAdjacentHTML('beforeend', contentsHTML);
+}
+
+window.switchZlatoTab = function(catId) {
+    const parentMenu = document.querySelector('.zlato-style');
+    if (!parentMenu) return;
+
+    parentMenu.querySelectorAll('.zlato-cat-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-target') === `zlato-cat-${catId}`);
+    });
+
+    parentMenu.querySelectorAll('.zlato-content').forEach(content => {
+        content.classList.toggle('active', content.id === `zlato-cat-${catId}`);
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initZlatoMegaMenu();
 });

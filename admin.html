@@ -903,12 +903,7 @@
                 await saveToCloudStorage('bv_categories_flat', categories);
             }
 
-            if(homeBlocks.length === 0) {
-                homeBlocks = [
-                    { id: 'hits', name: {uk: 'Хіти місяця', ru: 'Хиты', en: 'Hits'}, active: true },
-                    { id: 'weekly', name: {uk: 'Вибір тижня', ru: 'Выбор недели', en: 'Weekly Choice'}, active: true }
-                ];
-            }
+            
 
             renderProducts();
             renderCategoriesAdmin();
@@ -2294,6 +2289,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'index.html';
             }
         };
+
+
+        window.applyAdminSettings = function() {
+    const settings = API.get('bv_settings', null);
+    const pages = API.get('bv_pages_content', {});
+    
+    // Секция главного баннера (героя)
+    const heroSection = document.getElementById('heroBannerSection');
+
+    if (pages.home_hero) {
+        // Если баннер выключен в настройках — скрываем его полностью, чтобы контент поднялся
+        if (pages.home_hero.active === false || pages.home_hero.enabled === false) {
+            if (heroSection) heroSection.style.display = 'none';
+        } else {
+            if (heroSection) heroSection.style.display = ''; // возвращаем стандартное отображение
+            
+            const heroBg = document.querySelector('.hero-img-bg');
+            const heroOverlay = document.querySelector('.hero-overlay');
+            const heroTitle = document.querySelector('.hero-title');
+            const heroSub = document.querySelector('.hero-subtitle');
+
+            if (heroBg && pages.home_hero.heroBg) heroBg.style.backgroundImage = `url('${pages.home_hero.heroBg}')`;
+            if (heroOverlay && pages.home_hero.heroOpacity !== undefined) heroOverlay.style.backgroundColor = `rgba(0, 0, 0, ${pages.home_hero.heroOpacity})`;
+            
+            if (heroTitle) {
+                if (pages.home_hero.title) heroTitle.innerText = pages.home_hero.title;
+                if (pages.home_hero.titleColor) heroTitle.style.color = pages.home_hero.titleColor;
+            }
+            if (heroSub) {
+                if (pages.home_hero.subtitle) heroSub.innerText = pages.home_hero.subtitle;
+                if (pages.home_hero.subColor) heroSub.style.color = pages.home_hero.subColor;
+            }
+        }
+    }
+
+    if (settings) {
+        if (settings.phone) {
+            document.querySelectorAll('.header-phone-link, .phone-num').forEach(link => { link.href = `tel:${settings.phone.replace(/\s+/g, '')}`; });
+            document.querySelectorAll('.header-phone-text, .phone-num span').forEach(span => { span.innerText = settings.phone; });
+        }
+        if(settings.tgLink) document.querySelectorAll('.tg-link').forEach(link => link.href = settings.tgLink);
+        if(settings.instLink) document.querySelectorAll('.inst-link').forEach(link => link.href = settings.instLink);
+        
+        const footerAddrBlock = document.getElementById('footerAddressesBlock');
+        if (footerAddrBlock && settings.addresses && settings.addresses.length > 0) {
+            let html = '';
+            html += `<a href="http://maps.google.com/?q=${encodeURIComponent(settings.addresses[0])}" target="_blank" class="text-[14px] text-[var(--text-main)] opacity-90 hover:text-[var(--gold-muted)] flex items-center gap-2 transition">
+                        <svg class="w-4 h-4 fill-currentColor opacity-60" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        <span>${settings.addresses[0]}</span>
+                    </a>`;
+            
+            if (settings.addresses.length > 1) {
+                html += `<button onclick="window.showBranchesModal()" class="btn-cross text-[11px] font-bold uppercase tracking-widest text-[var(--gold-muted)] hover:underline mt-2">Наші філіали (${settings.addresses.length})</button>`;
+            }
+            footerAddrBlock.innerHTML = html;
+        }
+    }
+};
     </script>
 </body>
 </html>

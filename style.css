@@ -2193,3 +2193,111 @@ header {
     background: transparent !important;
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
+
+
+
+/* ==========================================
+   МЕГА-МЕНЮ (ZLATO STYLE) - ТЕКСТОВЫЕ КАРТОЧКИ
+   ========================================== */
+.zlato-style {
+    display: flex;
+    width: 1100px !important;
+    padding: 0 !important;
+    background: color-mix(in srgb, var(--bg-elevated) 85%, transparent) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent) !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .zlato-style {
+    background: color-mix(in srgb, #121212 90%, transparent) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Левая колонка — Главные категории */
+.zlato-categories {
+    width: 260px;
+    background: color-mix(in srgb, var(--bg-card) 40%, transparent);
+    backdrop-filter: blur(8px);
+    border-right: 1.5px solid color-mix(in srgb, var(--border) 50%, transparent);
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.zlato-cat-item {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zlato-cat-item:hover, 
+.zlato-cat-item.active {
+    color: var(--gold-muted);
+    background: color-mix(in srgb, var(--gold-muted) 10%, transparent);
+    border-left: 3px solid var(--gold-muted);
+    padding-left: 17px;
+}
+
+/* Правая колонка — Контент */
+.zlato-content {
+    flex: 1;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    background: transparent;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.zlato-content.active {
+    display: flex;
+}
+
+/* Сетка текстовых подкатегорий (4 колонки) */
+.zlato-subcats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.zlato-subcat-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 12px;
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    border-radius: 0 !important;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    text-align: center;
+    min-height: 48px;
+}
+
+.zlato-subcat-card:hover {
+    border-color: var(--gold-muted);
+    background: color-mix(in srgb, var(--gold-muted) 10%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.zlato-subcat-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+    word-break: break-word;
+    line-height: 1.3;
+}

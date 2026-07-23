@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="uk" data-theme="light">
 <head>
-    <!-- Основная иконка для большинства браузеров -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <!-- Основна іконка для більшості браузерів -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
-<!-- Иконка для Apple устройств -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Іконка для Apple пристроїв -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-<!-- Для Android -->
-<link rel="manifest" href="/site.webmanifest">
+    <!-- Для Android -->
+    <link rel="manifest" href="/site.webmanifest">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co 'unsafe-inline';">
     
     <meta charset="UTF-8">
@@ -38,71 +38,229 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
+    /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
+    .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
+        border-radius: 0 !important;
+    }
+    .promo-track, .weekly-track, .product-grid-wide, .glass-accordion-container {
+        gap: 0 !important; 
+    }
+    .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
+    section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
+    .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
+    
+    /* --- ЗАТЕМНЕННЯ ФОТО ДЛЯ ЧИТАБЕЛЬНОСТІ ТЕКСТУ --- */
+    .glass-panel-item .panel-overlay {
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%) !important;
+        opacity: 1 !important;
+    }
 
+    /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
+    .product-card {
+        border: 1px solid #e5e5e5 !important;
+        box-shadow: none !important;
+        background-color: #fff !important;
+        margin-right: -1px; /* Злиття рамок */
+        margin-bottom: -1px;
+    }
+    [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
+    
+    .product-card .product-img {
+        aspect-ratio: 1 / 1 !important;
+        object-fit: contain !important;
+        padding: 0 !important;
+        background: #fff !important;
+        mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
+    }
+    [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
+    
+    .product-card .p-4 { padding: 10px 8px !important; }
+    .product-card h3, .product-card span { line-height: 1.2; }
 
+    /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
+    @media (max-width: 1024px) {
+        #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
+        .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
+    }
 
+    /* Кнопка нагору */
+    #scrollToTopBtn { left: 1rem !important; right: auto !important; }
+    @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
+    
+    /* Футер колонки для моб */
+    .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
+    @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
 
+    /* Бокове меню: компактна верхівка */
+    .side-menu { padding-top: 16px !important; }
+    .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
+    .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
 
-        
-        /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
-        .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
-            border-radius: 0 !important;
+    /* --- АБСОЛЮТНО ПЛАВНИЙ FADE-ПЕРЕХІД ДЛЯ БАНЕРІВ --- */
+    .banner-fade-container {
+        position: relative !important;
+        display: block !important;
+        overflow: hidden !important;
+        width: 100% !important;
+    }
+    .banner-fade-container > * {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        opacity: 0 !important;
+        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+    }
+    .banner-fade-container > *.banner-active {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        z-index: 2 !important;
+    }
+
+    /* Стилі індикаторів банерів */
+    .banner-dot {
+        width: 24px;
+        height: 2px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 0 !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+    .banner-dot.active {
+        background-color: var(--gold-muted, #c5a059);
+        width: 44px;
+        box-shadow: 0 0 10px rgba(197, 160, 89, 0.7);
+    }
+
+    /* --- ПРЕМІАЛЬНИЙ ГОРИЗОНТАЛЬНИЙ СКРОЛ КАТЕГОРІЙ --- */
+    #homeCategoriesScroll {
+        display: flex;
+        align-items: center;
+        gap: 0 !important;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 8px 0;
+        scroll-behavior: smooth;
+        color: var(--text-main, #755712) !important;
+    }
+
+    [data-theme="dark"] #homeCategoriesScroll {
+        color: var(--text-main, #755712) !important;
+    }
+
+    #homeCategoriesScroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Група категорії та її підкатегорій */
+    .category-group {
+        display: flex;
+        align-items: center;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    /* Вертикальний розділювач між категоріями */
+    .category-group:not(:last-child)::after {
+        content: "" !important;
+        position: absolute !important;
+        right: 0 !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 1px !important;
+        height: 14px !important;
+        background-color: var(--border, #cbd5e1) !important;
+        transition: opacity 0.3s ease;
+    }
+
+    [data-theme="dark"] .category-group:not(:last-child)::after {
+        background-color: #3f3f46 !important;
+    }
+
+    /* Головна категорія */
+    .main-category {
+        background: transparent !important;
+        border: none !important;
+        padding: 6px 18px !important;
+        color: #755712 !important;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color 0.2s ease;
+    }
+
+    [data-theme="dark"] .main-category {
+        color: var(--text-main, #f3f4f6) !important;
+    }
+
+    /* Контейнер для підкатегорій, який виїжджає */
+    .subcategories-container {
+        display: flex;
+        align-items: center;
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+
+    /* Стиль кожної підкатегорії */
+    .sub-category {
+        background: transparent !important;
+        border: none !important;
+        padding: 6px 12px !important;
+        color: var(--text-main, #2c2a29) !important;
+        font-size: 12px;
+        font-weight: 400;
+        opacity: 0.8;
+        cursor: pointer;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    [data-theme="dark"] .sub-category {
+        color: var(--text-main, #f3f4f6) !important;
+        opacity: 0.7;
+    }
+
+    /* Ефект виїзду при наведенні на ПК (для пристроїв з мишкою) */
+    @media (hover: hover) {
+        .category-group:hover .subcategories-container {
+            max-width: 800px;
+            opacity: 1;
         }
-        .promo-track, .weekly-track, .product-grid-wide, .glass-accordion-container {
-            gap: 0 !important; 
-        }
-        .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
-        section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
-        .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
-        
-        
-        /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
-        .product-card {
-            border: 1px solid #e5e5e5 !important;
-            box-shadow: none !important;
-            background-color: #fff !important;
-            margin-right: -1px; /* Злиття рамок */
-            margin-bottom: -1px;
-        }
-        [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
-        
-        .product-card .product-img {
-            aspect-ratio: 1 / 1 !important;
-            object-fit: contain !important;
-            padding: 0 !important;
-            background: #fff !important;
-            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
-        }
-        [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
-        
-        .product-card .p-4 { padding: 10px 8px !important; }
-        .product-card ha, .product-card span { line-height: 1.2; }
+    }
 
-        /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
-        @media (max-width: 1024px) {
-            #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
-            .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
-        }
+    /* Для мобільних або при кліку на ПК (клас .active додається скриптом) */
+    .category-group.active .subcategories-container {
+        max-width: 800px;
+        opacity: 1;
+    }
 
-        /* Кнопка нагору */
-        #scrollToTopBtn { left: 1rem !important; right: auto !important; }
-        @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
-        
-        /* Футер колонки для моб */
-        .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
-        @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
-
-        /* Бокове меню: компактна верхівка */
-        .side-menu { padding-top: 16px !important; }
-        .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
-        .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
+    /* Ефект при наведенні на текст */
+    .main-category:hover, .sub-category:hover {
+        color: var(--gold-muted, #c5a059) !important;
+    }
 
 
 
 
 
 
-    </style>
+
+
+
+    
+</style>
+
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0">
 
@@ -158,10 +316,9 @@
                 <a href="gallery.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors">Галерея</a>
                 <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
                 
-
                 <div class="info-dropdown-wrapper group">
                     <button class="nav-link info-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='info.html'">
-                        <span data-i18n="">info   </span> 
+                        <span>info</span> 
                     </button>
                     <div class="mega-menu zlato-style">
                         <div class="mega-col-1 zlato-categories" id="megaCol1"></div>
@@ -230,16 +387,34 @@
 
     <nav class="side-menu" id="sideMenu" aria-label="Мобильная навигация"></nav>
 
-    <main class="pt-* md:pt-* pb-20 px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
-        
+    <main class="pt-6 md:pt-10 pb-20 px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
+        <section class="max-w-[1920px] mx-auto px-0 md:px-8 relative group overflow-hidden" id="promo-banner-top">
+    <!-- Стрілка вліво -->
+    <button type="button" onclick="window.scrollBanner(-1)" class="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
 
-        <section class="max-w-[1920px] mx-auto px-0 md:px-8" id="promo-banner-top">
-            <div id="mainBannerContainer" class="banner-slider-container min-h-[150px] md:min-h-[400px] rounded-none">
-                <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
-            </div>
-        </section>
+    <!-- Контейнер фейд-слайдера -->
+    <div id="mainBannerContainer" class="banner-fade-container relative min-h-[150px] md:min-h-[400px] w-full overflow-hidden rounded-none">
+        <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
+    </div>
 
-        <section class="max-w-[1920px] mx-auto px-0 md:px-8">
+    <!-- Стрілка вправо -->
+    <button type="button" onclick="window.scrollBanner(1)" class="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+
+    <!-- Блок навігації (Без квадрата, ідеально внизу банера) -->
+    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
+        <!-- Тонкий індикатор часу (прогрес-бар) -->
+        <div class="w-32 md:w-48 h-[2px] bg-white/30 overflow-hidden shadow-sm">
+            <div id="bannerTimeProgress" class="h-full bg-[var(--gold-muted)] w-0 transition-all duration-75"></div>
+        </div>
+        <!-- Елегантні точки-індикатори -->
+        <div class="flex justify-center items-center gap-3" id="bannerDots"></div>
+    </div>
+</section>
+        <section id="heroBannerSection" class="max-w-[1920px] mx-auto px-0 md:px-8">
             <a href="exclusive.html" class="relative block w-full h-[120px] md:h-[400px] overflow-hidden group border-y border-[var(--border)] rounded-none">
                 <img src="https://images.pexels.com/photos/28146843/pexels-photo-28146843.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-[1.5s]">
                 <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500"></div>
@@ -253,7 +428,16 @@
                 </div>
             </a>
         </section>
-
+        <!-- Горизонтальний скрол категорій -->
+<!-- Ультра-мінімалістичний горизонтальний скрол категорій -->
+<!-- Горизонтальний скрол категорій -->
+<section class="w-full bg-[var(--bg-main, #fff)] dark:bg-[var(--bg-card, #121212)] py-2.5 border-b border-[var(--border, #f5f5f5)] transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4">
+        <div id="homeCategoriesScroll" class="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth py-1">
+            <!-- Динамічний контент категорій підлаштовуватиметься автоматично через класи Tailwind з урахуванням конфігурації вище -->
+        </div>
+    </div>
+</section>
         <div id="dynamicHomeBlocksContainer"></div>
         
         <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-10 md:py-32" id="categories-section">
@@ -262,64 +446,7 @@
                 <h2 class="hero-title text-[var(--text-main)] !text-[28px] md:!text-[36px]" data-i18n="m2">Каталог</h2>
             </div>
             <div class="glass-accordion-container" id="glassAccordion">
-                <div class="glass-panel-item group active" onclick="toggleAccordionPanel(this)">
-                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800" alt="Каблучки" class="panel-bg">
-                    <div class="panel-overlay"></div>
-                    <div class="panel-content">
-                        <h3 class="panel-title">Каблучки</h3>
-                        <div class="panel-hidden-content">
-                            <div class="panel-tags">
-                                <a href="catalog.html#wr_gold_red" class="panel-tag">Золоті</a>
-                                <a href="catalog.html#wr_silver" class="panel-tag">Срібні</a>
-                                <a href="catalog.html#wr_diamonds" class="panel-tag">З діамантами</a>
-                            </div>
-                            <a href="catalog.html#rings" class="panel-btn">Всі каблучки →</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
-                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800" alt="Сережки" class="panel-bg">
-                    <div class="panel-overlay"></div>
-                    <div class="panel-content">
-                        <h3 class="panel-title">Сережки</h3>
-                        <div class="panel-hidden-content">
-                            <div class="panel-tags">
-                                <a href="catalog.html#we_gold" class="panel-tag">Золоті</a>
-                                <a href="catalog.html#we_silver" class="panel-tag">Срібні</a>
-                                <a href="catalog.html#we_studs" class="panel-tag">Пусети</a>
-                            </div>
-                            <a href="catalog.html#earrings" class="panel-btn">Всі сережки →</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
-                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800" alt="Ланцюжки" class="panel-bg">
-                    <div class="panel-overlay"></div>
-                    <div class="panel-content">
-                        <h3 class="panel-title">Підвіски</h3>
-                        <div class="panel-hidden-content">
-                            <div class="panel-tags">
-                                <a href="catalog.html#wn_gold_chains" class="panel-tag">Золоті</a>
-                                <a href="catalog.html#wn_silver_chains" class="panel-tag">Срібні</a>
-                            </div>
-                            <a href="catalog.html#necklaces" class="panel-btn">Всі підвіски →</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="glass-panel-item group" onclick="toggleAccordionPanel(this)">
-                    <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=800" alt="Браслети" class="panel-bg">
-                    <div class="panel-overlay"></div>
-                    <div class="panel-content">
-                        <h3 class="panel-title">Браслети</h3>
-                        <div class="panel-hidden-content">
-                            <div class="panel-tags">
-                                <a href="catalog.html#wb_gold" class="panel-tag">Золоті</a>
-                                <a href="catalog.html#wb_silver_hard" class="panel-tag">Срібні</a>
-                            </div>
-                            <a href="catalog.html#bracelets" class="panel-btn">Всі браслети →</a>
-                        </div>
-                    </div>
-                </div>
+                <!-- Динамічно заповнюється скриптом нижче -->
             </div>
         </section>
     </main>
@@ -353,14 +480,8 @@
         </button>
     </nav>
 
-    
-   
-
-
-
-    <footer  id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
-        <div class="max-w-9xl mx-auto footer-grid ">
-            
+    <footer id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
+        <div class="max-w-7xl mx-auto footer-grid">
             <div class="flex flex-col items-start">
                 <div class="bv-logo mb-4 relative !static !transform-none !items-start !opacity-100">
                     <span class="!text-3xl">BV</span><span class="!text-[8px] mt-1 font-['Montserrat'] font-bold tracking-widest">jewelry</span>
@@ -370,10 +491,6 @@
                 </p>
             </div>
             
-
-           
-
-            
             <div class="flex flex-col items-start">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" data-i18n="m2">Каталог</h4>
                 <a href="catalog.html#rings" class="text-[12px] text-[var(--text-muted)] mb-1">Каблучки</a>
@@ -381,8 +498,6 @@
                 <a href="catalog.html#necklaces" class="text-[12px] text-[var(--text-muted)] mb-1">Ланцюжки</a>
             </div>
 
-            
-           
             <div class="flex flex-col items-start">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Інформація</h4>
                 <a href="services.html" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="m_price">Послуги та Прайс</a>
@@ -391,8 +506,6 @@
                 <a href="info.html?p=about" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="brand_terms">Про нас</a>
             </div>
 
-
-          
             <div class="flex flex-col items-start">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Ми знаходимось</h4>
                 <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
@@ -400,29 +513,351 @@
                 <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
                 <span class="text-[12px] text-[var(--text-muted)] mb-1">09:00 - 17:00</span>
                 
-                
-                <br>    
+                <br>   
                 <div class="flex flex-col items-start">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" >Контакти</h4>
-                <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
-                
-                <div class="flex items-center gap-4 mt-2">
-                    <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
-                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </a>
+                    <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Контакти</h4>
+                    <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
+                    
+                    <div class="flex items-center gap-4 mt-2">
+                        <a href="#" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
-            </div>
-
         </div>
     </footer>
-
 
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
+
+    <script>// --- РЕНДЕРИНГ ГОЛОВНОГО АККОРДЕОНУ КАТЕГОРІЙ ---
+async function renderHomeCategories() {
+    const accordionContainer = document.getElementById('glassAccordion');
+    if (!accordionContainer) return;
+
+    try {
+        const { data: categoriesData } = await _supabase.from('site_storage').select('*').eq('key', 'bv_categories_flat').single();
+        const { data: productsData } = await _supabase.from('products').select('*');
+
+        const categories = categoriesData ? (categoriesData.value || categoriesData) : [];
+        const products = productsData || [];
+
+        const mainCategoryIds = ['rings', 'earrings', 'necklaces', 'bracelets'];
+        const rootCategories = categories.filter(c => mainCategoryIds.includes(c.id) || !c.parentId);
+
+        accordionContainer.innerHTML = rootCategories.map((cat, index) => {
+            const allSubIds = getAllSubCategoryIds(cat.id, categories);
+            const targetCatIds = [cat.id, ...allSubIds].map(id => String(id).toLowerCase());
+
+            let firstProduct = products.find(p => {
+                const pCat = p.category || p.category_id || p.cat_id || p.group || p.parent_id;
+                return pCat && targetCatIds.includes(String(pCat).toLowerCase());
+            });
+
+            if (!firstProduct && products.length > 0) {
+                firstProduct = products[0];
+            }
+            
+            let bgImage = '';
+            if (firstProduct) {
+                bgImage = firstProduct.image || 
+                        firstProduct.image_url || 
+                        firstProduct.photo || 
+                        firstProduct.img || 
+                        firstProduct.thumbnail || 
+                        (Array.isArray(firstProduct.images) ? firstProduct.images[0] : null);
+
+                if (!bgImage && firstProduct.variations) {
+                    const vars = Object.values(firstProduct.variations);
+                    for (const v of vars) {
+                        const vImg = v?.image || v?.image_url || v?.photo || (Array.isArray(v?.images) ? v.images[0] : null);
+                        if (vImg) {
+                            bgImage = vImg;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const subCategories = categories.filter(c => c.parentId === cat.id);
+            const tagsHtml = subCategories.map(sub => `
+                <a href="catalog.html#${sub.id}" onclick="event.stopPropagation()" class="panel-tag">${sub.name?.uk || sub.name || sub.id}</a>
+            `).join('');
+
+            const categoryName = cat.name?.uk || cat.name || cat.id;
+            const isActive = index === 0 ? 'active' : '';
+
+            return `
+                <div class="glass-panel-item group ${isActive}" onclick="toggleAccordionPanel(this)">
+                    ${bgImage ? `<img src="${bgImage}" alt="${categoryName}" class="panel-bg">` : `<div class="panel-bg bg-gray-200 dark:bg-zinc-800"></div>`}
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">${categoryName}</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                ${tagsHtml}
+                            </div>
+                            <a href="catalog.html#${cat.id}" onclick="event.stopPropagation()" class="panel-btn">Всі ${categoryName.toLowerCase()} →</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Помилка рендерингу категорій аккордеону:', error);
+    }
+}
+
+// Допоміжна рекурсивна функція збору підкатегорій
+function getAllSubCategoryIds(catId, allCategories) {
+    const children = allCategories.filter(c => c.parentId === catId);
+    let ids = children.map(c => c.id);
+    for (const child of children) {
+        ids = ids.concat(getAllSubCategoryIds(child.id, allCategories));
+    }
+    return ids;
+}
+
+
+// --- РЕНДЕРИНГ ГОРИЗОНТАЛЬНОГО СКРОЛУ КАТЕГОРІЙ З ВИЇЗДОМ ПІДКАТЕГОРІЙ ---
+async function renderHomeCategoriesScroll() {
+    const scrollContainer = document.getElementById('homeCategoriesScroll');
+    if (!scrollContainer) return;
+
+    try {
+        const { data, error } = await _supabase
+            .from('site_storage')
+            .select('value')
+            .eq('key', 'bv_categories_tree')
+            .single();
+
+        if (error || !data || !data.value) {
+            console.error('Помилка завантаження дерева категорій:', error);
+            return;
+        }
+
+        const categories = data.value;
+        if (!Array.isArray(categories)) return;
+
+        scrollContainer.innerHTML = '';
+
+        categories.forEach(category => {
+            const group = document.createElement('div');
+            group.className = 'category-group';
+
+            const mainBtn = document.createElement('button');
+            mainBtn.type = 'button';
+            mainBtn.className = 'main-category';
+            const catName = category.name?.uk || category.name || category.title || category.id;
+            mainBtn.textContent = catName;
+
+            const subcategories = category.subcategories || category.children || [];
+
+            // Клік (тап) для мобільних та сенсорних пристроїв
+            mainBtn.addEventListener('click', (e) => {
+                if (subcategories.length > 0) {
+                    document.querySelectorAll('.category-group').forEach(g => {
+                        if (g !== group) g.classList.remove('active');
+                    });
+                    group.classList.toggle('active');
+                } else {
+                    window.location.href = `catalog.html?cat=${category.id}`;
+                }
+            });
+
+            group.appendChild(mainBtn);
+
+            if (subcategories.length > 0) {
+                const subContainer = document.createElement('div');
+                subContainer.className = 'subcategories-container';
+
+                subcategories.forEach(subcat => {
+                    const subBtn = document.createElement('a');
+                    subBtn.href = `catalog.html?cat=${subcat.id}`;
+                    subBtn.className = 'sub-category';
+                    subBtn.textContent = subcat.name?.uk || subcat.name || subcat.title || subcat.id;
+                    
+                    subBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+
+                    subContainer.appendChild(subBtn);
+                });
+
+                group.appendChild(subContainer);
+            }
+
+            scrollContainer.appendChild(group);
+        });
+
+        // Плавний горизонтальний скрол колесом миші для ПК
+        scrollContainer.addEventListener('wheel', (evt) => {
+            if (evt.deltaY !== 0) {
+                evt.preventDefault();
+                scrollContainer.scrollLeft += evt.deltaY;
+            }
+        }, { passive: false });
+
+    } catch (err) {
+        console.error('Помилка рендерингу скролу категорій:', err);
+    }
+}
+
+
+// --- ЛОГІКА БАНЕРА (Fade / Автоплей) ---
+let currentSlideIndex = 0;
+let slideStartTime = Date.now();
+const SLIDE_DURATION = 10000;
+
+function showSlide(index) {
+    const container = document.getElementById('mainBannerContainer');
+    if (!container) return;
+    const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
+    if (slides.length === 0) return;
+
+    if (index >= slides.length) currentSlideIndex = 0;
+    else if (index < 0) currentSlideIndex = slides.length - 1;
+    else currentSlideIndex = index;
+
+    slides.forEach((slide, idx) => {
+        if (idx === currentSlideIndex) {
+            slide.classList.add('banner-active');
+        } else {
+            slide.classList.remove('banner-active');
+        }
+    });
+
+    const dotsContainer = document.getElementById('bannerDots');
+    if (dotsContainer) {
+        const dots = dotsContainer.querySelectorAll('.banner-dot');
+        dots.forEach((dot, idx) => {
+            if (idx === currentSlideIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+}
+
+window.scrollBanner = function(direction) {
+    const container = document.getElementById('mainBannerContainer');
+    if (!container) return;
+    const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
+    if (slides.length <= 1) return;
+
+    showSlide(currentSlideIndex + direction);
+    slideStartTime = Date.now();
+};
+
+
+
+
+
+
+window.goToSlide = function(index) {
+    showSlide(index);
+    slideStartTime = Date.now();
+};
+
+function initFadeBannerSlider() {
+    const container = document.getElementById('mainBannerContainer');
+    const dotsContainer = document.getElementById('bannerDots');
+    const timeProgress = document.getElementById('bannerTimeProgress');
+    if (!container || !dotsContainer) return;
+
+    let lastSlideCount = 0;
+
+    const updateSlidesAndDots = () => {
+        const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
+        if (slides.length === 0) return;
+
+        if (slides.length !== lastSlideCount) {
+            lastSlideCount = slides.length;
+            dotsContainer.innerHTML = '';
+            slides.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = `banner-dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => window.goToSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+            currentSlideIndex = 0;
+            showSlide(0);
+        }
+    };
+
+    function runAutoplayLoop() {
+        const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
+        
+        if (slides.length > 1) {
+            const now = Date.now();
+            const elapsed = now - slideStartTime;
+            
+            const progressPercent = Math.min((elapsed / SLIDE_DURATION) * 100, 100);
+            if (timeProgress) {
+                timeProgress.style.width = `${progressPercent}%`;
+            }
+
+            if (elapsed >= SLIDE_DURATION) {
+                showSlide(currentSlideIndex + 1);
+                slideStartTime = Date.now();
+            }
+        }
+        requestAnimationFrame(runAutoplayLoop);
+    }
+
+    window.addEventListener('resize', updateSlidesAndDots);
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    container.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const swipeThreshold = 40;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            showSlide(currentSlideIndex + 1);
+            slideStartTime = Date.now();
+        } else if (touchEndX > touchStartX + swipeThreshold) {
+            showSlide(currentSlideIndex - 1);
+            slideStartTime = Date.now();
+        }
+    }, { passive: true });
+
+    const observer = new MutationObserver(() => {
+        updateSlidesAndDots();
+    });
+    observer.observe(container, { childList: true, subtree: true });
+
+    updateSlidesAndDots();
+    slideStartTime = Date.now();
+    requestAnimationFrame(runAutoplayLoop);
+}
+
+
+// --- ЗАПУСК УСІХ СКРИПТІВ ПРИ ЗАВАНТАЖЕННІ ---
+document.addEventListener('DOMContentLoaded', () => {
+    renderHomeCategories();
+    renderHomeCategoriesScroll();
+    initFadeBannerSlider();
+
+});
+
+
+
+    </script>
+
+    
+</script>
 </body>
 </html>
