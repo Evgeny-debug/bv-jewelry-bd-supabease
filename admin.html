@@ -1599,17 +1599,22 @@ window.recalculateCurrentVarPrice = function() {
         }
         window.renderVarGallery = renderVarGallery;
 
-        window.saveActiveProduct = async function() {
+       window.saveActiveProduct = async function() {
     const submitBtn = document.querySelector('.btn-primary[onclick="saveActiveProduct()"]');
     if(submitBtn) { submitBtn.innerText = 'Зберігаю...'; submitBtn.disabled = true; }
 
     try {
-        // 1. Оновлюємо дані поточної варіації з полів форми
-        if (document.getElementById('var-weight')) {
-            actProd.variations[editVar].weight = document.getElementById('var-weight').value;
-            actProd.variations[editVar].workCost = document.getElementById('var-workCost').value;
-            actProd.variations[editVar].price = document.getElementById('var-price').value;
-            actProd.variations[editVar].discount = document.getElementById('var-discount').value;
+        // 1. Оновлюємо по поточній варіації (Включаючи priceType!)
+        if (actProd.variations && actProd.variations[editVar]) {
+            const priceTypeSelect = document.getElementById('var-price-type');
+            if (priceTypeSelect) {
+                actProd.variations[editVar].priceType = priceTypeSelect.value; // <-- ГОЛОВНИЙ ФІКС
+            }
+            if (document.getElementById('var-weight')) {
+                actProd.variations[editVar].weight = document.getElementById('var-weight').value;
+                actProd.variations[editVar].workCost = document.getElementById('var-workCost').value;
+                actProd.variations[editVar].discount = document.getElementById('var-discount').value;
+            }
         }
         
         // 2. Оновлюємо загальні поля товару
@@ -1623,21 +1628,25 @@ window.recalculateCurrentVarPrice = function() {
         const selectedBlocks = Array.from(document.querySelectorAll('.prod-block-cb:checked')).map(cb => cb.value);
         actProd.blocks = selectedBlocks;
 
-        // 3. КРИТИЧНИЙ ФІКС ДЛЯ SUPABASE:
-        // Витягуємо назву та ціну з основної варіації в корінь об'єкта
-        const baseVar = actProd.variations?.base;
-        const mainName = baseVar?.name?.uk || baseVar?.name?.ru || baseVar?.name?.en || '';
-        const mainPrice = parseFloat(baseVar?.price) || 0;
-
-        if (!mainName) {
-            throw new Error('Вкажіть назву товару (назва не може бути порожньою)!');
+        // 3. Якщо режим AUTO — підраховуємо актуальну ціну перед збереженням
+        const goldRate = parseFloat(siteSettings?.goldRate) || 0;
+        const baseVar = actProd.variations?.base || {};
+        
+        if (baseVar.priceType === 'auto') {
+            const weight = parseFloat(baseVar.weight) || 0;
+            const workCost = parseFloat(baseVar.workCost) || 0;
+            baseVar.price = Math.round((weight * goldRate) + workCost);
+        } else {
+            baseVar.price = document.getElementById('var-price')?.value || baseVar.price || 0;
         }
 
-        // Записуємо обов'язкові поля прямо в корінь об'єкта actProd
-        actProd.name = mainName;   
-        actProd.price = mainPrice; 
+        const mainName = baseVar?.name?.uk || baseVar?.name?.ru || baseVar?.name?.en || '';
+        if (!mainName) throw new Error('Вкажіть назву товару!');
 
-        // 4. Генерація ID та збереження
+        actProd.name = mainName;   
+        actProd.price = parseFloat(baseVar.price) || 0;
+
+        // 4. Збереження в Supabase
         if (!actProd.id) {
             const skuSlug = actProd.sku.toLowerCase().replace(/[^a-z0-9]/g, '-');
             actProd.id = skuSlug || `prod-${Date.now()}`;
@@ -1655,11 +1664,7 @@ window.recalculateCurrentVarPrice = function() {
         filteredProducts = [...products];
         renderProducts();
         closeProductModal();
-        if (typeof showNotification === 'function') {
-            showNotification('Товар збережено!');
-        } else {
-            alert('Товар збережено!');
-        }
+        if (typeof showNotification === 'function') showNotification('Товар збережено!');
     } catch (err) {
         console.error('Помилка збереження:', err);
         alert('Помилка: ' + err.message);
@@ -1667,6 +1672,9 @@ window.recalculateCurrentVarPrice = function() {
         if(submitBtn) { submitBtn.innerText = 'Зберегти товар'; submitBtn.disabled = false; }
     }
 };
+
+
+
 // ==========================================
 // ПРАЙС-ЛИСТ (Ремонт та Послуги - Золото/Срібло)
 // ==========================================
@@ -2249,18 +2257,90 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAddresses();
         });
 
-        window.saveSiteSettings = async function() {
-            siteSettings.goldRate = Number(document.getElementById('set-gold-rate').value) || 0;
-            siteSettings.phone = document.getElementById('set-phone').value.trim();
-            siteSettings.tg = document.getElementById('set-tg').value.trim();
-            siteSettings.inst = document.getElementById('set-inst').value.trim();
-            siteSettings.addresses = currentAddresses.filter(a => a && a.trim() !== '');
-            const ratioVal = document.getElementById('set-banner-ratio')?.value;
-            if (ratioVal) siteSettings.bannerRatio = ratioVal;
-            
-            await saveToCloudStorage('bv_settings', siteSettings);
-            showNotification('Всі налаштування успішно збережено!');
-        };
+       // Автоматичний перерахунок ВСІХ товарів з типом 'auto' в БД
+window.recalculateAutoProducts = async function() {
+    const goldRate = parseFloat(siteSettings.goldRate) || 0;
+    if (!goldRate) return;
+
+    const updates = [];
+
+    for (let p of products) {
+        if (!p.variations) continue;
+        let isChanged = false;
+
+        // Перевіряємо всі варіації (базова + розміри)
+        for (let vKey in p.variations) {
+            const v = p.variations[vKey];
+            if (v && v.priceType === 'auto') {
+                const weight = parseFloat(v.weight) || 0;
+                const workCost = parseFloat(v.workCost) || 0;
+                const calculatedPrice = Math.round((weight * goldRate) + workCost);
+
+                if (v.price !== calculatedPrice) {
+                    v.price = calculatedPrice;
+                    isChanged = true;
+                }
+            }
+        }
+
+        // Якщо ціна варіацій змінилася, оновлюємо кореневу ціну та відправляємо в Supabase
+        if (isChanged) {
+            const baseVar = p.variations.base;
+            if (baseVar && baseVar.priceType === 'auto') {
+                p.price = baseVar.price;
+            }
+
+            // Додаємо запит оновлення в масив
+            updates.push(
+                _supabase.from('products').update({
+                    price: p.price,
+                    variations: p.variations
+                }).eq('id', p.id)
+            );
+        }
+    }
+
+    // Відправляємо всі оновлені товари в Supabase паралельно
+    if (updates.length > 0) {
+        await Promise.all(updates);
+        filteredProducts = [...products];
+        if (typeof renderProducts === 'function') renderProducts();
+    }
+};
+
+// Збереження налаштувань сайту
+window.saveSiteSettings = async function() {
+    const btn = document.getElementById('btnSaveSettings');
+    if (btn) { btn.innerText = 'Зберігаю...'; btn.disabled = true; }
+
+    try {
+        siteSettings.goldRate = Number(document.getElementById('set-gold-rate').value) || 0;
+        siteSettings.phone = document.getElementById('set-phone').value.trim();
+        siteSettings.tg = document.getElementById('set-tg').value.trim();
+        siteSettings.inst = document.getElementById('set-inst').value.trim();
+        siteSettings.addresses = currentAddresses.filter(a => a && a.trim() !== '');
+        
+        const ratioVal = document.getElementById('set-banner-ratio')?.value;
+        if (ratioVal) siteSettings.bannerRatio = ratioVal;
+        
+        // 1. Зберігаємо налаштування сайту
+        await saveToCloudStorage('bv_settings', siteSettings);
+
+        // 2. Масово перераховуємо всі авто-товари за новим курсом
+        await recalculateAutoProducts();
+
+        if (typeof showNotification === 'function') {
+            showNotification('Налаштування збережено! Ціни авто-товарів оновлено.');
+        } else {
+            alert('Налаштування збережено! Ціни авто-товарів оновлено.');
+        }
+    } catch (err) {
+        console.error('Помилка збереження налаштувань:', err);
+        alert('Помилка: ' + err.message);
+    } finally {
+        if (btn) { btn.innerText = 'Зберегти налаштування'; btn.disabled = false; }
+    }
+};
 
         document.getElementById('btnSaveSettings')?.addEventListener('click', saveSiteSettings);
 
