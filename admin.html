@@ -586,53 +586,114 @@
 
     <!-- МОДАЛКА: ТОВАР -->
     <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
-        <div class="glass-panel bg-[#121216] w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col relative rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30 overflow-hidden shadow-2xl">
-            <div class="flex justify-between items-center p-4 sm:px-6 border-b border-white/10 shrink-0 bg-white/5">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#c5a059]"></span>
-                    <h3 class="text-base sm:text-lg font-serif text-[#c5a059] font-bold" id="prodModalTitle">Редактор товару</h3>
-                </div>
-                <button type="button" onclick="closeProductModal()" class="text-gray-400 p-1 rounded-lg hover:bg-white/10 hover:text-white transition">&times;</button>
+    <div class="glass-panel bg-[#121216] w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col relative rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30 overflow-hidden shadow-2xl">
+        <div class="flex justify-between items-center p-4 sm:px-6 border-b border-white/10 shrink-0 bg-white/5">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#c5a059]"></span>
+                <h3 class="text-base sm:text-lg font-serif text-[#c5a059] font-bold" id="prodModalTitle">Редактор товару</h3>
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                    <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">ID (Технічний)</label><input type="text" id="prod-id" class="input-field text-xs opacity-50 cursor-not-allowed" disabled placeholder="Автоматично"></div>
-                    <div><label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Артикул (SKU) *</label><input type="text" id="prod-sku" class="input-field text-xs border-[#c5a059]/50 font-mono" required placeholder="Напр: R-101"></div>
-                    <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label><select id="prod-category" class="input-field text-xs" required></select></div>
-                    <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Статус</label><select id="prod-status" class="input-field text-xs"><option value="in-stock">В наявності</option><option value="out-stock">Немає</option><option value="pre-order">Під замовлення</option></select></div>
-                    <div class="sm:col-span-2 md:col-span-1"><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Бейдж</label><select id="prod-badge" class="input-field text-xs"><option value="none">Немає</option><option value="new">🔥 Новинка</option><option value="exclusive">💎 Ексклюзив</option><option value="sale">🏷 Sale</option></select></div>
+            <button type="button" onclick="closeProductModal()" class="text-gray-400 p-1 rounded-lg hover:bg-white/10 hover:text-white transition">&times;</button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
+            <!-- Основні поля з преміальними селектами -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                <!-- ID -->
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">ID (Технічний)</label>
+                    <input type="text" id="prod-id" class="input-field text-xs opacity-50 cursor-not-allowed bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full" disabled placeholder="Автоматично">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Матеріал (Спільне)</label><input type="text" id="prod-variant" class="input-field text-xs" placeholder="Золото 585, Біле золото"></div>
-                    <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Каміння (Спільне)</label><input type="text" id="prod-stones" class="input-field text-xs" placeholder="Діамант 0.5ct, Сапфір"></div>
+                <!-- Артикул (SKU) -->
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Артикул (SKU) *</label>
+                    <input type="text" id="prod-sku" class="input-field text-xs bg-[#1a1a1f] border-[#c5a059]/50 text-white font-mono rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none transition" required placeholder="Напр: R-101">
                 </div>
 
-                <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <label class="text-[10px] uppercase tracking-wider font-bold text-[#c5a059] block mb-3">Показувати в блоках на Головній:</label>
-                    <div id="prod-blocks-container" class="flex flex-wrap gap-3"></div>
-                </div>
-
-                <div class="bg-black/30 p-4 sm:p-5 rounded-xl border border-[#c5a059]/30">
-                    <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-                        <div class="flex gap-1.5 overflow-x-auto custom-scrollbar w-full py-1" id="varTabsContainer"></div>
+                <!-- Категорія та підкатегорія (Преміальний Select з оптичними групами) -->
+                <div class="relative">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label>
+                    <div class="relative">
+                        <select id="prod-category" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8" required>
+                            <option value="" disabled selected>Оберіть категорію...</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </div>
-                    <div class="flex gap-2 mb-4 bg-white/5 p-1 rounded-lg w-fit" id="langTabsContainer">
-                        <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded active" onclick="switchLangTab('uk')">UA</button>
-                        <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('ru')">RU</button>
-                        <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('en')">EN</button>
+                </div>
+
+                <!-- Статус -->
+                <div class="relative">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Статус</label>
+                    <div class="relative">
+                        <select id="prod-status" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8">
+                            <option value="in-stock">✨ В наявності</option>
+                            <option value="out-stock">⏳ Немає в наявності</option>
+                            <option value="pre-order">📦 Під замовлення</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </div>
-                    <div id="variationFieldsContainer" class="flex flex-col gap-4"></div>
+                </div>
+
+                <!-- Бейдж -->
+                <div class="sm:col-span-2 md:col-span-1 relative">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Бейдж</label>
+                    <div class="relative">
+                        <select id="prod-badge" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8">
+                            <option value="none">Немає</option>
+                            <option value="new">🔥 Новинка</option>
+                            <option value="exclusive">💎 Ексклюзив</option>
+                            <option value="sale">🏷 Sale</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="p-4 sm:px-6 border-t border-white/10 shrink-0 bg-[#18181d] flex gap-3">
-                <button type="button" onclick="closeProductModal()" class="flex-1 btn-secondary text-xs">Скасувати</button>
-                <button type="button" onclick="saveActiveProduct()" class="flex-1 btn-primary text-xs tracking-wider uppercase font-bold">Зберегти товар</button>
+            <!-- Матеріали та каміння -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Матеріал (Спільне)</label>
+                    <input type="text" id="prod-variant" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none" placeholder="Золото 585, Біле золото">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Каміння (Спільне)</label>
+                    <input type="text" id="prod-stones" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none" placeholder="Діамант 0.5ct, Сапфір">
+                </div>
+            </div>
+
+            <!-- Блоки на головній -->
+            <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                <label class="text-[10px] uppercase tracking-wider font-bold text-[#c5a059] block mb-3">Показувати в блоках на Головній:</label>
+                <div id="prod-blocks-container" class="flex flex-wrap gap-3"></div>
+            </div>
+
+            <!-- Варіації та мови -->
+            <div class="bg-black/30 p-4 sm:p-5 rounded-xl border border-[#c5a059]/30">
+                <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                    <div class="flex gap-1.5 overflow-x-auto custom-scrollbar w-full py-1" id="varTabsContainer"></div>
+                </div>
+                <div class="flex gap-2 mb-4 bg-white/5 p-1 rounded-lg w-fit" id="langTabsContainer">
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded active" onclick="switchLangTab('uk')">UA</button>
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('ru')">RU</button>
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('en')">EN</button>
+                </div>
+                <div id="variationFieldsContainer" class="flex flex-col gap-4"></div>
             </div>
         </div>
+
+        <!-- Футер модального вікна -->
+        <div class="p-4 sm:px-6 border-t border-white/10 shrink-0 bg-[#18181d] flex gap-3">
+            <button type="button" onclick="closeProductModal()" class="flex-1 btn-secondary text-xs py-2.5 rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 transition">Скасувати</button>
+            <button type="button" onclick="saveActiveProduct()" class="flex-1 btn-primary text-xs tracking-wider uppercase font-bold py-2.5 rounded-lg bg-[#c5a059] text-black hover:bg-[#b08d4c] transition">Зберегти товар</button>
+        </div>
     </div>
+</div>
 
     <!-- МОДАЛКА: ГАЛЕРЕЯ -->
     <div id="galleryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
@@ -1294,10 +1355,49 @@
             };
         }
 
-        window.populateCategorySelects = function() {
-            const catSelect = document.getElementById('prod-category');
-            if(catSelect) catSelect.innerHTML = buildCategorySelectOptions();
-        };
+        function populateCategorySelect(selectedCategoryId = '') {
+    const select = document.getElementById('prod-category');
+    if (!select) return;
+
+    // Отримуємо дерева категорій або плоский масив з API / localStorage
+    const categoriesTree = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || []) : [];
+    const categoriesFlat = typeof API !== 'undefined' ? (API.get('bv_categories_flat', []) || []) : [];
+
+    let html = '<option value="" disabled>Оберіть категорію...</option>';
+
+    if (categoriesTree.length > 0) {
+        // Якщо є деревоподібна структура
+        categoriesTree.forEach(cat => {
+            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
+            
+            if (cat.sub && cat.sub.length > 0) {
+                // Якщо є підкатегорії — використовуємо оптичну групу <optgroup>
+                html += `<optgroup label="📂 ${catName}">`;
+                // Саму батьківську категорію теж можна дозволити вибрати або зробити групою
+                html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>— Всі в «${catName}»</option>`;
+                
+                cat.sub.forEach(sub => {
+                    const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id);
+                    html += `<option value="${sub.id}" ${selectedCategoryId === sub.id ? 'selected' : ''}>&nbsp;&nbsp;&nbsp;&nbsp;↳ ${subName}</option>`;
+                });
+                html += `</optgroup>`;
+            } else {
+                // Якщо підкатегорій немає
+                html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>${catName}</option>`;
+            }
+        });
+    } else if (categoriesFlat.length > 0) {
+        // Резервний варіант для плоского масиву
+        categoriesFlat.forEach(cat => {
+            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
+            html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>${catName}</option>`;
+        });
+    } else {
+        html += `<option value="rings">Каблучки</option><option value="earrings">Сережки</option><option value="necklaces">Ланцюжки</option>`;
+    }
+
+    select.innerHTML = html;
+}
 
         window.searchProducts = function() {
             const term = document.getElementById('prodSearch').value.toLowerCase();
