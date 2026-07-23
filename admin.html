@@ -1549,50 +1549,73 @@
         window.renderVarGallery = renderVarGallery;
 
         window.saveActiveProduct = async function() {
-            const submitBtn = document.querySelector('.btn-primary[onclick="saveActiveProduct()"]');
-            if(submitBtn) { submitBtn.innerText = 'Зберігаю...'; submitBtn.disabled = true; }
+    const submitBtn = document.querySelector('.btn-primary[onclick="saveActiveProduct()"]');
+    if(submitBtn) { submitBtn.innerText = 'Зберігаю...'; submitBtn.disabled = true; }
 
-            try {
-                if (document.getElementById('var-weight')) {
-                    actProd.variations[editVar].weight = document.getElementById('var-weight').value;
-                    actProd.variations[editVar].workCost = document.getElementById('var-workCost').value;
-                    actProd.variations[editVar].price = document.getElementById('var-price').value;
-                    actProd.variations[editVar].discount = document.getElementById('var-discount').value;
-                }
-                
-                actProd.sku = document.getElementById('prod-sku').value;
-                actProd.category = document.getElementById('prod-category').value;
-                actProd.status = document.getElementById('prod-status').value;
-                actProd.badge = document.getElementById('prod-badge').value;
-                actProd.variant = document.getElementById('prod-variant').value;
-                actProd.stones = document.getElementById('prod-stones').value;
-                
-                const selectedBlocks = Array.from(document.querySelectorAll('.prod-block-cb:checked')).map(cb => cb.value);
-                actProd.blocks = selectedBlocks;
+    try {
+        // 1. Оновлюємо дані поточної варіації з полів форми
+        if (document.getElementById('var-weight')) {
+            actProd.variations[editVar].weight = document.getElementById('var-weight').value;
+            actProd.variations[editVar].workCost = document.getElementById('var-workCost').value;
+            actProd.variations[editVar].price = document.getElementById('var-price').value;
+            actProd.variations[editVar].discount = document.getElementById('var-discount').value;
+        }
+        
+        // 2. Оновлюємо загальні поля товару
+        actProd.sku = document.getElementById('prod-sku').value.trim();
+        actProd.category = document.getElementById('prod-category').value;
+        actProd.status = document.getElementById('prod-status').value;
+        actProd.badge = document.getElementById('prod-badge').value;
+        actProd.variant = document.getElementById('prod-variant').value;
+        actProd.stones = document.getElementById('prod-stones').value;
+        
+        const selectedBlocks = Array.from(document.querySelectorAll('.prod-block-cb:checked')).map(cb => cb.value);
+        actProd.blocks = selectedBlocks;
 
-                if (!actProd.id) {
-                    actProd.id = actProd.sku.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    const { error } = await _supabase.from('products').insert([actProd]);
-                    if(error) throw error;
-                    products.push(actProd);
-                } else {
-                    const { error } = await _supabase.from('products').update(actProd).eq('id', actProd.id);
-                    if(error) throw error;
-                    const idx = products.findIndex(p => p.id === actProd.id);
-                    if (idx !== -1) products[idx] = actProd;
-                }
-                
-                filteredProducts = [...products];
-                renderProducts();
-                closeProductModal();
-                showNotification('Товар збережено!');
-            } catch (err) {
-                alert('Помилка: ' + err.message);
-            } finally {
-                if(submitBtn) { submitBtn.innerText = 'Зберегти товар'; submitBtn.disabled = false; }
-            }
-        };
+        // 3. КРИТИЧНИЙ ФІКС ДЛЯ SUPABASE:
+        // Витягуємо назву та ціну з основної варіації в корінь об'єкта
+        const baseVar = actProd.variations?.base;
+        const mainName = baseVar?.name?.uk || baseVar?.name?.ru || baseVar?.name?.en || '';
+        const mainPrice = parseFloat(baseVar?.price) || 0;
 
+        if (!mainName) {
+            throw new Error('Вкажіть назву товару (назва не може бути порожньою)!');
+        }
+
+        // Записуємо обов'язкові поля прямо в корінь об'єкта actProd
+        actProd.name = mainName;   
+        actProd.price = mainPrice; 
+
+        // 4. Генерація ID та збереження
+        if (!actProd.id) {
+            const skuSlug = actProd.sku.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            actProd.id = skuSlug || `prod-${Date.now()}`;
+            
+            const { error } = await _supabase.from('products').insert([actProd]);
+            if(error) throw error;
+            products.push(actProd);
+        } else {
+            const { error } = await _supabase.from('products').update(actProd).eq('id', actProd.id);
+            if(error) throw error;
+            const idx = products.findIndex(p => p.id === actProd.id);
+            if (idx !== -1) products[idx] = actProd;
+        }
+        
+        filteredProducts = [...products];
+        renderProducts();
+        closeProductModal();
+        if (typeof showNotification === 'function') {
+            showNotification('Товар збережено!');
+        } else {
+            alert('Товар збережено!');
+        }
+    } catch (err) {
+        console.error('Помилка збереження:', err);
+        alert('Помилка: ' + err.message);
+    } finally {
+        if(submitBtn) { submitBtn.innerText = 'Зберегти товар'; submitBtn.disabled = false; }
+    }
+};
 // ==========================================
 // ПРАЙС-ЛИСТ (Ремонт та Послуги - Золото/Срібло)
 // ==========================================
