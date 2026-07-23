@@ -2716,3 +2716,58 @@ header {
 
 
 
+/* Стилізація кастомного преміального селекта категорій */
+#prod-category {
+    background-color: #1a1a1f;
+    color: #ffffff;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    border-radius: 0.75rem;
+    padding: 0.65rem 2.5rem 0.65rem 0.75rem;
+    font-size: 0.75rem;
+    width: 100%;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+#prod-category:hover {
+    border-color: rgba(197, 160, 89, 0.6);
+    background-color: #1f1f26;
+}
+
+#prod-category:focus {
+    border-color: #c5a059;
+    box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+}
+
+/* Стилізація заголовків категорій (optgroup) всередині списку */
+#prod-category optgroup {
+    background-color: #15151a;
+    color: #c5a059;
+    font-weight: 700;
+    font-style: normal;
+    padding: 8px;
+}
+
+/* Стилізація самі варіантів (option) */
+#prod-category option {
+    background-color: #121216;
+    color: #ffffff;
+    padding: 8px 12px;
+}
+
+#prod-category option[disabled] {
+    color: #6b7280;
+}
+
+/* Адаптивність для мобільних пристроїв */
+@media (max-width: 640px) {
+    #prod-category {
+        font-size: 14px; /* Збільшуємо шрифт на смартфонах для зручності тапу */
+        padding: 0.75rem 2.5rem 0.75rem 0.85rem;
+    }
+}

@@ -1359,46 +1359,43 @@
     const select = document.getElementById('prod-category');
     if (!select) return;
 
-    // Отримуємо дерева категорій або плоский масив з API / localStorage
     const categoriesTree = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || []) : [];
     const categoriesFlat = typeof API !== 'undefined' ? (API.get('bv_categories_flat', []) || []) : [];
 
-    let html = '<option value="" disabled>Оберіть категорію...</option>';
+    let html = '<option value="" disabled selected>Оберіть категорію...</option>';
 
     if (categoriesTree.length > 0) {
-        // Якщо є деревоподібна структура
         categoriesTree.forEach(cat => {
             const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
             
             if (cat.sub && cat.sub.length > 0) {
-                // Якщо є підкатегорії — використовуємо оптичну групу <optgroup>
-                html += `<optgroup label="📂 ${catName}">`;
-                // Саму батьківську категорію теж можна дозволити вибрати або зробити групою
-                html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>— Всі в «${catName}»</option>`;
+                // Використовуємо <optgroup> для справжнього візуального поділу та виділення головної категорії
+                html += `<optgroup label="✨ ${catName.toUpperCase()}">`;
                 
                 cat.sub.forEach(sub => {
                     const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id);
-                    html += `<option value="${sub.id}" ${selectedCategoryId === sub.id ? 'selected' : ''}>&nbsp;&nbsp;&nbsp;&nbsp;↳ ${subName}</option>`;
+                    const isSelected = selectedCategoryId === sub.id ? 'selected' : '';
+                    html += `<option value="${sub.id}" ${isSelected}>&nbsp;&nbsp;&nbsp;&nbsp;↳ ${subName}</option>`;
                 });
+                
                 html += `</optgroup>`;
             } else {
-                // Якщо підкатегорій немає
-                html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>${catName}</option>`;
+                // Якщо у головної категорії немає підкатегорій
+                const isSelected = selectedCategoryId === cat.id ? 'selected' : '';
+                html += `<option value="${cat.id}" ${isSelected}>🔸 ${catName}</option>`;
             }
         });
-    } else if (categoriesFlat.length > 0) {
-        // Резервний варіант для плоского масиву
+    } else {
+        // Запасний варіант на випадок плоского списку
         categoriesFlat.forEach(cat => {
             const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
-            html += `<option value="${cat.id}" ${selectedCategoryId === cat.id ? 'selected' : ''}>${catName}</option>`;
+            const isSelected = selectedCategoryId === cat.id ? 'selected' : '';
+            html += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
         });
-    } else {
-        html += `<option value="rings">Каблучки</option><option value="earrings">Сережки</option><option value="necklaces">Ланцюжки</option>`;
     }
 
     select.innerHTML = html;
 }
-
         window.searchProducts = function() {
             const term = document.getElementById('prodSearch').value.toLowerCase();
             filteredProducts = products.filter(p => {
