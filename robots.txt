@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /profile.html
+Disallow: /checkout.html
+Disallow: /index1.html
+Disallow: /index2.html
+Disallow: /exclusive2.html
+Disallow: /desain.html
+
 Sitemap: https://bv-jewelry.com/sitemap.xml
