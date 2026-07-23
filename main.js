@@ -1,3 +1,22 @@
+/* ==========================================
+   ВІДКЛЮЧЕННЯ СИСТЕМНИХ СПІВПАДАЮЧИХ ВІКОН (ALERT/CONFIRM/PROMPT)
+   ========================================== */
+window.alert = function(msg) {
+    console.warn('Системний alert заблоковано:', msg);
+};
+
+window.confirm = function(msg) {
+    console.warn('Системний confirm заблоковано:', msg);
+    return true; // або false залежно від того, що зазвичай потрібно за замовчуванням
+};
+
+window.prompt = function(msg) {
+    console.warn('Системний prompt заблоковано:', msg);
+    return null;
+};
+
+
+
 // ==========================================
 // 0. ІНІЦІАЛІЗАЦІЯ БАЗИ ДАНИХ (SUPABASE)
 // ==========================================
@@ -551,79 +570,85 @@ function generateMenus() {
         const currentThemeIcon = currentTheme === 'light' ? sunSVG : moonSVG;
 
         sideMenu.innerHTML = `
-            <div class="flex justify-between items-center pb-4 mb-4 border-b border-[var(--border)] pt-4 px-4">
-                <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
-                    <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
-                </a>
-                <div class="flex items-center gap-5">
-                    <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
-                    </button>
-                    <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
-                        <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
-                        <span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
-                        <span class="opacity-30">|</span>
-                        <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
-                    </div>
-                    <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </button>
+    <div class="flex flex-col h-full">
+        <!-- Шапка (статичная) -->
+        <div class="flex justify-between items-center pb-4 border-b border-[var(--border)] pt-4 px-4 flex-shrink-0">
+            <a href="index.html" class="flex flex-col items-start gap-1" style="text-decoration:none;">
+                <span class="text-3xl font-serif text-[var(--gold-muted)] leading-none">BV</span>
+            </a>
+            <div class="flex items-center gap-5">
+                <button onclick="window.toggleTheme()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                    <svg id="themeIconMob" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${currentThemeIcon}</svg>
+                </button>
+                <div class="text-[11px] font-bold text-[var(--text-main)] flex gap-1.5 uppercase opacity-80">
+                    <span class="cursor-pointer ${savedLang==='uk'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('uk')">UK</span>
+                    <span class="opacity-30">|</span>
+                    <span class="cursor-pointer ${savedLang==='ru'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('ru')">RU</span>
+                    <span class="opacity-30">|</span>
+                    <span class="cursor-pointer ${savedLang==='en'?'text-[var(--gold-muted)]':''}" onclick="window.changeLang('en')">EN</span>
                 </div>
+                <button onclick="window.smartProfileClick()" class="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
             </div>
+        </div>
 
-            <div class="px-4 pb-6 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
-                <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
-                <div>
-                    <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
-                        <span data-i18n="m2">Каталог</span>
-                        <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">
-                        <a href="catalog.html#" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Всі товари</a>
-                        <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Золото</a>
-                        <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Срібло</a>
-                        <a href="catalog.html#rings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Каблучки</a>
-                        <a href="catalog.html#earrings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Сережки</a>
-                        <a href="catalog.html#necklaces" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Кольє та Ланцюжки</a>
-                        <a href="catalog.html#bracelets" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Браслети</a>
-                    </div>
+        <!-- Основной контент (скроллится) -->
+        <div class="px-4 py-2 flex flex-col flex-grow overflow-y-auto custom-scrollbar">
+            <a href="index.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()">Головна</a>
+            <div>
+                <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobCatList', 'mobCatArrow')">
+                    <span data-i18n="m2">Каталог</span>
+                    <svg id="mobCatArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
-                <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
-                <div>
-                    <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
-                        <span>Бренд</span>
-                        <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
-                        <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
-                        <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
-                        <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
-                        <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
-                    </div>
-                </div>
-                <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
-                <div>
-                    <a href="exclusive.html" class="text-[var(--gold-muted)] font-bold py-3 block">
-                        <span data-i18n="m_atelier">Ексклюзив</span>
-                    </a>
-                </div>
-                <div class="mt-4 flex flex-col gap-2 text-[12px] text-[var(--text-muted)]">
-                    <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium transition hover:opacity-80">+38 063 45 40 901</a>
-                    <span>Пн–Пт: 08:00–18:00</span>
-                    <span>м. Ізмаїл, вул. Торгова, 68</span>
-                    <span>м. Ізмаїл, вул. Покровська, 57</span>
-                </div>
-                <div class="flex items-center gap-4 mt-4">
-                    <a href="https://www.instagram.com/bv.jewelry_izmail" target="_blank" class="inst-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
-                    <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </a>
+                <div class="mob-accordion-list flex flex-col" id="mobCatList" style="gap: 5px; padding-left: 10px;">
+                    <a href="catalog.html#" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Всі товари</a>
+                    <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Золото</a>
+                    <a href="catalog.html#gold" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Срібло</a>
+                    <a href="catalog.html#rings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Каблучки</a>
+                    <a href="catalog.html#earrings" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Сережки</a>
+                    <a href="catalog.html#necklaces" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Кольє та Ланцюжки</a>
+                    <a href="catalog.html#bracelets" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Браслети</a>
                 </div>
             </div>
-        `;
+            <a href="gallery.html" class="mob-menu-title border-b border-[var(--border)] break-normal" onclick="window.toggleMenu()">Галерея</a>
+            <div>
+                <div class="mob-menu-title cursor-pointer flex justify-between items-center" onclick="window.toggleAccordion('mobInfoList', 'mobInfoArrow')">
+                    <span>Бренд</span>
+                    <svg id="mobInfoArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="mob-accordion-list flex flex-col" id="mobInfoList" style="gap: 5px; padding-left: 10px;">
+                    <a href="info.html?p=about" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Про нас</a>
+                    <a href="info.html?p=warranty" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Гарантія та повернення</a>
+                    <a href="info.html?p=terms" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Оплата і доставка</a>
+                    <a href="info.html?p=faq" class="sub-cat-link break-normal py-3 block text-[14px] opacity-80" onclick="window.toggleMenu()">Часті питання</a>
+                </div>
+            </div>
+            <a href="services.html" class="mob-menu-title break-normal" onclick="window.toggleMenu()"><span data-i18n="m_price">Наші послуги</span></a>
+            <div>
+                <a href="exclusive.html" class="text-[var(--gold-muted)] font-bold py-3 block">
+                    <span data-i18n="m_atelier">Ексклюзив</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Футер (статичный внизу, стилизован под шапку) -->
+        <div class="flex justify-between items-center pt-4 pb-4 px-4 border-t border-[var(--border)] flex-shrink-0">
+            <div class="flex flex-col gap-1 text-[11px] text-[var(--text-muted)]">
+                <a href="tel:+380634540901" class="text-[13px] text-[var(--gold-muted)] font-medium transition hover:opacity-80">+38 063 45 40 901</a>
+                <span>вул. Торгова, 68 • вул. Покровська, 57</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="https://www.instagram.com/bv.jewelry_izmail" target="_blank" class="inst-link w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
+                <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-main)] hover:text-[#111] hover:bg-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all duration-300">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+`;
     }
 }
 

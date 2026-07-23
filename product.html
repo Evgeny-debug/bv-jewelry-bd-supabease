@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="uk" data-theme="light" style="scroll-behavior: smooth;">
 <head>
+    <!-- Основна іконка для більшості браузерів -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
+    <!-- Іконка для Apple пристроїв -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
- <!-- Основная иконка для большинства браузеров -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-
-<!-- Иконка для Apple устройств -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-<!-- Для Android -->
-<link rel="manifest" href="/site.webmanifest">
+    <!-- Для Android -->
+    <link rel="manifest" href="/site.webmanifest">
     
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co 'unsafe-inline';">
     <meta charset="UTF-8">
@@ -64,7 +62,6 @@
             border-color: var(--gold-muted);
         }
 
-
         /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
         .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
             border-radius: 0 !important;
@@ -79,14 +76,14 @@
         /* Зменшений Hero-банер */
         .h-screen-hero { min-height: 0 !important; height: 30vh !important; padding: 0 !important; }
         
-        #globalContactBtn { display: none !important; } /* Плаваюча кнопка видалена */
+        #globalContactBtn { display: none !important; }
 
-        /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
+        /* --- КАРТКИ ТОВАРІВ --- */
         .product-card {
             border: 1px solid #e5e5e5 !important;
             box-shadow: none !important;
             background-color: #fff !important;
-            margin-right: -1px; /* Злиття рамок */
+            margin-right: -1px;
             margin-bottom: -1px;
         }
         [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
@@ -96,34 +93,79 @@
             object-fit: contain !important;
             padding: 0 !important;
             background: #fff !important;
-            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
+            mix-blend-mode: multiply;
         }
         [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
         
         .product-card .p-4 { padding: 10px 8px !important; }
-        .product-card ha, .product-card span { line-height: 1.2; }
 
-        /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
         @media (max-width: 1024px) {
             #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
             .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
         }
 
-        /* Кнопка нагору */
         #scrollToTopBtn { left: 1rem !important; right: auto !important; }
         @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
         
-        /* Футер колонки для моб */
         .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
         @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* Бокове меню: компактна верхівка */
         .side-menu { padding-top: 16px !important; }
         .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
         .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
+
+        /* ==========================================
+           DRAWERS ТА МОДАЛКИ
+           ========================================== */
+        .cart-overlay, .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 5500; opacity: 0; visibility: hidden; backdrop-filter: blur(5px); transition: 0.4s ease;}
+        .cart-overlay.active, .menu-overlay.active { opacity: 1; visibility: visible; }
+
+        .cart-drawer, .side-menu { position: fixed; top: 0; height: 100dvh; background: color-mix(in srgb, var(--bg-card) 78%, transparent); backdrop-filter: blur(30px); border: 1px solid var(--border); box-shadow: var(--shadow-strong); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 5501; display: flex; flex-direction: column; }
+        .cart-drawer { right: -100%; width: 100%; max-width: 440px; border-left-width: 1px; }
+        .cart-drawer.active { right: 0; }
+        .side-menu { left: -100%; width: 85%; max-width: 360px; border-right-width: 1px; padding: 100px 24px 40px; gap: 16px; overflow-y: auto; z-index: 5000;}
+        .side-menu.active { left: 0; }
+
+        .cart-header { display: flex; justify-content: space-between; padding: 30px 40px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .cart-header h2 { font-size: 26px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin: 0;}
+        .cart-close { font-size: 36px; font-weight: 300; opacity: 0.5; border: none; background: none; color: var(--text-main);}
+        .cart-close:hover { opacity: 1; color: var(--danger); transform: rotate(90deg); }
+
+        .cart-body { flex-grow: 1; padding: 30px 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+        .cart-item { display: flex; gap: 20px; align-items: center; background: rgba(255,255,255,0.05); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
+        [data-theme="light"] .cart-item { background: rgba(0,0,0,0.02); }
+        .cart-item:hover { border-color: color-mix(in srgb, var(--gold-muted) 35%, var(--border)); transform: translateY(-2px); }
+        .cart-item img { width: 80px; height: 80px; object-fit: contain; border-radius: 10px; background: transparent; }
+        .cart-item-remove svg { stroke-linecap: round; stroke-linejoin: round; }
+        .cart-item-remove:hover { color: var(--danger); transform: scale(1.1);}
+
+        .cart-footer { 
+            padding: 24px 40px calc(24px + env(safe-area-inset-bottom, 20px)); 
+            border-top: 1px solid var(--border); 
+            background: rgba(0,0,0,0.2); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            flex-shrink: 0;
+        }
+        [data-theme="light"] .cart-footer { background: rgba(255,255,255,0.4); }
+        .cart-subtotal { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .cart-subtotal-val { color: var(--gold-muted); font-size: 24px; font-weight: 600; }
+        .btn-checkout { background: var(--text-main); color: var(--bg-body); padding: 18px; width: 100%; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22); cursor: pointer;}
+        .btn-checkout:hover { opacity: 0.9; transform: translateY(-3px); }
+
+        .glass-panel { background: var(--bg-card); border: 1px solid var(--border); }
+        .auth-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--bg-card) 80%, transparent); padding: 14px; color: var(--text-main); font-size: 15px; outline: none; font-family: 'Inter'; transition: 0.3s;}
+        .auth-input:focus { border-color: var(--gold-muted); }
     </style>
 </head>
 <body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white">
+
+    <script>
+        window.alert = function(msg) { console.warn('Системний alert заблоковано:', msg); };
+        window.confirm = function(msg) { console.warn('Системний confirm заблоковано:', msg); return true; };
+        window.prompt = function(msg) { console.warn('Системний prompt заблоковано:', msg); return null; };
+    </script>
 
     <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] hidden opacity-0 transition-opacity flex items-center justify-center p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
         <div class="glass-panel p-8 w-full max-w-sm relative rounded-[32px] shadow-2xl bg-[var(--bg-card)] border border-[var(--border)]">
@@ -214,10 +256,9 @@
                 <a href="gallery.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors">Галерея</a>
                 <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
                 
-
                 <div class="info-dropdown-wrapper group">
                     <button class="nav-link info-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='info.html'">
-                        <span data-i18n="">info   </span> 
+                        <span>info</span> 
                     </button>
                     <div class="mega-menu zlato-style">
                         <div class="mega-col-1 zlato-categories" id="megaCol1"></div>
@@ -249,11 +290,11 @@
             <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
             
             <div class="dropdown-wrapper lang-dropdown desktop-only">
-                <button class="lang-current"><img src="" class="" id="" alt=""><span id="currentLangLabel">UA</span></button>
+                <button class="lang-current"><img src="" alt=""><span id="currentLangLabel">UA</span></button>
                 <div class="dropdown-menu">
-                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('uk')"><img src="" class="w-5 rounded-[3px]" alt=""> UA</button>
-                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('en')"><img src="" class="w-5 rounded-[3px]" alt=""> EN</button>
-                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('ru')"><img src="" class="w-5 rounded-[3px]" alt=""> RU</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('uk')">UA</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('en')">EN</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('ru')">RU</button>
                 </div>
             </div>
             
@@ -311,8 +352,7 @@
             
             <div class="col-span-1 md:col-span-7 flex flex-col md:flex-row gap-4 md:sticky md:top-[120px] h-auto md:h-[60vh] lg:h-[70vh]">
                 
-                <div id="pd-gallery-thumbnails" class="hidden md:flex flex-col gap-2 shrink-0 w-16 overflow-y-auto no-scrollbar max-h-[500px]">
-                    </div>
+                <div id="pd-gallery-thumbnails" class="hidden md:flex flex-col gap-2 shrink-0 w-16 overflow-y-auto no-scrollbar max-h-[500px]"></div>
 
                 <div class="relative w-full aspect-square sm:aspect-[4/5] md:aspect-auto md:h-full overflow-hidden group touch-pan-y bg-transparent" id="pd-gallery-container">
                     <div id="pd-badges" class="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none"></div>
@@ -356,27 +396,38 @@
                     <div class="flex flex-wrap gap-2" id="pd-sizes-list"></div>
                 </div>
 
-                <div class="hidden md:flex flex-col gap-6 mb-10">
+                <div class="hidden md:flex flex-col gap-6 mb-8">
                     <div id="pd-price-desktop" class="flex items-end gap-4 whitespace-nowrap"></div>
                     <div class="flex items-center gap-4">
                         <button id="pd-add-btn-desktop" class="w-full bg-[var(--text-main)] text-[var(--bg-body)] py-4 font-bold uppercase tracking-widest text-[11px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors active:scale-95 flex items-center justify-center text-center rounded-lg shadow-md"></button>
                     </div>
                 </div>
 
-                <div class="flex flex-col mb-8 border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-card)] shadow-sm">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4 pb-2 border-b border-[var(--border)]">Характеристики виробу</h3>
-                    <div class="flex justify-between py-2 border-b border-[var(--border)]/30">
+                <!-- ВКЛАДКИ (Характеристики / Про виріб) -->
+                <div class="flex border-b border-[var(--border)] mb-4">
+                    <button onclick="window.switchProductTab('specs')" id="tab-btn-specs" class="pb-3 text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] border-b-2 border-[var(--gold-muted)] mr-8 transition-colors cursor-pointer">Характеристики</button>
+                    <button onclick="window.switchProductTab('desc')" id="tab-btn-desc" class="pb-3 text-[10px] uppercase tracking-widest font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors cursor-pointer">Про виріб</button>
+                </div>
+
+                <!-- Контент вкладки: Характеристики -->
+                <div id="tab-content-specs" class="flex flex-col mb-8 border border-[var(--border)] p-5 bg-[var(--bg-card)] shadow-sm">
+                    <div class="flex justify-between items-center py-2 border-b border-[var(--border)]/30">
                         <span class="text-[var(--text-muted)] text-xs">Метал</span>
                         <span class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-metal">-</span>
                     </div>
-                    <div id="pd-spec-stones-row" class="hidden flex justify-between py-2 border-b border-[var(--border)]/30">
+                    <div id="pd-spec-stones-row" class="hidden flex justify-between items-center py-2 border-b border-[var(--border)]/30">
                         <span class="text-[var(--text-muted)] text-xs">Вставка</span>
                         <span class="font-medium text-[var(--text-main)] text-xs text-right pl-4" id="pd-spec-stones">-</span>
                     </div>
-                    <div id="pd-spec-weight-row" class="hidden flex justify-between py-2">
+                    <div id="pd-spec-weight-row" class="hidden flex justify-between items-center py-2">
                         <span class="text-[var(--text-muted)] text-xs">Орієнтовна вага</span>
                         <span class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-weight">-</span>
                     </div>
+                </div>
+
+                <!-- Контент вкладки: Про виріб (Опис) -->
+                <div id="tab-content-desc" class="hidden flex flex-col mb-8 border border-[var(--border)] p-5 bg-[var(--bg-card)] shadow-sm min-h-[140px] justify-center items-center text-center">
+                    <p id="pd-desc-full" class="text-xs md:text-sm text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap font-light"></p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[var(--border)] pt-6">
@@ -391,19 +442,11 @@
                         <svg class="w-4 h-4 shrink-0 text-[var(--gold-muted)] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <div>
                             <h4 class="text-[10px] uppercase tracking-widest font-bold text-[var(--text-main)]">Гарантія</h4>
-                            <p class="text-[11px] text-[var(--text-muted)] mt-1 leading-relaxed">Безкоштовне обслуговування включає усунення прихованих дефектів, що виникли
-з вини виробника.</p>
+                            <p class="text-[11px] text-[var(--text-muted)] mt-1 leading-relaxed">Безкоштовне обслуговування включає усунення прихованих дефектів.</p>
                         </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
-
-        <div id="pd-info-section" class="border-t border-[var(--border)] pt-12 mt-12 w-full">
-            <div class="w-full lg:w-2/3 mx-auto">
-                <h2 class="text-2xl font-serif text-[var(--text-main)] mb-6 text-center">Про виріб</h2>
-                <p id="pd-desc-full" class="text-sm md:text-base text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap font-light text-center"></p>
             </div>
         </div>
 
@@ -459,9 +502,8 @@
         </button>
     </nav>
 
-    <footer  id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
-        <div class="max-w-9xl mx-auto footer-grid ">
-            
+    <footer id="footer" class="pt-12 pb-24 md:pb-12 px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10">
+        <div class="max-w-9xl mx-auto footer-grid">
             <div class="flex flex-col items-start">
                 <div class="bv-logo mb-4 relative !static !transform-none !items-start !opacity-100">
                     <span class="!text-3xl">BV</span><span class="!text-[8px] mt-1 font-['Montserrat'] font-bold tracking-widest">jewelry</span>
@@ -471,10 +513,6 @@
                 </p>
             </div>
             
-
-           
-
-            
             <div class="flex flex-col items-start">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" data-i18n="m2">Каталог</h4>
                 <a href="catalog.html#rings" class="text-[12px] text-[var(--text-muted)] mb-1">Каблучки</a>
@@ -482,29 +520,16 @@
                 <a href="catalog.html#necklaces" class="text-[12px] text-[var(--text-muted)] mb-1">Ланцюжки</a>
             </div>
 
-            
-           
             <div class="flex flex-col items-start">
                 <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Інформація</h4>
                 <a href="services.html" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="m_price">Послуги та Прайс</a>
                 <a href="info.html?p=warranty" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="brand_warranty">Гарантія</a>
                 <a href="info.html?p=terms" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="brand_terms">Доставка</a>
-                <a href="info.html?p=about" class="text-[12px] text-[var(--text-muted)] mb-1" data-i18n="brand_terms">Про нас</a>
+                <a href="info.html?p=about" class="text-[12px] text-[var(--text-muted)] mb-1">Про нас</a>
             </div>
 
-
-          
             <div class="flex flex-col items-start">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Ми знаходимось</h4>
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Торгова, 68</span>
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">08:00 - 17:00</span>
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">м. Ізмаїл, вул. Покровська, 57</span>
-                <span class="text-[12px] text-[var(--text-muted)] mb-1">09:00 - 17:00</span>
-                
-                
-                <br>    
-                <div class="flex flex-col items-start">
-                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4" >Контакти</h4>
+                <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4">Контакти</h4>
                 <a href="tel:+380634540901" class="text-[14px] text-[var(--gold-muted)] font-medium mb-1 transition hover:opacity-80 tracking-wide">+38 063 45 40 901</a>
                 
                 <div class="flex items-center gap-4 mt-2">
@@ -516,8 +541,6 @@
                     </a>
                 </div>
             </div>
-            </div>
-
         </div>
     </footer>
 
@@ -525,55 +548,95 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
-    <script>
+  <script>
         let currentGalleryIndex = 0;
         let productGallery = [];
         let currentProduct = null;
         let currentLang = 'uk';
-        let allProductsCache = []; // Кеш для рекомендаций
+        let allProductsCache = [];
 
-        // --- ЛОГІКА ЧИТАННЯ ДАНИХ ---
+        // --- ФУНКЦІЯ ПЕРЕМИКАННЯ ВКЛАДОК ---
+        window.switchProductTab = function(tabName) {
+            const specsTab = document.getElementById('tab-btn-specs');
+            const descTab = document.getElementById('tab-btn-desc');
+            const specsContent = document.getElementById('tab-content-specs');
+            const descContent = document.getElementById('tab-content-desc');
+
+            if (!specsTab || !descTab || !specsContent || !descContent) return;
+
+            if (tabName === 'specs') {
+                specsTab.classList.add('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
+                specsTab.classList.remove('text-[var(--text-muted)]');
+                descTab.classList.remove('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
+                descTab.classList.add('text-[var(--text-muted)]');
+                
+                specsContent.classList.remove('hidden');
+                descContent.classList.add('hidden');
+            } else {
+                descTab.classList.add('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
+                descTab.classList.remove('text-[var(--text-muted)]');
+                specsTab.classList.remove('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
+                specsTab.classList.add('text-[var(--text-muted)]');
+                
+                descContent.classList.remove('hidden');
+                specsContent.classList.add('hidden');
+            }
+        };
+
+        // --- ЛОГІКА ЧИТАННЯ ДАНИХ ТА ВАРІАЦІЙ ---
         function getVarData(prod, size, field, lang = null) {
             if (!prod) return '';
-            const b = prod.variations ? prod.variations.base : prod;
+            const b = (prod.variations && prod.variations.base) ? prod.variations.base : prod;
             const v = (prod.variations && size && prod.variations[size]) ? prod.variations[size] : b;
             
             const getVal = (obj, f) => {
                 if (!obj) return undefined;
-                if (f === 'desc') return obj.desc || obj.description;
-                if (f === 'workCost') return obj.workCost || obj.work_cost;
-                if (f === 'priceType') return obj.priceType || obj.price_type;
-                if (f === 'nameEN') return obj.nameEN || obj.name_en;
-                return obj[f];
+                const map = {
+                    'desc': ['desc', 'description'],
+                    'workCost': ['workCost', 'work_cost'],
+                    'priceType': ['priceType', 'price_type'],
+                    'nameEN': ['nameEN', 'name_en'],
+                    'isWeekly': ['isWeekly', 'is_weekly'],
+                    'isSpecial': ['isSpecial', 'is_special'],
+                    'status': ['status', 'availability', 'state'],
+                    'stones': ['stones', 'stone'],
+                    'blocks': ['blocks', 'block'],
+                    'images': ['images', 'image', 'img']
+                };
+                const keys = map[f] || [f];
+                for (let k of keys) {
+                    if (obj[k] !== undefined && obj[k] !== '' && obj[k] !== null) return obj[k];
+                }
+                return undefined;
             };
 
             if (field === 'images') {
-                let imgs = getVal(v, 'images') || getVal(b, 'images');
+                let imgs = getVal(v, 'images') || getVal(b, 'images') || getVal(prod, 'images');
                 if (typeof imgs === 'string') {
                     try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
                 }
                 if (Array.isArray(imgs) && imgs.length > 0) return imgs;
-                const singleImg = v.img || v.image || b.img || b.image || prod.img || prod.image;
+                const singleImg = v?.img || v?.image || b?.img || b?.image || prod?.img || prod?.image;
                 return singleImg ? [singleImg] : [];
             }
 
-            if (['price', 'discount', 'weight', 'workCost', 'priceType'].includes(field)) {
-                const valV = getVal(v, field);
-                const valB = getVal(b, field);
-                return valV !== undefined && valV !== '' ? valV : (valB !== undefined ? valB : '');
-            }
+            const valV = getVal(v, field);
+            const valB = getVal(b, field);
+            const valProd = getVal(prod, field);
+
+            if (valV !== undefined && valV !== '' && valV !== null) return valV;
+            if (valB !== undefined && valB !== '' && valB !== null) return valB;
+            if (valProd !== undefined && valProd !== '' && valProd !== null) return valProd;
 
             if (lang) {
-                const valV = getVal(v, field);
-                const valB = getVal(b, field);
                 if (valV && typeof valV === 'object' && valV[lang]) return valV[lang];
                 if (valB && typeof valB === 'object' && valB[lang]) return valB[lang];
+                if (valProd && typeof valProd === 'object' && valProd[lang]) return valProd[lang];
             }
 
-            return getVal(v, field) || getVal(b, field) || '';
+            return '';
         }
 
-        // --- ЛОГІКА КЛІКУ НА РОЗМІР ---
         window.selectSize = function(btn, size) {
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
@@ -582,7 +645,6 @@
             window.updateProductUI();
         };
 
-        // --- ГОЛОВНА ФУНКЦІЯ ОНОВЛЕННЯ ІНТЕРФЕЙСУ ТОВАРУ ---
         window.updateProductUI = function() {
             if(!currentProduct) return;
             const size = window.currentSelectedSize || 'base';
@@ -593,16 +655,42 @@
             const price = getVarData(currentProduct, size, 'price');
             const discount = getVarData(currentProduct, size, 'discount');
             const weight = getVarData(currentProduct, size, 'weight');
+            const stones = getVarData(currentProduct, size, 'stones');
+            const workCost = getVarData(currentProduct, size, 'workCost');
+            const blocks = getVarData(currentProduct, size, 'blocks');
 
-            document.getElementById('pd-title').innerText = name;
+            if(document.getElementById('pd-title')) document.getElementById('pd-title').innerText = name;
             if(document.getElementById('pd-title-mob')) document.getElementById('pd-title-mob').innerText = name;
-            document.getElementById('pd-desc-full').innerText = desc || 'Опис відсутній';
+            if(document.getElementById('pd-desc-full')) document.getElementById('pd-desc-full').innerText = desc || 'Опис відсутній';
             
             if(weight && Number(weight) > 0) {
-                document.getElementById('pd-spec-weight').innerText = weight + ' г';
+                if(document.getElementById('pd-spec-weight')) document.getElementById('pd-spec-weight').innerText = weight + ' г';
                 document.getElementById('pd-spec-weight-row')?.classList.remove('hidden');
             } else {
                 document.getElementById('pd-spec-weight-row')?.classList.add('hidden');
+            }
+
+            if(stones && String(stones).trim() !== '') {
+                if(document.getElementById('pd-spec-stones')) document.getElementById('pd-spec-stones').innerText = stones;
+                document.getElementById('pd-spec-stones-row')?.classList.remove('hidden');
+            } else {
+                document.getElementById('pd-spec-stones-row')?.classList.add('hidden');
+            }
+
+            if(workCost && String(workCost).trim() !== '') {
+                const el = document.getElementById('pd-spec-workcost');
+                if(el) el.innerText = workCost;
+                document.getElementById('pd-spec-workcost-row')?.classList.remove('hidden');
+            } else {
+                document.getElementById('pd-spec-workcost-row')?.classList.add('hidden');
+            }
+
+            if(blocks && String(blocks).trim() !== '') {
+                const el = document.getElementById('pd-spec-blocks');
+                if(el) el.innerText = blocks;
+                document.getElementById('pd-spec-blocks-row')?.classList.remove('hidden');
+            } else {
+                document.getElementById('pd-spec-blocks-row')?.classList.add('hidden');
             }
 
             const hasDiscount = discount && Number(discount) > 0;
@@ -615,7 +703,49 @@
             
             if(document.getElementById('pd-price-desktop')) document.getElementById('pd-price-desktop').innerHTML = priceHtmlDesktop;
 
-            const isOutOfStock = currentProduct.status === 'out-stock';
+            // --- ДИНАМІЧНІ СТАТУСИ ТА СТАН ТОВАРУ (БЕЗПЕЧНИЙ ВИВІД) ---
+            let statuses = [];
+            const rawStatus = getVarData(currentProduct, size, 'status');
+            const statusLower = String(rawStatus || '').toLowerCase().trim();
+
+            const isOutOfStock = statusLower === 'out-stock' || statusLower === 'out_stock' || statusLower === 'нет в наличии' || statusLower === 'немає в наявності';
+            const isOnOrder = statusLower === 'order' || statusLower === 'pod-zakaz' || statusLower === 'під замовлення' || statusLower === 'под_заказ' || Boolean(getVarData(currentProduct, size, 'isOrder'));
+            const isExclusive = Boolean(getVarData(currentProduct, size, 'isExclusive') || getVarData(currentProduct, size, 'exclusive') || statusLower === 'exclusive');
+            const isWeekly = Boolean(getVarData(currentProduct, size, 'isWeekly'));
+            const isSpecial = Boolean(getVarData(currentProduct, size, 'isSpecial'));
+
+            if (isOutOfStock) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-red-500 border border-red-500/20 px-3 py-1 rounded">Нема в наявності</span>`);
+            } else if (isOnOrder) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-amber-500 border border-amber-500/20 px-3 py-1 rounded">Під замовлення</span>`);
+            } else {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-green-500 border border-green-500/20 px-3 py-1 rounded">В наявності</span>`);
+            }
+
+            if (isExclusive) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] border border-[var(--gold-muted)]/20 px-3 py-1 rounded">Ексклюзив</span>`);
+            }
+
+            if (isWeekly) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-blue-400 border border-blue-400/20 px-3 py-1 rounded">Товар тижня</span>`);
+            }
+
+            if (isSpecial) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-purple-400 border border-purple-400/20 px-3 py-1 rounded">Спеціальна пропозиція</span>`);
+            }
+
+            if (hasDiscount) {
+                statuses.push(`<span class="text-[10px] uppercase tracking-widest font-bold text-[var(--success)] border border-[var(--success)]/20 px-3 py-1 rounded">Знижка</span>`);
+            }
+
+            const statusHtml = `<div class="flex flex-wrap gap-2 items-center">${statuses.join('')}</div>`;
+            
+            const pdStatusEl = document.getElementById('pd-status');
+            if (pdStatusEl) pdStatusEl.innerHTML = statusHtml;
+
+            const pdStatusMobEl = document.getElementById('pd-status-mob');
+            if (pdStatusMobEl) pdStatusMobEl.innerHTML = statusHtml;
+
             const setupAddBtn = (id) => {
                 const btn = document.getElementById(id);
                 if(!btn) return;
@@ -623,17 +753,30 @@
                 if(isOutOfStock) {
                     btn.disabled = true;
                     btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    btn.innerHTML = `<span class="uppercase font-bold tracking-widest text-[11px]">${i18n?.[currentLang]?.out_stock || 'Немає в наявності'}</span>`;
+                    btn.innerHTML = `<span class="uppercase font-bold tracking-widest text-[11px]">Нема в наявності</span>`;
+                } else if(isOnOrder) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.innerHTML = `<span class="uppercase font-bold tracking-widest text-[11px]">Замовити за ${formatterPrice.format(currentPrice)}</span>`;
+                    
+                    btn.onclick = () => {
+                        const needsSize = !document.getElementById('pd-sizes-container')?.classList.contains('hidden');
+                        if (needsSize && !window.currentSelectedSize) {
+                            document.getElementById('pd-sizes-container')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+                            return;
+                        }
+                        const finalName = window.currentSelectedSize ? `${name} (Під замовлення, Розмір: ${window.currentSelectedSize})` : `${name} (Під замовлення)`;
+                        window.addToCart(currentProduct.id, finalName, currentProduct.variant, currentPrice, productGallery[0]);
+                    };
                 } else {
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                     btn.innerHTML = `<span class="uppercase font-bold tracking-widest text-[11px]">${i18n?.[currentLang]?.btn_buy || 'Купити'} за ${formatterPrice.format(currentPrice)}</span>`;
                     
                     btn.onclick = () => {
-                        const needsSize = !document.getElementById('pd-sizes-container').classList.contains('hidden');
+                        const needsSize = !document.getElementById('pd-sizes-container')?.classList.contains('hidden');
                         if (needsSize && !window.currentSelectedSize) {
-                            alert('Будь ласка, оберіть розмір перед покупкою.');
-                            document.getElementById('pd-sizes-container').scrollIntoView({behavior: 'smooth', block: 'center'});
+                            document.getElementById('pd-sizes-container')?.scrollIntoView({behavior: 'smooth', block: 'center'});
                             return;
                         }
                         const finalName = window.currentSelectedSize ? `${name} (Розмір: ${window.currentSelectedSize})` : name;
@@ -652,7 +795,6 @@
             }
         };
 
-        // --- ГАЛЕРЕЯ ---
         function rebuildGallery() {
             const track = document.getElementById('pd-gallery-track');
             const dots = document.getElementById('pd-gallery-dots');
@@ -733,17 +875,14 @@
             document.body.style.overflow = '';
         };
 
-        // --- РЕНДЕР СТОРІНКИ ТОВАРУ (Адаптовано під Supabase) ---
         window.renderProductPage = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
             const categories = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || API.get('bv_categories_flat', [])) : [];
 
-            // 1. ЗАПРОС К SUPABASE
             try {
                 if (typeof _supabase !== 'undefined' && productId) {
-                    // Ищем товар в БД (убедитесь, что таблица называется 'products')
-                    const { data: productData, error: productError } = await _supabase
+                    const { data: productData } = await _supabase
                         .from('products') 
                         .select('*')
                         .eq('id', productId)
@@ -751,15 +890,13 @@
 
                     if (productData) currentProduct = productData;
 
-                    // Загружаем все товары для блока рекомендаций (опционально, можно ограничить)
                     const { data: allData } = await _supabase.from('products').select('*');
                     if (allData) allProductsCache = allData;
                 }
             } catch (err) {
-                console.warn("Помилка завантаження з бази, використовуємо локальні дані:", err);
+                console.warn("Помилка завантаження з бази:", err);
             }
 
-            // Фоллбек, если база недоступна или пуста
             if (!currentProduct) {
                 const localProducts = typeof API !== 'undefined' ? API.get('bv_products', []) : [];
                 allProductsCache = localProducts;
@@ -767,14 +904,13 @@
             }
 
             if (!currentProduct) {
-                document.getElementById('pd-title').innerText = 'Товар не знайдено';
+                if(document.getElementById('pd-title')) document.getElementById('pd-title').innerText = 'Товар не знайдено';
                 if(document.getElementById('pd-title-mob')) document.getElementById('pd-title-mob').innerText = 'Товар не знайдено';
                 return;
             }
 
             productGallery = getVarData(currentProduct, 'base', 'images');
             
-            // Налаштування свайпу
             let touchStartX = 0; let touchEndX = 0;
             const galleryContainer = document.getElementById('pd-gallery-container');
             if (galleryContainer && !galleryContainer.dataset.touchAttached) {
@@ -789,65 +925,49 @@
                 galleryContainer.dataset.touchAttached = 'true';
             }
 
-            // Статичні дані
             ['pd-sku', 'pd-spec-sku', 'pd-sku-mob'].forEach(id => {
                 if(document.getElementById(id)) document.getElementById(id).innerText = currentProduct.sku || currentProduct.id;
             });
             if(document.getElementById('pd-spec-metal')) document.getElementById('pd-spec-metal').innerText = currentProduct.variant || 'Не вказано';
             
-            if(currentProduct.stones && currentProduct.stones.trim() !== '') {
-                document.getElementById('pd-spec-stones').innerText = currentProduct.stones;
-                document.getElementById('pd-spec-stones-row')?.classList.remove('hidden');
-            }
-
-            // Категорія
             const catObj = categories.find(c => c.id === currentProduct.category) || {};
             const catName = window.getLoc ? window.getLoc(catObj.name) || currentProduct.category : currentProduct.category;
-            document.getElementById('pd-category-name').innerText = catName;
-            document.getElementById('pd-category-link').href = `catalog.html#${currentProduct.category}`;
+            if(document.getElementById('pd-category-name')) document.getElementById('pd-category-name').innerText = catName;
+            if(document.getElementById('pd-category-link')) document.getElementById('pd-category-link').href = `catalog.html#${currentProduct.category}`;
             if(document.getElementById('pd-category-name-mob')) document.getElementById('pd-category-name-mob').innerText = catName;
             if(document.getElementById('pd-category-link-mob')) document.getElementById('pd-category-link-mob').href = `catalog.html#${currentProduct.category}`;
 
-            // Розміри
             const sizesContainer = document.getElementById('pd-sizes-container');
             const sizesList = document.getElementById('pd-sizes-list');
             if (currentProduct.sizes && currentProduct.sizes.length > 0) {
-                sizesList.innerHTML = currentProduct.sizes.map(s => `
-                    <button class="size-btn btn-cross border border-[var(--border)] text-[var(--text-main)] hover:border-[var(--gold-muted)] py-2 px-4 text-[11px] font-medium transition-colors rounded-none" onclick="selectSize(this, '${s}')">${s}</button>
-                `).join('');
-                sizesContainer.classList.remove('hidden');
+                if(sizesList) {
+                    sizesList.innerHTML = currentProduct.sizes.map(s => `
+                        <button class="size-btn btn-cross border border-[var(--border)] text-[var(--text-main)] hover:border-[var(--gold-muted)] py-2 px-4 text-[11px] font-medium transition-colors rounded-none" onclick="selectSize(this, '${s}')">${s}</button>
+                    `).join('');
+                }
+                sizesContainer?.classList.remove('hidden');
             } else {
-                sizesContainer.classList.add('hidden');
+                sizesContainer?.classList.add('hidden');
                 window.currentSelectedSize = null;
             }
 
-            // Статус
-            let statusHtml = currentProduct.status === 'out-stock' 
-                ? `<span class="text-[10px] uppercase tracking-widest font-bold text-red-500 border border-red-500/20 px-3 py-1 rounded">Немає в наявності</span>`
-                : `<span class="text-[10px] uppercase tracking-widest font-bold text-green-500 border border-green-500/20 px-3 py-1 rounded">В наявності</span>`;
-            document.getElementById('pd-status').innerHTML = statusHtml;
-            if(document.getElementById('pd-status-mob')) document.getElementById('pd-status-mob').innerHTML = statusHtml;
-
-            // Улюблене
             const favs = typeof API !== 'undefined' && typeof API.get === 'function' ? API.get('bv_favs', []) : JSON.parse(localStorage.getItem('bv_favs') || '[]');
             const setupFavBtn = (id) => {
                 const btn = document.getElementById(id);
                 if(!btn) return;
                 if(favs.includes(currentProduct.id)) {
                     btn.classList.add('text-[var(--danger)]', 'border-[var(--danger)]');
-                    btn.querySelector('svg').setAttribute('fill', 'currentColor');
+                    btn.querySelector('svg')?.setAttribute('fill', 'currentColor');
                 }
                 btn.onclick = (e) => {
                     e.preventDefault();
                     let isLoggedIn = false;
                     const nameEl = document.getElementById('profName');
                     if (nameEl && nameEl.innerText.trim().length > 0 && nameEl.innerText !== 'User') isLoggedIn = true;
-                    
                     if (!isLoggedIn && localStorage.getItem('bv_current_user')) isLoggedIn = true;
 
                     if (!isLoggedIn) {
                         if(typeof window.smartProfileClick === 'function') window.smartProfileClick();
-                        else alert('Будь ласка, увійдіть в акаунт, щоб додати в улюблене.');
                         return;
                     }
 
@@ -855,25 +975,24 @@
                     const isFav = btn.classList.contains('text-[var(--danger)]');
                     if(isFav) {
                         btn.classList.remove('text-[var(--danger)]', 'border-[var(--danger)]');
-                        btn.querySelector('svg').setAttribute('fill', 'none');
+                        btn.querySelector('svg')?.setAttribute('fill', 'none');
                     } else {
                         btn.classList.add('text-[var(--danger)]', 'border-[var(--danger)]');
-                        btn.querySelector('svg').setAttribute('fill', 'currentColor');
+                        btn.querySelector('svg')?.setAttribute('fill', 'currentColor');
                     }
                 };
             };
             setupFavBtn('pd-fav-btn-desktop-img');
             setupFavBtn('pd-fav-btn-mob');
 
-            // Рекомендації
             if (typeof window.renderProductCard === 'function') {
                 let similarProducts = allProductsCache.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
-                if (similarProducts.length > 0) {
+                if (similarProducts.length > 0 && document.getElementById('similarGrid')) {
                     document.getElementById('similarGrid').innerHTML = similarProducts.map(p => window.renderProductCard(p)).join('');
                     document.getElementById('similarSection')?.classList.remove('hidden');
                 }
                 let boughtTogether = allProductsCache.filter(p => p.category !== currentProduct.category && p.id !== currentProduct.id).sort(() => 0.5 - Math.random()).slice(0, 5);
-                if (boughtTogether.length > 0) {
+                if (boughtTogether.length > 0 && document.getElementById('boughtTogetherGrid')) {
                     document.getElementById('boughtTogetherGrid').innerHTML = boughtTogether.map(p => window.renderProductCard(p)).join('');
                     document.getElementById('boughtTogetherSection')?.classList.remove('hidden');
                 }
@@ -883,13 +1002,11 @@
             window.updateProductUI();
         };
 
-        // Запуск при завантаженні
         document.addEventListener('DOMContentLoaded', () => {
-            // Теперь не нужен setTimeout, так как функция асинхронная и сама дождется ответа от базы
             if(typeof window.renderProductPage === 'function') {
                 window.renderProductPage(); 
             }
         });
-</script>
+    </script>
 </body>
 </html>
