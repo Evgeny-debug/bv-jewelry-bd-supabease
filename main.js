@@ -899,14 +899,25 @@ window.renderFavDrawer = function() {
 // ==========================================
 // 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
 // ==========================================
+// ==========================================
+// 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
+// ==========================================
 window.handleFavClick = function(id) {
-    const isRegistered = window.isLoggedIn || localStorage.getItem('user_token') || window.currentUser;
+    // 🔥 Універсальна перевірка всіх можливих варіантів авторизації
+    const isRegistered = 
+        window.isLoggedIn || 
+        localStorage.getItem('user_token') || 
+        window.currentUser || 
+        localStorage.getItem('bv_current_user') || 
+        localStorage.getItem('bv_logged_in') === 'true';
     
     if (!isRegistered) {
         if (typeof window.openAuthModal === 'function') {
             window.openAuthModal();
         } else if (typeof window.showAuth === 'function') {
             window.showAuth();
+        } else if (typeof window.smartProfileClick === 'function') {
+            window.smartProfileClick();
         } else {
             const authModal = document.getElementById('auth-modal') || document.getElementById('register-modal');
             if (authModal) {

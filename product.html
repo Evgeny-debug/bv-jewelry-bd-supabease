@@ -392,21 +392,19 @@
 
                 <!-- Контент вкладки: Характеристики -->
                 <div id="tab-content-specs" class="flex flex-col mb-8 border border-[var(--border)] p-5 bg-[var(--bg-card)] shadow-sm">
-                    <div class="flex justify-between items-center py-2 border-b border-[var(--border)]/30">
-                        <span class="text-[var(--text-muted)] text-xs">Метал</span>
-                        <span class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-metal">-</span>
-                    </div>
-                    <div id="pd-spec-stones-row" class="hidden flex justify-between items-center py-2 border-b border-[var(--border)]/30">
-                        <span class="text-[var(--text-muted)] text-xs">Вставка</span>
-                        <span class="font-medium text-[var(--text-main)] text-xs text-right pl-4" id="pd-spec-stones">-</span>
-
-                        
-                    </div>
-                    <div id="pd-spec-weight-row" class=" flex justify-between items-center py-2">
-                        <span id="selected-size-label" class="text-[var(--text-muted)] text-xs">Вага</span>
-                        <span id="selected-size-label" class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-weight">-</span>
-                    </div>
-                </div>
+    <div class="flex justify-between items-center py-2 border-b border-[var(--border)]/30">
+        <span class="text-[var(--text-muted)] text-xs">Метал</span>
+        <span class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-metal">-</span>
+    </div>
+    <div id="pd-spec-stones-row" class="hidden flex justify-between items-center py-2 border-b border-[var(--border)]/30">
+        <span class="text-[var(--text-muted)] text-xs">Вставка</span>
+        <span class="font-medium text-[var(--text-main)] text-xs text-right pl-4" id="pd-spec-stones">-</span>
+    </div>
+    <div id="pd-spec-weight-row" class="flex justify-between items-center py-2">
+        <span class="text-[var(--text-muted)] text-xs">Вага</span>
+        <span class="font-medium text-[var(--text-main)] text-xs text-right" id="pd-spec-weight">-</span>
+    </div>
+</div>
 
                 <!-- Контент вкладки: Про виріб (Опис) -->
                 <div id="tab-content-desc" class="hidden flex flex-col mb-8 border border-[var(--border)] p-5 bg-[var(--bg-card)] shadow-sm min-h-[140px] justify-center items-center text-center">
@@ -689,7 +687,10 @@
 
         const price = getVarData(currentProduct, size, 'price');
         const discount = getVarData(currentProduct, size, 'discount');
+        
+        // --- ОСЬ ТУТ МИ ПРАВИЛЬНО ЗЧИТУЄМО ВАГУ ДЛЯ ПОТОЧНОГО РОЗМІРУ ---
         const weight = getVarData(currentProduct, size, 'weight');
+        
         const stones = getVarData(currentProduct, size, 'stones');
         const workCost = getVarData(currentProduct, size, 'workCost');
         const blocks = getVarData(currentProduct, size, 'blocks');
@@ -698,6 +699,23 @@
         if(document.getElementById('pd-title-mob')) document.getElementById('pd-title-mob').innerText = name;
         if(document.getElementById('pd-desc-full')) document.getElementById('pd-desc-full').innerText = desc || 'Опис відсутній';
         
+        // --- ОНОВЛЕННЯ ХАРАКТЕРИСТИКИ ВАГИ ТА ЇЇ РЯДКА ---
+        const weightRow = document.getElementById('pd-spec-weight-row');
+        const weightSpecEl = document.getElementById('pd-spec-weight');
+        
+        if (weight && String(weight).trim() !== '') {
+            if (weightSpecEl) weightSpecEl.innerText = `${weight} г`;
+            if (weightRow) {
+                weightRow.classList.remove('hidden');
+                weightRow.style.display = 'flex';
+            }
+        } else {
+            if (weightRow) {
+                weightRow.classList.add('hidden');
+                weightRow.style.display = 'none';
+            }
+        }
+
         if(stones && String(stones).trim() !== '') {
             if(document.getElementById('pd-spec-stones')) document.getElementById('pd-spec-stones').innerText = getSafeText(stones, currentLang);
             document.getElementById('pd-spec-stones-row')?.classList.remove('hidden');
@@ -724,7 +742,6 @@
         const hasDiscount = discount && Number(discount) > 0;
         const currentPrice = hasDiscount ? discount : price;
         
-        // Оновлений формат ціни згідно з референсом (Золотий Вік)
         let priceHtmlDesktop = hasDiscount 
             ? `<span class="text-lg md:text-xl text-[var(--danger)] line-through mb-1 md:mb-0 md:mr-3">${formatPrice(price)} ₴</span>
                <span class="text-2xl md:text-3xl font-bold text-[var(--text-main)]">${formatPrice(discount)} ₴</span>`
@@ -732,7 +749,6 @@
         
         if(document.getElementById('pd-price-desktop')) document.getElementById('pd-price-desktop').innerHTML = priceHtmlDesktop;
 
-        // Нова логіка для відображення розміру та ваги зліва від ціни та в лейблі
         const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
         let sizeStr = hasSizes ? (window.currentSelectedSize || 'Оберіть розмір') : 'Універсальний';
         const weightStr = (weight && Number(weight) > 0) ? `${weight} г.` : '';
@@ -750,6 +766,8 @@
         if(document.getElementById('selected-size-label')) {
             document.getElementById('selected-size-label').innerText = combinedStr;
         }
+        
+        // ... (далі решта коду функції без змін)
 
         // --- ПЕРЕВІРКА СТАТУСУ ТА НАЯВНОСТІ ---
         let statuses = [];
