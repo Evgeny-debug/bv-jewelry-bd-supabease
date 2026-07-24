@@ -1687,7 +1687,7 @@ window.updateProfileMenu = function() {
         } else {
             dropdownMenu.innerHTML = `
                 <button onclick="window.isRegisterMode=false; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium">Увійти</button>
-                <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium text-[#c5a059]">Зареєструватися</button>
+                <button onclick="window.isRegisterMode=true; window.openAuthModal();" class="btn-cross dropdown-item w-full text-left font-medium text-[#bf0d0d] font-bold">Зареєструватися</button>
             `;
         }
     }
