@@ -17,16 +17,32 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
     
+    
+
+    
     <script>
-        (function initThemeBeforePaint() {
-            try {
-                const savedTheme = JSON.parse(localStorage.getItem('bv_theme'));
-                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        })();
+(function() {
+        try {
+            const saved = localStorage.getItem('theme');
+            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+    })();
+   
+
+        // Відключаємо стандартне запам'ятовування скролу браузером
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+// Примусово кидаємо наверх при перезавантаженні та завантаженні
+window.addEventListener('beforeunload', () => {
+    window.scrollTo(0, 0);
+});
+
+window.addEventListener('load', () => {
+    window.scrollTo(0, 0);
+});
     </script>
 
     <title>BV Jewelry | Atelier since 1984</title>
@@ -38,515 +54,39 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-    /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень --- */
-    .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
-        border-radius: 0 !important;
-    }
-    
-    /* Адаптивні зменшені відступи сітки для мобільних (більше товарів в ряду) */
-    .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
-        gap: 6px !important;
-    }
-    @media (min-width: 640px) {
-        .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
-            gap: 12px !important;
-        }
-    }
-    @media (min-width: 768px) {
-        .product-grid, [id*="dynamicHomeBlocksContainer"] .grid, #glassAccordion .grid {
-            gap: 20px !important;
-        }
-    }
-
-    .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
-    section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
-    .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
-    
-    /* --- ЗАТЕМНЕННЯ ФОТО ДЛЯ ЧИТАБЕЛЬНОСТІ ТЕКСТУ --- */
-    .glass-panel-item .panel-overlay {
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%) !important;
-        opacity: 1 !important;
-    }
-
-    /* --- КАРТКИ ТОВАРІВ (Строга сітка, фіксовані пропорції) --- */
-    .product-card {
-        border: 1px solid #e5e5e5 !important;
-        box-shadow: none !important;
-        background-color: #fff !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    [data-theme="dark"] .product-card { 
-        border-color: #262626 !important; 
-        background-color: #161616 !important; 
-    }
-    
-    /* Стабільні пропорції фотографій у картках товарів */
-    .product-card .aspect-\[4\/5\], 
-    .product-card .aspect-square, 
-    .product-card .product-img-wrap {
-        aspect-ratio: 4 / 5 !important;
-        width: 100% !important;
-        position: relative;
-        overflow: hidden;
-        background: #F7F7F7 !important;
-    }
-    [data-theme="dark"] .product-card .aspect-\[4\/5\], 
-    [data-theme="dark"] .product-card .aspect-square, 
-    [data-theme="dark"] .product-card .product-img-wrap {
-        background: #1a1a1a !important;
-    }
-
-    .product-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-    }
-    
-    .product-card .p-2, .product-card .p-2\.5, .product-card .p-3 { 
-        padding: 6px 8px !important; 
-    }
-    @media (min-width: 640px) {
-        .product-card .p-2, .product-card .p-2\.5, .product-card .p-3 { 
-            padding: 12px !important; 
-        }
-    }
-    .product-card h3, .product-card h4, .product-card span { line-height: 1.2; }
-
-    /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
-    @media (max-width: 1024px) {
-        #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
-        .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
-    }
-
-    /* Кнопка нагору */
-    #scrollToTopBtn { left: 1rem !important; right: auto !important; }
-    @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
-    
-    /* Футер колонки для моб */
-    .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
-    @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
-
-    /* Бокове меню: компактна верхівка */
-    .side-menu { padding-top: 16px !important; }
-    .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
-    .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
-
-    /* --- АБСОЛЮТНО ПЛАВНИЙ FADE-ПЕРЕХІД ДЛЯ БАНЕРІВ --- */
-    .banner-fade-container {
-        position: relative !important;
-        display: block !important;
-        overflow: hidden !important;
-        width: 100% !important;
-    }
-    .banner-fade-container > * {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        opacity: 0 !important;
-        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        pointer-events: none !important;
-        z-index: 1 !important;
-    }
-    .banner-fade-container > *.banner-active {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        z-index: 2 !important;
-    }
-
-    /* Стилі індикаторів банерів */
-    .banner-dot {
-        width: 24px;
-        height: 2px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border: none;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        border-radius: 0 !important;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-    }
-    .banner-dot.active {
-        background-color: var(--gold-muted, #c5a059);
-        width: 44px;
-        box-shadow: 0 0 10px rgba(197, 160, 89, 0.7);
-    }
-
-    /* --- ПРЕМІАЛЬНИЙ ГОРИЗОНТАЛЬНИЙ СКРОЛ КАТЕГОРІЙ --- */
-    #homeCategoriesScroll {
-        display: flex;
-        align-items: center;
-        gap: 0 !important;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        padding: 8px 0;
-        scroll-behavior: smooth;
-        color: var(--text-main, #755712) !important;
-    }
-
-    [data-theme="dark"] #homeCategoriesScroll {
-        color: var(--text-main, #755712) !important;
-    }
-
-    #homeCategoriesScroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    .category-group {
-        display: flex;
-        align-items: center;
-        position: relative;
-        flex-shrink: 0;
-    }
-
-    .category-group:not(:last-child)::after {
-        content: "" !important;
-        position: absolute !important;
-        right: 0 !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        width: 1px !important;
-        height: 14px !important;
-        background-color: var(--border, #cbd5e1) !important;
-        transition: opacity 0.3s ease;
-    }
-
-    [data-theme="dark"] .category-group:not(:last-child)::after {
-        background-color: #3f3f46 !important;
-    }
-
-    .main-category {
-        background: transparent !important;
-        border: none !important;
-        padding: 6px 18px !important;
-        color: #755712 !important;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: color 0.2s ease;
-    }
-
-    [data-theme="dark"] .main-category {
-        color: var(--text-main, #f3f4f6) !important;
-    }
-
-    .subcategories-container {
-        display: flex;
-        align-items: center;
-        max-width: 0;
-        opacity: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-    }
-
-    .sub-category {
-        background: transparent !important;
-        border: none !important;
-        padding: 6px 12px !important;
-        color: var(--text-main, #2c2a29) !important;
-        font-size: 12px;
-        font-weight: 400;
-        opacity: 0.8;
-        cursor: pointer;
-        white-space: nowrap;
-        text-decoration: none;
-        transition: color 0.2s ease, opacity 0.2s ease;
-    }
-
-    [data-theme="dark"] .sub-category {
-        color: var(--text-main, #f3f4f6) !important;
-        opacity: 0.7;
-    }
-
-    @media (hover: hover) {
-        .category-group:hover .subcategories-container {
-            max-width: 800px;
-            opacity: 1;
-        }
-    }
-
-    .category-group.active .subcategories-container {
-        max-width: 800px;
-        opacity: 1;
-    }
-
-    .main-category:hover, .sub-category:hover {
-        color: var(--gold-muted, #c5a059) !important;
-    }
 
 
 
-
-/* Примусово робимо рівно 2 колонки на мобільних для всіх сіток у цих контейнерах */
-#dynamicHomeBlocksContainer .grid, 
-#glassAccordion .grid,
-#dynamicHomeBlocksContainer div[class*="grid"], 
-#glassAccordion div[class*="grid"] {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-}
-
-@media (min-width: 640px) {
-    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
-    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 12px !important;
-    }
-}
-
-@media (min-width: 768px) {
-    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
-    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-    }
-}
-
-@media (min-width: 1024px) {
-    #dynamicHomeBlocksContainer .grid, #glassAccordion .grid,
-    #dynamicHomeBlocksContainer div[class*="grid"], #glassAccordion div[class*="grid"] {
-        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-        gap: 20px !important;
-    }
-}
-
-
-
-/* Жорстке перенаправлення для будь-яких сіток, що створюються JS у цих контейнерах */
-#dynamicHomeBlocksContainer div[class*="grid-cols-"],
-#glassAccordion div[class*="grid-cols-"] {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-}
-
-@media (min-width: 640px) {
-    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
-    #glassAccordion div[class*="grid-cols-"] {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 12px !important;
-    }
-}
-
-@media (min-width: 768px) {
-    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
-    #glassAccordion div[class*="grid-cols-"] {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 16px !important;
-    }
-}
-
-@media (min-width: 1024px) {
-    #dynamicHomeBlocksContainer div[class*="grid-cols-"],
-    #glassAccordion div[class*="grid-cols-"] {
-        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-        gap: 20px !important;
-    }
-}
-
-
-    /* Плавний інерційний скролл без ривків та приклеек */
-.promo-horizontal-scroll {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: none !important; /* Повне видалення прилипань/сніпів */
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Приховуємо скроллбар для Firefox */
-    -ms-overflow-style: none; /* Приховуємо для IE/Edge */
-    position: relative;
-    /* М'які градієнтні краї-індикатори по боках, що сигналізують про наявність контенту */
-    mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
-}
-
-.promo-horizontal-scroll::-webkit-scrollbar {
-    display: none; /* Приховуємо скроллбар для Chrome/Safari */
-}
-
-/* Обгортка для внутрішніх елементів слайдера */
-.promo-track {
-    display: flex;
-    gap: 12px; /* Або ваш відступ між картками */
-    will-change: transform;
-}
-
-
-/* Повна плавний інерційний скролл без будь-яких сніпів */
-.promo-horizontal-scroll {
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: none !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    position: relative;
-    /* М'які градієнтні краї, що підказують про наявність контенту */
-    mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-}
-
-.promo-horizontal-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-/* Жорстко забороняємо дочірнім елементам прилипати до країв */
-.promo-horizontal-scroll *, 
-.promo-horizontal-scroll > * {
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-    flex-shrink: 0;
-}
-
-.promo-track {
-    display: flex;
-    gap: 12px;
-    will-change: transform;
-}
-
-
-
-/* Ізольований горизонтальний скрол без жодних ривків і прилипань */
-.promo-horizontal-scroll {
-    display: flex !important;
-    overflow-x: auto !important;
-    scroll-snap-type: none !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-    position: relative;
-    width: 100%;
-    /* М'які затінення по боках для розуміння скролу */
-    mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
-}
-
-.promo-horizontal-scroll::-webkit-scrollbar {
-    display: none !important;
-}
-
-/* Гарантовано прибираємо прилипання для всіх внутрішніх елементів */
-.promo-horizontal-scroll *, 
-.promo-horizontal-scroll > * {
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-    flex-shrink: 0 !important;
-}
-
-.promo-track {
-    display: flex !important;
-    gap: 10px !important;
-    will-change: transform;
-}
-
-/* Абсолютне блокування будь-якого сніпу та прилипань для каруселі та всього її вмісту */
-.promo-horizontal-scroll,
-.promo-horizontal-scroll * {
+/* Повне викорінення скролл-снэпу для абсолютно всіх елементів на сторінці */
+html, body, *, *::before, *::after {
     scroll-snap-type: none !important;
     scroll-snap-align: none !important;
     scroll-snap-stop: normal !important;
-    touch-action: pan-x !important; /* Дозволяє плавний горизонтальний жест без перехоплення */
-}
-
-.promo-horizontal-scroll {
-    display: flex !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-    position: relative;
-    width: 100%;
-}
-
-.promo-horizontal-scroll::-webkit-scrollbar {
-    display: none !important;
-}
-
-.promo-track {
-    display: flex !important;
-    gap: 10px !important;
-    will-change: transform;
+    scroll-padding: 0 !important;
+    scroll-margin: 0 !important;
 }
 
 
-
-/* Жорстке скасування сніпів, прилипань та штучних анімацій */
-.promo-horizontal-scroll,
-.promo-horizontal-scroll * {
-    scroll-snap-type: none !important;
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-    scroll-behavior: auto !important; /* Гарантує миттєве зміщення scrollLeft без ривків */
-    touch-action: pan-x pan-y !important;
-}
-
-/* Контейнер горизонтальної каруселі */
 .promo-horizontal-scroll {
     display: flex !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important; /* Нативна інерція iOS/Android */
-    scrollbar-width: none !important;             /* Приховування скроллбара Firefox */
-    -ms-overflow-style: none !important;          /* Приховування скроллбара IE/Edge */
-    position: relative;
-    width: 100%;
-    
-    /* М'які маски-градієнти по боках для індикації продовження контенту */
-    mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-}
-
-.promo-horizontal-scroll::-webkit-scrollbar {
-    display: none !important; /* Приховування скроллбара Chrome/Safari */
-}
-
-/* Внутрішній трек із картками */
-.promo-track {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 12px !important;
-    will-change: scroll-position;
-}
-
-.promo-track > * {
-    flex-shrink: 0 !important;
-}
-
-
-/* Контейнер-маска для карусели */
-.promo-carousel-wrapper {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    touch-action: pan-y; /* Разрешает вертикальный скролл страницы, фиксируя горизонт */
-    user-select: none;
-    -webkit-user-select: none;
-    mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
-}
-
-/* Движущаяся дорожка */
-.promo-carousel-track {
-    display: flex !important;
-    gap: 12px !important;
-    width: max-content !important;
-    will-change: transform;
+    scroll-behavior: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     cursor: grab;
+    user-select: none;
 }
 
-.promo-carousel-track:active {
+.promo-horizontal-scroll:active {
     cursor: grabbing;
 }
 
-.promo-carousel-track > * {
-    flex-shrink: 0 !important;
+.promo-horizontal-scroll::-webkit-scrollbar {
+    display: none !important;
 }
+
 </style>
 
 </head>
@@ -720,7 +260,7 @@
     </section>
 
     <!-- Горизонтальний скрол категорій -->
-    <section class="w-full bg-[var(--bg-main,#fff)] dark:bg-[var(--bg-card,#121212)] py-2.5 border-b border-[var(--border,#f5f5f5)] transition-colors duration-300 mb-6">
+    <section class="w-full  py-2.5 border-b border-[var(--border,#f5f5f5)] transition-colors duration-300 mb-6">
         <div class="max-w-7xl mx-auto px-2 sm:px-4">
             <div id="homeCategoriesScroll" class="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth py-1">
                 <!-- Динамічний контент категорій -->
@@ -730,8 +270,7 @@
 
     <!-- Динамічні блоки товарів із захищеною сіткою (grid-cols-2 або більше на вузьких екранах із мінімальними відступами) -->
     <!-- Оновлені контейнери для динамічних блоків і каталогу -->
-<div id="dynamicHomeBlocksContainer" class="space-y-10 mb-12 [&_.grid]:!grid-cols-2 [&_.grid]:sm:!grid-cols-3 [&_.grid]:md:!grid-cols-4 [&_.grid]:lg:!grid-cols-5 [&_.grid]:gap-2 [&_.grid]:sm:gap-4"></div>
-        
+<div id="dynamicHomeBlocksContainer" class="space-y-10 mb-12 [&_.grid:not(.promo-horizontal-scroll)]:!grid-cols-2 [&_.grid:not(.promo-horizontal-scroll)]:sm:!grid-cols-3 [&_.grid:not(.promo-horizontal-scroll)]:md:!grid-cols-4 [&_.grid:not(.promo-horizontal-scroll)]:lg:!grid-cols-5 [&_.grid:not(.promo-horizontal-scroll)]:gap-2 [&_.grid:not(.promo-horizontal-scroll)]:sm:gap-4"></div>
     <!-- Каталог / Акорд на головній -->
     <section class="max-w-[1920px] mx-auto px-0 md:px-4 py-6 md:py-16" id="categories-section">
         <div class="text-center mb-8 md:mb-12">
@@ -1331,6 +870,165 @@ function initInfiniteHorizontalScroll() {
         }, { passive: true });
     });
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Даємо невелику паузу (300мс), щоб SPA встиг згенерувати та відмалювати картки товарів у DOM
+    setTimeout(() => {
+        const slider = document.querySelector('.promo-horizontal-scroll');
+        if (slider) {
+            slider.scrollLeft = 24; // Змініть це число (в пікселях), якщо потрібно зробити край ширшим або вужчим
+        }
+    }, 300);
+});
+(function() {
+    const shiftCarousel = () => {
+        const slider = document.querySelector('.promo-horizontal-scroll');
+        if (slider && slider.children.length > 0) {
+            // Зміщуємо скрол на 18 пікселів, щоб з'явився край наступної картки
+            slider.scrollLeft = 18;
+            return true;
+        }
+        return false;
+    };
+
+    // Перевіряємо готовність елемента в циклі, оскільки контент генерується динамічно через JS
+    const interval = setInterval(() => {
+        if (shiftCarousel()) {
+            clearInterval(interval);
+        }
+    }, 50);
+
+    // Страховка на випадок затримок мережі
+    setTimeout(() => clearInterval(interval), 4000);
+})();
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.querySelector('.promo-horizontal-scroll');
+    if (!slider) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    // 1. Прокрутка колесиком мыши на ПК (конвертация вертикали в горизонталь)
+    slider.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            slider.scrollBy({
+                left: e.deltaY * 1.8,
+                behavior: 'smooth'
+            });
+        }
+    }, { passive: false });
+
+    // 2. Перетаскивание мышью (Drag-to-scroll)
+    slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        slider.style.cursor = 'grabbing';
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        isDown = false;
+        slider.style.cursor = 'grab';
+    });
+
+    slider.addEventListener('mouseup', () => {
+        isDown = false;
+        slider.style.cursor = 'grab';
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2; // Коэффициент скорости перемещения
+        slider.scrollLeft = scrollLeft - walk;
+    });
+
+    // 3. Бесшовное бесконечное зацикливание
+    slider.addEventListener('scroll', () => {
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        if (maxScroll <= 0) return;
+
+        // Если доскролили до самого конца вправо, незаметно возвращаем в начало
+        if (slider.scrollLeft >= maxScroll - 2) {
+            slider.scrollLeft = 2;
+        } 
+        // Если уперлись влево, перебрасываем в конец
+        else if (slider.scrollLeft <= 0) {
+            slider.scrollLeft = maxScroll - 2;
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.querySelector('.promo-horizontal-scroll');
+    if (!slider) return;
+
+    // 1. Конвертация колесика мыши в горизонтальный скролл на ПК
+    slider.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            slider.scrollBy({
+                left: e.deltaY * 1.8,
+                behavior: 'smooth'
+            });
+        }
+    }, { passive: false });
+
+    // 2. Бесшовное кольцевое зацикливание при скролле
+    slider.addEventListener('scroll', () => {
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        if (maxScroll <= 0) return;
+
+        if (slider.scrollLeft >= maxScroll - 2) {
+            slider.scrollLeft = 2;
+        } else if (slider.scrollLeft <= 0) {
+            slider.scrollLeft = maxScroll - 2;
+        }
+    });
+
+    // 3. Управление кнопками .btn-cross (правая и левая стрелки)
+    const nextBtn = document.querySelector('.btn-cross.right-2, .btn-cross[class*="right-"]');
+    const prevBtn = document.querySelector('.btn-cross.left-2, .btn-cross[class*="left-"]');
+
+    const getScrollStep = () => {
+        const firstCard = slider.querySelector('.product-card, > *');
+        return firstCard ? firstCard.offsetWidth + 16 : 300; // Ширина карточки + отступ
+    };
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            const step = getScrollStep();
+            const maxScroll = slider.scrollWidth - slider.clientWidth;
+            
+            // Если дошли до конца, циклично перескакиваем в начало
+            if (slider.scrollLeft + step >= maxScroll - 10) {
+                slider.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                slider.scrollBy({ left: step, behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            const step = getScrollStep();
+            
+            // Если находимся в начале, циклично перескакиваем в конец
+            if (slider.scrollLeft <= 10) {
+                slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
+            } else {
+                slider.scrollBy({ left: -step, behavior: 'smooth' });
+            }
+        });
+    }
+});
     </script>
 
     

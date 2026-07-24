@@ -48,6 +48,7 @@ const API = {
         }
     }
 };
+
 // ==========================================
 // 12. ГЛОБАЛЬНИЙ UI ТА НАВІГАЦІЯ
 // ==========================================
@@ -409,9 +410,71 @@ window.deleteProductFromDB = async function(productId) {
     }
 };
 
+
+
 // ==========================================
 // 4. СТАН ТА СИНХРОНІЗАЦІЯ
 // ==========================================
+
+const sunIconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>';
+const moonIconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+
+function updateThemeIcon(isDark) {
+    const iconEl = document.getElementById('themeIcon');
+    if (!iconEl) return;
+    
+    iconEl.setAttribute('fill', 'none');
+    iconEl.setAttribute('stroke', 'currentColor');
+    iconEl.innerHTML = isDark ? sunIconSvg : moonIconSvg;
+}
+
+function getTargetTheme() {
+    try {
+        const saved = localStorage.getItem('theme');
+        if (saved) return saved;
+    } catch (e) {}
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcon(theme === 'dark');
+}
+
+// Ручное переключение по кнопке (сохраняет выбор навсегда)
+window.toggleTheme = function() {
+    const current = document.documentElement.getAttribute('data-theme') || getTargetTheme();
+    const nextTheme = current === 'dark' ? 'light' : 'dark';
+    
+    try {
+        localStorage.setItem('theme', nextTheme);
+    } catch (e) {}
+    
+    applyTheme(nextTheme);
+};
+
+// Синхронизация иконки при загрузке DOM
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme(getTargetTheme());
+});
+
+// Защита от сброса темы при динамической отрисовке страниц SPA
+const themeGuard = new MutationObserver(() => {
+    const targetTheme = getTargetTheme();
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme !== targetTheme) {
+        document.documentElement.setAttribute('data-theme', targetTheme);
+    }
+});
+
+themeGuard.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+});
+
+
+
 function getCurrentUser() { return API.get('bv_current_user', null); }
 function getScopedStorageKey(baseKey) {
     const currentUser = getCurrentUser();
@@ -1036,6 +1099,7 @@ window.renderProductCard = function(prod) {
         </div>
     `;
 };
+
 
 window.addToCartById = function(id) {
     const allProducts = window.products || API.get('bv_products', []);

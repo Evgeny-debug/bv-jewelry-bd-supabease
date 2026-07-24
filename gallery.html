@@ -21,7 +21,15 @@
     <title>Галерея робіт | BV Jewelry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-
+<script>
+         (function() {
+        try {
+            const saved = localStorage.getItem('theme');
+            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+    })();
+    </script>
     <style>
         
         /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */

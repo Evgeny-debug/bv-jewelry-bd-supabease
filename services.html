@@ -18,16 +18,14 @@
     <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
     
     <script>
-        (function initThemeBeforePaint() {
-            try {
-                const savedTheme = JSON.parse(localStorage.getItem('bv_theme'));
-                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        })();
-    </script>
+    (function() {
+        try {
+            const saved = localStorage.getItem('theme');
+            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+    })();
+</script>
 
     <title>Прайс-лист Послуг | BV Jewelry</title>
     
