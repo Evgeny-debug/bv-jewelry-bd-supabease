@@ -955,7 +955,7 @@ function checkUserIsLogged() {
 }
 
 // ==========================================
-// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК ОБРАНОГО ЗА ONCLICK
+// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК (З АВТОМАТИЧНИМ SPА-СПОСТЕРЕЖЕННЯМ)
 // ==========================================
 
 window.updateFavoriteIcons = function() {
@@ -967,7 +967,6 @@ window.updateFavoriteIcons = function() {
         el.classList.remove('text-red-500', 'text-[var(--danger)]', 'active', 'fill-current');
         el.classList.add('text-[var(--text-muted)]');
         
-        // Знаходимо SVG та всі його шляхи
         const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
         svgs.forEach(svg => {
             svg.setAttribute('fill', 'none');
@@ -983,7 +982,6 @@ window.updateFavoriteIcons = function() {
         document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
             const onclickAttr = el.getAttribute('onclick') || '';
             
-            // Перевіряємо, чи викликає цей елемент toggleFav саме для цього ID
             if (onclickAttr.includes(`toggleFav('${id}')`) || 
                 onclickAttr.includes(`toggleFav("${id}")`) || 
                 onclickAttr.includes(`toggleFav(${id})`)) {
@@ -1004,7 +1002,30 @@ window.updateFavoriteIcons = function() {
     });
 };
 
-// Автозапуск при завантаженні та зміні історії
+// Автоматичний стеж за появою нових карток у SPA
+if (!window._favObserverInitialized) {
+    window._favObserverInitialized = true;
+    
+    const observer = new MutationObserver((mutations) => {
+        let hasNewNodes = false;
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+                hasNewNodes = true;
+                break;
+            }
+        }
+        if (hasNewNodes) {
+            // Коротка затримка, щоб дочекатися завершення рендеру розмітки
+            setTimeout(window.updateFavoriteIcons, 30);
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
 window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
 
