@@ -962,13 +962,11 @@ window.updateFavoriteIcons = function() {
     const rawFavs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
     const favs = rawFavs.map(String);
     
-    // Шукаємо кнопки за вашим атрибутом data-id всередині карток
+    // Проходимо по всіх кнопках обраного, які мають data-id
     document.querySelectorAll('button[data-id]').forEach(btn => {
-        // Перевіряємо, чи це саме кнопка обраного (має виклик handleFavClick або SVG-серце)
-        const onclickAttr = btn.getAttribute('onclick') || '';
-        const hasHeartSvg = btn.querySelector('svg path[d*="M20.84"]') || btn.querySelector('svg');
-        
-        if (!onclickAttr.includes('Fav') && !hasHeartSvg) return;
+        const onclick = btn.getAttribute('onclick') || '';
+        // Перевіряємо, чи це дійсно кнопка обраного (містить handleFavClick або toggleFav)
+        if (!onclick.includes('Fav')) return;
 
         const prodId = String(btn.getAttribute('data-id'));
         const isFav = favs.includes(prodId);
@@ -976,56 +974,45 @@ window.updateFavoriteIcons = function() {
         const path = svg ? svg.querySelector('path') : null;
 
         if (isFav) {
-            // Активний стан (у вибраному)
-            btn.classList.remove('text-[#888]', 'text-[#aaa]');
+            // Фарбуємо в червоний з найвищим пріоритетом (!important)
+            btn.classList.remove('text-[#888]', 'text-[#aaa]', 'dark:text-[#aaa]');
             btn.classList.add('text-red-500');
+            btn.style.setProperty('color', '#ef4444', 'important');
             
             if (svg) {
                 svg.setAttribute('fill', 'currentColor');
-                svg.style.fill = 'currentColor';
+                svg.style.setProperty('fill', 'currentColor', 'important');
             }
             if (path) {
                 path.setAttribute('fill', 'currentColor');
-                path.style.fill = 'currentColor';
+                path.style.setProperty('fill', 'currentColor', 'important');
             }
         } else {
-            // Неактивний стан (не у вибраному)
+            // Повертаємо сірий колір та видаляємо заливку
             btn.classList.remove('text-red-500');
-            btn.classList.add('text-[#888]');
+            btn.style.removeProperty('color');
             
             if (svg) {
                 svg.setAttribute('fill', 'none');
-                svg.style.fill = 'none';
+                svg.style.setProperty('fill', 'none', 'important');
             }
             if (path) {
-                path.removeAttribute('fill');
-                path.style.fill = 'none';
+                path.setAttribute('fill', 'none');
+                path.style.setProperty('fill', 'none', 'important');
             }
         }
     });
 };
 
-// Автоматичне стеження за появою карток у SPA
+// Автоматичне спостереження за новими картками у SPA
 if (!window._favObserverInitialized) {
     window._favObserverInitialized = true;
-    
     const observer = new MutationObserver((mutations) => {
-        let hasNewNodes = false;
-        for (const mutation of mutations) {
-            if (mutation.addedNodes.length > 0) {
-                hasNewNodes = true;
-                break;
-            }
-        }
-        if (hasNewNodes) {
+        if (mutations.some(m => m.addedNodes.length > 0)) {
             setTimeout(window.updateFavoriteIcons, 30);
         }
     });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
@@ -1172,6 +1159,16 @@ window.handleFavClick = function(id) {
     
     if (typeof window.toggleFav === 'function') {
         window.toggleFav(id);
+    }
+
+    // ВІДРАЗУ ОНОВЛЮЄМО ІКОНКИ НА СТОРІНЦІ ПІСЛЯ КЛИКУ
+    if (typeof window.updateFavoriteIcons === 'function') {
+        window.updateFavoriteIcons();
+    }
+    
+    // Оновлення віджета/шухляди обраного, якщо є
+    if (typeof window.renderFavDrawer === 'function') {
+        window.renderFavDrawer();
     }
 };
 
@@ -3441,167 +3438,3 @@ document.addEventListener('DOMContentLoaded', () => {
         window.injectAuthModal();
     }
 });
-
-
-
-
-
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// window.toggleFavorite = function(productId, element) {
-//     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-//     const index = favorites.indexOf(productId);
-    
-//     let isFav = false;
-//     if (index > -1) {
-//         favorites.splice(index, 1);
-//         isFav = false;
-//     } else {
-//         favorites.push(productId);
-//         isFav = true;
-//     }
-//     localStorage.setItem('favorites', JSON.stringify(favorites));
-
-//     // Розширені селектори для точного знаходження іконки чи кнопки на будь-якій картці
-//     const targetElements = document.querySelectorAll(`
-//         [data-product-id="${productId}"] .fav-icon, 
-//         [data-product-id="${productId}"] .fav-btn, 
-//         [data-id="${productId}"] .fav-btn, 
-//         .fav-btn-${productId},
-//         [data-product-id="${productId}"] svg,
-//         [data-id="${productId}"] svg
-//     `);
-    
-//     targetElements.forEach(btn => {
-//         if (isFav) {
-//             btn.classList.add('active', 'text-[var(--danger)]', 'fill-current');
-//             btn.style.fill = 'var(--danger)';
-//         } else {
-//             btn.classList.remove('active', 'text-[var(--danger)]', 'fill-current');
-//             btn.style.fill = 'none';
-//         }
-//     });
-
-//     // Примусово синхронізуємо стан усіх іконок на сторінці
-//     if (typeof window.updateFavoriteIcons === 'function') {
-//         window.updateFavoriteIcons();
-//     }
-
-//     // Оновлюємо лічильники в шапці/футері
-//     if (typeof window.updateCounters === 'function') {
-//         window.updateCounters();
-//     }
-// };
-
-
-
-
-
-
-
-
-
-
-// /// 1. Універсальна функція для оновлення підсвічування всіх сердечок на сторінці
-// window.updateFavoriteIcons = function() {
-//     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    
-//     // Спочатку знімаємо підсвічування з усього
-//     document.querySelectorAll('.fav-icon, .fav-btn').forEach(btn => {
-//         btn.classList.remove('active', 'text-[var(--danger)]', 'fill-current');
-//         btn.style.fill = '';
-//     });
-    
-//     // Підсвічуємо те, що є в обраному
-//     favorites.forEach(productId => {
-//         const targetElements = document.querySelectorAll(`[data-product-id="${productId}"] .fav-icon, [data-id="${productId}"] .fav-btn, .fav-btn-${productId}, [data-product-id="${productId}"] .fav-btn`);
-//         targetElements.forEach(btn => {
-//             btn.classList.add('active', 'text-[var(--danger)]', 'fill-current');
-//             btn.style.fill = 'var(--danger)';
-//         });
-//     });
-// };
-
-// // Запускаємо при завантаженні та при зміні SPA-сторінок
-// document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
-// window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
-
-// // Якщо у вас є функція додавання в обране, викликайте в ній window.updateFavoriteIcons() одразу після зміни localStorage!
-
-
-// // 2. Виправлена та надійна функція відкриття шторки обраного
-// window.toggleFavDrawer = async function() {
-//     // Перевіряємо всі можливі ключі авторизації (включно з Supabase та кастомними)
-//     let isLogged = false;
-    
-//     if (localStorage.getItem('user') || localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('auth')) {
-//         isLogged = true;
-//     } else {
-//         // Шукаємо будь-який ключ Supabase або сесії в localStorage
-//         for (let i = 0; i < localStorage.length; i++) {
-//             const key = localStorage.key(i);
-//             if (key && (key.includes('auth') || key.includes('token') || key.includes('sb-'))) {
-//                 const val = localStorage.getItem(key);
-//                 if (val && val.length > 5) {
-//                     isLogged = true;
-//                     break;
-//                 }
-//             }
-//         }
-//     }
-
-//     // Додаткова перевірка через клієнт Supabase, якщо він є
-//     const supabaseClient = window._supabase || window.supabase;
-//     if (!isLogged && supabaseClient && supabaseClient.auth) {
-//         try {
-//             const { data } = await supabaseClient.auth.getSession();
-//             if (data && data.session) {
-//                 isLogged = true;
-//             }
-//         } catch (e) {
-//             console.error('Помилка сесії:', e);
-//         }
-//     }
-
-//     // Якщо користувач вже додавав товари в обране — він точно має доступ до перегляду
-//     const favoritesCheck = JSON.parse(localStorage.getItem('favorites') || '[]');
-//     if (favoritesCheck.length > 0) {
-//         isLogged = true;
-//     }
-
-//     // Якщо все ще не визначено як залогінений — відкриваємо вікно входу
-//     if (!isLogged) {
-//         if (typeof window.openAuthModal === 'function') {
-//             window.openAuthModal();
-//         } else if (typeof window.toggleAuthModal === 'function') {
-//             window.toggleAuthModal();
-//         } else {
-//             console.warn('Модальне вікно авторизації не знайдено');
-//         }
-//         return;
-//     }
-
-//     // Відкриваємо / закриваємо шторку улюбленого
-//     const drawer = document.getElementById('favDrawer');
-//     const overlay = document.getElementById('favOverlay');
-//     if (!drawer) return;
-    
-//     // Оновлюємо іконки перед відкриттям
-//     window.updateFavoriteIcons();
-
-//     if (!drawer.classList.contains('active')) {
-//         if (typeof window.renderFavDrawer === 'function') {
-//             window.renderFavDrawer();
-//         }
-//         drawer.classList.add('active'); 
-//         if (overlay) overlay.classList.add('active');
-//         document.body.style.overflow = 'hidden';
-//     } else {
-//         drawer.classList.remove('active'); 
-//         if (overlay) overlay.classList.remove('active');
-//         if (!document.getElementById('sideMenu')?.classList.contains('active')) {
-//             document.body.style.overflow = '';
-//         }
-//     }
-// };
