@@ -954,44 +954,57 @@ function checkUserIsLogged() {
     return isLogged;
 }
 
-// Універсальна функція оновлення іконок підсвічування сердечок
+// ==========================================
+// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК ОБРАНОГО ЗА ONCLICK
+// ==========================================
+
 window.updateFavoriteIcons = function() {
-    const favs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
+    const rawFavs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
+    const favs = rawFavs.map(String);
     
-    // Повне скидання стану всіх сердечок на сторінці
-    document.querySelectorAll('.fav-btn, .fav-icon, [data-fav-id], .fav-btn-inline').forEach(btn => {
-        btn.classList.remove('text-red-500', 'text-[var(--danger)]', 'active', 'fill-current');
-        btn.classList.add('text-[var(--text-muted)]');
-        const svg = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
-        if (svg) {
+    // 1. Повністю скидаємо стан усіх сердечок на сторінці
+    document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
+        el.classList.remove('text-red-500', 'text-[var(--danger)]', 'active', 'fill-current');
+        el.classList.add('text-[var(--text-muted)]');
+        
+        // Знаходимо SVG та всі його шляхи
+        const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
+        svgs.forEach(svg => {
             svg.setAttribute('fill', 'none');
             svg.style.fill = 'none';
-        }
+            svg.querySelectorAll('path').forEach(path => {
+                path.removeAttribute('fill');
+            });
+        });
     });
 
-    // Підсвічування обраних товарів
+    // 2. Підсвічуємо лише ті, які є в обраному за їхнім ID в onclick
     favs.forEach(id => {
-        const targetElements = document.querySelectorAll(`
-            [data-fav-id="${id}"],
-            [data-id="${id}"] .fav-btn, 
-            [data-id="${id}"] .fav-icon, 
-            [data-product-id="${id}"] .fav-btn, 
-            [data-product-id="${id}"] .fav-icon,
-            .fav-btn-${id}
-        `);
-        
-        targetElements.forEach(btn => {
-            btn.classList.add('text-red-500', 'active', 'fill-current');
-            btn.classList.remove('text-[var(--text-muted)]');
-            const svg = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
-            if (svg) {
-                svg.setAttribute('fill', 'currentColor');
-                svg.style.fill = 'currentColor';
+        document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
+            const onclickAttr = el.getAttribute('onclick') || '';
+            
+            // Перевіряємо, чи викликає цей елемент toggleFav саме для цього ID
+            if (onclickAttr.includes(`toggleFav('${id}')`) || 
+                onclickAttr.includes(`toggleFav("${id}")`) || 
+                onclickAttr.includes(`toggleFav(${id})`)) {
+                
+                el.classList.add('text-red-500', 'active', 'fill-current');
+                el.classList.remove('text-[var(--text-muted)]');
+                
+                const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
+                svgs.forEach(svg => {
+                    svg.setAttribute('fill', 'currentColor');
+                    svg.style.fill = 'currentColor';
+                    svg.querySelectorAll('path').forEach(path => {
+                        path.setAttribute('fill', 'currentColor');
+                    });
+                });
             }
         });
     });
 };
 
+// Автозапуск при завантаженні та зміні історії
 document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
 window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
 
