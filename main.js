@@ -919,39 +919,131 @@ window.renderCart = function() {
     }
 };
 
-window.toggleFavDrawer = function() {
+// 1. Універсальна функція оновлення іконок підсвічування сердечок
+window.updateFavoriteIcons = function() {
+    const favs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    // Скидаємо стан усіх іконок на сторінці
+    document.querySelectorAll('.fav-btn-inline, [data-id] .fav-btn, [data-product-id] .fav-btn, [data-product-id] .fav-icon, [data-id] .fav-icon').forEach(btn => {
+        btn.classList.remove('text-[var(--danger)]', 'text-red-500', 'active', 'fill-current');
+        btn.classList.add('text-[var(--text-muted)]');
+        const icon = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
+        if (icon) icon.setAttribute('fill', 'none');
+        btn.style.fill = 'none';
+    });
+
+    // Підсвічуємо те, що є в обраному
+    favs.forEach(id => {
+        const targetElements = document.querySelectorAll(`
+            .fav-btn-inline[data-id="${id}"], 
+            [data-id="${id}"] .fav-btn, 
+            [data-product-id="${id}"] .fav-btn, 
+            [data-product-id="${id}"] .fav-icon,
+            [data-id="${id}"] .fav-icon,
+            .fav-btn-${id}
+        `);
+        
+        targetElements.forEach(btn => {
+            btn.classList.add('text-red-500', 'active', 'fill-current');
+            btn.classList.remove('text-[var(--text-muted)]');
+            const icon = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
+            if (icon) icon.setAttribute('fill', 'currentColor');
+            btn.style.fill = 'var(--danger)';
+        });
+    });
+};
+
+// Автоматичні слухачі для оновлення іконок
+document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
+window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
+
+window.toggleFav = function(id) {
+    let favs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
+    const idx = favs.indexOf(id);
+    
+    if(idx > -1) {
+        favs.splice(idx, 1);
+    } else {
+        favs.push(id);
+    }
+    
+    if (typeof setFavs === 'function') {
+        setFavs(favs);
+    } else {
+        localStorage.setItem('favorites', JSON.stringify(favs));
+    }
+    
+    window.updateFavoriteIcons();
+    window.renderFavDrawer();
+};
+
+// 2. Надійна функція відкриття шторки улюбленого з перевіркою авторизації
+window.toggleFavDrawer = async function() {
+    let isLogged = false;
+    
+    if (localStorage.getItem('user') || localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('auth')) {
+        isLogged = true;
+    } else {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('auth') || key.includes('token') || key.includes('sb-'))) {
+                const val = localStorage.getItem(key);
+                if (val && val.length > 5) {
+                    isLogged = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    const supabaseClient = window._supabase || window.supabase;
+    if (!isLogged && supabaseClient && supabaseClient.auth) {
+        try {
+            const { data } = await supabaseClient.auth.getSession();
+            if (data && data.session) {
+                isLogged = true;
+            }
+        } catch (e) {
+            console.error('Помилка сесії:', e);
+        }
+    }
+
+    const favoritesCheck = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (favoritesCheck.length > 0) {
+        isLogged = true;
+    }
+
+    if (!isLogged) {
+        if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal();
+        } else if (typeof window.toggleAuthModal === 'function') {
+            window.toggleAuthModal();
+        } else {
+            console.warn('Модальне вікно авторизації не знайдено');
+        }
+        return;
+    }
+
     const drawer = document.getElementById('favDrawer');
     const overlay = document.getElementById('favOverlay');
     if (!drawer) return;
     
+    window.updateFavoriteIcons();
+
     if (!drawer.classList.contains('active')) {
-        window.renderFavDrawer();
-        drawer.classList.add('active'); if(overlay) overlay.classList.add('active');
+        if (typeof window.renderFavDrawer === 'function') {
+            window.renderFavDrawer();
+        }
+        drawer.classList.add('active'); 
+        if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     } else {
-        drawer.classList.remove('active'); if(overlay) overlay.classList.remove('active');
-        if (!document.getElementById('sideMenu')?.classList.contains('active')) document.body.style.overflow = '';
-    }
-};
-
-window.toggleFav = function(id) {
-    let favs = getFavs();
-    const idx = favs.indexOf(id);
-    if(idx > -1) favs.splice(idx, 1); else favs.push(id);
-    setFavs(favs);
-    
-    document.querySelectorAll(`.fav-btn-inline[data-id="${id}"]`).forEach(btn => {
-        const icon = btn.querySelector('svg');
-        if (!icon) return;
-        if(favs.includes(id)) {
-            btn.classList.add('text-[var(--danger)]'); btn.classList.remove('text-[var(--text-muted)]');
-            icon.setAttribute('fill', 'currentColor');
-        } else {
-            btn.classList.remove('text-[var(--danger)]'); btn.classList.add('text-[var(--text-muted)]');
-            icon.setAttribute('fill', 'none');
+        drawer.classList.remove('active'); 
+        if (overlay) overlay.classList.remove('active');
+        if (!document.getElementById('sideMenu')?.classList.contains('active')) {
+            document.body.style.overflow = '';
         }
-    });
-    window.renderFavDrawer();
+    }
 };
 
 window.renderFavDrawer = function() {
@@ -994,10 +1086,6 @@ window.renderFavDrawer = function() {
         `;
     }).join('');
 };
-
-// ==========================================
-// 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
-// ==========================================
 // ==========================================
 // 7. ГЛОБАЛЬНИЙ РЕНДЕР КАРТКИ ТОВАРУ
 // ==========================================
@@ -1149,108 +1237,108 @@ window.addToCartById = function(id) {
     
     window.addToCart(prod.id, name, prod.variant || '', price, img);
 };
-// ==========================================
-// 9. БЕЗКІНЧЕННА БІГУЧА СТРОКА ТА КАРУСЕЛІ
-// ==========================================
-if (!document.getElementById('marquee-fix-styles')) {
-    const style = document.createElement('style');
-    style.id = 'marquee-fix-styles';
-    style.innerHTML = `
-        .marquee-wrapper { width: 100% !important; overflow: hidden !important; background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 20px 0; cursor: grab; user-select: none; display: block !important; position: relative; }
-        #marqueeTrack { display: flex !important; gap: 0px !important; white-space: nowrap; width: max-content; will-change: transform; align-items: center; }
-        .marquee-item { flex-shrink: 0; padding: 0 !important; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-muted); text-decoration: none; display: flex; align-items: center; user-select: none; -webkit-user-drag: none; }
-        .marquee-item::after { content: "•"; margin: 0 25px !important; color: var(--gold-muted); opacity: 0.4; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-    `;
-    document.head.appendChild(style);
-}
+// // ==========================================
+// // 9. БЕЗКІНЧЕННА БІГУЧА СТРОКА ТА КАРУСЕЛІ
+// // ==========================================
+// if (!document.getElementById('marquee-fix-styles')) {
+//     const style = document.createElement('style');
+//     style.id = 'marquee-fix-styles';
+//     style.innerHTML = `
+//         .marquee-wrapper { width: 100% !important; overflow: hidden !important; background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 20px 0; cursor: grab; user-select: none; display: block !important; position: relative; }
+//         #marqueeTrack { display: flex !important; gap: 0px !important; white-space: nowrap; width: max-content; will-change: transform; align-items: center; }
+//         .marquee-item { flex-shrink: 0; padding: 0 !important; font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-muted); text-decoration: none; display: flex; align-items: center; user-select: none; -webkit-user-drag: none; }
+//         .marquee-item::after { content: "•"; margin: 0 25px !important; color: var(--gold-muted); opacity: 0.4; }
+//         .no-scrollbar::-webkit-scrollbar { display: none; }
+//     `;
+//     document.head.appendChild(style);
+// }
 
-function createInertiaScroll(containerSelector, trackSelector, baseSpeed = -0.5) {
-    const container = document.querySelector(containerSelector);
-    const track = document.querySelector(trackSelector);
-    if (!container || !track) return;
+// function createInertiaScroll(containerSelector, trackSelector, baseSpeed = -0.5) {
+//     const container = document.querySelector(containerSelector);
+//     const track = document.querySelector(trackSelector);
+//     if (!container || !track) return;
 
-    let currentX = 0, isDown = false, isDragging = false, startX, velocity = 0, state = 'playing', pauseTimer = null;
-    const content = track.innerHTML;
-    track.innerHTML = content + content + content + content;
+//     let currentX = 0, isDown = false, isDragging = false, startX, velocity = 0, state = 'playing', pauseTimer = null;
+//     const content = track.innerHTML;
+//     track.innerHTML = content + content + content + content;
 
-    track.addEventListener('dragstart', (e) => e.preventDefault());
-    track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
+//     track.addEventListener('dragstart', (e) => e.preventDefault());
+//     track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
 
-    function step() {
-        if (state === 'playing') currentX += baseSpeed;
-        else if (state === 'coasting') {
-            currentX += velocity; velocity *= 0.95; 
-            if (Math.abs(velocity) < 0.2) { state = 'paused'; clearTimeout(pauseTimer); pauseTimer = setTimeout(() => { state = 'playing'; }, 3000); }
-        } 
-        const resetPoint = track.scrollWidth / 4;
-        if (currentX <= -resetPoint) currentX += resetPoint;
-        if (currentX > 0) currentX -= resetPoint;
-        track.style.transform = `translate3d(${currentX}px, 0, 0)`;
-        requestAnimationFrame(step);
-    }
+//     function step() {
+//         if (state === 'playing') currentX += baseSpeed;
+//         else if (state === 'coasting') {
+//             currentX += velocity; velocity *= 0.95; 
+//             if (Math.abs(velocity) < 0.2) { state = 'paused'; clearTimeout(pauseTimer); pauseTimer = setTimeout(() => { state = 'playing'; }, 3000); }
+//         } 
+//         const resetPoint = track.scrollWidth / 4;
+//         if (currentX <= -resetPoint) currentX += resetPoint;
+//         if (currentX > 0) currentX -= resetPoint;
+//         track.style.transform = `translate3d(${currentX}px, 0, 0)`;
+//         requestAnimationFrame(step);
+//     }
 
-    const startDrag = (e) => { isDown = true; isDragging = false; state = 'dragging'; clearTimeout(pauseTimer); startX = (e.pageX || e.touches[0].pageX) - currentX; velocity = 0; container.style.cursor = 'grabbing'; };
-    const endDrag = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; state = 'coasting'; setTimeout(() => { isDragging = false; }, 50); };
-    const moveDrag = (e) => { if (!isDown) return; const x = (e.pageX || e.touches[0].pageX) - startX; if (Math.abs(x - currentX) > 3) isDragging = true; velocity = x - currentX; currentX = x; };
+//     const startDrag = (e) => { isDown = true; isDragging = false; state = 'dragging'; clearTimeout(pauseTimer); startX = (e.pageX || e.touches[0].pageX) - currentX; velocity = 0; container.style.cursor = 'grabbing'; };
+//     const endDrag = () => { if (!isDown) return; isDown = false; container.style.cursor = 'grab'; state = 'coasting'; setTimeout(() => { isDragging = false; }, 50); };
+//     const moveDrag = (e) => { if (!isDown) return; const x = (e.pageX || e.touches[0].pageX) - startX; if (Math.abs(x - currentX) > 3) isDragging = true; velocity = x - currentX; currentX = x; };
 
-    container.addEventListener('mousedown', startDrag); window.addEventListener('mouseup', endDrag); container.addEventListener('mouseleave', endDrag); container.addEventListener('mousemove', moveDrag);
-    container.addEventListener('touchstart', startDrag, {passive: true}); container.addEventListener('touchend', endDrag); container.addEventListener('touchmove', moveDrag, {passive: true});
-    requestAnimationFrame(step);
-}
+//     container.addEventListener('mousedown', startDrag); window.addEventListener('mouseup', endDrag); container.addEventListener('mouseleave', endDrag); container.addEventListener('mousemove', moveDrag);
+//     container.addEventListener('touchstart', startDrag, {passive: true}); container.addEventListener('touchend', endDrag); container.addEventListener('touchmove', moveDrag, {passive: true});
+//     requestAnimationFrame(step);
+// }
 
-window.initMarqueeSim = function() {
-    const track = document.getElementById('marqueeTrack');
-    if (!track) return;
-    const categoriesFlat = API.get('bv_categories_flat', []);
-    const html = categoriesFlat.map(c => `<a href="catalog.html#${c.id}" class="marquee-item">${window.getLoc(c.name)}</a>`).join('');
-    if (html) { track.innerHTML = html; setTimeout(() => { createInertiaScroll('.marquee-wrapper', '#marqueeTrack', -0.5); }, 100); }
-};
+// window.initMarqueeSim = function() {
+//     const track = document.getElementById('marqueeTrack');
+//     if (!track) return;
+//     const categoriesFlat = API.get('bv_categories_flat', []);
+//     const html = categoriesFlat.map(c => `<a href="catalog.html#${c.id}" class="marquee-item">${window.getLoc(c.name)}</a>`).join('');
+//     if (html) { track.innerHTML = html; setTimeout(() => { createInertiaScroll('.marquee-wrapper', '#marqueeTrack', -0.5); }, 100); }
+// };
 
-window.initPremiumCarousel = function(track) {
-    if (!track || track.dataset.init === 'true') return;
-    track.dataset.init = 'true';
+// window.initPremiumCarousel = function(track) {
+//     if (!track || track.dataset.init === 'true') return;
+//     track.dataset.init = 'true';
 
-    let wrapper = track.closest('.group');
-    if (!wrapper) {
-        wrapper = document.createElement('div');
-        wrapper.className = 'relative w-full group outline-none'; 
-        track.parentNode.insertBefore(wrapper, track);
-        wrapper.appendChild(track);
-    }
+//     let wrapper = track.closest('.group');
+//     if (!wrapper) {
+//         wrapper = document.createElement('div');
+//         wrapper.className = 'relative w-full group outline-none'; 
+//         track.parentNode.insertBefore(wrapper, track);
+//         wrapper.appendChild(track);
+//     }
 
-    const btnClass = "btn-cross hidden md:flex absolute top-1/2 -translate-y-1/2 z-40 w-12 h-12 lg:w-14 lg:h-14 items-center justify-center rounded-none bg-[var(--bg-card)]/40 backdrop-blur-md border border-[var(--border)] text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all duration-400 hover:bg-[var(--bg-card)] hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
-    const prevBtn = document.createElement('button'); prevBtn.className = `${btnClass} left-2 lg:left-6`; prevBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>`;
-    const nextBtn = document.createElement('button'); nextBtn.className = `${btnClass} right-2 lg:right-6`; nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>`;
-    wrapper.appendChild(prevBtn); wrapper.appendChild(nextBtn);
+//     const btnClass = "btn-cross hidden md:flex absolute top-1/2 -translate-y-1/2 z-40 w-12 h-12 lg:w-14 lg:h-14 items-center justify-center rounded-none bg-[var(--bg-card)]/40 backdrop-blur-md border border-[var(--border)] text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all duration-400 hover:bg-[var(--bg-card)] hover:border-[var(--gold-muted)] hover:text-[var(--gold-muted)] shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
+//     const prevBtn = document.createElement('button'); prevBtn.className = `${btnClass} left-2 lg:left-6`; prevBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>`;
+//     const nextBtn = document.createElement('button'); nextBtn.className = `${btnClass} right-2 lg:right-6`; nextBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>`;
+//     wrapper.appendChild(prevBtn); wrapper.appendChild(nextBtn);
 
-    track.classList.add('no-scrollbar', 'cursor-grab'); track.classList.remove('snap-x', 'snap-mandatory'); track.style.scrollBehavior = 'auto';
+//     track.classList.add('no-scrollbar', 'cursor-grab'); track.classList.remove('snap-x', 'snap-mandatory'); track.style.scrollBehavior = 'auto';
 
-    let isDown = false, isDragging = false, startX, scrollLeft, lastX, velX = 0, momentumID;
+//     let isDown = false, isDragging = false, startX, scrollLeft, lastX, velX = 0, momentumID;
 
-    track.addEventListener('dragstart', (e) => e.preventDefault());
-    track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
+//     track.addEventListener('dragstart', (e) => e.preventDefault());
+//     track.addEventListener('click', (e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } });
 
-    const momentumLoop = () => {
-        if (isDown) return; track.scrollLeft -= velX; velX *= 0.95; checkInfinite();
-        if (Math.abs(velX) > 0.5) { momentumID = requestAnimationFrame(momentumLoop); } else { track.classList.add('snap-x', 'snap-mandatory'); }
-    };
+//     const momentumLoop = () => {
+//         if (isDown) return; track.scrollLeft -= velX; velX *= 0.95; checkInfinite();
+//         if (Math.abs(velX) > 0.5) { momentumID = requestAnimationFrame(momentumLoop); } else { track.classList.add('snap-x', 'snap-mandatory'); }
+//     };
 
-    const beginMomentum = () => { track.classList.remove('snap-x', 'snap-mandatory'); cancelAnimationFrame(momentumID); momentumID = requestAnimationFrame(momentumLoop); };
+//     const beginMomentum = () => { track.classList.remove('snap-x', 'snap-mandatory'); cancelAnimationFrame(momentumID); momentumID = requestAnimationFrame(momentumLoop); };
 
-    nextBtn.onclick = () => { velX = -25; beginMomentum(); };
-    prevBtn.onclick = () => { velX = 25; beginMomentum(); };
+//     nextBtn.onclick = () => { velX = -25; beginMomentum(); };
+//     prevBtn.onclick = () => { velX = 25; beginMomentum(); };
 
-    const startAction = (e) => { isDown = true; isDragging = false; track.classList.remove('snap-x', 'snap-mandatory'); track.classList.add('cursor-grabbing'); cancelAnimationFrame(momentumID); startX = (e.pageX || e.touches[0].pageX); scrollLeft = track.scrollLeft; lastX = startX; velX = 0; };
-    const endAction = () => { if (!isDown) return; isDown = false; track.classList.remove('cursor-grabbing'); beginMomentum(); setTimeout(() => { isDragging = false; }, 50); };
-    const moveAction = (e) => { if (!isDown) return; const currentX = (e.pageX || e.touches[0].pageX); const walk = (currentX - startX); if (Math.abs(walk) > 5) isDragging = true; track.scrollLeft = scrollLeft - walk; velX = currentX - lastX; lastX = currentX; checkInfinite(); };
-    const checkInfinite = () => { const bWidth = track.scrollWidth / 3; if (track.scrollLeft >= bWidth * 2) track.scrollLeft -= bWidth; if (track.scrollLeft <= 0) track.scrollLeft += bWidth; };
+//     const startAction = (e) => { isDown = true; isDragging = false; track.classList.remove('snap-x', 'snap-mandatory'); track.classList.add('cursor-grabbing'); cancelAnimationFrame(momentumID); startX = (e.pageX || e.touches[0].pageX); scrollLeft = track.scrollLeft; lastX = startX; velX = 0; };
+//     const endAction = () => { if (!isDown) return; isDown = false; track.classList.remove('cursor-grabbing'); beginMomentum(); setTimeout(() => { isDragging = false; }, 50); };
+//     const moveAction = (e) => { if (!isDown) return; const currentX = (e.pageX || e.touches[0].pageX); const walk = (currentX - startX); if (Math.abs(walk) > 5) isDragging = true; track.scrollLeft = scrollLeft - walk; velX = currentX - lastX; lastX = currentX; checkInfinite(); };
+//     const checkInfinite = () => { const bWidth = track.scrollWidth / 3; if (track.scrollLeft >= bWidth * 2) track.scrollLeft -= bWidth; if (track.scrollLeft <= 0) track.scrollLeft += bWidth; };
 
-    track.addEventListener('mousedown', startAction); window.addEventListener('mouseup', endAction); track.addEventListener('mousemove', moveAction); track.addEventListener('mouseleave', endAction);
-    track.addEventListener('touchstart', startAction, {passive: true}); track.addEventListener('touchend', endAction); track.addEventListener('touchmove', moveAction, {passive: true});
+//     track.addEventListener('mousedown', startAction); window.addEventListener('mouseup', endAction); track.addEventListener('mousemove', moveAction); track.addEventListener('mouseleave', endAction);
+//     track.addEventListener('touchstart', startAction, {passive: true}); track.addEventListener('touchend', endAction); track.addEventListener('touchmove', moveAction, {passive: true});
 
-    setTimeout(() => { track.scrollLeft = track.scrollWidth / 3; }, 200);
-};
+//     setTimeout(() => { track.scrollLeft = track.scrollWidth / 3; }, 200);
+// };
 
 // ==========================================
 // 10. СЛАЙДЕР БАНЕРІВ (ЗАВАНТАЖЕННЯ З БД)
@@ -1262,8 +1350,8 @@ window.initBannerSlider = function() {
     let banners = API.get('bv_banners', []);
     if (!banners || banners.length === 0) {
         banners = [
-            { id: 1, img: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg', link: 'catalog.html' },
-            { id: 2, img: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg', link: 'exclusive.html' }
+            { id: 1, img: '', link: 'catalog.html' },
+            { id: 2, img: '', link: 'exclusive.html' }
         ];
     }
 
@@ -1849,13 +1937,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fullName = (profile && profile.full_name) ? profile.full_name : (session.user.user_metadata?.full_name || 'Клієнт');
             const userFavs = profile && profile.favs ? profile.favs : [];
 
-            API.set('bv_current_user', { id: session.user.id, username: session.user.email, role: role, name: fullName, favs: userFavs });
+            const userData = { id: session.user.id, username: session.user.email, role: role, name: fullName, favs: userFavs };
+            API.set('bv_current_user', userData);
+            window.currentUser = userData;
+            window.isLoggedIn = true;
+
             if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
             API.set(getScopedStorageKey('bv_favs'), userFavs);
             
             history.replaceState(null, null, ' ');
             window.updateProfileMenu();
             if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+            if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
         }
     }
 
@@ -1908,13 +2001,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fullName = (profile && profile.full_name) ? profile.full_name : (data.user.user_metadata?.full_name || 'Клієнт');
                 const userFavs = profile && profile.favs ? profile.favs : [];
 
-                API.set('bv_current_user', { id: data.user.id, username: data.user.email, role: role, name: fullName, favs: userFavs });
+                const userData = { id: data.user.id, username: data.user.email, role: role, name: fullName, favs: userFavs };
+                API.set('bv_current_user', userData);
+                window.currentUser = userData;
+                window.isLoggedIn = true;
+
                 if (role === 'admin') sessionStorage.setItem('isAdminAuth', 'true');
                 API.set(getScopedStorageKey('bv_favs'), userFavs);
                 
                 closeAuthModal();
                 if(typeof updateBadges === 'function') updateBadges();
                 window.renderFavDrawer();
+                if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
                 window.initRealtime();
                 window.updateProfileMenu(); 
             }
@@ -1946,6 +2044,13 @@ window.onload = async () => {
     
     await window.loadCloudData();
 
+    // Автоматично виставляємо статус авторизації при завантаженні, якщо є сесія
+    const existingUser = API.get('bv_current_user', null);
+    if (existingUser) {
+        window.currentUser = existingUser;
+        window.isLoggedIn = true;
+    }
+
     if(document.getElementById('marqueeTrack') && typeof initMarqueeSim === 'function') initMarqueeSim();
     if(document.getElementById('productContainer') && typeof renderProductPage === 'function') renderProductPage();
     if(document.getElementById('servicesPriceBody') && typeof renderServicesTable === 'function') renderServicesTable();
@@ -1967,6 +2072,7 @@ window.onload = async () => {
 
     if(typeof window.renderCart === 'function') window.renderCart(); 
     if(typeof window.renderFavDrawer === 'function') window.renderFavDrawer();
+    if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
 
     const currentUser = API.get('bv_current_user', null);
     if(currentUser || localStorage.getItem('isAdminAuth') === 'true') window.initRealtime();
@@ -3361,105 +3467,3 @@ window.toggleFavorite = function(productId, element) {
 
 
 
-/// 1. Універсальна функція для оновлення підсвічування всіх сердечок на сторінці
-window.updateFavoriteIcons = function() {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    
-    // Спочатку знімаємо підсвічування з усього
-    document.querySelectorAll('.fav-icon, .fav-btn').forEach(btn => {
-        btn.classList.remove('active', 'text-[var(--danger)]', 'fill-current');
-        btn.style.fill = '';
-    });
-    
-    // Підсвічуємо те, що є в обраному
-    favorites.forEach(productId => {
-        const targetElements = document.querySelectorAll(`[data-product-id="${productId}"] .fav-icon, [data-id="${productId}"] .fav-btn, .fav-btn-${productId}, [data-product-id="${productId}"] .fav-btn`);
-        targetElements.forEach(btn => {
-            btn.classList.add('active', 'text-[var(--danger)]', 'fill-current');
-            btn.style.fill = 'var(--danger)';
-        });
-    });
-};
-
-// Запускаємо при завантаженні та при зміні SPA-сторінок
-document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
-window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
-
-// Якщо у вас є функція додавання в обране, викликайте в ній window.updateFavoriteIcons() одразу після зміни localStorage!
-
-
-// 2. Виправлена та надійна функція відкриття шторки обраного
-window.toggleFavDrawer = async function() {
-    // Перевіряємо всі можливі ключі авторизації (включно з Supabase та кастомними)
-    let isLogged = false;
-    
-    if (localStorage.getItem('user') || localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('auth')) {
-        isLogged = true;
-    } else {
-        // Шукаємо будь-який ключ Supabase або сесії в localStorage
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.includes('auth') || key.includes('token') || key.includes('sb-'))) {
-                const val = localStorage.getItem(key);
-                if (val && val.length > 5) {
-                    isLogged = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    // Додаткова перевірка через клієнт Supabase, якщо він є
-    const supabaseClient = window._supabase || window.supabase;
-    if (!isLogged && supabaseClient && supabaseClient.auth) {
-        try {
-            const { data } = await supabaseClient.auth.getSession();
-            if (data && data.session) {
-                isLogged = true;
-            }
-        } catch (e) {
-            console.error('Помилка сесії:', e);
-        }
-    }
-
-    // Якщо користувач вже додавав товари в обране — він точно має доступ до перегляду
-    const favoritesCheck = JSON.parse(localStorage.getItem('favorites') || '[]');
-    if (favoritesCheck.length > 0) {
-        isLogged = true;
-    }
-
-    // Якщо все ще не визначено як залогінений — відкриваємо вікно входу
-    if (!isLogged) {
-        if (typeof window.openAuthModal === 'function') {
-            window.openAuthModal();
-        } else if (typeof window.toggleAuthModal === 'function') {
-            window.toggleAuthModal();
-        } else {
-            console.warn('Модальне вікно авторизації не знайдено');
-        }
-        return;
-    }
-
-    // Відкриваємо / закриваємо шторку улюбленого
-    const drawer = document.getElementById('favDrawer');
-    const overlay = document.getElementById('favOverlay');
-    if (!drawer) return;
-    
-    // Оновлюємо іконки перед відкриттям
-    window.updateFavoriteIcons();
-
-    if (!drawer.classList.contains('active')) {
-        if (typeof window.renderFavDrawer === 'function') {
-            window.renderFavDrawer();
-        }
-        drawer.classList.add('active'); 
-        if (overlay) overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    } else {
-        drawer.classList.remove('active'); 
-        if (overlay) overlay.classList.remove('active');
-        if (!document.getElementById('sideMenu')?.classList.contains('active')) {
-            document.body.style.overflow = '';
-        }
-    }
-};
