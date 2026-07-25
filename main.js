@@ -955,53 +955,65 @@ function checkUserIsLogged() {
 }
 
 // ==========================================
-// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК (ЧЕРЕЗ ІНЛАЙН-СТИЛІ)
+// УНІВЕРСАЛЬНЕ ОНОВЛЕННЯ ІКОНОК ОБРАНОГО
 // ==========================================
 
 window.updateFavoriteIcons = function() {
     const rawFavs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
     const favs = rawFavs.map(String);
     
-    // 1. Повністю скидаємо стан усіх сердечок на сторінці
-    document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
-        el.classList.remove('active');
-        el.style.color = ''; // скидаємо колір тексту
+    // Знаходимо абсолютно всі потенційні кнопки обраного за будь-яким можливим критерієм
+    const elements = document.querySelectorAll('.fav-btn, .fav-icon, [data-fav-id], [data-product-id], [onclick*="toggleFav"]');
+    
+    elements.forEach(el => {
+        let prodId = null;
         
-        const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
-        svgs.forEach(svg => {
-            svg.style.fill = 'none';
-            svg.style.stroke = 'currentColor';
-            svg.querySelectorAll('path').forEach(path => {
-                path.style.fill = 'none';
-                path.style.stroke = 'currentColor';
-            });
-        });
-    });
-
-    // 2. Підсвічуємо лише ті, які є в обраному
-    favs.forEach(id => {
-        document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
-            const onclickAttr = el.getAttribute('onclick') || '';
-            
-            if (onclickAttr.includes(`toggleFav('${id}')`) || 
-                onclickAttr.includes(`toggleFav("${id}")`) || 
-                onclickAttr.includes(`toggleFav(${id})`)) {
-                
-                el.classList.add('active');
-                // Примусово задаємо червоний/акцентний колір через інлайн-стиль
-                el.style.color = '#ef4444'; 
-                
-                const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
-                svgs.forEach(svg => {
-                    svg.style.fill = '#ef4444';
-                    svg.style.stroke = '#ef4444';
-                    svg.querySelectorAll('path').forEach(path => {
-                        path.style.fill = '#ef4444';
-                        path.style.stroke = '#ef4444';
-                    });
-                });
+        // Визначаємо ID товару залежно від того, як влаштована розмітка картки
+        if (el.hasAttribute('data-fav-id')) {
+            prodId = String(el.getAttribute('data-fav-id'));
+        } else if (el.hasAttribute('data-product-id')) {
+            prodId = String(el.getAttribute('data-product-id'));
+        } else {
+            const parentWithId = el.closest('[data-id]');
+            if (parentWithId) {
+                prodId = String(parentWithId.getAttribute('data-id'));
+            } else {
+                const onclick = el.getAttribute('onclick') || '';
+                const match = onclick.match(/toggleFav\(['"]?([^'")]+)['"]?\)/);
+                if (match) {
+                    prodId = String(match[1]);
+                }
             }
-        });
+        }
+        
+        if (!prodId) return;
+        
+        const isFav = favs.includes(prodId);
+        const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
+        
+        if (isFav) {
+            el.classList.add('active');
+            el.style.color = '#ef4444';
+            svgs.forEach(svg => {
+                svg.style.fill = '#ef4444';
+                svg.style.stroke = '#ef4444';
+                svg.querySelectorAll('path').forEach(path => {
+                    path.style.fill = '#ef4444';
+                    path.style.stroke = '#ef4444';
+                });
+            });
+        } else {
+            el.classList.remove('active');
+            el.style.color = '';
+            svgs.forEach(svg => {
+                svg.style.fill = 'none';
+                svg.style.stroke = 'currentColor';
+                svg.querySelectorAll('path').forEach(path => {
+                    path.style.fill = 'none';
+                    path.style.stroke = 'currentColor';
+                });
+            });
+        }
     });
 };
 
