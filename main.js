@@ -1245,10 +1245,11 @@ window.renderProductCard = function(prod) {
                     <img src="${safeImg}" class="w-full h-full m-0 p-0 object-cover" loading="lazy">
                 </a>
                 ${badgesHtml}
-                <!-- Кнопка обраного з перевіркою реєстрації -->
-                <button class="absolute top-2 right-2 z-25 p-1.5 bg-transparent border-none outline-none transition-transform active:scale-95 ${isFav ? 'text-red-500' : 'text-[#888] dark:text-[#aaa]'}" data-id="${safeId}" onclick="handleFavClick('${safeId}')" title="У вибране">
-                    <svg width="18" height="18" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
+                
+               <!-- Кнопка обраного у кольорі світлого золота -->
+<button class="absolute top-2 right-2 z-25 w-8 h-8 rounded-[6px] flex items-center justify-center bg-gradient-to-br from-white via-[#f4f1ea] to-[#e8e2d5] dark:from-[#2a2a2a] dark:via-[#222222] dark:to-[#1a1a1a] backdrop-blur-md border border-[#d8d0c1] dark:border-[#3a3a3a] shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-300 active:scale-95 ${isFav ? 'text-[#ff3b30]' : 'text-[#c5a059] dark:text-[#dfc384]'}" data-id="${safeId}" onclick="handleFavClick('${safeId}')" title="У вибране">
+    <svg width="15" height="15" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+</button>
             </div>
             
             <!-- Текстовий блок фіксованої висоти -->
