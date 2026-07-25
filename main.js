@@ -769,20 +769,36 @@ window.openAuthModal = function() {
 };
 
 // ==========================================
-// 5. КОШИК ТА УЛЮБЛЕНЕ
+// 5. КОШИК ТА УЛЮБЛЕНЕ (Виправлено покращене керування сердечками)
 // ==========================================
+
+// Централізована функція керування скролом сторінки
+window.updateBodyOverflow = function() {
+    const cartActive = document.getElementById('cartDrawer')?.classList.contains('active');
+    const favActive = document.getElementById('favDrawer')?.classList.contains('active');
+    const menuActive = document.getElementById('sideMenu')?.classList.contains('active');
+
+    if (cartActive || favActive || menuActive) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+};
+
 window.toggleCart = function() {
     const drawer = document.getElementById('cartDrawer');
     const overlay = document.getElementById('cartOverlay');
     if (!drawer || !overlay) return;
+    
     if (!drawer.classList.contains('active')) {
         window.renderCart();
-        drawer.classList.add('active'); overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        drawer.classList.add('active'); 
+        overlay.classList.add('active');
     } else {
-        drawer.classList.remove('active'); overlay.classList.remove('active');
-        if (!document.getElementById('sideMenu')?.classList.contains('active')) document.body.style.overflow = '';
+        drawer.classList.remove('active'); 
+        overlay.classList.remove('active');
     }
+    window.updateBodyOverflow();
 };
 
 window.addToCart = function(id, title, variant, price, img) {
@@ -919,52 +935,86 @@ window.renderCart = function() {
     }
 };
 
-// 1. Універсальна функція оновлення іконок підсвічування сердечок
+// Допоміжна перевірка авторизації
+function checkUserIsLogged() {
+    let isLogged = false;
+    if (localStorage.getItem('user') || localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('auth')) {
+        isLogged = true;
+    } else {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('auth') || key.includes('token') || key.includes('sb-'))) {
+                const val = localStorage.getItem(key);
+                if (val && val.length > 5) { isLogged = true; break; }
+            }
+        }
+    }
+    const favoritesCheck = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (favoritesCheck.length > 0) isLogged = true;
+    return isLogged;
+}
+
+// Універсальна функція оновлення іконок підсвічування сердечок
 window.updateFavoriteIcons = function() {
     const favs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
     
-    // Скидаємо стан усіх іконок на сторінці
-    document.querySelectorAll('.fav-btn-inline, [data-id] .fav-btn, [data-product-id] .fav-btn, [data-product-id] .fav-icon, [data-id] .fav-icon').forEach(btn => {
-        btn.classList.remove('text-[var(--danger)]', 'text-red-500', 'active', 'fill-current');
+    // Повне скидання стану всіх сердечок на сторінці
+    document.querySelectorAll('.fav-btn, .fav-icon, [data-fav-id], .fav-btn-inline').forEach(btn => {
+        btn.classList.remove('text-red-500', 'text-[var(--danger)]', 'active', 'fill-current');
         btn.classList.add('text-[var(--text-muted)]');
-        const icon = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
-        if (icon) icon.setAttribute('fill', 'none');
-        btn.style.fill = 'none';
+        const svg = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
+        if (svg) {
+            svg.setAttribute('fill', 'none');
+            svg.style.fill = 'none';
+        }
     });
 
-    // Підсвічуємо те, що є в обраному
+    // Підсвічування обраних товарів
     favs.forEach(id => {
         const targetElements = document.querySelectorAll(`
-            .fav-btn-inline[data-id="${id}"], 
+            [data-fav-id="${id}"],
             [data-id="${id}"] .fav-btn, 
+            [data-id="${id}"] .fav-icon, 
             [data-product-id="${id}"] .fav-btn, 
             [data-product-id="${id}"] .fav-icon,
-            [data-id="${id}"] .fav-icon,
             .fav-btn-${id}
         `);
         
         targetElements.forEach(btn => {
             btn.classList.add('text-red-500', 'active', 'fill-current');
             btn.classList.remove('text-[var(--text-muted)]');
-            const icon = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
-            if (icon) icon.setAttribute('fill', 'currentColor');
-            btn.style.fill = 'var(--danger)';
+            const svg = btn.querySelector('svg') || (btn.tagName === 'SVG' ? btn : null);
+            if (svg) {
+                svg.setAttribute('fill', 'currentColor');
+                svg.style.fill = 'currentColor';
+            }
         });
     });
 };
 
-// Автоматичні слухачі для оновлення іконок
 document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
 window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
 
 window.toggleFav = function(id) {
+    // Перевірка авторизації: якщо не зареєстрований — відкриваємо модалку входу
+    if (!checkUserIsLogged()) {
+        if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal();
+        } else if (typeof window.toggleAuthModal === 'function') {
+            window.toggleAuthModal();
+        } else {
+            console.warn('Модальне вікно авторизації не знайдено');
+        }
+        return;
+    }
+
     let favs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
     const idx = favs.indexOf(id);
     
-    if(idx > -1) {
-        favs.splice(idx, 1);
+    if (idx > -1) {
+        favs.splice(idx, 1); // Зняти з обраного
     } else {
-        favs.push(id);
+        favs.push(id);       // Додати в обране
     }
     
     if (typeof setFavs === 'function') {
@@ -974,46 +1024,13 @@ window.toggleFav = function(id) {
     }
     
     window.updateFavoriteIcons();
-    window.renderFavDrawer();
+    if (typeof window.renderFavDrawer === 'function') {
+        window.renderFavDrawer();
+    }
 };
 
-// 2. Надійна функція відкриття шторки улюбленого з перевіркою авторизації
 window.toggleFavDrawer = async function() {
-    let isLogged = false;
-    
-    if (localStorage.getItem('user') || localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('auth')) {
-        isLogged = true;
-    } else {
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.includes('auth') || key.includes('token') || key.includes('sb-'))) {
-                const val = localStorage.getItem(key);
-                if (val && val.length > 5) {
-                    isLogged = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    const supabaseClient = window._supabase || window.supabase;
-    if (!isLogged && supabaseClient && supabaseClient.auth) {
-        try {
-            const { data } = await supabaseClient.auth.getSession();
-            if (data && data.session) {
-                isLogged = true;
-            }
-        } catch (e) {
-            console.error('Помилка сесії:', e);
-        }
-    }
-
-    const favoritesCheck = JSON.parse(localStorage.getItem('favorites') || '[]');
-    if (favoritesCheck.length > 0) {
-        isLogged = true;
-    }
-
-    if (!isLogged) {
+    if (!checkUserIsLogged()) {
         if (typeof window.openAuthModal === 'function') {
             window.openAuthModal();
         } else if (typeof window.toggleAuthModal === 'function') {
