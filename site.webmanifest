@@ -1,13 +1,6 @@
 {
-  "name": "BV Jewelry — Ювелірний інтернет-магазин",
-  "short_name": "BV Jewelry",
-  "description": "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#1c1d21",
-  "theme_color": "#1c1d21",
+  "name": "MyWebSite",
+  "short_name": "MySite",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -21,5 +14,8 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "theme_color": "#1c1d21",
+  "background_color": "#1c1d21",
+  "display": "standalone"
 }

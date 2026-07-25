@@ -204,49 +204,84 @@ window.toggleAccordionPanel = function(clickedPanel) {
 // ==========================================
 const i18n = {
     uk: { 
-        m1: "Головна", m2: "Каталог", m3: "Бренд", m4: "Контакти", m_price: "Прайс", m_atelier: "Ексклюзив",
-        menu_all: "Всі товари", menu_for_whom: "Для кого", menu_metal: "За металом",
-        cart_title: "Кошик", cart_subtotal: "Підсумок:", cart_checkout: "Оформити замовлення", cart_empty: "Ваш кошик порожній",
-        fav_title: "Улюблене", fav_empty: "Список порожній",
-        in_stock: "В наявності", out_stock: "Немає", pre_order: "Під замовлення",
-        badge_new: "Новинка", badge_exclusive: "Ексклюзив", badge_sale: "Sale", badge_sold_out: "Продано", badge_pre_order: "Під замовлення",
-        btn_buy: "Купити", btn_details: "Детальніше", btn_send: "Надіслати",
-        similar: "Також рекомендуємо", desc_title: "Опис виробу", pd_nav_specs: "Характеристики", pd_nav_review: "Відгуки", pd_nav_all: "Усе про товар", pd_nav_photo: "Фото", pd_nav_ask: "Задати питання",
-        cat_filters: "Фільтри", cat_sort: "Сортування", cat_sort_new: "Спочатку нові", cat_sort_cheap: "Від дешевих до дорогих", cat_sort_exp: "Від дорогих до дешевих", cat_load_more: "Показати ще", cat_reset: "Скинути", cat_empty: "Товарів не знайдено",
-        search_ph: "Пошук...", login: "Увійти", register: "Зареєструватися", login_mob_title: "КАБІНЕТ", theme_mob: "Змінити тему", lang_title: "МОВА",
-        footer_rights: "Всі права захищені.", footer_dev: "Розроблено",
-        exc_title: "Створення ексклюзиву", exc_step: "Етап", exc_order: "Замовити прорахунок"
+        m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
+        search_ph: "Пошук...", search_mob_ph: "Пошукаємо прикрасу?...",
+        cart_title: "Кошик", cart_subtotal: "Підсумок:", cart_clear: "Очистити",
+        fav_title: "Улюблене",
+        exc_subtitle: "Individual Order", exc_title_main: "ЕКСКЛЮЗИВ", btn_details: "Дізнатися більше",
+        cat_subtitle: "Our World",
+        footer_desc: "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
+        footer_phone_title: "Контактний телефон",
+        footer_phone_sub: "Згідно з тарифами вашого оператора",
+        footer_socials_title: "Ми в соцмережах",
+        footer_address_1: "вул. Торгова, 68, Ізмаїл",
+        footer_schedule_1: "Пн–Нд: 08:00 – 17:00",
+        footer_address_2: "вул. Покровська, 57, Ізмаїл",
+        footer_schedule_2: "Пн–Нд: 09:00 – 17:00",
+        footer_col_buyers: "Покупцям",
+        footer_link_delivery: "Доставка та оплата",
+        footer_link_warranty: "Гарантія",
+        footer_link_services: "Послуги та Прайс",
+        footer_col_catalog: "Каталог",
+        footer_cat_rings: "Каблучки",
+        footer_cat_earrings: "Сережки",
+        footer_cat_chains: "Ланцюжки",
+        footer_cat_pendants: "Кулони та підвіски",
+        footer_dev: "Розроблено:"
     },
     ru: { 
-        m1: "Главная", m2: "Каталог", m3: "Бренд", m4: "Контакты", m_price: "Прайс", m_atelier: "Эксклюзив",
-        menu_all: "Все товары", menu_for_whom: "Для кого", menu_metal: "По металлу",
-        cart_title: "Корзина", cart_subtotal: "Итог:", cart_checkout: "Оформить заказ", cart_empty: "Ваша корзина пуста",
-        fav_title: "Избранное", fav_empty: "Список пуст",
-        in_stock: "В наличии", out_stock: "Нет в наличии", pre_order: "Под заказ",
-        badge_new: "Новинка", badge_exclusive: "Эксклюзив", badge_sale: "Sale", badge_sold_out: "Продано", badge_pre_order: "Под заказ",
-        btn_buy: "Купить", btn_details: "Подробнее", btn_send: "Отправить",
-        similar: "Также рекомендуем", desc_title: "Описание изделия", pd_nav_specs: "Характеристики", pd_nav_review: "Отзывы", pd_nav_all: "Всё о товаре", pd_nav_photo: "Фото", pd_nav_ask: "Задать вопрос",
-        cat_filters: "Фильтры", cat_sort: "Сортировка", cat_sort_new: "Сначала новые", cat_sort_cheap: "От дешевых к дорогим", cat_sort_exp: "От дорогих к дешевым", cat_load_more: "Показать еще", cat_reset: "Сбросить", cat_empty: "Товары не найдены",
-        search_ph: "Поиск...", login: "Войти", register: "Регистрация", login_mob_title: "КАБИНЕТ", theme_mob: "Сменить тему", lang_title: "ЯЗЫК",
-        footer_rights: "Все права защищены.", footer_dev: "Разработано",
-        exc_title: "Создание эксклюзива", exc_step: "Этап", exc_order: "Заказать просчет"
+        m1: "Главная", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Эксклюзив", m_info: "info", m_menu: "Меню",
+        search_ph: "Поиск...", search_mob_ph: "Поищем украшение?...",
+        cart_title: "Корзина", cart_subtotal: "Итог:", cart_clear: "Очистить",
+        fav_title: "Избранное",
+        exc_subtitle: "Individual Order", exc_title_main: "ЭКСКЛЮЗИВ", btn_details: "Узнать больше",
+        cat_subtitle: "Our World",
+        footer_desc: "Формируем семейные ценности в драгоценных металлах с 1984 года.",
+        footer_phone_title: "Контактный телефон",
+        footer_phone_sub: "Согласно тарифам вашего оператора",
+        footer_socials_title: "Мы в соцсетях",
+        footer_address_1: "ул. Торговая, 68, Измаил",
+        footer_schedule_1: "Пн–Вс: 08:00 – 17:00",
+        footer_address_2: "ул. Покровская, 57, Измаил",
+        footer_schedule_2: "Пн–Вс: 09:00 – 17:00",
+        footer_col_buyers: "Покупателям",
+        footer_link_delivery: "Доставка и оплата",
+        footer_link_warranty: "Гарантия",
+        footer_link_services: "Услуги и Прайс",
+        footer_col_catalog: "Каталог",
+        footer_cat_rings: "Кольца",
+        footer_cat_earrings: "Серьги",
+        footer_cat_chains: "Цепочки",
+        footer_cat_pendants: "Кулоны и подвески",
+        footer_dev: "Разработано:"
     },
     en: { 
-        m1: "Home", m2: "Catalog", m3: "Brand", m4: "Contacts", m_price: "Price", m_atelier: "Exclusive",
-        menu_all: "All products", menu_for_whom: "For whom", menu_metal: "By metal",
-        cart_title: "Cart", cart_subtotal: "Subtotal:", cart_checkout: "Checkout", cart_empty: "Your cart is empty",
-        fav_title: "Favorites", fav_empty: "List is empty",
-        in_stock: "In stock", out_stock: "Out of stock", pre_order: "Pre-order",
-        badge_new: "New", badge_exclusive: "Exclusive", badge_sale: "Sale", badge_sold_out: "Sold Out", badge_pre_order: "Pre-order",
-        btn_buy: "Buy", btn_details: "Details", btn_send: "Send",
-        similar: "You might also like", desc_title: "Description", pd_nav_specs: "Specifications", pd_nav_review: "Reviews", pd_nav_all: "About Product", pd_nav_photo: "Photos", pd_nav_ask: "Ask a Question",
-        cat_filters: "Filters", cat_sort: "Sort by", cat_sort_new: "Newest first", cat_sort_cheap: "Price: Low to High", cat_sort_exp: "Price: High to Low", cat_load_more: "Load more", cat_reset: "Reset", cat_empty: "No products found",
-        search_ph: "Search...", login: "Log in", register: "Register", login_mob_title: "PROFILE", theme_mob: "Change Theme", lang_title: "LANGUAGE",
-        footer_rights: "All rights reserved.", footer_dev: "Developed by",
-        exc_title: "Exclusive Creation", exc_step: "Step", exc_order: "Request Quote"
+        m1: "Home", m2: "Catalog", m_gallery: "Gallery", m_price: "Prices", m_atelier: "Exclusive", m_info: "info", m_menu: "Menu",
+        search_ph: "Search...", search_mob_ph: "Looking for jewelry?...",
+        cart_title: "Cart", cart_subtotal: "Subtotal:", cart_clear: "Clear",
+        fav_title: "Favorites",
+        exc_subtitle: "Individual Order", exc_title_main: "EXCLUSIVE", btn_details: "Discover more",
+        cat_subtitle: "Our World",
+        footer_desc: "Shaping family values in precious metals since 1984.",
+        footer_phone_title: "Contact Phone",
+        footer_phone_sub: "According to your operator's tariffs",
+        footer_socials_title: "Follow us",
+        footer_address_1: "68 Torhova St., Izmail",
+        footer_schedule_1: "Mon–Sun: 08:00 AM – 05:00 PM",
+        footer_address_2: "57 Pokrovska St., Izmail",
+        footer_schedule_2: "Mon–Sun: 09:00 AM – 05:00 PM",
+        footer_col_buyers: "Customer Care",
+        footer_link_delivery: "Delivery & Payment",
+        footer_link_warranty: "Warranty",
+        footer_link_services: "Services & Prices",
+        footer_col_catalog: "Catalog",
+        footer_cat_rings: "Rings",
+        footer_cat_earrings: "Earrings",
+        footer_cat_chains: "Chains",
+        footer_cat_pendants: "Pendants & Charms",
+        footer_dev: "Developed by:"
     }
 };
-
 window.getLoc = function(obj, field) {
     if (!obj) return '';
     const lang = API.get('bv_lang', 'uk');
@@ -3269,5 +3304,95 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+window.toggleFavorite = function(productId, element) {
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const index = favorites.indexOf(productId);
+    
+    let isFav = false;
+    if (index > -1) {
+        favorites.splice(index, 1);
+        isFav = false;
+    } else {
+        favorites.push(productId);
+        isFav = true;
+    }
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+
+    // Миттєво фарбуємо ВСІ сердечка цього товару на сторінці (і в каталозі, і в картці)
+    const targetElements = document.querySelectorAll(`[data-product-id="${productId}"] .fav-icon, [data-id="${productId}"] .fav-btn, .fav-btn-${productId}`);
+    
+    targetElements.forEach(btn => {
+        if (isFav) {
+            btn.classList.add('active', 'text-[var(--danger)]', 'fill-current');
+            btn.style.fill = 'var(--danger)'; // Примусове зафарбовування для SVG
+        } else {
+            btn.classList.remove('active', 'text-[var(--danger)]', 'fill-current');
+            btn.style.fill = 'none';
+        }
+    });
+
+    // Оновлюємо лічильники в шапці/футері
+    if (typeof window.updateCounters === 'function') {
+        window.updateCounters();
+    }
+};
+
+// Автоматичне підсвічування сердечок при завантаженні будь-якої сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    favorites.forEach(productId => {
+        const targetElements = document.querySelectorAll(`[data-product-id="${productId}"] .fav-icon, [data-id="${productId}"] .fav-btn, .fav-btn-${productId}`);
+        targetElements.forEach(btn => {
+            btn.classList.add('active', 'text-[var(--danger)]', 'fill-current');
+            btn.style.fill = 'var(--danger)';
+        });
+    });
+});
 
 
+
+window.toggleFavDrawer = async function() {
+    // Універсальна перевірка: чи є юзер в localStorage або в активній сесії Supabase
+    let isLogged = localStorage.getItem('user') || localStorage.getItem('sb-access-token');
+    
+    if (!isLogged && window._supabase) {
+        const session = await window._supabase.auth.getSession();
+        if (session && session.data && session.data.session) {
+            isLogged = true;
+        }
+    }
+
+    if (!isLogged) {
+        // Якщо справді не залогінений — відкриваємо модалку реєстрації/входу
+        if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal();
+        } else if (typeof window.toggleAuthModal === 'function') {
+            window.toggleAuthModal();
+        } else {
+            console.warn('Модальне вікно авторизації не знайдено');
+        }
+        return;
+    }
+
+    // Якщо все ок — відкриваємо шторку улюбленого
+    const drawer = document.getElementById('favDrawer');
+    const overlay = document.getElementById('favOverlay');
+    if (!drawer) return;
+    
+    if (!drawer.classList.contains('active')) {
+        if (typeof window.renderFavDrawer === 'function') {
+            window.renderFavDrawer();
+        }
+        drawer.classList.add('active'); 
+        if(overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else {
+        drawer.classList.remove('active'); 
+        if(overlay) overlay.classList.remove('active');
+        if (!document.getElementById('sideMenu')?.classList.contains('active')) {
+            document.body.style.overflow = '';
+        }
+    }
+};
