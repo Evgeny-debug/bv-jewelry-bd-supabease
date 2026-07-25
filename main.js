@@ -202,6 +202,7 @@ window.toggleAccordionPanel = function(clickedPanel) {
 // ==========================================
 // 2. БАЗОВІ ДАНІ ТА ЛОКАЛІЗАЦІЯ
 // ==========================================
+
 const i18n = {
     uk: { 
         m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
@@ -3354,18 +3355,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 window.toggleFavDrawer = async function() {
-    // Універсальна перевірка: чи є юзер в localStorage або в активній сесії Supabase
-    let isLogged = localStorage.getItem('user') || localStorage.getItem('sb-access-token');
+    // 1. Перевірка звичних ключів в localStorage
+    let isLogged = localStorage.getItem('user') || localStorage.getItem('access_token');
     
-    if (!isLogged && window._supabase) {
-        const session = await window._supabase.auth.getSession();
-        if (session && session.data && session.data.session) {
-            isLogged = true;
+    // 2. Пошук будь-якого активного токена Supabase в localStorage (ключі виду sb-xxxx-auth-token)
+    if (!isLogged) {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+                const sessionData = localStorage.getItem(key);
+                if (sessionData) {
+                    isLogged = true;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // 3. Перевірка через об'єкт Supabase (підтримує і window._supabase, і window.supabase)
+    const supabaseClient = window._supabase || window.supabase;
+    if (!isLogged && supabaseClient && supabaseClient.auth) {
+        try {
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (data && data.session) {
+                isLogged = true;
+            }
+        } catch (e) {
+            console.error('Помилка перевірки сесії Supabase:', e);
         }
     }
 
+    // Якщо користувач не авторизований жодним способом — відкриваємо модалку входу
     if (!isLogged) {
-        // Якщо справді не залогінений — відкриваємо модалку реєстрації/входу
         if (typeof window.openAuthModal === 'function') {
             window.openAuthModal();
         } else if (typeof window.toggleAuthModal === 'function') {
@@ -3376,7 +3397,7 @@ window.toggleFavDrawer = async function() {
         return;
     }
 
-    // Якщо все ок — відкриваємо шторку улюбленого
+    // Якщо все ок — відкриваємо/закриваємо шторку улюбленого
     const drawer = document.getElementById('favDrawer');
     const overlay = document.getElementById('favOverlay');
     if (!drawer) return;
