@@ -955,7 +955,7 @@ function checkUserIsLogged() {
 }
 
 // ==========================================
-// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК (З АВТОМАТИЧНИМ SPА-СПОСТЕРЕЖЕННЯМ)
+// УЛЬТИМАТИВНЕ ОНОВЛЕННЯ ІКОНОК (ЧЕРЕЗ ІНЛАЙН-СТИЛІ)
 // ==========================================
 
 window.updateFavoriteIcons = function() {
@@ -964,20 +964,21 @@ window.updateFavoriteIcons = function() {
     
     // 1. Повністю скидаємо стан усіх сердечок на сторінці
     document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
-        el.classList.remove('text-red-500', 'text-[var(--danger)]', 'active', 'fill-current');
-        el.classList.add('text-[var(--text-muted)]');
+        el.classList.remove('active');
+        el.style.color = ''; // скидаємо колір тексту
         
         const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
         svgs.forEach(svg => {
-            svg.setAttribute('fill', 'none');
             svg.style.fill = 'none';
+            svg.style.stroke = 'currentColor';
             svg.querySelectorAll('path').forEach(path => {
-                path.removeAttribute('fill');
+                path.style.fill = 'none';
+                path.style.stroke = 'currentColor';
             });
         });
     });
 
-    // 2. Підсвічуємо лише ті, які є в обраному за їхнім ID в onclick
+    // 2. Підсвічуємо лише ті, які є в обраному
     favs.forEach(id => {
         document.querySelectorAll('[onclick*="toggleFav"]').forEach(el => {
             const onclickAttr = el.getAttribute('onclick') || '';
@@ -986,15 +987,17 @@ window.updateFavoriteIcons = function() {
                 onclickAttr.includes(`toggleFav("${id}")`) || 
                 onclickAttr.includes(`toggleFav(${id})`)) {
                 
-                el.classList.add('text-red-500', 'active', 'fill-current');
-                el.classList.remove('text-[var(--text-muted)]');
+                el.classList.add('active');
+                // Примусово задаємо червоний/акцентний колір через інлайн-стиль
+                el.style.color = '#ef4444'; 
                 
                 const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
                 svgs.forEach(svg => {
-                    svg.setAttribute('fill', 'currentColor');
-                    svg.style.fill = 'currentColor';
+                    svg.style.fill = '#ef4444';
+                    svg.style.stroke = '#ef4444';
                     svg.querySelectorAll('path').forEach(path => {
-                        path.setAttribute('fill', 'currentColor');
+                        path.style.fill = '#ef4444';
+                        path.style.stroke = '#ef4444';
                     });
                 });
             }
@@ -1015,7 +1018,6 @@ if (!window._favObserverInitialized) {
             }
         }
         if (hasNewNodes) {
-            // Коротка затримка, щоб дочекатися завершення рендеру розмітки
             setTimeout(window.updateFavoriteIcons, 30);
         }
     });
