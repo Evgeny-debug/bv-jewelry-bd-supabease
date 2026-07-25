@@ -955,69 +955,57 @@ function checkUserIsLogged() {
 }
 
 // ==========================================
-// УНІВЕРСАЛЬНЕ ОНОВЛЕННЯ ІКОНОК ОБРАНОГО
+// дает авторизированным профилям сохранить товар в избранные
 // ==========================================
 
 window.updateFavoriteIcons = function() {
     const rawFavs = typeof getFavs === 'function' ? getFavs() : JSON.parse(localStorage.getItem('favorites') || '[]');
     const favs = rawFavs.map(String);
     
-    // Знаходимо абсолютно всі потенційні кнопки обраного за будь-яким можливим критерієм
-    const elements = document.querySelectorAll('.fav-btn, .fav-icon, [data-fav-id], [data-product-id], [onclick*="toggleFav"]');
-    
-    elements.forEach(el => {
-        let prodId = null;
+    // Шукаємо кнопки за вашим атрибутом data-id всередині карток
+    document.querySelectorAll('button[data-id]').forEach(btn => {
+        // Перевіряємо, чи це саме кнопка обраного (має виклик handleFavClick або SVG-серце)
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        const hasHeartSvg = btn.querySelector('svg path[d*="M20.84"]') || btn.querySelector('svg');
         
-        // Визначаємо ID товару залежно від того, як влаштована розмітка картки
-        if (el.hasAttribute('data-fav-id')) {
-            prodId = String(el.getAttribute('data-fav-id'));
-        } else if (el.hasAttribute('data-product-id')) {
-            prodId = String(el.getAttribute('data-product-id'));
-        } else {
-            const parentWithId = el.closest('[data-id]');
-            if (parentWithId) {
-                prodId = String(parentWithId.getAttribute('data-id'));
-            } else {
-                const onclick = el.getAttribute('onclick') || '';
-                const match = onclick.match(/toggleFav\(['"]?([^'")]+)['"]?\)/);
-                if (match) {
-                    prodId = String(match[1]);
-                }
-            }
-        }
-        
-        if (!prodId) return;
-        
+        if (!onclickAttr.includes('Fav') && !hasHeartSvg) return;
+
+        const prodId = String(btn.getAttribute('data-id'));
         const isFav = favs.includes(prodId);
-        const svgs = el.querySelectorAll('svg').length ? el.querySelectorAll('svg') : (el.tagName === 'SVG' ? [el] : []);
-        
+        const svg = btn.querySelector('svg');
+        const path = svg ? svg.querySelector('path') : null;
+
         if (isFav) {
-            el.classList.add('active');
-            el.style.color = '#ef4444';
-            svgs.forEach(svg => {
-                svg.style.fill = '#ef4444';
-                svg.style.stroke = '#ef4444';
-                svg.querySelectorAll('path').forEach(path => {
-                    path.style.fill = '#ef4444';
-                    path.style.stroke = '#ef4444';
-                });
-            });
+            // Активний стан (у вибраному)
+            btn.classList.remove('text-[#888]', 'text-[#aaa]');
+            btn.classList.add('text-red-500');
+            
+            if (svg) {
+                svg.setAttribute('fill', 'currentColor');
+                svg.style.fill = 'currentColor';
+            }
+            if (path) {
+                path.setAttribute('fill', 'currentColor');
+                path.style.fill = 'currentColor';
+            }
         } else {
-            el.classList.remove('active');
-            el.style.color = '';
-            svgs.forEach(svg => {
+            // Неактивний стан (не у вибраному)
+            btn.classList.remove('text-red-500');
+            btn.classList.add('text-[#888]');
+            
+            if (svg) {
+                svg.setAttribute('fill', 'none');
                 svg.style.fill = 'none';
-                svg.style.stroke = 'currentColor';
-                svg.querySelectorAll('path').forEach(path => {
-                    path.style.fill = 'none';
-                    path.style.stroke = 'currentColor';
-                });
-            });
+            }
+            if (path) {
+                path.removeAttribute('fill');
+                path.style.fill = 'none';
+            }
         }
     });
 };
 
-// Автоматичний стеж за появою нових карток у SPA
+// Автоматичне стеження за появою карток у SPA
 if (!window._favObserverInitialized) {
     window._favObserverInitialized = true;
     
@@ -1042,6 +1030,7 @@ if (!window._favObserverInitialized) {
 
 document.addEventListener('DOMContentLoaded', window.updateFavoriteIcons);
 window.addEventListener('popstate', () => setTimeout(window.updateFavoriteIcons, 100));
+
 
 window.toggleFav = function(id) {
     // Перевірка авторизації: якщо не зареєстрований — відкриваємо модалку входу
