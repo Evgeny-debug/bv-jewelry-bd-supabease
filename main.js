@@ -356,6 +356,7 @@ window.loadCloudData = async function() {
         window.products = products;
         if(typeof window.generateMenus === 'function') window.generateMenus();
         if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
+        if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
         return;
     }
     
@@ -382,9 +383,10 @@ window.loadCloudData = async function() {
             API.set('bv_home_blocks', blocksValue);
         }
         
-        // 3. Запускаємо генерацію інтерфейсу
+        // 3. Запускаємо генерацію інтерфейсу та фарбування обраного
         if(typeof window.generateMenus === 'function') window.generateMenus();
         if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
+        if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
         
     } catch (err) {
         console.error('Помилка завантаження даних з Supabase:', err);
@@ -392,8 +394,8 @@ window.loadCloudData = async function() {
         window.products = products;
         
         if(typeof window.generateMenus === 'function') window.generateMenus();
-        // ВАЖЛИВО: Тепер рендер викликається і тут, щоб блоки будувалися навіть при збої мережі
         if(typeof window.renderHomeSections === 'function') window.renderHomeSections();
+        if(typeof window.updateFavoriteIcons === 'function') window.updateFavoriteIcons();
     }
 };
 
@@ -445,8 +447,6 @@ window.deleteProductFromDB = async function(productId) {
         return false;
     }
 };
-
-
 
 // ==========================================
 // 4. СТАН ТА СИНХРОНІЗАЦІЯ
