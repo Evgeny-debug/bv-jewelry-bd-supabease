@@ -2623,7 +2623,7 @@ window.saveSiteSettings = async function() {
 
 /**
  * Генерирует XML-фид товаров с учетом всех полей БД и загружает его в Supabase Storage.
- * @param {HTMLElement} buttonElement - Кнопка, на которую нажали (для блокировки).
+ * /@param {HTMLElement} buttonElement - Кнопка, на которую нажали (для блокировки).
  */
 async function generateAndUploadGoogleFeed(buttonElement) {
     const originalButtonText = buttonElement.innerText;
@@ -2633,7 +2633,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     try {
         console.log('Начало генерации фида Google Merchant Center...');
 
-        // 1. Запрашиваем все товары из таблицы products
+        // 1. Загружаем все товары из таблицы products
         const { data: products, error: dbError } = await _supabase
             .from('products')
             .select('*');
@@ -2644,20 +2644,20 @@ async function generateAndUploadGoogleFeed(buttonElement) {
             throw new Error('Таблица products пуста. Нет товаров для добавления в фид.');
         }
 
-        // 2. Формируем начало XML-документа
+        // 2. Начало XML-документа
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
     <channel>
-        <title>Название твоего магазина</title>
+        <title>Ювелирный магазин</title>
         <link>https://твой-домен.com</link>
         <description>Google Merchant Center Feed</description>`;
 
-        // 3. Проходим по каждому товару
+        // 3. Обрабатываем каждый товар
         products.forEach(p => {
             const id = p.sku || p.id; 
             const title = p.title || p.name || 'Без названия';
             
-            // Собираем описание и характеристики (безопасное преобразование массивов/объектов в текст)
+            // Собираем описание и характеристики
             let description = p.description || 'Описание отсутствует';
             let extraDetails = [];
             
@@ -2679,9 +2679,26 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
             const link = `https://твой-домен.com/product.html?id=${p.id}`;
             
-            // Обработка картинок
+            // УМНЫЙ ПОИСК КАРТИНКИ (проверяем корень и вариации)
             let imageLink = 'https://твой-домен.com/placeholder.jpg';
-            if (p.images) {
+            
+            // Сначала ищем в variations -> base -> images
+            if (p.variations && typeof p.variations === 'object') {
+                if (p.variations.base && Array.isArray(p.variations.base.images) && p.variations.base.images.length > 0) {
+                    imageLink = p.variations.base.images[0];
+                } else {
+                    // Ищем первую попавшуюся картинку в других размерах
+                    for (let key in p.variations) {
+                        if (p.variations[key] && Array.isArray(p.variations[key].images) && p.variations[key].images.length > 0) {
+                            imageLink = p.variations[key].images[0];
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Если в вариациях не нашли, проверяем корневое поле images
+            if (imageLink === 'https://твой-домен.com/placeholder.jpg' && p.images) {
                 if (Array.isArray(p.images) && p.images.length > 0) {
                     imageLink = p.images[0];
                 } else if (typeof p.images === 'string' && p.images.trim() !== '') {
@@ -2690,21 +2707,35 @@ async function generateAndUploadGoogleFeed(buttonElement) {
             }
 
             const brand = p.brand || 'Твой Бренд'; 
-            const price = parseFloat(p.price || p.work_cost || p.workCost || 0).toFixed(2);
             
-            // Безопасное извлечение категории (если это объект/массив, переводим в строку)
-            let category = 'Ювелирные изделия';
-            const rawCategory = p.category || p.variations;
-            if (rawCategory) {
-                if (typeof rawCategory === 'string') {
-                    category = rawCategory;
+            // ИЩЕМ ЦЕНУ (с учетом variations -> base -> price или корневых полей)
+            let rawPrice = p.price;
+            if (!rawPrice && p.variations && typeof p.variations === 'object') {
+                if (p.variations.base && p.variations.base.price) {
+                    rawPrice = p.variations.base.price;
                 } else {
-                    // Если это объект или массив, берем из него понятное текстовое поле или сериализуем
-                    category = rawCategory.name || rawCategory.title || JSON.stringify(rawCategory);
+                    // Берем цену первого доступного размера
+                    const firstKey = Object.keys(p.variations)[0];
+                    if (firstKey && p.variations[firstKey].price) {
+                        rawPrice = p.variations[firstKey].price;
+                    }
                 }
             }
+            const price = parseFloat(rawPrice || p.work_cost || p.workCost || 0).toFixed(2);
+            
+            // КАТЕГОРИЯ (Жестко задаем понятный тип для Google, исключая JSON объектов)
+            let category = 'Ювелирные изделия / Аксессуары';
+            if (typeof p.category === 'string' && !p.category.startsWith('{')) {
+                category = p.category;
+            } else if (title.toLowerCase().includes('каблучк') || title.toLowerCase().includes('кольц')) {
+                category = 'Ювелирные изделия / Кольца';
+            } else if (title.toLowerCase().includes('браслет')) {
+                category = 'Ювелирные изделия / Браслеты';
+            } else if (title.toLowerCase().includes('ланцюг') || title.toLowerCase().includes('цеп')) {
+                category = 'Ювелирные изделия / Цепочки';
+            }
 
-            // Маппинг статуса наличия для Google
+            // Статус наличия
             let googleAvailability = 'in_stock';
             if (p.status === 'pre-order') {
                 googleAvailability = 'preorder';
@@ -2731,7 +2762,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     </channel>
 </rss>`;
 
-        // 4. Добавляем BOM (Byte Order Mark) в начало Blob, чтобы кириллица не превращалась в «кракозябры»
+        // 4. Формируем Blob с UTF-8 BOM для правильной кодировки кириллицы
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const blob = new Blob([bom, xml], { type: 'application/xml;charset=utf-8;' });
         const fileName = 'google-feed.xml';
