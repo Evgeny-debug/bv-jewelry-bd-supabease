@@ -546,6 +546,18 @@
                 <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-3">Курс золота (ГРН / грам)</h3>
                 <input type="number" id="set-gold-rate" class="input-field text-lg font-bold text-[#c5a059] w-full sm:w-64">
             </div>
+            <div class="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 max-w-xl">
+    <label class="block text-sm font-medium text-gray-300 mb-2">Посилання на Google Feed для Merchant Center:</label>
+    <div class="flex items-center gap-2">
+        <input type="text" id="feedUrlInput" readonly 
+            value="Нажмите кнопку «Сгенерировать», чтобы получить ссылку" 
+            class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-gray-300 text-sm focus:outline-none">
+        <button onclick="copyFeedUrl()" id="copyFeedBtn" 
+            class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded text-sm font-medium transition whitespace-nowrap">
+            Копіювати
+        </button>
+    </div>
+</div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="glass-panel p-4 lg:p-6">
                     <h3 class="text-xs font-semibold uppercase tracking-widest text-[#c5a059] mb-4 pb-2 border-b border-white/10">Контакти та Соцмережі</h3>
@@ -2789,6 +2801,39 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     }
 }
 
+
+
+
+function copyFeedUrl() {
+    const inputElement = document.getElementById('feedUrlInput');
+    const copyBtn = document.getElementById('copyFeedBtn');
+    
+    if (!inputElement.value || inputElement.value.startsWith('Нажмите')) {
+        alert('Сначала сгенерируйте фид!');
+        return;
+    }
+
+    // Копируем текст в буфер обмена
+    navigator.clipboard.writeText(inputElement.value).then(() => {
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = 'Скопировано!';
+        copyBtn.classList.add('bg-green-600');
+        copyBtn.classList.remove('bg-yellow-600');
+
+        setTimeout(() => {
+            copyBtn.innerText = originalText;
+            copyBtn.classList.remove('bg-green-600');
+            copyBtn.classList.add('bg-yellow-600');
+        }, 2000);
+    }).catch(err => {
+        console.error('Ошибка копирования: ', err);
+        alert('Не удалось скопировать ссылку');
+    });
+}
+
+
+// Вставь это в свою функцию генерации перед вызовом alert или вместо него:
+document.getElementById('feedUrlInput').value = feedUrl;
 
 document.getElementById('btnGenerateFeed').addEventListener('click', function() {
     generateAndUploadGoogleFeed(this); // Передаем саму кнопку для ее блокировки
