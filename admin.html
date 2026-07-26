@@ -2633,9 +2633,11 @@ window.saveSiteSettings = async function() {
 
 
 
+
+
 /**
  * Генерирует XML-фид товаров с учетом всех полей БД и загружает его в Supabase Storage.
- * /@param {HTMLElement} buttonElement - Кнопка, на которую нажали (для блокировки).
+ * @param {HTMLElement} buttonElement - Кнопка, на которую нажали (для блокировки).
  */
 async function generateAndUploadGoogleFeed(buttonElement) {
     const originalButtonText = buttonElement.innerText;
@@ -2722,7 +2724,6 @@ async function generateAndUploadGoogleFeed(buttonElement) {
             const dbCat = (p.category || '').toLowerCase();
             
             if (dbCat.startsWith('{')) {
-                // Если в category случайно попал JSON, определяем тип по названию товара
                 const lowerTitle = title.toLowerCase();
                 if (lowerTitle.includes('каблучк') || lowerTitle.includes('кольц')) {
                     category = 'Ювелирные изделия > Кольца';
@@ -2789,6 +2790,12 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
         const feedUrl = publicUrlData.publicUrl;
         
+        // Вставляем полученную ссылку в поле ввода в админке
+        const feedInput = document.getElementById('feedUrlInput');
+        if (feedInput) {
+            feedInput.value = feedUrl;
+        }
+
         console.log(`Фид успешно создан: ${feedUrl}`);
         alert(`Фид успешно сгенерирован!\n\nСсылка для Google Merchant:\n${feedUrl}`);
 
@@ -2801,9 +2808,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     }
 }
 
-
-
-
+// Функция копирования ссылки
 function copyFeedUrl() {
     const inputElement = document.getElementById('feedUrlInput');
     const copyBtn = document.getElementById('copyFeedBtn');
@@ -2813,7 +2818,6 @@ function copyFeedUrl() {
         return;
     }
 
-    // Копируем текст в буфер обмена
     navigator.clipboard.writeText(inputElement.value).then(() => {
         const originalText = copyBtn.innerText;
         copyBtn.innerText = 'Скопировано!';
@@ -2831,13 +2835,13 @@ function copyFeedUrl() {
     });
 }
 
-
-// Вставь это в свою функцию генерации перед вызовом alert или вместо него:
-document.getElementById('feedUrlInput').value = feedUrl;
-
-document.getElementById('btnGenerateFeed').addEventListener('click', function() {
-    generateAndUploadGoogleFeed(this); // Передаем саму кнопку для ее блокировки
-});
+// Привязка события клика на кнопку генерации фида
+const generateBtn = document.getElementById('btnGenerateFeed');
+if (generateBtn) {
+    generateBtn.addEventListener('click', function() {
+        generateAndUploadGoogleFeed(this);
+    });
+}
     </script>
 </body>
 </html>
