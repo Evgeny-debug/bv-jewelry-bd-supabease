@@ -2652,13 +2652,13 @@ async function generateAndUploadGoogleFeed(buttonElement) {
         <link>https://bv-jewelry.com</link>
         <description>Google Merchant Center Feed</description>`;
 
-        // 3. Обрабатываем каждый товар с учетом твоей реальной схемы БД
+        // 3. Обрабатываем каждый товар под реальную структуру БД
         products.forEach(p => {
             const id = p.sku || p.id; 
             const title = p.title || p.name || 'Без названия';
             
-            // Описание и характеристики
-            let description = p.description || p.desc || 'Ювелирний виріб високої якості';
+            // Собираем описание и характеристики
+            let description = p.description || p.desc || 'Ювелирный виріб високої якості';
             let extraDetails = [];
             
             if (p.stones && p.stones !== 'EMPTY') {
@@ -2675,43 +2675,64 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
             const link = `https://bv-jewelry.com/product.html?id=${p.id}`;
             
-            // БЕРЕМ КАРТИНКУ ИЗ РЕАЛЬНОГО ПОЛЯ img ИЛИ variations
+            // ИЩЕМ КАРТИНКУ В ПОЛЕ img ИЛИ variations
             let imageLink = 'https://bv-jewelry.com/placeholder.jpg';
+            
             if (p.img && p.img.startsWith('http')) {
                 imageLink = p.img;
-            } else if (p.images) {
-                // Если вдруг images — это массив или строка
-                if (Array.isArray(p.images) && p.images.length > 0) {
-                    imageLink = p.images[0];
-                } else if (typeof p.images === 'string' && p.images.trim() !== '') {
-                    imageLink = p.images;
+            } else if (p.variations) {
+                let varObj = p.variations;
+                if (typeof varObj === 'string') {
+                    try { varObj = JSON.parse(varObj); } catch (e) {}
+                }
+                if (varObj && typeof varObj === 'object') {
+                    if (varObj.base && Array.isArray(varObj.base.images) && varObj.base.images.length > 0) {
+                        imageLink = varObj.base.images[0];
+                    } else {
+                        for (let key in varObj) {
+                            if (varObj[key] && Array.isArray(varObj[key].images) && varObj[key].images.length > 0) {
+                                imageLink = varObj[key].images[0];
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
             const brand = p.brand || 'BV Jewelry'; 
             
-            // ЦЕНА БЕРЕТСЯ ИЗ КОЛОНКИ price
+            // ЦЕНА ИЗ КОЛОНКИ price
             const rawPrice = p.price || 0;
             const price = parseFloat(rawPrice).toFixed(2);
             
-            // КАТЕГОРИЯ ИЗ ПОЛЯ category (с переводом в читаемый вид для Google)
+            // КАТЕГОРИЯ (Очищаем от JSON, приводим к красивому виду для Google)
             let category = 'Ювелирные изделия';
             const dbCat = (p.category || '').toLowerCase();
             
-            if (dbCat.includes('ring') || dbCat.includes('каблучк')) {
+            if (dbCat.startsWith('{')) {
+                // Если в category случайно попал JSON, определяем тип по названию товара
+                const lowerTitle = title.toLowerCase();
+                if (lowerTitle.includes('каблучк') || lowerTitle.includes('кольц')) {
+                    category = 'Ювелирные изделия > Кольца';
+                } else if (lowerTitle.includes('браслет')) {
+                    category = 'Ювелирные изделия > Браслеты';
+                } else if (lowerTitle.includes('ланцюг') || lowerTitle.includes('цеп')) {
+                    category = 'Ювелирные изделия > Цепочки';
+                }
+            } else if (dbCat.includes('ring') || dbCat.includes('rings')) {
                 category = 'Ювелирные изделия > Кольца';
-            } else if (dbCat.includes('bracelet') || dbCat.includes('браслет')) {
-                category = 'Ювелирные изделия > Браслеты';
-            } else if (dbCat.includes('necklace') || dbCat.includes('ланцюг') || dbCat.includes('цеп')) {
+            } else if (dbCat.includes('necklace') || dbCat.includes('necklaces')) {
                 category = 'Ювелирные изделия > Цепочки';
+            } else if (dbCat && dbCat !== 'empty') {
+                category = `Ювелирные изделия > ${p.category}`;
             }
 
-            // Статус наличия (из колонки status)
+            // Статус наличия
             let googleAvailability = 'in_stock';
             const dbStatus = (p.status || '').toLowerCase();
             if (dbStatus.includes('pre-order') || dbStatus.includes('предзаказ')) {
                 googleAvailability = 'preorder';
-            } else if (dbStatus.includes('out') || dbStatus.includes('нет')) {
+            } else if (dbStatus.includes('out')) {
                 googleAvailability = 'out_of_stock';
             }
 
@@ -2734,7 +2755,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     </channel>
 </rss>`;
 
-        // 4. Загрузка в Supabase Storage с кодировкой UTF-8 BOM
+        // 4. Загрузка в Supabase Storage с UTF-8 BOM
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const blob = new Blob([bom, xml], { type: 'application/xml;charset=utf-8;' });
         const fileName = 'google-feed.xml';
