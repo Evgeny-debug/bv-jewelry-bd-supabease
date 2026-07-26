@@ -2661,7 +2661,8 @@ async function generateAndUploadGoogleFeed(buttonElement) {
             // Собираем расширенное описание, включая характеристики (камни, блоки, стоимость работы)
             let description = p.description || 'Описание отсутствует';
             let extraDetails = [];
-            if (p.stones) extraDetails..push(`Вставки/камни: ${p.stones}`);
+            
+            if (p.stones) extraDetails.push(`Вставки/камни: ${p.stones}`);
             if (p.blocks) extraDetails.push(`Блоки: ${p.blocks}`);
             if (p.workCost) extraDetails.push(`Стоимость работы: ${p.workCost}`);
             
@@ -2671,22 +2672,18 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
             const link = `https://твой-домен.com/product.html?id=${p.id}`;
             
-            // Обработка поля images (если это массив или строка с ссылками)
+            // Обработка поля images
             let imageLink = 'https://твой-домен.com/placeholder.jpg';
             if (p.images) {
                 if (Array.isArray(p.images) && p.images.length > 0) {
-                    imageLink = p.images[0]; // Берем первую картинку из массива
+                    imageLink = p.images[0];
                 } else if (typeof p.images === 'string' && p.images.trim() !== '') {
-                    imageLink = p.images.split(',')[0].trim(); // Если строка с разделителями
+                    imageLink = p.images.split(',')[0].trim();
                 }
             }
 
             const brand = p.brand || 'Твой Бренд'; 
-            
-            // Итоговая цена (если цена хранится в отдельном поле, подставь p.price, здесь берем workCost или базовую цену)
             const price = parseFloat(p.price || p.workCost || 0).toFixed(2);
-            
-            // Категория или тип товара (можно использовать variations или product_type)
             const category = p.variations || p.category || 'Ювелирные изделия';
 
             xml += `
