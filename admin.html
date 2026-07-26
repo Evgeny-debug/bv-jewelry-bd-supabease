@@ -2679,15 +2679,15 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
             const link = `https://твой-домен.com/product.html?id=${p.id}`;
             
-            // УМНЫЙ ПОИСК КАРТИНКИ (проверяем корень и вариации)
+            // НАДЕЖНЫЙ ПОИСК КАРТИНКИ (сначала проверяем variations, потом корневые поля)
             let imageLink = 'https://твой-домен.com/placeholder.jpg';
             
-            // Сначала ищем в variations -> base -> images
             if (p.variations && typeof p.variations === 'object') {
+                // Ищем в base.images
                 if (p.variations.base && Array.isArray(p.variations.base.images) && p.variations.base.images.length > 0) {
                     imageLink = p.variations.base.images[0];
                 } else {
-                    // Ищем первую попавшуюся картинку в других размерах
+                    // Ищем в любом другом размере (например, "17", "16.5")
                     for (let key in p.variations) {
                         if (p.variations[key] && Array.isArray(p.variations[key].images) && p.variations[key].images.length > 0) {
                             imageLink = p.variations[key].images[0];
@@ -2697,7 +2697,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
                 }
             }
             
-            // Если в вариациях не нашли, проверяем корневое поле images
+            // Если в variations не нашли, проверяем корневое поле images
             if (imageLink === 'https://твой-домен.com/placeholder.jpg' && p.images) {
                 if (Array.isArray(p.images) && p.images.length > 0) {
                     imageLink = p.images[0];
@@ -2708,13 +2708,12 @@ async function generateAndUploadGoogleFeed(buttonElement) {
 
             const brand = p.brand || 'Твой Бренд'; 
             
-            // ИЩЕМ ЦЕНУ (с учетом variations -> base -> price или корневых полей)
+            // ПОИСК ЦЕНЫ (из variations.base.price или корневых полей)
             let rawPrice = p.price;
             if (!rawPrice && p.variations && typeof p.variations === 'object') {
                 if (p.variations.base && p.variations.base.price) {
                     rawPrice = p.variations.base.price;
                 } else {
-                    // Берем цену первого доступного размера
                     const firstKey = Object.keys(p.variations)[0];
                     if (firstKey && p.variations[firstKey].price) {
                         rawPrice = p.variations[firstKey].price;
@@ -2723,16 +2722,22 @@ async function generateAndUploadGoogleFeed(buttonElement) {
             }
             const price = parseFloat(rawPrice || p.work_cost || p.workCost || 0).toFixed(2);
             
-            // КАТЕГОРИЯ (Жестко задаем понятный тип для Google, исключая JSON объектов)
-            let category = 'Ювелирные изделия / Аксессуары';
-            if (typeof p.category === 'string' && !p.category.startsWith('{')) {
-                category = p.category;
-            } else if (title.toLowerCase().includes('каблучк') || title.toLowerCase().includes('кольц')) {
-                category = 'Ювелирные изделия / Кольца';
-            } else if (title.toLowerCase().includes('браслет')) {
-                category = 'Ювелирные изделия / Браслеты';
-            } else if (title.toLowerCase().includes('ланцюг') || title.toLowerCase().includes('цеп')) {
-                category = 'Ювелирные изделия / Цепочки';
+            // ОЧИСТКА КАТЕГОРИИ (игнорируем JSON, определяем по названию или берем чистый текст)
+            let category = 'Ювелирные изделия';
+            const rawCat = p.category;
+            
+            if (rawCat && typeof rawCat === 'string' && !rawCat.startsWith('{')) {
+                category = rawCat;
+            } else {
+                // Автоматически определяем категорию по названию товара для Google Merchant
+                const lowerTitle = title.toLowerCase();
+                if (lowerTitle.includes('каблучк') || lowerTitle.includes('кольц')) {
+                    category = 'Ювелирные изделия > Кольца';
+                } else if (lowerTitle.includes('браслет')) {
+                    category = 'Ювелирные изделия > Браслеты';
+                } else if (lowerTitle.includes('ланцюг') || lowerTitle.includes('цеп')) {
+                    category = 'Ювелирные изделия > Цепочки';
+                }
             }
 
             // Статус наличия
@@ -2762,7 +2767,7 @@ async function generateAndUploadGoogleFeed(buttonElement) {
     </channel>
 </rss>`;
 
-        // 4. Формируем Blob с UTF-8 BOM для правильной кодировки кириллицы
+        // 4. Формируем Blob с UTF-8 BOM
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const blob = new Blob([bom, xml], { type: 'application/xml;charset=utf-8;' });
         const fileName = 'google-feed.xml';
