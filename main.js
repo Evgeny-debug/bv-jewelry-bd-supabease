@@ -3445,32 +3445,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-const fixJivoButtonCompletely = () => {
-    // Ищем главный корень виджета Jivo
-    const jivoRoot = document.querySelector('jdiv[class*="jivo-root"]') || document.querySelector('jdiv[style*="position: fixed"]');
+const fixJivoMobileButton = () => {
+    const mobileButton = document.querySelector('.__jivoMobileButton');
     
-    if (jivoRoot) {
-        // Поднимаем выше нижнего бара меню (на вашем скриншоте меню снизу, ставим над ним)
-        jivoRoot.style.setProperty('bottom', '85px', 'important');
-        jivoRoot.style.setProperty('right', '15px', 'important');
-        jivoRoot.style.setProperty('z-index', '99999', 'important');
-        
-        // Принудительно задаем компактный размер (квадрат 60x60 пикселей), 
-        // чтобы убрать расплывшийся текстовый блок
-        jivoRoot.style.setProperty('width', '60px', 'important');
-        jivoRoot.style.setProperty('height', '60px', 'important');
-        
-        // Внутри корня ищем сам iframe и растягиваем его на этот компактный размер
-        const jivoIframe = jivoRoot.querySelector('iframe');
-        if (jivoIframe) {
-            jivoIframe.style.setProperty('width', '100%', 'important');
-            jivoIframe.style.setProperty('height', '100%', 'important');
-        }
+    if (mobileButton) {
+        // Поднимаем чуть ниже середины экрана (55% от низа)
+        mobileButton.style.setProperty('bottom', '55vh', 'important');
+        mobileButton.style.setProperty('right', '15px', 'important');
+        mobileButton.style.setProperty('z-index', '99999', 'important');
     }
 };
 
-// Запускаем постоянную проверку, так как Jivo подгружает свои слои поэтапно
-setInterval(fixJivoButtonCompletely, 200);
+setInterval(fixJivoMobileButton, 200);
 
 
 
