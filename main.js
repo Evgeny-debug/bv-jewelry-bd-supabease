@@ -3439,3 +3439,29 @@ document.addEventListener('DOMContentLoaded', () => {
         window.injectAuthModal();
     }
 });
+
+
+
+
+
+
+// Запускаем постоянный поиск кнопки Jivo на странице
+const fixJivoButton = () => {
+    // Ищем контейнеры или саму иконку Jivo по тегу jdiv
+    const jivoElements = document.querySelectorAll('jdiv');
+    
+    jivoElements.forEach(el => {
+        // Проверяем, что это именно плавающая кнопка Jivo, а не внутреннее содержимое чата
+        if (el.className && (el.className.includes('jivoIcon') || el.className.includes('icons') || el.style.position === 'fixed')) {
+            el.style.setProperty('bottom', '90px', 'important'); // Высота от низа
+            el.style.setProperty('right', '20px', 'important');  // Отступ справа
+        }
+    });
+};
+
+// Проверяем каждые 300 миллисекунд (Jivo подгружается асинхронно, поэтому нужен интервал)
+setInterval(fixJivoButton, 300);
+
+
+
+
