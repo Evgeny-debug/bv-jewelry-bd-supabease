@@ -3450,7 +3450,7 @@ const forceMoveJivo = () => {
     if (jivoBtn) {
         // Принудительно смещаем её вверх на нужное количество пикселей (например, на 300 пикселей)
         // Чем больше число, тем выше поднимется кнопка
-        jivoBtn.style.setProperty('transform', 'translateY(-300px)', 'important');
+        jivoBtn.style.setProperty('transform', 'translateY(-150px)', 'important');
     }
 };
 
