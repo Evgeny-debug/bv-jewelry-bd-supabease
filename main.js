@@ -3444,60 +3444,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Створюємо виїзну панель чату в елегантному стилі
-    const chatDrawerHTML = `
-        <div id="chatOverlay" class="fixed inset-0 z-[4900] bg-black/50 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300"></div>
-
-        <div id="chatDrawer" class="fixed top-0 right-0 z-[5000] w-full max-w-sm h-full bg-[var(--glass-bg)] backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] transform translate-x-full transition-transform duration-400 ease-in-out flex flex-col font-sans">
-            
-            <div class="flex items-center justify-between px-8 pt-8 pb-4">
-                <span class="text-xs uppercase tracking-[0.25em] text-[var(--gold-muted)] font-medium">Консультація</span>
-                <button id="closeChatBtn" aria-label="Закрити" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors p-1">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-
-            <div class="px-8 py-6 flex-grow overflow-y-auto space-y-6">
-                <div class="space-y-1">
-                    <h3 class="text-xl font-light tracking-tight text-[var(--text-main)]">Зв'язатися з нами</h3>
-                    <p class="text-xs text-[var(--text-muted)] font-light leading-relaxed">Залиште ваше повідомлення, і наш менеджер відповість вам найближчим часом.</p>
-                </div>
-                
-                <form id="quickChatForm" class="space-y-5">
-                    <div class="relative">
-                        <input type="text" id="clientName" required placeholder="Ваше ім'я або телефон" 
-                               class="w-full bg-[var(--bg-body)]/50 border-b border-[var(--border)] px-0 py-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--gold-muted)] transition-all rounded-none">
-                    </div>
-                    <div class="relative">
-                        <textarea id="clientMessage" required rows="4" placeholder="Ваше запитання..." 
-                                  class="w-full bg-[var(--bg-body)]/50 border-b border-[var(--border)] px-0 py-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--gold-muted)] transition-all rounded-none resize-none"></textarea>
-                    </div>
-                    <button type="submit" 
-                            class="w-full bg-[var(--text-main)] text-[var(--bg-body)] font-medium uppercase tracking-[0.2em] py-4 text-[11px] hover:bg-[var(--gold-muted)] active:scale-[0.98] transition-all duration-300">
-                        Надіслати повідомлення
-                    </button>
-                </form>
-                
-                <div id="chatSuccess" class="hidden text-center text-xs text-[var(--gold-muted)] font-light tracking-wider py-6">
-                    Дякуємо. Ваше повідомлення успішно надіслано.
-                </div>
-            </div>
-
-            <div class="px-8 py-6 text-center text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]/60">
-                BV Jewelry
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', chatDrawerHTML);
-
-    // 2. Створюємо плаваючу кнопку чату
+    // 1. Створюємо головний контейнер для кнопки телефону / чату
     const phoneWidget = document.createElement('div');
-    phoneWidget.className = "fixed bottom-36 sm:bottom-40 right-6 z-40 flex items-center justify-center cursor-pointer";
+    phoneWidget.className = "fixed bottom-36 sm:bottom-40 right-6 flex items-center justify-center cursor-pointer";
     
+    // Внутрішній HTML-код з твоїми стилями, хвилями та іконкою
     phoneWidget.innerHTML = `
         <span class="absolute w-10 h-10 bg-amber-400/40 rounded-full animate-ping pointer-events-none"></span>
         <span class="absolute w-14 h-14 bg-amber-400/20 rounded-full animate-pulse pointer-events-none"></span>
@@ -3509,53 +3461,22 @@ document.addEventListener("DOMContentLoaded", function() {
             </svg>
         </div>
     `;
+    
+    // Встановлюємо правильний z-index згідно з правилом (позиція телефону вище інших елементів)
+    phoneWidget.style.zIndex = "4801";
+    
+    // Додаємо віджет у кінець тегу body
     document.body.appendChild(phoneWidget);
 
-    // 3. Логіка відкриття/закриття панелі та інтеграція з JivoChat
-    const drawer = document.getElementById('chatDrawer');
-    const overlay = document.getElementById('chatOverlay');
+    // 2. Логіка відкриття JivoChat при кліку на створену кнопку
     const openBtn = document.getElementById('openChatBtn');
-    const closeBtn = document.getElementById('closeChatBtn');
-    const form = document.getElementById('quickChatForm');
-    const successMsg = document.getElementById('chatSuccess');
-
-    function openChat() {
-        drawer.classList.remove('translate-x-full');
-        overlay.classList.remove('opacity-0', 'pointer-events-none');
-    }
-
-    function closeChat() {
-        drawer.classList.add('translate-x-full');
-        overlay.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    if (openBtn && drawer) {
-        openBtn.addEventListener('click', openChat);
-        closeBtn.addEventListener('click', closeChat);
-        overlay.addEventListener('click', closeChat);
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('clientName').value;
-            const message = document.getElementById('clientMessage').value;
-
-            // Якщо підключено JivoChat, передаємо дані туди і відкриваємо його
+    if (openBtn) {
+        openBtn.addEventListener('click', function() {
             if (window.jivo_api) {
-                window.jivo_api.setContactInfo({ name: name });
-                window.jivo_api.setMessage(message);
                 window.jivo_api.open();
+            } else {
+                console.warn("JivoChat ще не завантажився або скрипт відсутній на сторінці.");
             }
-
-            form.reset();
-            form.classList.add('hidden');
-            successMsg.classList.remove('hidden');
-            
-            setTimeout(() => {
-                closeChat();
-                form.classList.remove('hidden');
-                successMsg.classList.add('hidden');
-            }, 3000);
         });
     }
 });
