@@ -3444,39 +3444,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Створюємо головний контейнер для кнопки телефону / чату
-    const phoneWidget = document.createElement('div');
-    phoneWidget.className = "fixed bottom-36 sm:bottom-40 right-6 flex items-center justify-center cursor-pointer";
+// document.addEventListener("DOMContentLoaded", function() {
+//     // 1. Створюємо головний контейнер для кнопки телефону / чату
+//     const phoneWidget = document.createElement('div');
+//     phoneWidget.className = "fixed bottom-36 sm:bottom-40 right-6 flex items-center justify-center cursor-pointer";
     
-    // Внутрішній HTML-код з твоїми стилями, хвилями та іконкою
-    phoneWidget.innerHTML = `
-        <span class="absolute w-10 h-10 bg-amber-400/40 rounded-full animate-ping pointer-events-none"></span>
-        <span class="absolute w-14 h-14 bg-amber-400/20 rounded-full animate-pulse pointer-events-none"></span>
+//     // Внутрішній HTML-код з твоїми стилями, хвилями та іконкою
+//     phoneWidget.innerHTML = `
+//         <span class="absolute w-10 h-10 bg-amber-400/40 rounded-full animate-ping pointer-events-none"></span>
+//         <span class="absolute w-14 h-14 bg-amber-400/20 rounded-full animate-pulse pointer-events-none"></span>
 
-        <div id="openChatBtn" aria-label="Написати в чат"
-           class="relative z-10 flex items-center justify-center w-10 h-10 bg-white/70 backdrop-blur-md text-slate-900 border border-white/40 rounded-full shadow-xl hover:bg-slate-900 hover:text-white hover:border-slate-900 hover:scale-110 active:scale-95 transition-all duration-300 ease-out">
-            <svg class="w-4 h-4 transform -scale-x-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-            </svg>
-        </div>
-    `;
+//         <div id="openChatBtn" aria-label="Написати в чат"
+//            class="relative z-10 flex items-center justify-center w-10 h-10 bg-white/70 backdrop-blur-md text-slate-900 border border-white/40 rounded-full shadow-xl hover:bg-slate-900 hover:text-white hover:border-slate-900 hover:scale-110 active:scale-95 transition-all duration-300 ease-out">
+//             <svg class="w-4 h-4 transform -scale-x-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+//                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+//             </svg>
+//         </div>
+//     `;
     
-    // Встановлюємо правильний z-index згідно з правилом (позиція телефону вище інших елементів)
-    phoneWidget.style.zIndex = "4801";
+//     // Встановлюємо правильний z-index згідно з правилом (позиція телефону вище інших елементів)
+//     phoneWidget.style.zIndex = "4801";
     
-    // Додаємо віджет у кінець тегу body
-    document.body.appendChild(phoneWidget);
+//     // Додаємо віджет у кінець тегу body
+//     document.body.appendChild(phoneWidget);
 
-    // 2. Логіка відкриття JivoChat при кліку на створену кнопку
-    const openBtn = document.getElementById('openChatBtn');
-    if (openBtn) {
-        openBtn.addEventListener('click', function() {
-            if (window.jivo_api) {
-                window.jivo_api.open();
-            } else {
-                console.warn("JivoChat ще не завантажився або скрипт відсутній на сторінці.");
-            }
-        });
-    }
-});
+//     // 2. Логіка відкриття JivoChat при кліку на створену кнопку
+//     const openBtn = document.getElementById('openChatBtn');
+//     if (openBtn) {
+//         openBtn.addEventListener('click', function() {
+//             if (window.jivo_api) {
+//                 window.jivo_api.open();
+//             } else {
+//                 console.warn("JivoChat ще не завантажився або скрипт відсутній на сторінці.");
+//             }
+//         });
+//     }
+// });
