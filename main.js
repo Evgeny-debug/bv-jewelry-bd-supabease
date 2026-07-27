@@ -3445,22 +3445,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Запускаем постоянный поиск кнопки Jivo на странице
 const fixJivoButton = () => {
-    // Ищем контейнеры или саму иконку Jivo по тегу jdiv
-    const jivoElements = document.querySelectorAll('jdiv');
+    // Ищем главный контейнер Jivo по специфичному атрибуту или классу
+    const jivoRoot = document.querySelector('jdiv[class*="jivo-root"]');
     
-    jivoElements.forEach(el => {
-        // Проверяем, что это именно плавающая кнопка Jivo, а не внутреннее содержимое чата
-        if (el.className && (el.className.includes('jivoIcon') || el.className.includes('icons') || el.style.position === 'fixed')) {
-            el.style.setProperty('bottom', '90px', 'important'); // Высота от низа
-            el.style.setProperty('right', '20px', 'important');  // Отступ справа
-        }
-    });
+    if (jivoRoot) {
+        // Поднимаем чат выше вашего нижнего мобильного меню
+        jivoRoot.style.setProperty('bottom', '85px', 'important');
+        jivoRoot.style.setProperty('right', '15px', 'important');
+        jivoRoot.style.setProperty('z-index', '99999', 'important'); // Чтобы чат был поверх остальных элементов
+    }
 };
 
-// Проверяем каждые 300 миллисекунд (Jivo подгружается асинхронно, поэтому нужен интервал)
-setInterval(fixJivoButton, 300);
+// Проверяем каждые 200 миллисекунд
+setInterval(fixJivoButton, 200);
 
 
 
