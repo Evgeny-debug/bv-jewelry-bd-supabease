@@ -3443,20 +3443,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-const fixJivoMobileButton = () => {
-    const mobileButton = document.querySelector('.__jivoMobileButton');
+const forceMoveJivo = () => {
+    // Ищем мобильную кнопку Jivo
+    const jivoBtn = document.querySelector('.__jivoMobileButton');
     
-    if (mobileButton) {
-        // Поднимаем чуть ниже середины экрана (55% от низа)
-        mobileButton.style.setProperty('bottom', '55vh', 'important');
-        mobileButton.style.setProperty('right', '15px', 'important');
-        mobileButton.style.setProperty('z-index', '99999', 'important');
+    if (jivoBtn) {
+        // Принудительно смещаем её вверх на нужное количество пикселей (например, на 300 пикселей)
+        // Чем больше число, тем выше поднимется кнопка
+        jivoBtn.style.setProperty('transform', 'translateY(-300px)', 'important');
     }
 };
 
-setInterval(fixJivoMobileButton, 200);
+// Запускаем постоянную проверку
+setInterval(forceMoveJivo, 200);
 
 
 
