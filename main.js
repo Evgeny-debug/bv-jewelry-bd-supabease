@@ -3445,20 +3445,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-const fixJivoButton = () => {
-    // Ищем главный контейнер Jivo по специфичному атрибуту или классу
-    const jivoRoot = document.querySelector('jdiv[class*="jivo-root"]');
+const fixJivoButtonCompletely = () => {
+    // Ищем главный корень виджета Jivo
+    const jivoRoot = document.querySelector('jdiv[class*="jivo-root"]') || document.querySelector('jdiv[style*="position: fixed"]');
     
     if (jivoRoot) {
-        // Поднимаем чат выше вашего нижнего мобильного меню
+        // Поднимаем выше нижнего бара меню (на вашем скриншоте меню снизу, ставим над ним)
         jivoRoot.style.setProperty('bottom', '85px', 'important');
         jivoRoot.style.setProperty('right', '15px', 'important');
-        jivoRoot.style.setProperty('z-index', '99999', 'important'); // Чтобы чат был поверх остальных элементов
+        jivoRoot.style.setProperty('z-index', '99999', 'important');
+        
+        // Принудительно задаем компактный размер (квадрат 60x60 пикселей), 
+        // чтобы убрать расплывшийся текстовый блок
+        jivoRoot.style.setProperty('width', '60px', 'important');
+        jivoRoot.style.setProperty('height', '60px', 'important');
+        
+        // Внутри корня ищем сам iframe и растягиваем его на этот компактный размер
+        const jivoIframe = jivoRoot.querySelector('iframe');
+        if (jivoIframe) {
+            jivoIframe.style.setProperty('width', '100%', 'important');
+            jivoIframe.style.setProperty('height', '100%', 'important');
+        }
     }
 };
 
-// Проверяем каждые 200 миллисекунд
-setInterval(fixJivoButton, 200);
+// Запускаем постоянную проверку, так как Jivo подгружает свои слои поэтапно
+setInterval(fixJivoButtonCompletely, 200);
 
 
 
