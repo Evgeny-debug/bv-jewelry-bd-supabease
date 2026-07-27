@@ -3298,7 +3298,11 @@ header {
     flex-shrink: 0 !important;
 }
 
-
+/* Принудительно смещаем весь контейнер JivoChat выше по всему сайту */
+jdiv[class*="jivo_"] {
+    bottom: 90px !important; /* Поднимаем от низа (измените под ваш дизайн) */
+    right: 20px !important;  /* Отступ справа */
+}
 
 
 
