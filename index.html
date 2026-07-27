@@ -1119,15 +1119,26 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <script>
-    const checkJivoInterval = setInterval(() => {
+    // Ждем полной инициализации Jivo и принудительно переопределяем его параметры
+    window.jivo_onLoadCallback = function() {
+        window.jivo_api.setCustomPosition({
+            bottom: '55vh', // Нужная высота (чуть ниже середины дисплея)
+            right: '15px'   // Отступ справа
+        });
+        window.jivo_api.show(); // Гарантированно показываем виджет, если он скрыт
+    };
+
+    // Дополнительный дублер на случай, если callback уже пролетел
+    const checkJivoLoaded = setInterval(() => {
         if (window.jivo_api && typeof window.jivo_api.setCustomPosition === 'function') {
             window.jivo_api.setCustomPosition({
-                bottom: '90px', // Высота от низа (подстройте под себя, например: 70px, 90px или 110px)
-                right: '20px'   // Отступ справа
+                bottom: '55vh',
+                right: '15px'
             });
-            clearInterval(checkJivoInterval);
+            window.jivo_api.show();
+            clearInterval(checkJivoLoaded);
         }
-    }, 100);
+    }, 200);
 </script>
 </body>
 </html>
