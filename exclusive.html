@@ -10,9 +10,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#121212">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; connect-src 'self' https://*.jivosite.com; frame-src https://*.jivosite.com; img-src 'self' data: https://*.jivosite.com;">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https://*.supabase.co https://*.jivosite.com;
+    script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline';
+    connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https://*.jivosite.com;
+    img-src 'self' data: https: http: https://*.jivosite.com;
+    frame-src https://*.jivosite.com;
+    style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;">
 
-
+<script>
+    function jivo_onLoadCallback() {
+        // Смещаем кнопку JivoChat выше, чтобы она не перекрывалась другими элементами
+        // (задаем отступ снизу, например, на уровень вашей старой кнопки)
+        window.jivo_api.setCustomPosition({
+            bottom: '140px', // подберите точное значение под ваш дизайн (аналог bottom-36 / bottom-40)
+            right: '24px'    // отступ справа
+        });
+    }
+</script>
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
 

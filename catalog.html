@@ -10,14 +10,20 @@
 <link rel="manifest" href="/site.webmanifest" />
 
     
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; connect-src 'self' https://*.jivosite.com; frame-src https://*.jivosite.com; img-src 'self' data: https://*.jivosite.com;">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https://*.supabase.co https://*.jivosite.com;
+    script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline';
+    connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https://*.jivosite.com;
+    img-src 'self' data: https: http: https://*.jivosite.com;
+    frame-src https://*.jivosite.com;
+    style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;">
 
 
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
 
 
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#f3e8e8" media="(prefers-color-scheme: light)">
