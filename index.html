@@ -1117,5 +1117,17 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>
+
+<script>
+    const checkJivoInterval = setInterval(() => {
+        if (window.jivo_api && typeof window.jivo_api.setCustomPosition === 'function') {
+            window.jivo_api.setCustomPosition({
+                bottom: '90px', // Высота от низа (подстройте под себя, например: 70px, 90px или 110px)
+                right: '20px'   // Отступ справа
+            });
+            clearInterval(checkJivoInterval);
+        }
+    }, 100);
+</script>
 </body>
 </html>
