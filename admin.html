@@ -460,7 +460,7 @@ select option, select optgroup {
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 lg:mb-6 gap-3">
                 <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide">Товари</h2>
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <div class="relative flex-grow sm:w-64">
+                    <div class="relative flex-grow sm:w-64 bg-black text-white">
                         <input type="text" id="prodSearch" onkeyup="searchProducts()" placeholder="Пошук за назвою..." class="input-field pl-9 py-2 text-xs">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
@@ -712,33 +712,17 @@ select option, select optgroup {
                 </div>
 
                 <!-- Оновлений блок вибору категорії (2 рівні) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
-    <!-- Головна категорія -->
-    <div class="relative w-full">
-        <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Головна категорія *</label>
-        <div class="relative">
-            <select id="prod-parent-category" onchange="handleParentCategoryChange()" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-xl p-3 w-full appearance-none cursor-pointer outline-none transition pr-10" required>
-                <option value="" disabled selected>Оберіть категорію...</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- Підкатегорія -->
-    <div class="relative w-full" id="sub-category-wrapper" style="display: none;">
-        <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1.5">Підкатегорія *</label>
-        <div class="relative">
-            <select id="prod-category" name="category" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-xl p-3 w-full appearance-none cursor-pointer outline-none transition pr-10" required>
-                <option value="" disabled selected>Оберіть підкатегорію...</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="relative">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label>
+                    <div class="relative">
+                        <select id="prod-category" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8" required>
+                            <option value="" disabled selected>Оберіть категорію...</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Статус -->
                 <div class="relative">
