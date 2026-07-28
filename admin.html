@@ -1487,104 +1487,129 @@ select option, select optgroup {
    /**
  * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
  */
+/**
+ * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
+ */
 function populateCategorySelect(selectedCategoryId = '') {
-    const parentSelect = document.getElementById('prod-parent-category');
-    const subSelect = document.getElementById('prod-category');
-    
-    if (!parentSelect || !subSelect) return;
+    try {
+        const parentSelect = document.getElementById('prod-parent-category');
+        const subSelect = document.getElementById('prod-category');
+        
+        if (!parentSelect || !subSelect) return;
 
-    const categoriesTree = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || []) : [];
-    const categoriesFlat = typeof API !== 'undefined' ? (API.get('bv_categories_flat', []) || []) : [];
+        // БЕЗПЕЧНЕ отримання масивів (якщо API повертає об'єкт, перетворюємо на масив)
+        let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
+        let categoriesTree = Array.isArray(rawTree) ? rawTree : (rawTree ? Object.values(rawTree) : []);
+        
+        let rawFlat = typeof API !== 'undefined' ? API.get('bv_categories_flat', []) : [];
+        let categoriesFlat = Array.isArray(rawFlat) ? rawFlat : (rawFlat ? Object.values(rawFlat) : []);
 
-    let selectedParentId = '';
-    let isSubCategory = false;
+        // Нормалізуємо ID (захист від об'єктів подій та строгі типи)
+        let targetId = selectedCategoryId;
+        if (typeof targetId === 'object') targetId = ''; 
+        targetId = String(targetId || '');
 
-    // 1. Визначаємо, до якої головної категорії належить переданий selectedCategoryId (для редагування товару)
-    if (selectedCategoryId) {
-        if (categoriesTree.length > 0) {
+        let selectedParentId = '';
+        let isSubCategory = false;
+
+        // 1. Визначаємо, до якої головної категорії належить переданий ID
+        if (targetId && categoriesTree.length > 0) {
             for (const cat of categoriesTree) {
-                if (cat.id === selectedCategoryId) {
-                    selectedParentId = cat.id; // Це головна категорія без підкатегорій
+                if (!cat) continue;
+                
+                if (String(cat.id) === targetId) {
+                    selectedParentId = String(cat.id);
                     break;
                 }
-                if (cat.sub && cat.sub.some(sub => sub.id === selectedCategoryId)) {
-                    selectedParentId = cat.id; // Це підкатегорія
+                
+                // Перевіряємо, чи є підкатегорії і чи це масив
+                if (Array.isArray(cat.sub) && cat.sub.some(sub => sub && String(sub.id) === targetId)) {
+                    selectedParentId = String(cat.id);
                     isSubCategory = true;
                     break;
                 }
             }
-        } else {
-            // Фолбек для плоского списку (якщо дерева немає)
-            selectedParentId = selectedCategoryId;
         }
+
+        // Якщо ID передано, але його немає в дереві (фолбек)
+        if (targetId && !selectedParentId) {
+            selectedParentId = targetId; 
+        }
+
+        // 2. Заповнюємо селект ГОЛОВНИХ категорій
+        let parentHtml = '<option value="" disabled selected>Оберіть категорію...</option>';
+
+        if (categoriesTree.length > 0) {
+            categoriesTree.forEach(cat => {
+                if (!cat) return;
+                const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id || 'Без назви');
+                const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
+                parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
+            });
+        } else {
+            categoriesFlat.forEach(cat => {
+                if (!cat) return;
+                const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id || 'Без назви');
+                const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
+                parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
+            });
+        }
+
+        parentSelect.innerHTML = parentHtml;
+
+        // 3. Викликаємо оновлення підкатегорій, безпечно передаючи targetId
+        handleParentCategoryChange(targetId);
+
+    } catch (error) {
+        console.error('Критична помилка в populateCategorySelect:', error);
     }
-
-    // 2. Заповнюємо селект ГОЛОВНИХ категорій
-    let parentHtml = '<option value="" disabled selected>Оберіть категорію...</option>';
-
-    if (categoriesTree.length > 0) {
-        categoriesTree.forEach(cat => {
-            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
-            const isSelected = selectedParentId === cat.id ? 'selected' : '';
-            parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
-        });
-    } else {
-        // Запасний варіант на випадок плоского списку
-        categoriesFlat.forEach(cat => {
-            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
-            const isSelected = selectedParentId === cat.id ? 'selected' : '';
-            parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
-        });
-    }
-
-    parentSelect.innerHTML = parentHtml;
-
-    // 3. Відразу викликаємо функцію оновлення підкатегорій, передаючи початковий ID для виділення
-    handleParentCategoryChange(selectedCategoryId);
 }
 
 /**
  * Обробник події зміни головної категорії.
- * Відображає або приховує селект підкатегорій.
  */
 function handleParentCategoryChange(preselectedSubId = '') {
-    const parentSelect = document.getElementById('prod-parent-category');
-    const subSelect = document.getElementById('prod-category');
-    const subWrapper = document.getElementById('sub-category-wrapper');
+    try {
+        const parentSelect = document.getElementById('prod-parent-category');
+        const subSelect = document.getElementById('prod-category');
+        const subWrapper = document.getElementById('sub-category-wrapper');
 
-    if (!parentSelect || !subSelect || !subWrapper) return;
+        if (!parentSelect || !subSelect || !subWrapper) return;
 
-    const parentId = parentSelect.value;
-    const categoriesTree = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || []) : [];
+        let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
+        let categoriesTree = Array.isArray(rawTree) ? rawTree : (rawTree ? Object.values(rawTree) : []);
 
-    // Шукаємо обрану головну категорію в дереві
-    const selectedParent = categoriesTree.find(cat => cat.id === parentId);
-
-    if (selectedParent && selectedParent.sub && selectedParent.sub.length > 0) {
-        // ЯКЩО Є ПІДКАТЕГОРІЇ: Показуємо другий селект і заповнюємо його
-        let subHtml = '<option value="" disabled selected>Оберіть підкатегорію...</option>';
+        const parentId = String(parentSelect.value || '');
         
-        selectedParent.sub.forEach(sub => {
-            const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id);
-            
-            // Якщо preselectedSubId передано і це подія звичайного кліку (event), preselectedSubId буде об'єктом.
-            // Тому перевіряємо, чи це рядок/число
-            const isSelected = (typeof preselectedSubId !== 'object' && preselectedSubId === sub.id) ? 'selected' : '';
-            
-            subHtml += `<option value="${sub.id}" ${isSelected}>${subName}</option>`;
-        });
+        // Нормалізуємо ID підкатегорії
+        let targetSubId = preselectedSubId;
+        if (typeof targetSubId === 'object') targetSubId = ''; 
+        targetSubId = String(targetSubId || '');
 
-        subSelect.innerHTML = subHtml;
-        subSelect.required = true;           // Робимо обов'язковим
-        subWrapper.style.display = 'block';  // Показуємо на екрані
-        
-    } else {
-        // ЯКЩО ПІДКАТЕГОРІЙ НЕМАЄ (або обрано звичайний плоский список):
-        // Приховуємо другий селект, але кладемо в нього ID головної категорії,
-        // щоб логіка збереження товару продовжувала працювати без змін.
-        subSelect.innerHTML = `<option value="${parentId}" selected>Без підкатегорії</option>`;
-        subSelect.removeAttribute('required'); // Знімаємо атрибут required, бо поле сховане
-        subWrapper.style.display = 'none';     // Ховаємо блок
+        // Безпечний пошук категорії
+        const selectedParent = categoriesTree.find(cat => cat && String(cat.id) === parentId);
+
+        if (selectedParent && Array.isArray(selectedParent.sub) && selectedParent.sub.length > 0) {
+            let subHtml = '<option value="" disabled selected>Оберіть підкатегорію...</option>';
+            
+            selectedParent.sub.forEach(sub => {
+                if (!sub) return;
+                const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id || 'Без назви');
+                const isSelected = targetSubId === String(sub.id) ? 'selected' : '';
+                subHtml += `<option value="${sub.id}" ${isSelected}>${subName}</option>`;
+            });
+
+            subSelect.innerHTML = subHtml;
+            subSelect.required = true;
+            subWrapper.style.display = 'block';
+            
+        } else {
+            subSelect.innerHTML = `<option value="${parentId}" selected>Без підкатегорії</option>`;
+            subSelect.removeAttribute('required');
+            subWrapper.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Критична помилка в handleParentCategoryChange:', error);
     }
 }
         window.searchProducts = function() {
