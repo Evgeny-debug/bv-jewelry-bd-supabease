@@ -81,12 +81,71 @@
         <span class="text-xs font-medium uppercase tracking-wider">До головної</span>
     </a>
 
+    <div id="cookieBanner" class="fixed bottom-36 sm:bottom-24 left-6 right-6 sm:left-auto sm:right-6 sm:max-w-sm z-50 bg-white/90 backdrop-blur-md border border-slate-200 p-5 rounded-2xl shadow-2xl transition-all duration-500 transform translate-y-4 opacity-0 pointer-events-none">
+        <div class="flex flex-col space-y-3">
+            <div class="flex items-start justify-between">
+                <h3 class="text-sm font-semibold text-slate-900">🍪 Використання Cookies</h3>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Ми використовуємо файли cookie для покращення роботи сайту. Продовжуючи перегляд, ви погоджуєтеся з нашою політикою.
+            </p>
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button id="acceptCookiesBtn" class="bg-slate-900 text-white text-xs font-medium px-4 py-2 rounded-full hover:bg-slate-800 active:scale-95 transition-all">
+                    Зрозуміло
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        // 1. Функции работы с куки (общий скрипт)
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax";
+        }
 
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) {
+                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                }
+            }
+            return null;
+        }
 
+        // 2. Логика показа и скрытия всплывающего окна
+        document.addEventListener("DOMContentLoaded", function() {
+            const banner = document.getElementById("cookieBanner");
+            const acceptBtn = document.getElementById("acceptCookiesBtn");
 
+            // Проверяем, давал ли пользователь согласие ранее
+            if (!getCookie("bv_cookie_consent")) {
+                // Если нет — плавно показываем окошко через полсекунды
+                setTimeout(() => {
+                    banner.classList.remove("translate-y-4", "opacity-0", "pointer-events-none");
+                    banner.classList.add("translate-y-0", "opacity-100");
+                }, 500);
+            }
 
-
+            // При нажатии на кнопку записываем куку и скрываем окно
+            acceptBtn.addEventListener("click", function() {
+                setCookie("bv_cookie_consent", "accepted", 30); // Запоминаем на 30 дней
+                
+                // Плавное исчезновение
+                banner.classList.remove("translate-y-0", "opacity-100");
+                banner.classList.add("translate-y-4", "opacity-0", "pointer-events-none");
+            });
+        });
+    </script>
 
 </body>
 </html>

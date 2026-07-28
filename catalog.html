@@ -323,85 +323,113 @@
 
     <nav class="side-menu" id="sideMenu"></nav>
 
-    <main class="pt-0 md:pt-0 pb-20 px-2 sm:px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
-        
-        <div class="mb-10 text-left">
-            <nav class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--text-muted)] mb-4">
-                <a href="index.html" class="hover:text-[var(--gold-muted)] transition-colors" data-i18n="m1">Головна</a>
-                <span class="opacity-30">/</span>
-                <span class="text-[var(--gold-muted)]" data-i18n="m2">Каталог</span>
-            </nav>
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h1 id="catalogMainTitle" class="font-serif text-4xl md:text-6xl text-[var(--text-main)] italic">Колекція Atelier</h1>
-                    <p id="catalogSubTitle" class="text-[var(--text-muted)] text-sm mt-3 max-w-xl font-light">Відкрийте для себе вишуканість у кожній деталі.</p>
-                </div>
-                
-                <div class="hidden lg:flex items-center gap-4 border-b border-[var(--border)] pb-2 min-w-[200px]">
-                    <span class="text-[10px] uppercase tracking-widest font-bold text-[var(--text-muted)]" data-i18n="cat_sort">Сортувати:</span>
-                    <select id="sortSelect" class="cursor-pointer font-medium text-[13px] outline-none bg-transparent">
-                        <option value="newest" data-i18n="cat_sort_new">Новинки</option>
-                        <option value="price-asc" data-i18n="cat_sort_cheap">Ціна: від нижчої</option>
-                        <option value="price-desc" data-i18n="cat_sort_exp">Ціна: від вищої</option>
-                        <option value="popular">Популярні</option>
-                    </select>
-                </div>
+    <main class="pt-4 md:pt-8 pb-24 px-4 sm:px-6 md:px-10 w-full max-w-[1440px] mx-auto min-h-screen">
+    
+    <!-- Хлебные крошки и заголовок -->
+    <div class="mb-8 md:mb-12 text-left">
+        <nav class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--text-muted)] mb-4">
+            <a href="index.html" class="hover:text-[var(--gold-muted)] transition-colors" data-i18n="m1">Головна</a>
+            <span class="opacity-30">/</span>
+            <span class="text-[var(--gold-muted)]" data-i18n="m2">Каталог</span>
+        </nav>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--border)]/60">
+            <div>
+                <h1 id="catalogMainTitle" class="font-serif text-3xl sm:text-4xl md:text-6xl text-[var(--text-main)] italic tracking-tight">Колекція Atelier</h1>
+                <p id="catalogSubTitle" class="text-[var(--text-muted)] text-xs sm:text-sm mt-2 max-w-xl font-light tracking-wide">Відкрийте для себе вишуканість у кожній деталі.</p>
+            </div>
+            
+            <!-- Сортировка для Desktop -->
+            <div class="hidden lg:flex items-center gap-3 bg-white/5 dark:bg-black/20 backdrop-blur-md px-4 py-2 rounded-full border border-[var(--border)] transition-all hover:border-[var(--gold-muted)]/50">
+                <span class="text-[10px] uppercase tracking-widest font-bold text-[var(--text-muted)] whitespace-nowrap" data-i18n="cat_sort">Сортувати:</span>
+                <select id="sortSelect" class="cursor-pointer font-medium text-[12px] uppercase tracking-wider outline-none bg-transparent text-[var(--text-main)] pr-2">
+                    <option value="newest" class="bg-[var(--bg-main)] text-[var(--text-main)]" data-i18n="cat_sort_new">Новинки</option>
+                    <option value="price-asc" class="bg-[var(--bg-main)] text-[var(--text-main)]" data-i18n="cat_sort_cheap">Ціна: від нижчої</option>
+                    <option value="price-desc" class="bg-[var(--bg-main)] text-[var(--text-main)]" data-i18n="cat_sort_exp">Ціна: від вищої</option>
+                    <option value="popular" class="bg-[var(--bg-main)] text-[var(--text-main)]">Популярні</option>
+                </select>
             </div>
         </div>
+    </div>
 
-        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-            
-            <aside class="hidden lg:flex flex-col w-56 xl:w-64 sticky top-32 gap-8 overflow-y-auto custom-scrollbar max-h-[calc(100vh-140px)] pb-10 pr-2">
-                <div class="filter-block">
-                    <h3 class="text-[11px] uppercase tracking-[0.3em] font-bold text-[var(--gold-muted)] mb-6" data-i18n="m2">Категорії</h3>
-                    <div id="sideFilterCategories" class="flex flex-col gap-1">
-                        </div>
+    <!-- Основной контент: Сайдбар + Сетка -->
+    <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+        
+        <!-- Сайдбар фильтров (Desktop) -->
+        <aside class="hidden lg:flex flex-col w-60 xl:w-64 sticky top-28 gap-8 overflow-y-auto custom-scrollbar max-h-[calc(100vh-140px)] pr-2 py-2">
+            <!-- Категории (Генерируются через JS) -->
+            <div class="filter-block">
+                <h3 class="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--gold-muted)] mb-4 flex items-center gap-2">
+                    <span data-i18n="m2">Категорії</span>
+                </h3>
+                <div id="sideFilterCategories" class="flex flex-col gap-1"></div>
+            </div>
+
+            <!-- Колекції -->
+            <div class="filter-block pt-4 border-t border-[var(--border)]/40">
+                <h3 class="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--gold-muted)] mb-4">Колекції</h3>
+                <div class="flex flex-col gap-2">
+                    <button class="filter-link text-left text-xs uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-1" data-filter="new" data-i18n="badge_new">Новинки</button>
+                    <button class="filter-link text-left text-xs uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-1" data-filter="sale" data-i18n="badge_sale">Sale</button>
+                    <button class="filter-link text-left text-xs uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-1" data-filter="exclusive" data-i18n="badge_exclusive">Ексклюзив</button>
                 </div>
+            </div>
 
-                <div class="filter-block">
-                    <h3 class="text-[11px] uppercase tracking-[0.3em] font-bold text-[var(--gold-muted)] mb-6">Колекції</h3>
-                    <div class="flex flex-col gap-3">
-                        <button class="filter-link" data-filter="new" data-i18n="badge_new">Новинки</button>
-                        <button class="filter-link" data-filter="sale" data-i18n="badge_sale">Sale</button>
-                        <button class="filter-link" data-filter="exclusive" data-i18n="badge_exclusive">Ексклюзив</button>
-                    </div>
+            <!-- Материал -->
+            <div class="filter-block pt-4 border-t border-[var(--border)]/40">
+                <h3 class="text-[10px] uppercase tracking-[0.25em] font-bold text-[var(--gold-muted)] mb-4" data-i18n="menu_metal">Матеріал</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button class="chip-filter px-3 py-1.5 text-[11px] rounded-full border border-[var(--border)] hover:border-[var(--gold-muted)] transition-all" data-variant="золото">Золото</button>
+                    <button class="chip-filter px-3 py-1.5 text-[11px] rounded-full border border-[var(--border)] hover:border-[var(--gold-muted)] transition-all" data-variant="срібло">Срібло</button>
+                    <button class="chip-filter px-3 py-1.5 text-[11px] rounded-full border border-[var(--border)] hover:border-[var(--gold-muted)] transition-all" data-variant="діамант">Діаманти</button>
                 </div>
+            </div>
+        </aside>
 
-                <div class="filter-block">
-                    <h3 class="text-[11px] uppercase tracking-[0.3em] font-bold text-[var(--gold-muted)] mb-6" data-i18n="menu_metal">Матеріал</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <button class="chip-filter" data-variant="золото">Золото</button>
-                        <button class="chip-filter" data-variant="срібло">Срібло</button>
-                        <button class="chip-filter" data-variant="діамант">Діаманти</button>
-                    </div>
-                </div>
-            </aside>
-
-            <button onclick="toggleMobileFilters()" class="floating-filter-btn lg:hidden">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
-    <span data-i18n="cat_filters">Фільтр</span>
+        <!-- Плавающая кнопка фильтров (Mobile) с бейджем активных фильтров -->
+        <!-- Плавающая кнопка фильтров (Mobile) — поднят отступ, плотный фон -->
+<button onclick="toggleMobileFilters()" class="lg:hidden fixed bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2.5 bg-[var(--bg-main)]/90 backdrop-blur-xl text-[var(--text-main)] border border-[var(--gold-muted)]/40 px-6 py-3 rounded-full shadow-2xl hover:border-[var(--gold-muted)] active:scale-95 transition-all duration-300 ease-out whitespace-nowrap">
+    <div class="relative flex items-center justify-center">
+        <svg class="w-4 h-4 text-[var(--gold-muted)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path>
+        </svg>
+        <!-- Бейдж активного фильтра -->
+        <span id="floatingFilterBadge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--gold-muted)] rounded-full animate-pulse"></span>
+    </div>
+    <span data-i18n="cat_filters" class="text-xs font-semibold uppercase tracking-wider">Фільтр</span>
 </button>
 
-            <div class="flex-1 w-full">
-                <div id="productGrid" class="product-grid-wide"></div>
+        <!-- Сетка товаров и Пагинация -->
+        <div class="flex-1 w-full">
+            <div id="productGrid" class="product-grid-wide"></div>
 
-                <div id="paginationContainer" class="flex justify-center items-center gap-6 mt-20 hidden">
-                    <button id="prevPageBtn" class="px-6 py-3 border border-[var(--border)] text-[var(--text-main)] hover:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all text-[11px] uppercase tracking-widest font-bold disabled:opacity-20 disabled:pointer-events-none">&larr; Попередня</button>
-                    <span id="pageIndicator" class="text-xs font-medium text-[var(--text-muted)] tracking-widest">1 / 1</span>
-                    <button id="nextPageBtn" class="px-6 py-3 border border-[var(--border)] text-[var(--text-main)] hover:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all text-[11px] uppercase tracking-widest font-bold disabled:opacity-20 disabled:pointer-events-none">Наступна &rarr;</button>
-                </div>
+            <!-- Контейнер пагинации -->
+            <div id="paginationContainer" class="flex justify-center items-center gap-4 sm:gap-6 mt-16 sm:mt-20 hidden">
+                <button id="prevPageBtn" class="px-5 py-2.5 sm:px-6 sm:py-3 border border-[var(--border)] text-[var(--text-main)] hover:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all text-[11px] uppercase tracking-widest font-bold disabled:opacity-20 disabled:pointer-events-none rounded-full">
+                    &larr; <span class="hidden sm:inline">Попередня</span>
+                </button>
+                <span id="pageIndicator" class="text-xs font-semibold text-[var(--text-muted)] tracking-widest px-3 py-1.5 bg-white/5 rounded-full border border-[var(--border)]/40">1 / 1</span>
+                <button id="nextPageBtn" class="px-5 py-2.5 sm:px-6 sm:py-3 border border-[var(--border)] text-[var(--text-main)] hover:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-all text-[11px] uppercase tracking-widest font-bold disabled:opacity-20 disabled:pointer-events-none rounded-full">
+                    <span class="hidden sm:inline">Наступна</span> &rarr;
+                </button>
+            </div>
 
-                <div id="emptyState" class="hidden text-center py-32 animate-fade-in">
-                    <div class="w-20 h-20 mx-auto mb-6 text-[var(--text-muted)] opacity-20">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196 7.5 7.5 0 0010.607 10.607z" /></svg>
-                    </div>
-                    <h3 class="text-2xl font-serif italic text-[var(--text-main)] mb-2" data-i18n="cat_empty">Ми нічого не знайшли</h3>
-                    <p class="text-[var(--text-muted)] text-sm mb-8">Спробуйте змінити параметри фільтрів або запит пошуку.</p>
-                    <button onclick="resetFilters()" class="text-[11px] uppercase tracking-widest font-bold text-[var(--gold-muted)] border-b border-[var(--gold-muted)] pb-1 hover:opacity-70 transition-opacity" data-i18n="cat_reset">Скинути всі фільтри</button>
+            <!-- Состояние "Пусто" -->
+            <div id="emptyState" class="hidden text-center py-20 sm:py-28 animate-fade-in bg-white/5 dark:bg-black/20 backdrop-blur-sm border border-[var(--border)]/40 rounded-2xl p-8 my-8">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 text-[var(--gold-muted)] opacity-40 flex items-center justify-center rounded-full bg-[var(--gold-muted)]/10 p-4">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196 7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
                 </div>
+                <h3 class="text-2xl sm:text-3xl font-serif italic text-[var(--text-main)] mb-3" data-i18n="cat_empty">Ми нічого не знайшли</h3>
+                <p class="text-[var(--text-muted)] text-xs sm:text-sm mb-8 max-w-md mx-auto font-light leading-relaxed">Спробуйте змінити параметри фільтрів або запит пошуку.</p>
+                <button onclick="resetFilters()" class="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest font-bold text-[var(--gold-muted)] border-b border-[var(--gold-muted)] pb-1 hover:opacity-70 transition-opacity" data-i18n="cat_reset">
+                    <span>Скинути всі фільтри</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
     <div id="mobileFilterOverlay" class="fixed inset-0 bg-black/60 z-[7000] hidden opacity-0 transition-opacity backdrop-blur-sm" onclick="toggleMobileFilters()"></div>
     <div id="mobileFilterDrawer" class="fixed bottom-0 left-0 w-full bg-[var(--bg-card)] z-[7001] rounded-t-[20px] transform translate-y-full transition-transform duration-500 max-h-[85vh] overflow-y-auto border-t border-[var(--border)]">
@@ -612,236 +640,286 @@
     <script src="main.js"></script>
 
     <script>
-
-        // Універсальна безпечна функція читання полів товару (підтримує snake_case та camelCase з Supabase)
-function getProdVal(prod, field) {
-    if (!prod) return '';
-    if (field === 'desc') return prod.desc || prod.description || '';
-    if (field === 'workCost') return prod.workCost || prod.work_cost || 0;
-    if (field === 'priceType') return prod.priceType || prod.price_type || '';
-    if (field === 'nameEN') return prod.nameEN || prod.name_en || '';
-    if (field === 'img') {
-        let imgs = prod.images || prod.img;
-        if (typeof imgs === 'string') {
-            try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
+    // Універсальна безпечна функція читання полів товару
+    function getProdVal(prod, field) {
+        if (!prod) return '';
+        if (field === 'desc') return prod.desc || prod.description || '';
+        if (field === 'workCost') return prod.workCost || prod.work_cost || 0;
+        if (field === 'priceType') return prod.priceType || prod.price_type || '';
+        if (field === 'nameEN') return prod.nameEN || prod.name_en || '';
+        if (field === 'img') {
+            let imgs = prod.images || prod.img;
+            if (typeof imgs === 'string') {
+                try { imgs = JSON.parse(imgs); } catch(e) { imgs = [imgs]; }
+            }
+            if (Array.isArray(imgs) && imgs.length > 0) return imgs[0];
+            return imgs || '';
         }
-        if (Array.isArray(imgs) && imgs.length > 0) return imgs[0];
-        return imgs || '';
+        return prod[field] !== undefined ? prod[field] : '';
     }
-    return prod[field] !== undefined ? prod[field] : '';
-}
 
+    // Робимо головний слухач асинхронним
+    document.addEventListener('DOMContentLoaded', async () => {
+        const grid = document.getElementById('productGrid');
+        const sideFilterCategories = document.getElementById('sideFilterCategories');
+        const mobFilterCategories = document.getElementById('mobileFilterCategories');
+        const sortSelect = document.getElementById('sortSelect');
+        
+        // ЕЛЕМЕНТИ ПАГІНАЦІЇ
+        const pagContainer = document.getElementById('paginationContainer');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
+        
+        let filteredProducts = [];
+        let currentPage = 1;
+        const itemsPerPage = 120;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const grid = document.getElementById('productGrid');
-            const sideFilterCategories = document.getElementById('sideFilterCategories');
-            const mobFilterCategories = document.getElementById('mobileFilterCategories');
-            const sortSelect = document.getElementById('sortSelect');
+        // --- НОВА ФУНКЦІЯ: Завантаження категорій з Supabase ---
+        async function fetchCategoriesFromDB() {
+            try {
+                // Використовуємо ваш ініціалізований клієнт _supabase
+                const db = typeof _supabase !== 'undefined' ? _supabase : null;
+
+                // Перевіряємо, чи клієнт існує та має метод .from
+                if (!db || typeof db.from !== 'function') {
+                    console.warn('[DB Error] Клієнт _supabase не готовий. Використовуємо кеш.');
+                    return typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
+                }
+
+                const { data, error } = await db
+                    .from('site_storage') 
+                    .select('value')
+                    .eq('key', 'bv_categories_tree')
+                    .single();
+
+                if (error) throw error;
+                if (data && data.value) {
+                    return data.value;
+                }
+            } catch (err) {
+                console.warn('[DB Error] Не вдалося завантажити категорії з БД, використовуємо кеш:', err);
+            }
             
-            // ЕЛЕМЕНТИ ПАГІНАЦІЇ
-            const pagContainer = document.getElementById('paginationContainer');
-            const prevPageBtn = document.getElementById('prevPageBtn');
-            const nextPageBtn = document.getElementById('nextPageBtn');
-            const pageIndicator = document.getElementById('pageIndicator');
-            
-            let filteredProducts = [];
-            let currentPage = 1;
-            const itemsPerPage = 120;
+            // Фолбек на існуючий метод, якщо сталася помилка
+            return typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
+        }
 
-            // 1. ДИНАМІЧНА ГЕНЕРАЦІЯ ДЕРЕВА КАТЕГОРІЙ
-            function initFilters() {
-                const cats = API.get('bv_categories_tree', []);
+        // 1. ДИНАМІЧНА ГЕНЕРАЦІЯ ДЕРЕВА КАТЕГОРІЙ (Тепер асинхронна)
+        async function initFilters() {
+            // Чекаємо на отримання реальних даних з бази
+            const cats = await fetchCategoriesFromDB();
+            
+            let sideHtml = `<button class="filter-link active font-bold mb-4 text-[14px] w-full text-left" data-filter="all" data-i18n="menu_all">Всі вироби</button>`;
+            let mobHtml = `<button class="filter-link active font-bold mb-4 text-[14px] w-full text-left" data-filter="all" data-i18n="menu_all">Всі вироби</button>`;
+
+            cats.forEach(cat => {
+                const catName = window.getLoc ? window.getLoc(cat, 'name') : (cat.name || '');
                 
-                let sideHtml = `<button class="filter-link active font-bold mb-4 text-[14px] w-full text-left" data-filter="all" data-i18n="menu_all">Всі вироби</button>`;
-                let mobHtml = `<button class="filter-link active font-bold mb-4 text-[14px] w-full text-left" data-filter="all" data-i18n="menu_all">Всі вироби</button>`;
-
-                cats.forEach(cat => {
-                    const catName = window.getLoc ? window.getLoc(cat, 'name') : cat.name;
-                    
-                    let treeHtml = `
-                    <details class="group mb-1">
-                        <summary class="flex justify-between items-center cursor-pointer text-[12px] font-bold uppercase tracking-widest text-[var(--text-main)] outline-none py-2">
-                            <span class="hover:text-[var(--gold-muted)] transition-colors w-full" data-filter="${cat.id}">${catName}</span>
-                            <svg class="w-4 h-4 transform transition-transform group-open:rotate-180 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </summary>
-                        <div class="pl-3 mt-1 flex flex-col gap-1 border-l border-[var(--border)] ml-1 mb-4">`;
-                    
-                    if (cat.subcategories && cat.subcategories.length > 0) {
-                        cat.subcategories.forEach(sub => {
-                            const subName = window.getLoc ? window.getLoc(sub, 'name') : sub.name;
+                let treeHtml = `
+                <details class="group mb-1">
+                    <summary class="flex justify-between items-center cursor-pointer text-[12px] font-bold uppercase tracking-widest text-[var(--text-main)] outline-none py-2">
+                        <!-- УБРАН data-filter, теперь клик только раскрывает details -->
+                        <span class="hover:text-[var(--gold-muted)] transition-colors w-full">${catName}</span>
+                        <svg class="w-4 h-4 transform transition-transform group-open:rotate-180 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="pl-3 mt-1 flex flex-col gap-1 border-l border-[var(--border)] ml-1 mb-4">`;
+                
+                if (cat.subcategories && cat.subcategories.length > 0) {
+                    cat.subcategories.forEach(sub => {
+                        const subName = window.getLoc ? window.getLoc(sub, 'name') : (sub.name || '');
+                        
+                        if (sub.subcategories && sub.subcategories.length > 0) {
+                            treeHtml += `
+                            <details class="group/sub">
+                                <summary class="flex justify-between items-center cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[var(--gold-muted)] hover:opacity-80 transition-opacity outline-none py-1.5 mt-1">
+                                    <!-- УБРАН data-filter для вложенного аккордеона -->
+                                    <span class="hover:text-[var(--text-main)] transition-colors w-full">${subName}</span>
+                                    <svg class="w-3 h-3 transform transition-transform group-open/sub:rotate-180 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </summary>
+                                <div class="pl-3 mt-1 flex flex-col gap-2 border-l border-white/10 ml-1 mb-2">`;
                             
-                            // Якщо є під-підкатегорії - малюємо details, якщо нема - звичайну кнопку
-                            if (sub.subcategories && sub.subcategories.length > 0) {
-                                treeHtml += `
-                                <details class="group/sub">
-                                    <summary class="flex justify-between items-center cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[var(--gold-muted)] hover:opacity-80 transition-opacity outline-none py-1.5 mt-1">
-                                        <span class="hover:text-[var(--text-main)] transition-colors w-full" data-filter="${sub.id}">${subName}</span>
-                                        <svg class="w-3 h-3 transform transition-transform group-open/sub:rotate-180 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </summary>
-                                    <div class="pl-3 mt-1 flex flex-col gap-2 border-l border-white/10 ml-1 mb-2">`;
-                                
-                                sub.subcategories.forEach(subsub => {
-                                    const subsubName = window.getLoc ? window.getLoc(subsub, 'name') : subsub.name;
-                                    treeHtml += `<button class="filter-link text-[12px] w-full text-left py-1" data-filter="${subsub.id}">${subsubName}</button>`;
-                                });
-                                treeHtml += `</div></details>`;
-                            } else {
-                                treeHtml += `<button class="filter-link text-[11px] w-full text-left py-1.5 uppercase tracking-widest font-semibold" data-filter="${sub.id}">${subName}</button>`;
-                            }
+                            sub.subcategories.forEach(subsub => {
+                                const subsubName = window.getLoc ? window.getLoc(subsub, 'name') : (subsub.name || '');
+                                // Здесь data-filter остается, так как это конечный пункт
+                                treeHtml += `<button class="filter-link text-[12px] w-full text-left py-1" data-filter="${subsub.id}">${subsubName}</button>`;
+                            });
+                            treeHtml += `</div></details>`;
+                        } else {
+                            // Здесь data-filter тоже остается, так как подкатегорий нет
+                            treeHtml += `<button class="filter-link text-[11px] w-full text-left py-1.5 uppercase tracking-widest font-semibold" data-filter="${sub.id}">${subName}</button>`;
+                        }
+                    });
+                }
+                treeHtml += `</div></details>`;
+
+                sideHtml += treeHtml;
+                mobHtml += treeHtml;
+            });
+
+            if(sideFilterCategories) sideFilterCategories.innerHTML = sideHtml;
+            if(mobFilterCategories) mobFilterCategories.innerHTML = mobHtml;
+
+            const savedLang = API.get('bv_lang', 'uk');
+            if (savedLang !== 'uk' && window.i18n && window.i18n[savedLang] && window.i18n[savedLang]['menu_all']) {
+                document.querySelectorAll('[data-filter="all"]').forEach(el => el.innerText = window.i18n[savedLang]['menu_all']);
+            }
+
+            document.querySelectorAll('details').forEach(detail => {
+                detail.addEventListener('toggle', function() {
+                    if (this.open) {
+                        const siblings = this.parentElement.querySelectorAll(':scope > details');
+                        siblings.forEach(sibling => {
+                            if (sibling !== this) sibling.removeAttribute('open');
                         });
                     }
-                    treeHtml += `</div></details>`;
-
-                    sideHtml += treeHtml;
-                    mobHtml += treeHtml;
                 });
+            });
 
-                if(sideFilterCategories) sideFilterCategories.innerHTML = sideHtml;
-                if(mobFilterCategories) mobFilterCategories.innerHTML = mobHtml;
-
-                const savedLang = API.get('bv_lang', 'uk');
-                if (savedLang !== 'uk' && i18n[savedLang] && i18n[savedLang]['menu_all']) {
-                    document.querySelectorAll('[data-filter="all"]').forEach(el => el.innerText = i18n[savedLang]['menu_all']);
-                }
-
-                document.querySelectorAll('details').forEach(detail => {
-                    detail.addEventListener('toggle', function() {
-                        if (this.open) {
-                            const siblings = this.parentElement.querySelectorAll(':scope > details');
-                            siblings.forEach(sibling => {
-                                if (sibling !== this) sibling.removeAttribute('open');
-                            });
-                        }
-                    });
-                });
-
-                document.querySelectorAll('[data-filter], .chip-filter, #mobileSortOptions button').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const f = e.currentTarget.dataset.filter;
-                        const v = e.currentTarget.dataset.variant;
-                        const s = e.currentTarget.dataset.sort;
-                        
-                        if(f) {
-                            if(e.currentTarget.tagName === 'SPAN') {
-                                e.preventDefault(); 
-                                e.stopPropagation();
-                            }
-                            
-                            document.querySelectorAll(`[data-filter]`).forEach(b => b.classList.remove('active'));
-                            document.querySelectorAll(`[data-filter="${f}"]`).forEach(b => b.classList.add('active'));
-                            window.location.hash = f === 'all' ? '' : f;
-                            
-                            currentPage = 1;
-                            applyAllFilters();
-                            if(window.innerWidth < 1024) window.toggleMobileFilters();
+            document.querySelectorAll('[data-filter], .chip-filter, #mobileSortOptions button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const f = e.currentTarget.dataset.filter;
+                    const v = e.currentTarget.dataset.variant;
+                    const s = e.currentTarget.dataset.sort;
+                    
+                    if(f) {
+                        if(e.currentTarget.tagName === 'SPAN') {
+                            e.preventDefault(); 
+                            e.stopPropagation();
                         }
                         
-                        if(v) {
-                            e.currentTarget.classList.toggle('active');
-                            currentPage = 1;
-                            applyAllFilters();
-                        }
+                        document.querySelectorAll(`[data-filter]`).forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll(`[data-filter="${f}"]`).forEach(b => b.classList.add('active'));
+                        window.location.hash = f === 'all' ? '' : f;
                         
-                        if(s) {
-                            document.querySelectorAll('#mobileSortOptions button').forEach(b => b.classList.remove('active'));
-                            e.currentTarget.classList.add('active');
-                            document.getElementById('sortSelect').value = s;
-                            currentPage = 1;
-                            applyAllFilters();
-                            if(window.innerWidth < 1024) window.toggleMobileFilters();
-                        }
-                    });
-                });
-            }
-            
-            window.toggleMobileFilters = function() {
-                const overlay = document.getElementById('mobileFilterOverlay');
-                const drawer = document.getElementById('mobileFilterDrawer');
-                
-                if(drawer.classList.contains('active')) {
-                    drawer.classList.remove('active');
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('opacity-100');
-                    document.body.style.overflow = '';
-                } else {
-                    overlay.classList.remove('hidden');
-                    setTimeout(() => overlay.classList.add('opacity-100'), 10);
-                    drawer.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
-            }
-
-            function applyAllFilters() {
-                const allProducts = API.get('bv_products', []);
-                const hash = window.location.hash.replace('#', '');
-                const urlParams = new URLSearchParams(window.location.search);
-                const searchQuery = urlParams.get('search');
-                const sortType = sortSelect.value;
-                
-                let results = [...allProducts];
-
-                if (searchQuery) {
-                    const q = searchQuery.toLowerCase();
-                    results = results.filter(p => {
-                        const name = window.getLoc ? window.getLoc(p, 'name').toLowerCase() : p.name.toLowerCase();
-                        return name.includes(q) || p.id.toLowerCase().includes(q);
-                    });
-                    document.getElementById('catalogMainTitle').innerText = `Пошук: "${searchQuery}"`;
-                } else if (hash) {
-                    if (['new', 'sale', 'exclusive'].includes(hash)) {
-                        results = results.filter(p => p.badge === hash);
-                    } else {
-                        results = results.filter(p => p.category === hash || p.subcategory === hash);
+                        currentPage = 1;
+                        applyAllFilters();
+                        if(window.innerWidth < 1024 && window.toggleMobileFilters) window.toggleMobileFilters();
                     }
-                    const activeBtn = document.querySelector(`[data-filter="${hash}"]`);
-                    document.getElementById('catalogMainTitle').innerText = activeBtn ? activeBtn.innerText : 'Каталог';
-                } else {
-                    document.getElementById('catalogMainTitle').innerText = 'Колекція Atelier';
-                }
+                    
+                    if(v) {
+                        e.currentTarget.classList.toggle('active');
+                        currentPage = 1;
+                        applyAllFilters();
+                    }
+                    
+                    if(s) {
+                        document.querySelectorAll('#mobileSortOptions button').forEach(b => b.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        const sortElement = document.getElementById('sortSelect');
+                        if(sortElement) sortElement.value = s;
+                        currentPage = 1;
+                        applyAllFilters();
+                        if(window.innerWidth < 1024 && window.toggleMobileFilters) window.toggleMobileFilters();
+                    }
+                });
+            });
+        }
+        
+        window.toggleMobileFilters = function() {
+            const overlay = document.getElementById('mobileFilterOverlay');
+            const drawer = document.getElementById('mobileFilterDrawer');
+            if (!overlay || !drawer) return;
+            
+            if(drawer.classList.contains('active')) {
+                drawer.classList.remove('active');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+                document.body.style.overflow = '';
+            } else {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+                drawer.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
 
-                const activeChips = Array.from(document.querySelectorAll('.chip-filter[data-variant].active')).map(b => b.dataset.variant.toLowerCase());
-                if(activeChips.length > 0) {
-                    results = results.filter(p => p.variant && activeChips.some(v => p.variant.toLowerCase().includes(v)));
-                }
+        function applyAllFilters() {
+            const allProducts = API.get('bv_products', []);
+            const hash = window.location.hash.replace('#', '');
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchQuery = urlParams.get('search');
+            const sortType = sortSelect ? sortSelect.value : 'newest';
+            
+            let results = [...allProducts];
 
-                if (sortType === 'price-asc') results.sort((a, b) => a.price - b.price);
-                if (sortType === 'price-desc') results.sort((a, b) => b.price - a.price);
-                if (sortType === 'newest') results.sort((a, b) => (b.badge === 'new' ? -1 : 1));
-
-                filteredProducts = results;
-                renderBatch();
+            const badge = document.getElementById('floatingFilterBadge');
+            if (badge) {
+                const hasActiveFilters = (hash && hash !== 'all') || searchQuery || document.querySelectorAll('.chip-filter[data-variant].active').length > 0;
+                badge.classList.toggle('hidden', !hasActiveFilters);
             }
 
-            function renderBatch() {
-                grid.innerHTML = '';
-                
-                const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
-                if (currentPage < 1) currentPage = 1;
-                if (currentPage > totalPages) currentPage = totalPages;
-
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const nextBatch = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-
-                if (nextBatch.length > 0) {
-                    const html = nextBatch.map(p => window.renderProductCard ? window.renderProductCard(p) : '').join('');
-                    grid.innerHTML = html;
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                results = results.filter(p => {
+                    const name = window.getLoc ? window.getLoc(p, 'name').toLowerCase() : (p.name || '').toLowerCase();
+                    return name.includes(q) || (p.id && p.id.toLowerCase().includes(q));
+                });
+                const titleEl = document.getElementById('catalogMainTitle');
+                if (titleEl) titleEl.innerText = `Пошук: "${searchQuery}"`;
+            } else if (hash) {
+                if (['new', 'sale', 'exclusive'].includes(hash)) {
+                    results = results.filter(p => p.badge === hash);
+                } else {
+                    results = results.filter(p => p.category === hash || p.subcategory === hash);
                 }
+                const activeBtn = document.querySelector(`[data-filter="${hash}"]`);
+                const titleEl = document.getElementById('catalogMainTitle');
+                if (titleEl) titleEl.innerText = activeBtn ? activeBtn.innerText : 'Каталог';
+            } else {
+                const titleEl = document.getElementById('catalogMainTitle');
+                if (titleEl) titleEl.innerText = 'Колекція Atelier';
+            }
 
-                document.getElementById('emptyState').classList.toggle('hidden', filteredProducts.length > 0);
-                grid.classList.toggle('hidden', filteredProducts.length === 0);
-                
+            const activeChips = Array.from(document.querySelectorAll('.chip-filter[data-variant].active')).map(b => b.dataset.variant.toLowerCase());
+            if(activeChips.length > 0) {
+                results = results.filter(p => p.variant && activeChips.some(v => p.variant.toLowerCase().includes(v)));
+            }
+
+            if (sortType === 'price-asc') results.sort((a, b) => (a.price || 0) - (b.price || 0));
+            if (sortType === 'price-desc') results.sort((a, b) => (b.price || 0) - (a.price || 0));
+            if (sortType === 'newest') results.sort((a, b) => (b.badge === 'new' ? -1 : 1));
+
+            filteredProducts = results;
+            renderBatch();
+        }
+
+        function renderBatch() {
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const nextBatch = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+            if (nextBatch.length > 0) {
+                const html = nextBatch.map(p => window.renderProductCard ? window.renderProductCard(p) : '').join('');
+                grid.innerHTML = html;
+            }
+
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) emptyState.classList.toggle('hidden', filteredProducts.length > 0);
+            grid.classList.toggle('hidden', filteredProducts.length === 0);
+            
+            if (pagContainer) {
                 if (totalPages > 1) {
                     pagContainer.classList.remove('hidden');
-                    pageIndicator.innerText = `${currentPage} / ${totalPages}`;
-                    prevPageBtn.disabled = currentPage === 1;
-                    nextPageBtn.disabled = currentPage === totalPages;
+                    if (pageIndicator) pageIndicator.innerText = `${currentPage} / ${totalPages}`;
+                    if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+                    if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
                 } else {
                     pagContainer.classList.add('hidden');
                 }
-
-                document.getElementById('catalogSubTitle').innerText = `Знайдено виробів: ${filteredProducts.length}`;
             }
 
+            const subTitle = document.getElementById('catalogSubTitle');
+            if (subTitle) subTitle.innerText = `Знайдено виробів: ${filteredProducts.length}`;
+        }
+
+        if (prevPageBtn) {
             prevPageBtn.addEventListener('click', () => {
                 if(currentPage > 1) { 
                     currentPage--; 
@@ -849,7 +927,9 @@ function getProdVal(prod, field) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
+        }
 
+        if (nextPageBtn) {
             nextPageBtn.addEventListener('click', () => {
                 const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
                 if(currentPage < totalPages) { 
@@ -858,68 +938,70 @@ function getProdVal(prod, field) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
+        }
 
-            window.resetFilters = () => {
-                window.location.hash = '';
-                window.history.pushState({}, '', window.location.pathname);
-                document.querySelectorAll('.active[data-filter]').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('[data-filter="all"]').forEach(b => b.classList.add('active'));
-                currentPage = 1;
-                applyAllFilters();
-            };
+        window.resetFilters = () => {
+            window.location.hash = '';
+            window.history.pushState({}, '', window.location.pathname);
+            document.querySelectorAll('.active[data-filter]').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('[data-filter="all"]').forEach(b => b.classList.add('active'));
+            currentPage = 1;
+            applyAllFilters();
+        };
 
+        if (sortSelect) {
             sortSelect.addEventListener('change', () => {
                 currentPage = 1;
                 applyAllFilters();
             });
+        }
 
-            window.addEventListener('hashchange', () => {
-                const hash = window.location.hash.replace('#', '') || 'all';
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '') || 'all';
+            document.querySelectorAll('.active[data-filter]').forEach(b => b.classList.remove('active'));
+            const newActive = document.querySelectorAll(`[data-filter="${hash}"]`);
+            newActive.forEach(b => {
+                b.classList.add('active');
+                let parentDetails = b.closest('details');
+                while(parentDetails) {
+                    parentDetails.setAttribute('open', '');
+                    parentDetails = parentDetails.parentElement.closest('details');
+                }
+            });
+            currentPage = 1;
+            applyAllFilters();
+        });
+
+        // ІНІЦІАЛІЗАЦІЯ КАТЕГОРІЙ З БД ТА ПЕРШИЙ РЕНДЕР
+        await initFilters();
+        
+        const initialHash = window.location.hash.replace('#', '');
+        if(initialHash) {
+            setTimeout(() => {
                 document.querySelectorAll('.active[data-filter]').forEach(b => b.classList.remove('active'));
-                const newActive = document.querySelectorAll(`[data-filter="${hash}"]`);
+                const newActive = document.querySelectorAll(`[data-filter="${initialHash}"]`);
                 newActive.forEach(b => {
                     b.classList.add('active');
-                    // Автоматичне розкриття батьківських details
                     let parentDetails = b.closest('details');
                     while(parentDetails) {
                         parentDetails.setAttribute('open', '');
                         parentDetails = parentDetails.parentElement.closest('details');
                     }
                 });
-                currentPage = 1;
                 applyAllFilters();
-            });
+            }, 100);
+        } else {
+            applyAllFilters();
+        }
+    });
 
-            initFilters();
-            
-            const initialHash = window.location.hash.replace('#', '');
-            if(initialHash) {
-                setTimeout(() => {
-                    document.querySelectorAll('.active[data-filter]').forEach(b => b.classList.remove('active'));
-                    const newActive = document.querySelectorAll(`[data-filter="${initialHash}"]`);
-                    newActive.forEach(b => {
-                        b.classList.add('active');
-                        let parentDetails = b.closest('details');
-                        while(parentDetails) {
-                            parentDetails.setAttribute('open', '');
-                            parentDetails = parentDetails.parentElement.closest('details');
-                        }
-                    });
-                    applyAllFilters();
-                }, 100);
-            } else {
-                applyAllFilters();
-            }
-        });
+    // Решта ваших слухачів
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof renderHomeCategories === 'function') renderHomeCategories();
+        if (typeof renderHomeCategoriesScroll === 'function') renderHomeCategoriesScroll();
+    });
 
-       
-document.addEventListener('DOMContentLoaded', () => {
-    renderHomeCategories();
-    renderHomeCategoriesScroll();
-    initFadeBannerSlider();
-
-});
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
         const fixGrids = () => {
             const containers = document.querySelectorAll('#dynamicHomeBlocksContainer .grid, #glassAccordion .grid, #dynamicHomeBlocksContainer div[class*="grid-cols-"], #glassAccordion div[class*="grid-cols-"]');
             containers.forEach(el => {
@@ -927,12 +1009,60 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         };
         fixGrids();
-        // Запускаємо ще раз на випадок динамічного завантаження даних із Supabase
         setTimeout(fixGrids, 500);
         setTimeout(fixGrids, 1500);
     });
 
-    </script>
+    // Ініціалізація кастомного меню фільтрів (якщо воно є на сторінці)
+    document.addEventListener('DOMContentLoaded', () => {
+        const drawer = document.getElementById('filterDrawer');
+        const openBtn = document.getElementById('openFilterBtn');
+        const closeBtn = document.getElementById('closeFilterBtn');
+        const applyBtn = document.getElementById('applyFilterBtn');
+        const resetBtn = document.getElementById('resetFilterBtn');
+
+        openBtn?.addEventListener('click', () => drawer.classList.add('active'));
+        closeBtn?.addEventListener('click', () => drawer.classList.remove('active'));
+
+        applyBtn?.addEventListener('click', () => {
+            const categoryEl = document.getElementById('filterCategory');
+            const maxPriceEl = document.getElementById('filterMaxPrice');
+            const category = categoryEl ? categoryEl.value : 'all';
+            const maxPrice = maxPriceEl ? parseFloat(maxPriceEl.value) : NaN;
+
+            const allProducts = window.products || [];
+
+            const filtered = allProducts.filter(item => {
+                const matchCategory = (category === 'all') || (item.category === category);
+                const matchPrice = isNaN(maxPrice) || (parseFloat(item.price || item.price_usd) <= maxPrice);
+                return matchCategory && matchPrice;
+            });
+
+            if (typeof renderCatalog === 'function') renderCatalog(filtered);
+            if (drawer) drawer.classList.remove('active');
+        });
+
+        resetBtn?.addEventListener('click', () => {
+            const categoryEl = document.getElementById('filterCategory');
+            const maxPriceEl = document.getElementById('filterMaxPrice');
+            if (categoryEl) categoryEl.value = 'all';
+            if (maxPriceEl) maxPriceEl.value = '';
+            
+            if (typeof renderCatalog === 'function') renderCatalog(window.products || []);
+            if (drawer) drawer.classList.remove('active');
+        });
+    });
+
+    function renderCatalog(items) {
+        const container = document.getElementById('catalogGrid');
+        if (!container) return;
+        if (items.length === 0) {
+            container.innerHTML = '<p class="empty-msg">Товары не найдены</p>';
+            return;
+        }
+        container.innerHTML = items.map(product => typeof createProductCard === 'function' ? createProductCard(product) : '').join('');
+    }
+</script>
 
 
     <!-- Преміальне модальне вікно "Під замовлення" -->
@@ -963,68 +1093,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>
         </div>
     </div>
+  </div>
 
-
-    <!-- <div id="authModal" class="fixed inset-0 bg-black/80 z-[6000] transition-opacity flex items-center justify-center p-4 backdrop-blur-md" aria-modal="true" role="dialog">
-        <div class="glass-panel p-8 w-full max-w-sm relative rounded-none shadow-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--danger)] text-3xl leading-none transition-colors z-10">×</button>
-            <div id="authFormContainer">
-                <h3 id="authTitle" class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login">Увійти</h3>
-                <p id="authSubtitle" class="text-center text-[var(--text-muted)] text-xs mb-6 font-light">Раді бачити вас знову</p>
-                <form id="authForm" class="flex flex-col gap-3">
-                    <div id="nameFieldContainer" class="hidden flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Ваше ім'я</label>
-                        <input type="text" id="authName" placeholder="Олена" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full">
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Email</label>
-                        <input type="email" id="authUser" placeholder="mail@example.com" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required="">
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--gold-muted)] ml-1">Пароль</label>
-                        <input type="password" id="authPass" placeholder="Мінімум 6 символів" class="auth-input outline-none border border-[var(--border)] bg-[rgba(255,255,255,0.03)] focus:border-[var(--gold-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-main)] transition-colors w-full" required="">
-                    </div>
-                    <button type="submit" class="btn-solid py-3.5 rounded-none font-bold uppercase tracking-widest text-[11px] hover:opacity-90 transition-opacity active:scale-95 shadow-md mt-2" id="authSubmitBtn" data-i18n="login">Увійти</button>
-                    
-                    <div class="mt-4 flex flex-col gap-2.5">
-                        <div class="relative flex py-2 items-center">
-                            <div class="flex-grow border-t border-[var(--border)]"></div>
-                            <span class="flex-shrink-0 mx-4 text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Або</span>
-                            <div class="flex-grow border-t border-[var(--border)]"></div>
-                        </div>
-                        
-                        <button type="button" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2 6.42 2 12c0 5.59 4.39 10 10.1 10 5.92 0 10.28-4.61 10.28-10.4 0-.83-.07-1.39-.07-1.39z"></path></svg>
-                            Увійти через Google
-                        </button>
-                        
-                        <button type="button" onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 border border-[var(--border)] bg-white/5 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--text-main)] hover:border-[var(--gold-muted)] hover:bg-white/10 transition-all active:scale-95 rounded-none">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.34-.85 3.73-.7 1.13.1 2.25.69 2.94 1.7-2.64 1.63-2.15 5.04.51 6.13-.67 1.84-1.63 3.75-2.26 5.04zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"></path></svg>
-                            Увійти через Apple
-                        </button>
-                    </div>
-
-                    <div class="text-center text-xs text-[var(--text-muted)] mt-4">
-                        <span id="authToggleText">Немає акаунта?</span> 
-                        <button type="button" onclick="toggleAuthMode(event)" class="text-[var(--gold-muted)] font-bold hover:underline ml-1" id="authToggleLink">Зареєструватися</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div id="profileView" class="hidden flex-col gap-4">
-                <h3 class="text-2xl font-serif text-[var(--text-main)] mb-1 text-center" data-i18n="login_mob_title">КАБІНЕТ</h3>
-                <div class="flex flex-col items-center justify-center p-5 bg-[rgba(255,255,255,0.02)] border border-[var(--border)] rounded-none mb-1 relative overflow-hidden group">
-                    <div class="w-16 h-16 bg-[var(--gold-muted)] text-[#111] rounded-full flex items-center justify-center text-2xl font-bold uppercase shadow-md mb-3 relative z-10" id="profAvatar">A</div>
-                    <p class="text-center text-[var(--text-main)] font-semibold text-lg relative z-10" id="profName">User</p>
-                    <p class="text-center text-[var(--text-muted)] text-[11px] mt-1 relative z-10" id="profEmail">user@mail.com</p>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <button onclick="location.href='admin.html'" id="adminLinkBtn" class="hidden w-full border border-[var(--gold-muted)] text-[var(--gold-muted)] py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors active:scale-95 text-center">Панель Адміністратора</button>
-                    <button onclick="location.href='profile.html'" id="clientLinkBtn" class="btn-solid py-3 rounded-none font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity active:scale-95 w-full">Мої замовлення</button>
-                    <button onclick="window.logoutUser()" class="w-full py-3 rounded-none border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors uppercase tracking-widest text-[10px] font-bold active:scale-95 bg-transparent mt-1">Вийти з акаунту</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </body>
 </html>

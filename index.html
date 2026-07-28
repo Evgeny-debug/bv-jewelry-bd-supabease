@@ -6,7 +6,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
+<meta name="apple-mobile-web-app-title" content="BV Jewelry" />
 <link rel="manifest" href="/site.webmanifest" />
 
     <meta name="description" content="Купити вишукані ювелірні вироби, каблучки та прикраси за вигідними цінами. Швидка доставка по Україні.">
@@ -512,83 +512,7 @@ html, body, *, *::before, *::after {
 
 
 
-async function renderHomeCategories() {
-    const accordionContainer = document.getElementById('glassAccordion');
-    if (!accordionContainer) return;
 
-    try {
-        const { data: categoriesData } = await _supabase.from('site_storage').select('*').eq('key', 'bv_categories_flat').single();
-        const { data: productsData } = await _supabase.from('products').select('*');
-
-        const categories = categoriesData ? (categoriesData.value || categoriesData) : [];
-        const products = productsData || [];
-
-        const mainCategoryIds = ['rings', 'earrings', 'necklaces', 'bracelets'];
-        const rootCategories = categories.filter(c => mainCategoryIds.includes(c.id) || !c.parentId);
-
-        accordionContainer.innerHTML = rootCategories.map((cat, index) => {
-            const allSubIds = getAllSubCategoryIds(cat.id, categories);
-            const targetCatIds = [cat.id, ...allSubIds].map(id => String(id).toLowerCase());
-
-            let firstProduct = products.find(p => {
-                const pCat = p.category || p.category_id || p.cat_id || p.group || p.parent_id;
-                return pCat && targetCatIds.includes(String(pCat).toLowerCase());
-            });
-
-            if (!firstProduct && products.length > 0) {
-                firstProduct = products[0];
-            }
-            
-            let bgImage = '';
-            if (firstProduct) {
-                bgImage = firstProduct.image || 
-                        firstProduct.image_url || 
-                        firstProduct.photo || 
-                        firstProduct.img || 
-                        firstProduct.thumbnail || 
-                        (Array.isArray(firstProduct.images) ? firstProduct.images[0] : null);
-
-                if (!bgImage && firstProduct.variations) {
-                    const vars = Object.values(firstProduct.variations);
-                    for (const v of vars) {
-                        const vImg = v?.image || v?.image_url || v?.photo || (Array.isArray(v?.images) ? v.images[0] : null);
-                        if (vImg) {
-                            bgImage = vImg;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            const subCategories = categories.filter(c => c.parentId === cat.id);
-            const tagsHtml = subCategories.map(sub => `
-                <a href="catalog.html#${sub.id}" onclick="event.stopPropagation()" class="panel-tag">${sub.name?.uk || sub.name || sub.id}</a>
-            `).join('');
-
-            const categoryName = cat.name?.uk || cat.name || cat.id;
-            const isActive = index === 0 ? 'active' : '';
-
-            return `
-                <div class="glass-panel-item group ${isActive}" onclick="toggleAccordionPanel(this)">
-                    ${bgImage ? `<img src="${bgImage}" alt="${categoryName}" class="panel-bg">` : `<div class="panel-bg bg-gray-200 dark:bg-zinc-800"></div>`}
-                    <div class="panel-overlay"></div>
-                    <div class="panel-content">
-                        <h3 class="panel-title">${categoryName}</h3>
-                        <div class="panel-hidden-content">
-                            <div class="panel-tags">
-                                ${tagsHtml}
-                            </div>
-                            <a href="catalog.html#${cat.id}" onclick="event.stopPropagation()" class="panel-btn">Всі ${categoryName.toLowerCase()} →</a>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-    } catch (error) {
-        console.error('Помилка рендерингу категорій аккордеону:', error);
-    }
-}
 
 // Допоміжна рекурсивна функція збору підкатегорій
 function getAllSubCategoryIds(catId, allCategories) {

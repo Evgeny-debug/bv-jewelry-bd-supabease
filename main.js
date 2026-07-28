@@ -3460,3 +3460,189 @@ setInterval(forceMoveJivo, 200);
 
 
 
+// === МОДУЛЬ COOKIE-БАННЕРА ===
+(function() {
+    // Функции работы с куки
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) {
+                return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+        }
+        return null;
+    }
+
+    // Создаем и внедряем HTML-разметку баннера
+    function initCookieBanner() {
+        // Если согласие уже получено ранее, ничего не выводим
+        if (getCookie("bv_cookie_consent")) return;
+
+        const banner = document.createElement("div");
+        banner.id = "cookieBanner";
+        // Позиционируем чуть выше нижнего бара (строго над кнопкой «До головної»)
+        // Изменили класс мобильного отступа с bottom-36 на bottom-48 (или bottom-52)
+        banner.className = "fixed bottom-48 sm:bottom-24 left-6 right-6 sm:left-auto sm:right-6 sm:max-w-sm z-50 bg-white/90 backdrop-blur-md border border-slate-200 p-5 rounded-2xl shadow-2xl transition-all duration-500 transform translate-y-4 opacity-0 pointer-events-none";
+        
+        banner.innerHTML = `
+            <div class="flex flex-col space-y-3">
+                <div class="flex items-start justify-between">
+                    <h3 class="text-sm font-semibold text-slate-900">🍪 Використання Cookies</h3>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Ми використовуємо файли cookie для покращення роботи. Детальніше читайте в нашій 
+                    <a href="privacy.html" class="text-slate-900 font-medium underline hover:text-slate-600 transition">Політиці конфіденційності</a>.
+                </p>
+                <div class="flex items-center justify-end gap-2 pt-1">
+                    <button id="acceptCookiesBtn" class="bg-slate-900 text-white text-xs font-medium px-4 py-2 rounded-full hover:bg-slate-800 active:scale-95 transition-all cursor-pointer">
+                        Зрозуміло
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(banner);
+
+        // Плавное появление через 500мс после загрузки страницы
+        setTimeout(() => {
+            banner.classList.remove("translate-y-4", "opacity-0", "pointer-events-none");
+            banner.classList.add("translate-y-0", "opacity-100");
+        }, 500);
+
+        // Обработка нажатия на кнопку «Зрозуміло»
+        const acceptBtn = document.getElementById("acceptCookiesBtn");
+        if (acceptBtn) {
+            acceptBtn.addEventListener("click", function() {
+                setCookie("bv_cookie_consent", "accepted", 30); // Запоминаем выбор на 30 дней
+                
+                // Плавное исчезновение
+                banner.classList.remove("translate-y-0", "opacity-100");
+                banner.classList.add("translate-y-4", "opacity-0", "pointer-events-none");
+                
+                setTimeout(() => banner.remove(), 500);
+            });
+        }
+    }
+
+    // Запускаем инициализацию при загрузке DOM
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initCookieBanner);
+    } else {
+        initCookieBanner();
+    }
+})();
+
+
+
+
+async function renderHomeCategories() {
+    const accordionContainer = document.getElementById('glassAccordion');
+    if (!accordionContainer) return;
+
+    try {
+        const { data: categoriesData } = await _supabase.from('site_storage').select('*').eq('key', 'bv_categories_flat').single();
+        const { data: productsData } = await _supabase.from('products').select('*');
+
+        const categories = categoriesData ? (categoriesData.value || categoriesData) : [];
+        const products = productsData || [];
+
+        const mainCategoryIds = ['rings', 'earrings', 'necklaces', 'bracelets'];
+        const rootCategories = categories.filter(c => mainCategoryIds.includes(c.id) || !c.parentId);
+
+        accordionContainer.innerHTML = rootCategories.map((cat, index) => {
+            const allSubIds = getAllSubCategoryIds(cat.id, categories);
+            const targetCatIds = [cat.id, ...allSubIds].map(id => String(id).toLowerCase());
+
+            let firstProduct = products.find(p => {
+                const pCat = p.category || p.category_id || p.cat_id || p.group || p.parent_id;
+                return pCat && targetCatIds.includes(String(pCat).toLowerCase());
+            });
+
+            if (!firstProduct && products.length > 0) {
+                firstProduct = products[0];
+            }
+            
+            let bgImage = '';
+            if (firstProduct) {
+                bgImage = firstProduct.image || 
+                        firstProduct.image_url || 
+                        firstProduct.photo || 
+                        firstProduct.img || 
+                        firstProduct.thumbnail || 
+                        (Array.isArray(firstProduct.images) ? firstProduct.images[0] : null);
+
+                if (!bgImage && firstProduct.variations) {
+                    const vars = Object.values(firstProduct.variations);
+                    for (const v of vars) {
+                        const vImg = v?.image || v?.image_url || v?.photo || (Array.isArray(v?.images) ? v.images[0] : null);
+                        if (vImg) {
+                            bgImage = vImg;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const subCategories = categories.filter(c => c.parentId === cat.id);
+            const tagsHtml = subCategories.map(sub => `
+                <a href="catalog.html#${sub.id}" onclick="event.stopPropagation()" class="panel-tag">${sub.name?.uk || sub.name || sub.id}</a>
+            `).join('');
+
+            const categoryName = cat.name?.uk || cat.name || cat.id;
+            const isActive = index === 0 ? 'active' : '';
+
+            return `
+                <div class="glass-panel-item group ${isActive}" onclick="toggleAccordionPanel(this)">
+                    ${bgImage ? `<img src="${bgImage}" alt="${categoryName}" class="panel-bg">` : `<div class="panel-bg bg-gray-200 dark:bg-zinc-800"></div>`}
+                    <div class="panel-overlay"></div>
+                    <div class="panel-content">
+                        <h3 class="panel-title">${categoryName}</h3>
+                        <div class="panel-hidden-content">
+                            <div class="panel-tags">
+                                ${tagsHtml}
+                            </div>
+                            <a href="catalog.html#${cat.id}" onclick="event.stopPropagation()" class="panel-btn">Всі ${categoryName.toLowerCase()} →</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Помилка рендерингу категорій аккордеону:', error);
+    }
+}
+
+
+
+
+
+
+
+function createProductCard(product) {
+    // Подстраховка от undefined: берем существующее поле или значение по умолчанию
+    const title = product.name || product.title || 'Без названия';
+    const price = product.price || product.price_usd ? `$${product.price || product.price_usd}` : 'Цена по запросу';
+    const imageUrl = product.image_url || product.image || 'https://via.placeholder.com/300';
+
+    return `
+        <div class="product-card" data-id="${product.id}">
+            <img src="${imageUrl}" alt="${title}">
+            <h3>${title}</h3>
+            <span>${price}</span>
+        </div>
+    `;
+}
