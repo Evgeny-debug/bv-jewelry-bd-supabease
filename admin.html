@@ -17,13 +17,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
     :root {
-        --bg-main: #0a0a0c;
-        --bg-card: #121216;
+        --bg-main: #070709;
+        --bg-surface: #101014;
+        --bg-card: rgba(18, 18, 24, 0.75);
+        --border-glass: rgba(255, 255, 255, 0.07);
+        --border-glass-hover: rgba(197, 160, 89, 0.3);
         --accent-gold: #c5a059;
         --accent-gold-hover: #d8b269;
+        --accent-gold-glow: rgba(197, 160, 89, 0.15);
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* 💎 Глобальный сброс для предотвращения горизонтального скролла */
+    /* 💎 Глобальный сброс и типографика */
     *, *::before, *::after {
         box-sizing: border-box;
     }
@@ -34,8 +41,10 @@
         width: 100%;
         overflow-x: hidden;
         background-color: var(--bg-main);
-        color: #e5e7eb;
+        color: var(--text-main);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     .main-content, .admin-main, main {
@@ -52,39 +61,55 @@
         width: 100%;
     }
 
+    /* 🪞 Премиальный Glassmorphism */
     .glass-panel {
-        background: rgba(18, 18, 22, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
         border-radius: 1rem;
+        box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+        transition: var(--transition-smooth);
         max-width: 100%;
     }
 
+    .glass-panel:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ⌨️ Поля ввода */
     .input-field {
         width: 100%;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0.625rem;
         padding: 0.75rem 1rem;
         color: #fff;
         font-size: 0.875rem;
-        transition: all 0.2s;
+        transition: var(--transition-smooth);
         min-height: 44px;
         appearance: none;
     }
+
+    .input-field:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
     .input-field:focus {
         outline: none;
         border-color: var(--accent-gold);
-        box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 0 3px var(--accent-gold-glow);
     }
 
+    /* 🔘 Кнопки */
     .btn-primary, .btn-secondary, .btn-danger {
         padding: 0.75rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: 0.625rem;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: transform 0.1s, opacity 0.2s;
+        transition: var(--transition-smooth);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -97,34 +122,54 @@
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, var(--accent-gold), #a68342);
+        background: linear-gradient(135deg, var(--accent-gold) 0%, #a68342 100%);
         color: #000;
         border: none;
+        box-shadow: 0 4px 15px rgba(197, 160, 89, 0.25);
     }
-    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--accent-gold-hover) 0%, #b8934d 100%);
+        box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .btn-primary:active { transform: translateY(0) scale(0.98); }
     
     .btn-secondary {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.04);
         color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
     }
     
     .btn-danger {
-        background: rgba(239, 68, 68, 0.1);
+        background: rgba(239, 68, 68, 0.08);
         color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.15);
     }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+    .btn-danger:hover { 
+        background: rgba(239, 68, 68, 0.15); 
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* 📜 Кастомный скроллбар */
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.4); }
 
+    /* 📱 Боковая панель и оверлей */
     .sidebar-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(6px);
         z-index: 40;
         opacity: 0;
         pointer-events: none;
@@ -142,9 +187,9 @@
             height: 100vh !important;
             height: 100dvh !important;
             z-index: 50;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             border-radius: 0;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -153,6 +198,7 @@
         .admin-sidebar.open { left: 0; }
     }
 
+    /* 📋 Адаптивные мобильные таблицы */
     @media (max-width: 768px) {
         .mobile-card-table {
             width: 100% !important;
@@ -166,14 +212,19 @@
         }
         
         .mobile-card-table tbody tr {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.875rem;
             padding: 1rem;
             margin-bottom: 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             max-width: 100%;
             overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .mobile-card-table tbody tr:hover {
+            border-color: rgba(197, 160, 89, 0.2);
         }
         
         .mobile-card-table tbody td {
@@ -183,7 +234,7 @@
             flex-wrap: wrap;
             gap: 0.5rem;
             padding: 0.75rem 0 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             text-align: right;
             font-size: 0.875rem;
             word-break: break-word;
@@ -193,7 +244,7 @@
         .mobile-card-table tbody td::before {
             content: attr(data-label);
             font-weight: 600;
-            color: #8b949e;
+            color: var(--text-muted);
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -211,10 +262,11 @@
             flex-direction: column;
             align-items: flex-start;
             text-align: left;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.25);
             padding: 0.75rem !important;
             border-radius: 0.5rem;
             margin: 0.25rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
         
         .mobile-card-table tbody td.td-column::before,
@@ -225,7 +277,7 @@
             max-width: 100%;
             margin-bottom: 0.35rem;
             color: var(--accent-gold);
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
             padding-bottom: 0.25rem;
             width: 100%;
         }
@@ -246,21 +298,22 @@
         }
     }
 
+    /* 🔔 Всплывающие уведомления (Toasts) */
     .toast {
         position: fixed;
         bottom: max(1.5rem, env(safe-area-inset-bottom));
         right: 1.5rem;
         left: auto;
-        background: var(--accent-gold);
+        background: linear-gradient(135deg, var(--accent-gold) 0%, #b8934d 100%);
         color: #000;
         font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         z-index: 100;
-        transform: translateY(100px);
+        transform: translateY(120px);
         opacity: 0;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     @media (max-width: 640px) {
@@ -272,7 +325,7 @@
     }
     
     .toast.show { transform: translateY(0); opacity: 1; }
-    </style>
+</style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col lg:flex-row relative bg-[#0a0a0c]" style="opacity: 0; transition: opacity 0.5s;">
 

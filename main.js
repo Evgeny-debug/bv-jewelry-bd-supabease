@@ -1,3 +1,26 @@
+const _origLog = console.warn;
+console.warn = function(...args) {
+    if (args.some(arg => String(arg).includes('undefined'))) {
+        console.trace('⚡ Знайдено запис із undefined!');
+    }
+    _origLog.apply(console, args);
+};
+
+// Перехоплювач появи тексту "undefined" у DOM
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((m) => {
+        m.addedNodes.forEach((node) => {
+            if (node.nodeType === 3 && node.nodeValue.includes('undefined')) {
+                console.error('🎯 Знайдено текст "undefined" у вузлі:', node.parentElement);
+            }
+        });
+    });
+});
+observer.observe(document.body, { subtree: true, characterData: true, childList: true });
+
+
+
+
 /* ==========================================
    ВІДКЛЮЧЕННЯ СИСТЕМНИХ СПІВПАДАЮЧИХ ВІКОН (ALERT/CONFIRM/PROMPT)
    ========================================== */
@@ -203,7 +226,7 @@ window.toggleAccordionPanel = function(clickedPanel) {
 // 2. БАЗОВІ ДАНІ ТА ЛОКАЛІЗАЦІЯ
 // ==========================================
 
-const i18n = {
+window.i18n = {
     uk: { 
         m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
         search_ph: "Пошук...", search_mob_ph: "Пошукаємо прикрасу?...",
@@ -211,6 +234,11 @@ const i18n = {
         fav_title: "Улюблене",
         exc_subtitle: "Individual Order", exc_title_main: "ЕКСКЛЮЗИВ", btn_details: "Дізнатися більше",
         cat_subtitle: "Our World",
+        badge_pre_order: "Під замовлення",
+        badge_sold_out: "Немає в наявності",
+        badge_new: "Новинка",
+        badge_exclusive: "Ексклюзив",
+        out_stock: "Немає",
         footer_desc: "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
         footer_phone_title: "Контактний телефон",
         footer_phone_sub: "Згідно з тарифами вашого оператора",
@@ -230,6 +258,35 @@ const i18n = {
         footer_cat_pendants: "Кулони та підвіски",
         footer_dev: "Розроблено:"
     },
+    ua: { m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
+        search_ph: "Пошук...", search_mob_ph: "Пошукаємо прикрасу?...",
+        cart_title: "Кошик", cart_subtotal: "Підсумок:", cart_clear: "Очистити",
+        fav_title: "Улюблене",
+        exc_subtitle: "Individual Order", exc_title_main: "ЕКСКЛЮЗИВ", btn_details: "Дізнатися більше",
+        cat_subtitle: "Our World",
+        badge_pre_order: "Під замовлення",
+        badge_sold_out: "Немає в наявності",
+        badge_new: "Новинка",
+        badge_exclusive: "Ексклюзив",
+        out_stock: "Немає",
+        footer_desc: "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
+        footer_phone_title: "Контактний телефон",
+        footer_phone_sub: "Згідно з тарифами вашого оператора",
+        footer_socials_title: "Ми в соцмережах",
+        footer_address_1: "вул. Торгова, 68, Ізмаїл",
+        footer_schedule_1: "Пн–Нд: 08:00 – 17:00",
+        footer_address_2: "вул. Покровська, 57, Ізмаїл",
+        footer_schedule_2: "Пн–Нд: 09:00 – 17:00",
+        footer_col_buyers: "Покупцям",
+        footer_link_delivery: "Доставка та оплата",
+        footer_link_warranty: "Гарантія",
+        footer_link_services: "Послуги та Прайс",
+        footer_col_catalog: "Каталог",
+        footer_cat_rings: "Каблучки",
+        footer_cat_earrings: "Сережки",
+        footer_cat_chains: "Ланцюжки",
+        footer_cat_pendants: "Кулони та підвіски",
+        footer_dev: "Розроблено:" }, // Дублює uk для повної сумісності з 'ua' у сховищі
     ru: { 
         m1: "Главная", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Эксклюзив", m_info: "info", m_menu: "Меню",
         search_ph: "Поиск...", search_mob_ph: "Поищем украшение?...",
@@ -237,6 +294,11 @@ const i18n = {
         fav_title: "Избранное",
         exc_subtitle: "Individual Order", exc_title_main: "ЭКСКЛЮЗИВ", btn_details: "Узнать больше",
         cat_subtitle: "Our World",
+        badge_pre_order: "Под заказ",
+        badge_sold_out: "Нет в наличии",
+        badge_new: "Новинка",
+        badge_exclusive: "Эксклюзив",
+        out_stock: "Нет",
         footer_desc: "Формируем семейные ценности в драгоценных металлах с 1984 года.",
         footer_phone_title: "Контактный телефон",
         footer_phone_sub: "Согласно тарифам вашего оператора",
@@ -263,6 +325,11 @@ const i18n = {
         fav_title: "Favorites",
         exc_subtitle: "Individual Order", exc_title_main: "EXCLUSIVE", btn_details: "Discover more",
         cat_subtitle: "Our World",
+        badge_pre_order: "Pre-order",
+        badge_sold_out: "Sold out",
+        badge_new: "New",
+        badge_exclusive: "Exclusive",
+        out_stock: "Out of stock",
         footer_desc: "Shaping family values in precious metals since 1984.",
         footer_phone_title: "Contact Phone",
         footer_phone_sub: "According to your operator's tariffs",
@@ -283,21 +350,26 @@ const i18n = {
         footer_dev: "Developed by:"
     }
 };
+
+// Робимо 'ua' точною копією 'uk' автоматично, щоб уникнути помилок доступу
+window.i18n.ua = window.i18n.uk;
 window.getLoc = function(obj, field) {
     if (!obj) return '';
-    const lang = API.get('bv_lang', 'uk');
+    let rawLang = API.get('bv_lang', 'uk');
+    // Нормалізуємо 'ua' у 'uk' для сумісності зі словниками об'єктів
+    const lang = (rawLang === 'ua') ? 'uk' : rawLang;
     
     if (typeof obj === 'string') return obj;
     if (typeof obj === 'object') {
         if (field) {
             if (typeof obj[field] === 'object' && obj[field] !== null) {
-                return obj[field][lang] || obj[field]['uk'] || '';
+                return obj[field][lang] || obj[field]['uk'] || obj[field]['ua'] || '';
             }
             if (lang === 'uk') return obj[field] || '';
             const locField = field + lang.toUpperCase(); 
             return obj[locField] || obj[field] || ''; 
         } else {
-            return obj[lang] || obj['uk'] || '';
+            return obj[lang] || obj['uk'] || obj['ua'] || '';
         }
     }
     return '';
@@ -804,8 +876,11 @@ window.toggleCart = function() {
 window.addToCart = function(id, title, variant, price, img) {
     let cart = getCart();
     
+    // Захист від undefined / null у вхідних даних
+    const safeTitle = title ? String(title) : '';
     let extractedSize = null;
-    let cleanTitle = String(title);
+    let cleanTitle = safeTitle;
+    
     if (cleanTitle.includes('(Розмір:')) {
         const parts = cleanTitle.split('(Розмір:');
         cleanTitle = parts[0].trim();
@@ -826,9 +901,9 @@ window.addToCart = function(id, title, variant, price, img) {
             cartId: cartId, 
             id: id, 
             title: cleanTitle, 
-            variant: String(variant), 
-            price: Number(price), 
-            img: String(img), 
+            variant: (variant && variant !== 'undefined') ? String(variant) : '', 
+            price: Number(price) || 0, 
+            img: (img && img !== 'undefined') ? String(img) : '', 
             qty: 1,
             sku: sku,
             size: extractedSize
@@ -880,11 +955,28 @@ window.renderCart = function() {
     if(!cartBody) return;
     cartBody.innerHTML = '';
 
+    // Пустое состояние корзины
     if (cart.length === 0) {
         const lang = API.get('bv_lang', 'uk');
-        cartBody.innerHTML = `<div class="cart-empty-msg text-center text-[var(--text-muted)] mt-10">${i18n[lang].cart_empty}</div>`;
+        const emptyMsg = (typeof i18n !== 'undefined' && i18n[lang] && i18n[lang].cart_empty) 
+            ? i18n[lang].cart_empty 
+            : 'Ваш кошик порожній';
+
+        cartBody.innerHTML = `
+            <div class="cart-empty-msg text-center text-[var(--text-muted)] my-12 flex flex-col items-center justify-center gap-5 px-4">
+                <p class="text-sm uppercase tracking-wider opacity-80">${emptyMsg}</p>
+                <a href="catalog.html" onclick="if(window.toggleCart) window.toggleCart()" class="btn-solid inline-block bg-[var(--gold-muted)] !text-[#111] font-bold uppercase tracking-widest text-xs px-6 py-3 rounded-none hover:opacity-90 transition-all active:scale-95 text-center">
+                    Перейти до каталогу
+                </a>
+            </div>
+        `;
+        
         if(subtotalVal) subtotalVal.innerText = '0 ₴';
-        cartBadges.forEach(b => b.innerText = '0');
+        cartBadges.forEach(b => {
+            b.innerText = '0';
+            b.style.display = 'none';
+        });
+        
         const checkoutBtnWrapper = document.getElementById('checkoutBtnWrapper');
         if(checkoutBtnWrapper) checkoutBtnWrapper.style.display = 'none';
         return;
@@ -1191,40 +1283,65 @@ window.closePreOrderModal = function() {
 };
 
 window.renderProductCard = function(prod) {
-    const lang = API.get('bv_lang', 'uk');
-    const base = prod.variations ? prod.variations.base : prod; 
+    const base = prod.variations ? prod.variations.base : prod;  
     
     const isOutOfStock = prod.status === 'out-stock';
     const isPreOrder = prod.status === 'pre-order';
     
     const isRegistered = window.isLoggedIn || localStorage.getItem('user_token') || window.currentUser;
-    const isFav = isRegistered && getFavs().includes(prod.id);
+    const isFav = isRegistered && typeof getFavs === 'function' && getFavs().includes(prod.id);
 
     const price = base.price || 0;
     const discount = base.discount || null;
     
+    const currentLang = (typeof API !== 'undefined' && API.get) ? API.get('bv_lang', 'uk') : 'uk';
+    
+    const dict = {
+        uk: { pre: "ПІД ЗАМОВЛЕННЯ", sold: "НЕМАЄ", new: "НОВИНКА", exc: "ЕКСКЛЮЗИВ" },
+        ru: { pre: "ПОД ЗАКАЗ", sold: "НЕТ", new: "НОВИНКА", exc: "ЭКСКЛЮЗИВ" },
+        en: { pre: "PRE-ORDER", sold: "SOLD OUT", new: "NEW", exc: "EXCLUSIVE" }
+    };
+    const t = dict[currentLang] || dict.uk;
+
     let badgesHtml = '<div class="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">';
+    
     if (isOutOfStock) {
-        badgesHtml += `<div class="prod-badge badge-sold-out rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_sold_out}</div>`;
+        badgesHtml += `<div class="prod-badge badge-sold-out rounded-none text-[9px] px-1.5 py-0.5">${t.sold}</div>`;
     } else if (isPreOrder) {
-        badgesHtml += `<div class="prod-badge badge-pre-order rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_pre_order}</div>`;
+        badgesHtml += `<div class="prod-badge badge-pre-order rounded-none text-[9px] px-1.5 py-0.5">${t.pre}</div>`;
     }
-    if (prod.badge === 'new') {
-        badgesHtml += `<div class="prod-badge badge-new rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_new}</div>`;
+
+    // Всевариантная проверка эксклюзива и новинки
+    const isSpecialItem = Boolean(
+        prod.isSpecial === true || prod.isSpecial === 'true' || prod.isSpecial === 1 ||
+        prod.special === true || prod.special === 'true' || prod.special === 1 ||
+        prod.exclusive === true || prod.exclusive === 'true' || prod.exclusive === 1 ||
+        base.isSpecial === true || base.isSpecial === 'true' || base.isSpecial === 1 ||
+        base.special === true || base.special === 'true' || base.special === 1 ||
+        base.exclusive === true || base.exclusive === 'true' || base.exclusive === 1
+    );
+
+    const isWeeklyItem = Boolean(
+        prod.isWeekly === true || prod.isWeekly === 'true' || prod.isWeekly === 1 ||
+        prod.weekly === true || prod.weekly === 'true' || prod.weekly === 1 ||
+        base.isWeekly === true || base.isWeekly === 'true' || base.isWeekly === 1 ||
+        base.weekly === true || base.weekly === 'true' || base.weekly === 1
+    );
+
+    if (isSpecialItem) {
+        badgesHtml += `<div class="prod-badge badge-exclusive rounded-none text-[9px] px-1.5 py-0.5">${t.exc}</div>`;
     }
-    if (prod.badge === 'exclusive') {
-        badgesHtml += `<div class="prod-badge badge-exclusive rounded-none text-[9px] px-1.5 py-0.5">${i18n[lang].badge_exclusive}</div>`;
+    
+    if (isWeeklyItem) {
+        badgesHtml += `<div class="prod-badge badge-new rounded-none text-[9px] px-1.5 py-0.5">${t.new}</div>`;
     }
-    if (prod.badge === 'sale') {
-        let badgeText = 'SALE';
-        if (discount && Number(discount) > 0 && price > discount) {
-            const percent = Math.round(((price - discount) / price) * 100);
-            if (percent > 0) {
-                badgeText = `-${percent}%`;
-            }
-        }
+
+    if (discount && Number(discount) > 0 && price > discount) {
+        const percent = Math.round(((price - discount) / price) * 100);
+        const badgeText = percent > 0 ? `-${percent}%` : 'SALE';
         badgesHtml += `<div class="rounded-none text-[11px] px-2 py-0.5 font-bold shadow-sm" style="background-color: #dc2626 !important; color: #ffffff !important;">${badgeText}</div>`;
     }
+    
     badgesHtml += '</div>';
 
     let priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[var(--gold-muted)]">${formatterPrice.format(price)} ₴</span>`;
@@ -1232,27 +1349,24 @@ window.renderProductCard = function(prod) {
         priceHtml = `<span class="text-[12px] md:text-[15px] font-bold text-[#c5a059]">${formatterPrice.format(discount)} ₴</span><span class="text-[9px] md:text-[11px] text-[#888] dark:text-[#aaa] line-through ml-1.5 opacity-70">${formatterPrice.format(price)} ₴</span>`;
     }
 
-    const safeId = escapeHtml(prod.id);
-    const safeName = escapeHtml(window.getLoc(base.name)); 
-    const safeVariant = escapeHtml(prod.variant || '');
-    const safeImg = escapeHtml((base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || ''));
+    const safeId = typeof escapeHtml === 'function' ? escapeHtml(prod.id || '') : (prod.id || '');
+    const safeName = typeof escapeHtml === 'function' ? escapeHtml(window.getLoc(base.name)) : window.getLoc(base.name);
+    const safeVariant = typeof escapeHtml === 'function' ? escapeHtml(prod.variant || '') : (prod.variant || '');
+    const rawImg = (base.images && base.images.length > 0) ? base.images[0] : (base.img || base.image || '');
+    const safeImg = typeof escapeHtml === 'function' ? escapeHtml(rawImg) : rawImg;
 
     return `
         <div class="product-card group relative flex flex-col w-full h-full bg-white dark:bg-[#1a1a1a] border border-[#f0f0f0] dark:border-[#333] overflow-hidden transition-colors duration-300">
-            <!-- Блок фото: розтягнуте по краях без фонів -->
             <div class="relative w-full aspect-square bg-transparent overflow-hidden">
                 <a href="product.html?id=${safeId}" class="block w-full h-full m-0 p-0">
                     <img src="${safeImg}" class="w-full h-full m-0 p-0 object-cover" loading="lazy">
                 </a>
                 ${badgesHtml}
-                
-               <!-- Кнопка обраного у кольорі світлого золота -->
-<button class="absolute top-2 right-2 z-25 w-8 h-8 rounded-[6px] flex items-center justify-center bg-gradient-to-br from-white via-[#f4f1ea] to-[#e8e2d5] dark:from-[#2a2a2a] dark:via-[#222222] dark:to-[#1a1a1a] backdrop-blur-md border border-[#d8d0c1] dark:border-[#3a3a3a] shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-300 active:scale-95 ${isFav ? 'text-[#ff3b30]' : 'text-[#c5a059] dark:text-[#dfc384]'}" data-id="${safeId}" onclick="handleFavClick('${safeId}')" title="У вибране">
-    <svg width="15" height="15" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-</button>
+                <button class="absolute top-2 right-2 z-25 w-8 h-8 rounded-[6px] flex items-center justify-center bg-gradient-to-br from-white via-[#f4f1ea] to-[#e8e2d5] dark:from-[#2a2a2a] dark:via-[#222222] dark:to-[#1a1a1a] backdrop-blur-md border border-[#d8d0c1] dark:border-[#3a3a3a] shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-300 active:scale-95 ${isFav ? 'text-[#ff3b30]' : 'text-[#c5a059] dark:text-[#dfc384]'}" data-id="${safeId}" onclick="handleFavClick('${safeId}')" title="У вибране">
+                    <svg width="15" height="15" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
             </div>
             
-            <!-- Текстовий блок фіксованої висоти -->
             <div class="card-text-block px-2.5 md:px-3 pt-2 pb-2.5 bg-white dark:bg-[#1a1a1a]">
                 <div class="flex flex-col gap-0.5">
                     ${safeVariant ? `<a href="product.html?id=${safeId}" class="product-variant text-[9px] uppercase tracking-widest line-clamp-1">${safeVariant}</a>` : ''}
@@ -1267,7 +1381,7 @@ window.renderProductCard = function(prod) {
                             <svg class="w-5 h-5" fill="none" stroke="${isPreOrder ? 'currentColor' : 'var(--gold-muted, #C5A059)'}" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </button>
                         ` : `
-                        <span class="text-[9px] font-bold uppercase tracking-widest text-[#888] dark:text-[#aaa] shrink-0">${i18n[lang].out_stock}</span>
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-[#888] dark:text-[#aaa] shrink-0">${t.sold}</span>
                         `}
                     </div>
                 </div>
@@ -1275,7 +1389,6 @@ window.renderProductCard = function(prod) {
         </div>
     `;
 };
-
 
 window.addToCartById = function(id) {
     const allProducts = window.products || API.get('bv_products', []);
@@ -1506,7 +1619,6 @@ window.renderHomeSections = function() {
     let container = document.getElementById('dynamicHomeBlocksContainer');
     if (!container) return;
 
-    // Чередуем получение данных: сначала проверяем глобальную переменную из админки, затем API
     let homeBlocks = [];
     if (typeof window.homeBlocks !== 'undefined' && Array.isArray(window.homeBlocks)) {
         homeBlocks = window.homeBlocks;
@@ -1525,39 +1637,53 @@ window.renderHomeSections = function() {
     }
 
     let html = '';
-    const activeBlocks = homeBlocks.filter(b => b.active);
+    const activeBlocks = homeBlocks.filter(b => b && b.active);
 
     activeBlocks.forEach(block => {
-        // Умная фильтрация: поддерживает массив blocks у товара, строки и прямые свойства
+        // Умная фильтрация: поддерживает блоки эксклюзивов, новинок и кастомные поля
         let items = products.filter(p => {
             if (!p) return false;
+            const base = p.variations ? p.variations.base : p;
 
             if (Array.isArray(p.blocks) && p.blocks.includes(block.id)) return true;
             if (typeof p.blocks === 'string' && p.blocks.includes(block.id)) return true;
             if (p[block.id] === true || p[block.id] === 'true' || p[block.id] === 1 || p[block.id] === '1') return true;
+            if (base && (base[block.id] === true || base[block.id] === 'true' || base[block.id] === 1 || base[block.id] === '1')) return true;
+
+            // Специальный мостик для эксклюзивов (если ID блока 'exclusive' или 'special', а в базе 'isSpecial')
+            if (block.id === 'exclusive' || block.id === 'special') {
+                if (p.isSpecial === true || p.isSpecial === 'true' || p.isSpecial === 1 || p.special === true || p.special === 'true' || p.special === 1 || p.exclusive === true || p.exclusive === 'true' || p.exclusive === 1) return true;
+                if (base && (base.isSpecial === true || base.isSpecial === 'true' || base.isSpecial === 1 || base.special === true || base.special === 'true' || base.special === 1 || base.exclusive === true || base.exclusive === 'true' || base.exclusive === 1)) return true;
+            }
+
+            // Мостик для недельных/новых товаров
+            if (block.id === 'weekly' || block.id === 'new') {
+                if (p.isWeekly === true || p.isWeekly === 'true' || p.isWeekly === 1 || p.weekly === true || p.weekly === 'true' || p.weekly === 1) return true;
+                if (base && (base.isWeekly === true || base.isWeekly === 'true' || base.isWeekly === 1 || base.weekly === true || base.weekly === 'true' || base.weekly === 1)) return true;
+            }
 
             return false;
         });
 
         if (items.length > 0) {
-            // Безопасное получение перевода названия блока
-            let title = block.id;
+            let title = block.id || '';
             if (block.name) {
                 const currentLang = (typeof window.getCurrentLang === 'function') ? window.getCurrentLang() : 'uk';
-                title = block.name[currentLang] || block.name.uk || block.name.ru || block.name.en || block.id;
+                if (typeof block.name === 'object') {
+                    title = block.name[currentLang] || block.name.uk || block.name.ru || block.name.en || block.id || '';
+                } else {
+                    title = block.name;
+                }
             }
 
             const trackId = `block-track-${block.id}`;
-            
             if (typeof window.renderProductCard !== 'function') return;
 
-            // Было: const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] ...">...</div>`
-// Стало (карточки меньше, помещается больше):
-// Змінюємо ширину карток у каруселі: на мобільних рівно 50% (2 картки в ряд)
-const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex px-1">${window.renderProductCard(p)}</div>`;
+            const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[25%] lg:w-[20%] xl:w-[16.666%] snap-start flex px-1">${window.renderProductCard(p)}</div>`;
+            
             let blockItems = [...items];
-            while(blockItems.length < 12 && blockItems.length > 0) { 
-                blockItems = blockItems.concat(items); 
+            while(blockItems.length < 12 && blockItems.length > 0) {  
+                blockItems = blockItems.concat(items);  
             }
             
             html += `
@@ -1584,13 +1710,14 @@ const cardWrapper = (p) => `<div class="flex-none w-[50%] sm:w-[33.333%] md:w-[2
         }
     });
 };
+
 window.showBranchesModal = function() {
-    const settings = API.get('bv_settings', {});
+    const settings = (typeof API !== 'undefined' && API.get) ? API.get('bv_settings', {}) : {};
     const addrs = settings.addresses || [];
     if(addrs.length === 0) return;
     
     const list = addrs.map(a => `<a href="http://maps.google.com/?q=${encodeURIComponent(a)}" target="_blank" class="block p-4 border border-[var(--border)] rounded-none hover:border-[var(--gold-muted)] text-[var(--text-main)] text-sm mb-3 transition-colors flex items-center justify-between group">
-        <span>${a}</span>
+        <span>${a || ''}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gold-muted)]"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
     </a>`).join('');
     
@@ -1610,30 +1737,32 @@ window.showBranchesModal = function() {
 window.renderServicesTable = function() {
     const tbody = document.getElementById('servicesPriceBody');
     if (!tbody) return;
-    const priceDB = API.get('bv_price_list', []);
+    const priceDB = (typeof API !== 'undefined' && API.get) ? API.get('bv_price_list', []) : [];
     tbody.innerHTML = '';
     
-    if (priceDB.length === 0) {
+    if (!Array.isArray(priceDB) || priceDB.length === 0) {
         tbody.innerHTML = `<tr><td colspan="2" class="text-center py-10 text-[var(--text-muted)]">Прайс порожній. Додайте послуги в Адмін-панелі.</td></tr>`;
         return;
     }
     
     priceDB.forEach(cat => {
+        if (!cat) return;
         tbody.innerHTML += `
             <tr class="bg-[rgba(255,255,255,0.02)] border-b border-[var(--border)]">
-                <td colspan="2" class="py-4 px-2 md:px-4 font-serif text-lg md:text-xl text-[var(--gold-muted)]">${cat.category}</td>
+                <td colspan="2" class="py-4 px-2 md:px-4 font-serif text-lg md:text-xl text-[var(--gold-muted)]">${cat.category || ''}</td>
             </tr>
         `;
-        if(cat.items) {
+        if(Array.isArray(cat.items)) {
             cat.items.forEach(item => {
+                if (!item) return;
                 tbody.innerHTML += `
                     <tr class="border-b border-[var(--border)] hover:bg-[rgba(255,255,255,0.01)] transition-colors group">
-                        <td class="py-4 px-2 md:px-4 font-medium text-[var(--text-main)] pr-4">${item.name}</td>
+                        <td class="py-4 px-2 md:px-4 font-medium text-[var(--text-main)] pr-4">${item.name || ''}</td>
                         <td class="py-4 px-2 md:px-4 text-right align-top md:align-middle">
                             <div class="flex flex-col md:flex-row justify-end gap-1 md:gap-4">
                                 <div class="flex flex-col text-right">
                                     <span class="text-[9px] uppercase tracking-widest text-[#e8b923] font-bold">Золото</span>
-                                    <span class="text-[var(--text-main)] font-semibold">${item.gold}</span>
+                                    <span class="text-[var(--text-main)] font-semibold">${item.gold || ''}</span>
                                 </div>
                                 ${item.silver ? `
                                 <div class="flex flex-col text-right opacity-70 group-hover:opacity-100 transition">
@@ -1654,28 +1783,28 @@ window.renderExclusivePage = function() {
     const materialsContainer = document.getElementById('material-options-container');
     
     if(processContainer) {
-        const processDB = API.get('bv_exclusive_process', []);
+        const processDB = (typeof API !== 'undefined' && API.get) ? API.get('bv_exclusive_process', []) : [];
         processContainer.innerHTML = processDB.map((step, idx) => `
             <div class="flex flex-col md:flex-row gap-6 items-center bg-[var(--bg-card)] border border-[var(--border)] p-6 rounded-none group hover:border-[var(--gold-muted)] transition-colors">
                 <div class="w-full md:w-1/3 aspect-[4/3] bg-black overflow-hidden relative">
                     <div class="absolute top-2 left-2 bg-[var(--gold-muted)] text-[#111] text-[10px] font-bold uppercase tracking-widest px-2 py-1 z-10">Етап ${idx+1}</div>
-                    <img src="${step.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                    <img src="${step && step.img ? step.img : ''}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
                 </div>
                 <div class="w-full md:w-2/3">
-                    <h3 class="font-serif text-2xl text-[var(--text-main)] mb-3">${step.title}</h3>
-                    <p class="text-sm text-[var(--text-muted)] leading-relaxed">${step.desc}</p>
+                    <h3 class="font-serif text-2xl text-[var(--text-main)] mb-3">${step && step.title ? step.title : ''}</h3>
+                    <p class="text-sm text-[var(--text-muted)] leading-relaxed">${step && step.desc ? step.desc : ''}</p>
                 </div>
             </div>
         `).join('');
     }
 
     if(materialsContainer) {
-        const matDB = API.get('bv_exclusive_materials', []);
+        const matDB = (typeof API !== 'undefined' && API.get) ? API.get('bv_exclusive_materials', []) : [];
         materialsContainer.innerHTML = matDB.map(m => `
             <label class="flex-1 cursor-pointer">
-                <input type="radio" name="material" value="${m.id}" class="peer hidden" ${m.selected ? 'checked' : ''}>
+                <input type="radio" name="material" value="${m && m.id ? m.id : ''}" class="peer hidden" ${m && m.selected ? 'checked' : ''}>
                 <div class="border border-[var(--border)] text-center py-4 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] peer-checked:border-[var(--gold-muted)] peer-checked:text-[var(--gold-muted)] hover:border-[var(--gold-muted)] transition-colors">
-                    ${m.label}
+                    ${m && m.label ? m.label : ''}
                 </div>
             </label>
         `).join('');
@@ -3646,3 +3775,21 @@ function createProductCard(product) {
         </div>
     `;
 }
+
+
+
+// Глобальний захист від появи слова "undefined" у будь-яких елементах на сайті
+document.addEventListener("DOMContentLoaded", () => {
+    const sanitizeUndefined = () => {
+        document.querySelectorAll('*').forEach(el => {
+            // Перевіряємо текстові вузли без дочірніх тегів
+            if (el.children.length === 0 && el.textContent && el.textContent.trim() === 'undefined') {
+                el.textContent = ''; // Очищаємо сміття
+            }
+        });
+    };
+
+    // Запускаємо при завантаженні та періодично для динамічних елементів (кошик, модалки тощо)
+    sanitizeUndefined();
+    setInterval(sanitizeUndefined, 500);
+});
