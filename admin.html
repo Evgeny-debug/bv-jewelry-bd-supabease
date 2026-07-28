@@ -1487,20 +1487,25 @@ select option, select optgroup {
    /**
  * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
  */
-/**
- * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
- */
-// Допоміжна функція для безпечного витягування даних з site_storage (підтримка структури Supabase {key, value})
+
+function getCategoryNameSafe(cat) {
+    if (!cat) return 'Без назви';
+    if (typeof window.getLoc === 'function') {
+        return window.getLoc(cat, 'name') || '';
+    }
+    return cat.name?.uk || cat.name || cat.id || 'Без назви';
+}
+
+// Допоміжна функція для безпечного витягування масиву з Supabase site_storage
 function extractStorageValue(raw) {
     if (!raw) return [];
-    if (typeof raw === 'object' && 'value' in raw) {
-        raw = raw.value;
-    }
+    if (typeof raw === 'object' && 'value' in raw) raw = raw.value;
     if (Array.isArray(raw)) return raw;
     if (typeof raw === 'object' && raw !== null) return Object.values(raw);
     return [];
 }
 
+// Заповнення головних категорій та коректна ініціалізація підкатегорій
 window.populateCategorySelect = function(selectedCategoryId = '') {
     try {
         const parentSelect = document.getElementById('prod-parent-category');
@@ -1508,59 +1513,57 @@ window.populateCategorySelect = function(selectedCategoryId = '') {
         
         if (!parentSelect || !subSelect) return;
 
+        // Отримуємо дерево категорій так само як у ваших фільтрах
         let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let categoriesTree = extractStorageValue(rawTree);
-        
-        let rawFlat = typeof API !== 'undefined' ? API.get('bv_categories_flat', []) : [];
-        let categoriesFlat = extractStorageValue(rawFlat);
+        let cats = extractStorageValue(rawTree);
 
         let targetId = selectedCategoryId;
         if (typeof targetId === 'object') targetId = ''; 
         targetId = String(targetId || '');
 
         let selectedParentId = '';
-        let isSubCategory = false;
 
-        if (targetId && categoriesTree.length > 0) {
-            for (const cat of categoriesTree) {
+        // Шукаємо, до якої головної категорії належить обраний ID (враховуємо вкладеність)
+        if (targetId && cats.length > 0) {
+            for (const cat of cats) {
                 if (!cat) continue;
-                
                 if (String(cat.id) === targetId) {
                     selectedParentId = String(cat.id);
                     break;
                 }
-                
-                if (Array.isArray(cat.sub) && cat.sub.some(sub => sub && String(sub.id) === targetId)) {
-                    selectedParentId = String(cat.id);
-                    isSubCategory = true;
-                    break;
+                if (Array.isArray(cat.subcategories)) {
+                    // Перевіряємо другий та третій рівень вкладеності
+                    let foundInSub = cat.subcategories.some(sub => {
+                        if (String(sub.id) === targetId) return true;
+                        if (Array.isArray(sub.subcategories)) {
+                            return sub.subcategories.some(subsub => String(subsub.id) === targetId);
+                        }
+                        return false;
+                    });
+                    if (foundInSub) {
+                        selectedParentId = String(cat.id);
+                        break;
+                    }
                 }
             }
         }
 
         if (targetId && !selectedParentId) {
-            selectedParentId = targetId; 
+            selectedParentId = targetId;
         }
 
+        // Формуємо HTML для головних категорій
         let parentHtml = '<option value="" disabled selected>Оберіть категорію...</option>';
-
-        if (categoriesTree.length > 0) {
-            categoriesTree.forEach(cat => {
-                if (!cat) return;
-                const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id || 'Без назви');
-                const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
-                parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
-            });
-        } else {
-            categoriesFlat.forEach(cat => {
-                if (!cat) return;
-                const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id || 'Без назви');
-                const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
-                parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
-            });
-        }
+        cats.forEach(cat => {
+            if (!cat) return;
+            const catName = getCategoryNameSafe(cat);
+            const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
+            parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
+        });
 
         parentSelect.innerHTML = parentHtml;
+
+        // Запускаємо заповнення дочірніх елементів
         handleParentCategoryChange(targetId);
 
     } catch (error) {
@@ -1568,43 +1571,54 @@ window.populateCategorySelect = function(selectedCategoryId = '') {
     }
 };
 
+// Обробка зміни головної категорії (рендерить усю вкладену структуру subcategories)
 window.handleParentCategoryChange = function(preselectedSubId = '') {
     try {
         const parentSelect = document.getElementById('prod-parent-category');
         const subSelect = document.getElementById('prod-category');
         const subWrapper = document.getElementById('sub-category-wrapper');
 
-        if (!parentSelect || !subSelect || !subWrapper) return;
+        if (!parentSelect || !subSelect) return;
 
         let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let categoriesTree = extractStorageValue(rawTree);
+        let cats = extractStorageValue(rawTree);
 
         const parentId = String(parentSelect.value || '');
-        
         let targetSubId = preselectedSubId;
         if (typeof targetSubId === 'object') targetSubId = ''; 
         targetSubId = String(targetSubId || '');
 
-        const selectedParent = categoriesTree.find(cat => cat && String(cat.id) === parentId);
+        const selectedParent = cats.find(cat => cat && String(cat.id) === parentId);
 
-        if (selectedParent && Array.isArray(selectedParent.sub) && selectedParent.sub.length > 0) {
+        if (selectedParent && Array.isArray(selectedParent.subcategories) && selectedParent.subcategories.length > 0) {
             let subHtml = '<option value="" disabled selected>Оберіть підкатегорію...</option>';
             
-            selectedParent.sub.forEach(sub => {
+            // Рекурсивно або плоско виводимо вкладені рівні для зручного вибору в селекті
+            selectedParent.subcategories.forEach(sub => {
                 if (!sub) return;
-                const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id || 'Без назви');
+                const subName = getCategoryNameSafe(sub);
                 const isSelected = targetSubId === String(sub.id) ? 'selected' : '';
-                subHtml += `<option value="${sub.id}" ${isSelected}>${subName}</option>`;
+                subHtml += `<option value="${sub.id}" ${isSelected}>— ${subName}</option>`;
+
+                // Якщо є третій рівень (subsubcategories)
+                if (Array.isArray(sub.subcategories) && sub.subcategories.length > 0) {
+                    sub.subcategories.forEach(subsub => {
+                        if (!subsub) return;
+                        const subsubName = getCategoryNameSafe(subsub);
+                        const isSubSelected = targetSubId === String(subsub.id) ? 'selected' : '';
+                        subHtml += `<option value="${subsub.id}" ${isSubSelected}>&nbsp;&nbsp;&nbsp;&nbsp;• ${subsubName}</option>`;
+                    });
+                }
             });
 
             subSelect.innerHTML = subHtml;
             subSelect.required = true;
-            subWrapper.style.display = 'block';
+            if (subWrapper) subWrapper.style.display = 'block';
             
         } else {
             subSelect.innerHTML = `<option value="${parentId}" selected>Без підкатегорії</option>`;
             subSelect.removeAttribute('required');
-            subWrapper.style.display = 'none';
+            if (subWrapper) subWrapper.style.display = 'none';
         }
     } catch (error) {
         console.error('Критична помилка в handleParentCategoryChange:', error);
