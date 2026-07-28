@@ -16,29 +16,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Принудительная темная тема для нативных select и option */
-select {
-    color-scheme: dark;
-}
-select option, select optgroup {
-    background-color: var(--bg-surface) !important;
-    color: var(--text-main) !important;
-}
     :root {
-        --bg-main: #070709;
-        --bg-surface: #101014;
-        --bg-card: rgba(18, 18, 24, 0.75);
-        --border-glass: rgba(255, 255, 255, 0.07);
-        --border-glass-hover: rgba(197, 160, 89, 0.3);
+        --bg-main: #0a0a0c;
+        --bg-card: #121216;
         --accent-gold: #c5a059;
         --accent-gold-hover: #d8b269;
-        --accent-gold-glow: rgba(197, 160, 89, 0.15);
-        --text-main: #f3f4f6;
-        --text-muted: #9ca3af;
-        --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* 💎 Глобальный сброс и типографика */
+    /* 💎 Глобальный сброс для предотвращения горизонтального скролла */
     *, *::before, *::after {
         box-sizing: border-box;
     }
@@ -49,10 +34,8 @@ select option, select optgroup {
         width: 100%;
         overflow-x: hidden;
         background-color: var(--bg-main);
-        color: var(--text-main);
+        color: #e5e7eb;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
     }
 
     .main-content, .admin-main, main {
@@ -69,55 +52,39 @@ select option, select optgroup {
         width: 100%;
     }
 
-    /* 🪞 Премиальный Glassmorphism */
     .glass-panel {
-        background: var(--bg-card);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--border-glass);
+        background: rgba(18, 18, 22, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 1rem;
-        box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-        transition: var(--transition-smooth);
         max-width: 100%;
     }
 
-    .glass-panel:hover {
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    /* ⌨️ Поля ввода */
     .input-field {
         width: 100%;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 0.625rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
         padding: 0.75rem 1rem;
         color: #fff;
         font-size: 0.875rem;
-        transition: var(--transition-smooth);
+        transition: all 0.2s;
         min-height: 44px;
         appearance: none;
     }
-
-    .input-field:hover {
-        border-color: rgba(255, 255, 255, 0.15);
-        background: rgba(255, 255, 255, 0.04);
-    }
-
     .input-field:focus {
         outline: none;
         border-color: var(--accent-gold);
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 0 0 3px var(--accent-gold-glow);
+        box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
     }
 
-    /* 🔘 Кнопки */
     .btn-primary, .btn-secondary, .btn-danger {
         padding: 0.75rem 1.25rem;
-        border-radius: 0.625rem;
+        border-radius: 0.5rem;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: var(--transition-smooth);
+        transition: transform 0.1s, opacity 0.2s;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -130,54 +97,34 @@ select option, select optgroup {
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, var(--accent-gold) 0%, #a68342 100%);
+        background: linear-gradient(135deg, var(--accent-gold), #a68342);
         color: #000;
         border: none;
-        box-shadow: 0 4px 15px rgba(197, 160, 89, 0.25);
     }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, var(--accent-gold-hover) 0%, #b8934d 100%);
-        box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
-        transform: translateY(-1px);
-    }
-
-    .btn-primary:active { transform: translateY(0) scale(0.98); }
+    .btn-primary:active { transform: scale(0.98); }
     
     .btn-secondary {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.05);
         color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .btn-danger {
-        background: rgba(239, 68, 68, 0.08);
+        background: rgba(239, 68, 68, 0.1);
         color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.2);
     }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 
-    .btn-danger:hover { 
-        background: rgba(239, 68, 68, 0.15); 
-        border-color: rgba(239, 68, 68, 0.3);
-    }
-
-    /* 📜 Кастомный скроллбар */
-    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(197, 160, 89, 0.4); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
 
-    /* 📱 Боковая панель и оверлей */
     .sidebar-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(6px);
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
         z-index: 40;
         opacity: 0;
         pointer-events: none;
@@ -195,9 +142,9 @@ select option, select optgroup {
             height: 100vh !important;
             height: 100dvh !important;
             z-index: 50;
-            transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 0;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -206,7 +153,6 @@ select option, select optgroup {
         .admin-sidebar.open { left: 0; }
     }
 
-    /* 📋 Адаптивные мобильные таблицы */
     @media (max-width: 768px) {
         .mobile-card-table {
             width: 100% !important;
@@ -220,19 +166,14 @@ select option, select optgroup {
         }
         
         .mobile-card-table tbody tr {
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 0.875rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
             padding: 1rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             max-width: 100%;
             overflow: hidden;
-            transition: var(--transition-smooth);
-        }
-
-        .mobile-card-table tbody tr:hover {
-            border-color: rgba(197, 160, 89, 0.2);
         }
         
         .mobile-card-table tbody td {
@@ -242,7 +183,7 @@ select option, select optgroup {
             flex-wrap: wrap;
             gap: 0.5rem;
             padding: 0.75rem 0 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             text-align: right;
             font-size: 0.875rem;
             word-break: break-word;
@@ -252,7 +193,7 @@ select option, select optgroup {
         .mobile-card-table tbody td::before {
             content: attr(data-label);
             font-weight: 600;
-            color: var(--text-muted);
+            color: #8b949e;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -270,11 +211,10 @@ select option, select optgroup {
             flex-direction: column;
             align-items: flex-start;
             text-align: left;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.2);
             padding: 0.75rem !important;
             border-radius: 0.5rem;
             margin: 0.25rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.03);
         }
         
         .mobile-card-table tbody td.td-column::before,
@@ -285,7 +225,7 @@ select option, select optgroup {
             max-width: 100%;
             margin-bottom: 0.35rem;
             color: var(--accent-gold);
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
             padding-bottom: 0.25rem;
             width: 100%;
         }
@@ -306,22 +246,21 @@ select option, select optgroup {
         }
     }
 
-    /* 🔔 Всплывающие уведомления (Toasts) */
     .toast {
         position: fixed;
         bottom: max(1.5rem, env(safe-area-inset-bottom));
         right: 1.5rem;
         left: auto;
-        background: linear-gradient(135deg, var(--accent-gold) 0%, #b8934d 100%);
+        background: var(--accent-gold);
         color: #000;
         font-weight: 600;
-        padding: 0.875rem 1.5rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         z-index: 100;
-        transform: translateY(120px);
+        transform: translateY(100px);
         opacity: 0;
-        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     @media (max-width: 640px) {
@@ -333,7 +272,7 @@ select option, select optgroup {
     }
     
     .toast.show { transform: translateY(0); opacity: 1; }
-</style>
+    </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col lg:flex-row relative bg-[#0a0a0c]" style="opacity: 0; transition: opacity 0.5s;">
 
@@ -354,79 +293,86 @@ select option, select optgroup {
 
     <!-- Боковая панель -->
     <aside id="sidebar" class="admin-sidebar glass-panel flex flex-col h-full lg:h-[calc(100vh-24px)] lg:m-3 lg:mr-0 lg:w-64 shrink-0">
-    <div class="p-6 border-b border-white/10 text-center hidden lg:block">
-        <h2 class="text-xl font-serif text-[#c5a059] tracking-widest font-bold">BV JEWELRY</h2>
-        <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] mt-1.5 font-sans">Control Panel</p>
-    </div>
+        <div class="p-6 border-b border-white/10 text-center hidden lg:block">
+            <h2 class="text-xl font-serif text-[#c5a059] tracking-widest font-bold">BV JEWELRY</h2>
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] mt-1.5 font-sans">Control Panel</p>
+        </div>
         
-    <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
-        <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg bg-white/10 text-[#c5a059] font-medium transition text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            <span class="truncate">Замовлення</span>
-        </button>
-        
-        <button onclick="switchTab('products')" id="tab-products" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            <span class="truncate">Товари</span>
-        </button>
+        <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+            <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg bg-white/10 text-[#c5a059] font-medium transition text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span class="truncate">Замовлення</span>
+            </button>
+            
+            <button onclick="switchTab('products')" id="tab-products" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                <span class="truncate">Товари</span>
+            </button>
+            
 
-        <!-- 🚀 Пункт для генерації та вигрузки фіду Google Merchant -->
+
+            <!-- 🚀 Пункт для генерації та вигрузки фіду Google Merchant -->
 <button onclick="switchTab('feed')" id="tab-feed" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
     <span class="truncate">Google Feed</span>
 </button>
-        <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-            <span class="truncate">Категорії</span>
-        </button>
-        
-        <button onclick="switchTab('gallery')" id="tab-gallery" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="truncate">Галерея</span>
-        </button>
-        
-        <button onclick="switchTab('blocks')" id="tab-blocks" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-            <span class="truncate">Блоки Головної</span>
-        </button>
-        
-        <button onclick="switchTab('home-visuals')" id="tab-home-visuals" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
-            <span class="truncate">Банери</span>
-        </button>
-        
-        <button onclick="switchTab('exclusive')" id="tab-exclusive" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-            <span class="truncate">Ексклюзив</span>
-        </button>
-        
-        <button onclick="switchTab('builder')" id="tab-builder" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            <span class="truncate">Конструктор</span>
-        </button>
-        
-        <button onclick="switchTab('price-builder')" id="tab-price-builder" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-            <span class="truncate">Прайс-лист</span>
-        </button>
-        
-        <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            <span class="truncate">Налаштування</span>
-        </button>
-    </nav>
 
-    <div class="p-3 border-t border-white/10 space-y-1 shrink-0">
-        <a href="index.html" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 text-xs bg-white/5 hover:bg-white/10 rounded-lg text-gray-300 hover:text-[#c5a059] transition">
-            <span>Перейти на сайт</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
-        <button onclick="logout()" class="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg transition font-medium">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-            <span>Вийти</span>
-        </button>
-    </div>
-</aside>
+            <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                <span class="truncate">Категорії</span>
+            </button>
+            
+            <button onclick="switchTab('gallery')" id="tab-gallery" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="truncate">Галерея</span>
+            </button>
+            
+            <button onclick="switchTab('blocks')" id="tab-blocks" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <span class="truncate">Блоки Головної</span>
+            </button>
+            
+            <button onclick="switchTab('home-visuals')" id="tab-home-visuals" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                <span class="truncate">Банери</span>
+            </button>
+            
+            <button onclick="switchTab('exclusive')" id="tab-exclusive" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                <span class="truncate">Ексклюзив</span>
+            </button>
+            
+            <button onclick="switchTab('builder')" id="tab-builder" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span class="truncate">Конструктор</span>
+            </button>
+            
+            <button onclick="switchTab('price-builder')" id="tab-price-builder" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                <span class="truncate">Прайс-лист</span>
+            </button>
+            
+
+
+
+
+            <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="truncate">Налаштування</span>
+            </button>
+        </nav>
+
+        <div class="p-3 border-t border-white/10 space-y-1 shrink-0">
+            <a href="index.html" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 text-xs bg-white/5 hover:bg-white/10 rounded-lg text-gray-300 hover:text-[#c5a059] transition">
+                <span>Перейти на сайт</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg transition font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                <span>Вийти</span>
+            </button>
+        </div>
+    </aside>
 
     <!-- Основной контент -->
     <main id="mainContent" class="flex-1 p-3 lg:p-6 overflow-y-auto h-full custom-scrollbar">
@@ -455,12 +401,32 @@ select option, select optgroup {
             </div>
         </section>
 
+
+<section id="content-feed" class="tab-content hidden h-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide">Google Merchant Feed</h2>
+    </div>
+    <div class="glass-panel p-4 lg:p-6 max-w-3xl">
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-[#c5a059] mb-2 uppercase tracking-wider">Генерація XML-фіду</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Система автоматично сформує XML-файл з усіма активними товарами згідно вимог Google Merchant Center. Всі ціни, наявності та посилання будуть актуальними на момент генерації.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button onclick="downloadGoogleFeed()" class="btn-primary text-xs py-3 px-6 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Завантажити XML
+            </button>
+        </div>
+    </div>
+</section>
+
+
         <!-- ТОВАРЫ -->
         <section id="content-products" class="tab-content h-full hidden">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 lg:mb-6 gap-3">
                 <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide">Товари</h2>
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <div class="relative flex-grow sm:w-64 bg-black text-white">
+                    <div class="relative flex-grow sm:w-64">
                         <input type="text" id="prodSearch" onkeyup="searchProducts()" placeholder="Пошук за назвою..." class="input-field pl-9 py-2 text-xs">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
@@ -653,65 +619,38 @@ select option, select optgroup {
                 <div id="galleryAdminList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"></div>
             </div>
         </section>
-<!-- ФИД GOOGLE MERCHANT -->
-<section id="content-feed" class="tab-content hidden h-full">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 class="text-xl lg:text-2xl font-semibold text-white font-serif tracking-wide">Google Merchant Feed</h2>
-    </div>
-    <div class="glass-panel p-4 lg:p-6 max-w-3xl">
-        <div class="mb-6">
-            <h3 class="text-sm font-bold text-[#c5a059] mb-2 uppercase tracking-wider">Генерація XML-фіду</h3>
-            <p class="text-xs text-gray-400 leading-relaxed">Система автоматично сформує XML-файл з усіма активними товарами згідно вимог Google Merchant Center. Всі ціни, наявності та посилання будуть актуальними на момент генерації.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-4">
-            <button onclick="downloadGoogleFeed()" class="btn-primary text-xs py-3 px-6 flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Завантажити XML
-            </button>
-        </div>
-    </div>
-</section>
-
-
-
 
     </main>
 
-    <!-- МОДАЛЬНЫЕ ОКНА -->
+  
 
     <!-- МОДАЛКА: ТОВАР -->
-    <div id="productModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-all duration-300 p-0 sm:p-4">
-    <div class="glass-panel bg-[#121216] w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col relative rounded-t-3xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30 overflow-hidden shadow-2xl transform transition-transform translate-y-full sm:translate-y-0">
-        
-        <!-- Верхняя ручка для мобильных (Pull indicator) и шапка -->
-        <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 sm:hidden shrink-0"></div>
-        
-        <div class="flex justify-between items-center px-5 py-4 sm:px-6 border-b border-white/10 shrink-0 bg-white/5">
-            <div class="flex items-center gap-2.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#c5a059] shadow-[0_0_10px_#c5a059]"></span>
-                <h3 class="text-base sm:text-lg font-serif text-[#c5a059] font-bold tracking-wide" id="prodModalTitle">Редактор товару</h3>
+    <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
+    <div class="glass-panel bg-[#121216] w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col relative rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30 overflow-hidden shadow-2xl">
+        <div class="flex justify-between items-center p-4 sm:px-6 border-b border-white/10 shrink-0 bg-white/5">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#c5a059]"></span>
+                <h3 class="text-base sm:text-lg font-serif text-[#c5a059] font-bold" id="prodModalTitle">Редактор товару</h3>
             </div>
-            <button type="button" onclick="closeProductModal()" class="text-gray-400 w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 hover:text-white transition text-lg">&times;</button>
+            <button type="button" onclick="closeProductModal()" class="text-gray-400 p-1 rounded-lg hover:bg-white/10 hover:text-white transition">&times;</button>
         </div>
         
-        <!-- Скроллируемая часть -->
-        <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-5 pb-24 sm:pb-6">
-            
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
             <!-- Основні поля з преміальними селектами -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
                 <!-- ID -->
                 <div>
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">ID (Технічний)</label>
-                    <input type="text" id="prod-id" class="input-field text-xs opacity-50 cursor-not-allowed bg-[#1a1a1f] border-white/10 text-white rounded-xl p-3 w-full" disabled placeholder="Автоматично">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">ID (Технічний)</label>
+                    <input type="text" id="prod-id" class="input-field text-xs opacity-50 cursor-not-allowed bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full" disabled placeholder="Автоматично">
                 </div>
 
                 <!-- Артикул (SKU) -->
                 <div>
-                    <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1.5">Артикул (SKU) *</label>
-                    <input type="text" id="prod-sku" class="input-field text-xs bg-[#1a1a1f] border-[#c5a059]/50 text-white font-mono rounded-xl p-3 w-full focus:border-[#c5a059] outline-none transition shadow-inner" required placeholder="Напр: R-101">
+                    <label class="text-[10px] uppercase font-bold text-[#c5a059] block mb-1">Артикул (SKU) *</label>
+                    <input type="text" id="prod-sku" class="input-field text-xs bg-[#1a1a1f] border-[#c5a059]/50 text-white font-mono rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none transition" required placeholder="Напр: R-101">
                 </div>
 
-                <!-- Оновлений блок вибору категорії (2 рівні) -->
+                <!-- Категорія та підкатегорія (Преміальний Select з оптичними групами) -->
                 <div class="relative">
                     <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label>
                     <div class="relative">
@@ -726,9 +665,9 @@ select option, select optgroup {
 
                 <!-- Статус -->
                 <div class="relative">
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Статус</label>
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Статус</label>
                     <div class="relative">
-                        <select id="prod-status" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-xl p-3 w-full appearance-none cursor-pointer outline-none transition pr-10">
+                        <select id="prod-status" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8">
                             <option value="in-stock">✨ В наявності</option>
                             <option value="out-stock">⏳ Немає в наявності</option>
                             <option value="pre-order">📦 Під замовлення</option>
@@ -740,10 +679,10 @@ select option, select optgroup {
                 </div>
 
                 <!-- Бейдж -->
-                <div class="sm:col-span-2 md:col-span-2 relative">
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Бейдж</label>
+                <div class="sm:col-span-2 md:col-span-1 relative">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Бейдж</label>
                     <div class="relative">
-                        <select id="prod-badge" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-xl p-3 w-full appearance-none cursor-pointer outline-none transition pr-10">
+                        <select id="prod-badge" class="input-field text-xs bg-[#1a1a1f] text-white border border-white/10 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8">
                             <option value="none">Немає</option>
                             <option value="new">🔥 Новинка</option>
                             <option value="exclusive">💎 Ексклюзив</option>
@@ -757,53 +696,41 @@ select option, select optgroup {
             </div>
 
             <!-- Матеріали та каміння -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Матеріал (Спільне)</label>
-                    <input type="text" id="prod-variant" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-xl p-3 w-full focus:border-[#c5a059] outline-none" placeholder="Золото 585, Біле золото">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Матеріал (Спільне)</label>
+                    <input type="text" id="prod-variant" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none" placeholder="Золото 585, Біле золото">
                 </div>
                 <div>
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Каміння (Спільне)</label>
-                    <input type="text" id="prod-stones" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-xl p-3 w-full focus:border-[#c5a059] outline-none" placeholder="Діамант 0.5ct, Сапфір">
+                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Каміння (Спільне)</label>
+                    <input type="text" id="prod-stones" class="input-field text-xs bg-[#1a1a1f] border-white/10 text-white rounded-lg p-2.5 w-full focus:border-[#c5a059] outline-none" placeholder="Діамант 0.5ct, Сапфір">
                 </div>
             </div>
 
             <!-- Блоки на головній -->
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div class="bg-white/5 p-4 rounded-xl border border-white/5">
                 <label class="text-[10px] uppercase tracking-wider font-bold text-[#c5a059] block mb-3">Показувати в блоках на Головній:</label>
-                <div id="prod-blocks-container" class="flex flex-wrap gap-2.5"></div>
+                <div id="prod-blocks-container" class="flex flex-wrap gap-3"></div>
             </div>
 
             <!-- Варіації та мови -->
-            <div class="bg-black/40 p-4 sm:p-5 rounded-2xl border border-[#c5a059]/30 shadow-inner">
+            <div class="bg-black/30 p-4 sm:p-5 rounded-xl border border-[#c5a059]/30">
                 <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
                     <div class="flex gap-1.5 overflow-x-auto custom-scrollbar w-full py-1" id="varTabsContainer"></div>
                 </div>
-
-                <!-- Кнопка швидкого клонування фото на інші розміри/варіації -->
-                <div class="mb-4 bg-white/5 p-2.5 rounded-xl border border-white/5 flex items-center justify-between gap-3">
-                    <div class="text-[11px] text-gray-300">
-                        <span class="font-bold text-[#c5a059]">🖼 Фото:</span> Швидко скопіювати зображення поточної вкладки на всі інші розміри/варіації.
-                    </div>
-                    <button type="button" onclick="copyImagesToAllVariations()" class="btn-secondary text-[11px] py-1.5 px-3 rounded-lg bg-white/10 hover:bg-[#c5a059] hover:text-black transition flex items-center gap-1.5 shrink-0 font-medium">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
-                        Дублювати на всі
-                    </button>
-                </div>
-
-                <div class="flex gap-2 mb-4 bg-white/5 p-1 rounded-xl w-fit border border-white/5" id="langTabsContainer">
-                    <button type="button" class="tab-lang px-3.5 py-1.5 text-xs font-bold rounded-lg active transition" onclick="switchLangTab('uk')">UA</button>
-                    <button type="button" class="tab-lang px-3.5 py-1.5 text-xs font-bold rounded-lg transition" onclick="switchLangTab('ru')">RU</button>
-                    <button type="button" class="tab-lang px-3.5 py-1.5 text-xs font-bold rounded-lg transition" onclick="switchLangTab('en')">EN</button>
+                <div class="flex gap-2 mb-4 bg-white/5 p-1 rounded-lg w-fit" id="langTabsContainer">
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded active" onclick="switchLangTab('uk')">UA</button>
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('ru')">RU</button>
+                    <button type="button" class="tab-lang px-3 py-1 text-xs font-bold rounded" onclick="switchLangTab('en')">EN</button>
                 </div>
                 <div id="variationFieldsContainer" class="flex flex-col gap-4"></div>
             </div>
         </div>
 
-        <!-- Футер модального вікна (фиксированный снизу с безопасным отступом для телефонов) -->
-        <div class="p-4 sm:px-6 border-t border-white/10 shrink-0 bg-[#16161b] flex gap-3 pb-safe">
-            <button type="button" onclick="closeProductModal()" class="flex-1 btn-secondary text-xs py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition font-medium">Скасувати</button>
-            <button type="button" onclick="saveActiveProduct()" class="flex-1 btn-primary text-xs tracking-wider uppercase font-bold py-3 rounded-xl bg-[#c5a059] text-black hover:bg-[#b08d4c] transition shadow-lg shadow-[#c5a059]/20">Зберегти товар</button>
+        <!-- Футер модального вікна -->
+        <div class="p-4 sm:px-6 border-t border-white/10 shrink-0 bg-[#18181d] flex gap-3">
+            <button type="button" onclick="closeProductModal()" class="flex-1 btn-secondary text-xs py-2.5 rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 transition">Скасувати</button>
+            <button type="button" onclick="saveActiveProduct()" class="flex-1 btn-primary text-xs tracking-wider uppercase font-bold py-2.5 rounded-lg bg-[#c5a059] text-black hover:bg-[#b08d4c] transition">Зберегти товар</button>
         </div>
     </div>
 </div>
@@ -1468,146 +1395,47 @@ select option, select optgroup {
             };
         }
 
-   /**
- * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
- */
+        function populateCategorySelect(selectedCategoryId = '') {
+    const select = document.getElementById('prod-category');
+    if (!select) return;
 
-function getCategoryNameSafe(cat) {
-    if (!cat) return 'Без назви';
-    if (typeof window.getLoc === 'function') {
-        return window.getLoc(cat, 'name') || '';
-    }
-    return cat.name?.uk || cat.name || cat.id || 'Без назви';
-}
+    const categoriesTree = typeof API !== 'undefined' ? (API.get('bv_categories_tree', []) || []) : [];
+    const categoriesFlat = typeof API !== 'undefined' ? (API.get('bv_categories_flat', []) || []) : [];
 
-// Допоміжна функція для безпечного витягування масиву з Supabase site_storage
-function extractStorageValue(raw) {
-    if (!raw) return [];
-    if (typeof raw === 'object' && 'value' in raw) raw = raw.value;
-    if (Array.isArray(raw)) return raw;
-    if (typeof raw === 'object' && raw !== null) return Object.values(raw);
-    return [];
-}
+    let html = '<option value="" disabled selected>Оберіть категорію...</option>';
 
-// Заповнення головних категорій та коректна ініціалізація підкатегорій
-window.populateCategorySelect = function(selectedCategoryId = '') {
-    try {
-        const parentSelect = document.getElementById('prod-parent-category');
-        const subSelect = document.getElementById('prod-category');
-        
-        if (!parentSelect || !subSelect) return;
-
-        // Отримуємо дерево категорій так само як у ваших фільтрах
-        let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let cats = extractStorageValue(rawTree);
-
-        let targetId = selectedCategoryId;
-        if (typeof targetId === 'object') targetId = ''; 
-        targetId = String(targetId || '');
-
-        let selectedParentId = '';
-
-        // Шукаємо, до якої головної категорії належить обраний ID (враховуємо вкладеність)
-        if (targetId && cats.length > 0) {
-            for (const cat of cats) {
-                if (!cat) continue;
-                if (String(cat.id) === targetId) {
-                    selectedParentId = String(cat.id);
-                    break;
-                }
-                if (Array.isArray(cat.subcategories)) {
-                    // Перевіряємо другий та третій рівень вкладеності
-                    let foundInSub = cat.subcategories.some(sub => {
-                        if (String(sub.id) === targetId) return true;
-                        if (Array.isArray(sub.subcategories)) {
-                            return sub.subcategories.some(subsub => String(subsub.id) === targetId);
-                        }
-                        return false;
-                    });
-                    if (foundInSub) {
-                        selectedParentId = String(cat.id);
-                        break;
-                    }
-                }
+    if (categoriesTree.length > 0) {
+        categoriesTree.forEach(cat => {
+            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
+            
+            if (cat.sub && cat.sub.length > 0) {
+                // Використовуємо <optgroup> для справжнього візуального поділу та виділення головної категорії
+                html += `<optgroup label="✨ ${catName.toUpperCase()}">`;
+                
+                cat.sub.forEach(sub => {
+                    const subName = typeof getSafeText === 'function' ? getSafeText(sub.name) : (sub.name?.uk || sub.name || sub.id);
+                    const isSelected = selectedCategoryId === sub.id ? 'selected' : '';
+                    html += `<option value="${sub.id}" ${isSelected}>&nbsp;&nbsp;&nbsp;&nbsp;↳ ${subName}</option>`;
+                });
+                
+                html += `</optgroup>`;
+            } else {
+                // Якщо у головної категорії немає підкатегорій
+                const isSelected = selectedCategoryId === cat.id ? 'selected' : '';
+                html += `<option value="${cat.id}" ${isSelected}>🔸 ${catName}</option>`;
             }
-        }
-
-        if (targetId && !selectedParentId) {
-            selectedParentId = targetId;
-        }
-
-        // Формуємо HTML для головних категорій
-        let parentHtml = '<option value="" disabled selected>Оберіть категорію...</option>';
-        cats.forEach(cat => {
-            if (!cat) return;
-            const catName = getCategoryNameSafe(cat);
-            const isSelected = selectedParentId === String(cat.id) ? 'selected' : '';
-            parentHtml += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
         });
-
-        parentSelect.innerHTML = parentHtml;
-
-        // Запускаємо заповнення дочірніх елементів
-        handleParentCategoryChange(targetId);
-
-    } catch (error) {
-        console.error('Критична помилка в populateCategorySelect:', error);
+    } else {
+        // Запасний варіант на випадок плоского списку
+        categoriesFlat.forEach(cat => {
+            const catName = typeof getSafeText === 'function' ? getSafeText(cat.name) : (cat.name?.uk || cat.name || cat.id);
+            const isSelected = selectedCategoryId === cat.id ? 'selected' : '';
+            html += `<option value="${cat.id}" ${isSelected}>${catName}</option>`;
+        });
     }
-};
 
-// Обробка зміни головної категорії (рендерить усю вкладену структуру subcategories)
-window.handleParentCategoryChange = function(preselectedSubId = '') {
-    try {
-        const parentSelect = document.getElementById('prod-parent-category');
-        const subSelect = document.getElementById('prod-category');
-        const subWrapper = document.getElementById('sub-category-wrapper');
-
-        if (!parentSelect || !subSelect) return;
-
-        let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let cats = extractStorageValue(rawTree);
-
-        const parentId = String(parentSelect.value || '');
-        let targetSubId = preselectedSubId;
-        if (typeof targetSubId === 'object') targetSubId = ''; 
-        targetSubId = String(targetSubId || '');
-
-        const selectedParent = cats.find(cat => cat && String(cat.id) === parentId);
-
-        if (selectedParent && Array.isArray(selectedParent.subcategories) && selectedParent.subcategories.length > 0) {
-            let subHtml = '<option value="" disabled selected>Оберіть підкатегорію...</option>';
-            
-            // Рекурсивно або плоско виводимо вкладені рівні для зручного вибору в селекті
-            selectedParent.subcategories.forEach(sub => {
-                if (!sub) return;
-                const subName = getCategoryNameSafe(sub);
-                const isSelected = targetSubId === String(sub.id) ? 'selected' : '';
-                subHtml += `<option value="${sub.id}" ${isSelected}>— ${subName}</option>`;
-
-                // Якщо є третій рівень (subsubcategories)
-                if (Array.isArray(sub.subcategories) && sub.subcategories.length > 0) {
-                    sub.subcategories.forEach(subsub => {
-                        if (!subsub) return;
-                        const subsubName = getCategoryNameSafe(subsub);
-                        const isSubSelected = targetSubId === String(subsub.id) ? 'selected' : '';
-                        subHtml += `<option value="${subsub.id}" ${isSubSelected}>&nbsp;&nbsp;&nbsp;&nbsp;• ${subsubName}</option>`;
-                    });
-                }
-            });
-
-            subSelect.innerHTML = subHtml;
-            subSelect.required = true;
-            if (subWrapper) subWrapper.style.display = 'block';
-            
-        } else {
-            subSelect.innerHTML = `<option value="${parentId}" selected>Без підкатегорії</option>`;
-            subSelect.removeAttribute('required');
-            if (subWrapper) subWrapper.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Критична помилка в handleParentCategoryChange:', error);
-    }
-};
+    select.innerHTML = html;
+}
         window.searchProducts = function() {
             const term = document.getElementById('prodSearch').value.toLowerCase();
             filteredProducts = products.filter(p => {
@@ -1707,6 +1535,7 @@ window.handleParentCategoryChange = function(preselectedSubId = '') {
             document.getElementById('productModal').classList.add('opacity-0'); 
             setTimeout(() => document.getElementById('productModal').classList.add('hidden'), 300); 
         };
+
         window.switchLangTab = function(l) { editLang = l; renderProductEditor(); };
         window.switchVarTab = function(v) { editVar = v; renderProductEditor(); };
 
@@ -2824,10 +2653,6 @@ window.saveSiteSettings = async function() {
 
 
 
-
-
-
-
 /**
  * Генерирует XML-фид товаров с учетом всех полей БД и загружает его в Supabase Storage.
  * @param {HTMLElement} buttonElement - Кнопка, на которую нажали (для блокировки).
@@ -3078,188 +2903,6 @@ function copyFeedUrl() {
         alert('Не вдалося скопіювати посилання');
     });
 }
-
-/**
- * Копирует изображения (и массив картинок) из текущей активной вкладки варіації на все остальные варіації товара.
- */
-function copyImagesToAllVariations() {
-    // Предполагаем, что у вас в глобальной переменной или объекте редактора хранится текущий объект товара/форма
-    if (typeof currentProductEditing === 'undefined' || !currentProductEditing.variations) {
-        // Если структура иная, считываем картинки прямо из инпутов текущей активной вкладки
-        const activeVarKey = window.activeVariationKey || 'base';
-        const imgInput = document.querySelector(`[data-var-field="${activeVarKey}-img"]`) || document.getElementById('prod-img-input');
-        
-        if (!imgInput || !imgInput.value) {
-            alert('В текущей вкладке нет изображений для копирования!');
-            return;
-        }
-
-        const sourceImageUrl = imgInput.value.trim();
-        
-        // Находим все инпуты картинок во всех варіаціях и прописываем туда же
-        const allImgInputs = document.querySelectorAll('.variation-img-input');
-        allImgInputs.forEach(input => {
-            input.value = sourceImageUrl;
-            // Триггерим событие input/change чтобы обновился стейт в JS
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-
-        alert('Фотографии успешно скопированы на все размеры/варіації!');
-        return;
-    }
-
-    // Если работаете через JS-модель данных:
-    const activeVar = window.activeVariationKey || Object.keys(currentProductEditing.variations)[0];
-    if (!activeVar || !currentProductEditing.variations[activeVar]) return;
-
-    const sourceImages = currentProductEditing.variations[activeVar].images || [currentProductEditing.variations[activeVar].img];
-
-    for (let key in currentProductEditing.variations) {
-        if (currentProductEditing.variations.hasOwnProperty(key)) {
-            currentProductEditing.variations[key].images = [...sourceImages];
-            if (sourceImages.length > 0) {
-                currentProductEditing.variations[key].img = sourceImages[0];
-            }
-        }
-    }
-
-    // Перерисовываем вкладки варіацій в модалке, если у вас есть такая функция
-    if (typeof renderVariationTabs === 'function') {
-        renderVariationTabs();
-    }
-    
-    alert('Изображения успешно скопированы на все размеры!');
-}
-
-
-function generateGoogleFeed() {
-    // Отримуємо базовий URL (або поточний хост за замовчуванням)
-    const baseUrlInput = document.getElementById('feed-base-url').value.trim();
-    const baseUrl = baseUrlInput || window.location.origin;
-    const currency = document.getElementById('feed-currency').value;
-    
-    // Припускаємо, що масив товарів зберігається у змінній products (або адаптуйте під ваше сховище, напр. localStorage)
-    const allProducts = window.products || JSON.parse(localStorage.getItem('bv_products') || '[]');
-    
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">\n`;
-    xml += `  <channel>\n`;
-    xml += `    <title>BV Jewelry Feed</title>\n`;
-    xml += `    <link>${baseUrl}</link>\n`;
-    xml += `    <description>Google Merchant Catalog Feed for BV Jewelry</description>\n`;
-
-    allProducts.forEach(item => {
-        const itemId = item.id || item.sku || Math.random().toString(36).substring(2, 9);
-        const title = escapeXml(item.title || item.name || 'Ювелірний виріб');
-        const description = escapeXml(item.description || item.title || 'Ексклюзивні ювелірні прикраси');
-        const link = `${baseUrl}/product.html?id=${itemId}`;
-        const imageLink = item.image || item.photo || '';
-        const price = `${parseFloat(item.price || 0).toFixed(2)} ${currency}`;
-        const availability = (item.inStock !== false) ? 'in_stock' : 'out_of_stock';
-        const category = escapeXml(item.category || 'Apparel & Accessories > Jewelry');
-
-        xml += `    <item>\n`;
-        xml += `      <g:id>${itemId}</g:id>\n`;
-        xml += `      <g:title>${title}</g:title>\n`;
-        xml += `      <g:description>${description}</g:description>\n`;
-        xml += `      <g:link>${link}</g:link>\n`;
-        xml += `      <g:image_link>${imageLink}</g:image_link>\n`;
-        xml += `      <g:brand>BV Jewelry</g:brand>\n`;
-        xml += `      <g:condition>new</g:condition>\n`;
-        xml += `      <g:availability>${availability}</g:availability>\n`;
-        xml += `      <g:price>${price}</g:price>\n`;
-        xml += `      <g:product_type>${category}</g:product_type>\n`;
-        xml += `    </item>\n`;
-    });
-
-    xml += `  </channel>\n`;
-    xml += `</rss>`;
-
-    // Виводимо у textarea для попереднього перегляду
-    document.getElementById('feed-preview').value = xml;
-    document.getElementById('feed-stats').innerText = `Всього товарів у фіді: ${allProducts.length}`;
-
-    // Автоматичне створення та завантаження файлу
-    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'google-merchant-feed.xml';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    if (typeof showToast === 'function') {
-        showToast('Фід успішно згенеровано та завантажено!');
-    }
-}
-
-// Допоміжна функція для екранування спецсимволів XML
-function escapeXml(unsafe) {
-    return unsafe.replace(/[<>&'"]/g, function (c) {
-        switch (c) {
-            case '<': return '&lt;';
-            case '>': return '&gt;';
-            case '&': return '&amp;';
-            case '\'': return '&apos;';
-            case '"': return '&quot;';
-        }
-    });
-}
-
-
-
-window.downloadGoogleFeed = function() {
-    showNotification('Генерація XML фіду...');
-    
-    // URL твоего магазина (нужно будет заменить на актуальный домен)
-    const siteUrl = 'https://bv-jewelry.com'; 
-    
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
-<channel>
-    <title>BV Jewelry</title>
-    <link>${siteUrl}</link>
-    <description>Товарний фід BV Jewelry</description>\n`;
-    
-    // Фильтруем только активные товары, если нужно (тут берем все)
-    products.forEach(p => {
-        const title = (p.variations.base.name.uk || 'Товар').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        const desc = (p.variations.base.desc.uk || title).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        const link = `${siteUrl}/product.html?id=${p.id}`;
-        const image = p.variations.base.images[0] || '';
-        const price = p.variations.base.price || 0;
-        const availability = p.status === 'in-stock' ? 'in_stock' : (p.status === 'pre-order' ? 'preorder' : 'out_of_stock');
-        
-        xml += `    <item>
-        <g:id>${p.sku || p.id}</g:id>
-        <g:title>${title}</g:title>
-        <g:description>${desc}</g:description>
-        <g:link>${link}</g:link>
-        <g:image_link>${image}</g:image_link>
-        <g:condition>new</g:condition>
-        <g:availability>${availability}</g:availability>
-        <g:price>${price} UAH</g:price>
-        <g:brand>BV Jewelry</g:brand>
-    </item>\n`;
-    });
-    
-    xml += `</channel>\n</rss>`;
-    
-    // Создаем Blob объект и триггерим загрузку
-    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `bv_merchant_feed_${new Date().toISOString().split('T')[0]}.xml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    setTimeout(() => showNotification('Фід успішно завантажено!'), 500);
-};
     </script>
 </body>
 </html>
