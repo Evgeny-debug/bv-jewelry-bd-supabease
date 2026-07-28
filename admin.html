@@ -1665,68 +1665,48 @@ window.handleParentCategoryChange = function(preselectedSubId = '') {
                 `;
             });
         };
-window.openProductModal = function(id = null) {
-    editLang = 'uk'; 
-    editVar = 'base';
-    
-    if(id) {
-        actProd = JSON.parse(JSON.stringify(products.find(p => p.id === id) || {}));
-        if(!actProd.variations) actProd.variations = { base: { name:{uk:''}, desc:{uk:''}, images:[] } };
-        if(!actProd.blocks) actProd.blocks = [];
-        if(!actProd.sizes) actProd.sizes = [];
-    } else {
-        actProd = {
-            id: '', sku: '', category: '', status: 'in-stock', badge: 'none', blocks: [], sizes: [], stones: '', variant: '',
-            variations: { base: { name: {uk:'', ru:'', en:''}, desc: {uk:'', ru:'', en:''}, priceType: 'manual', price: '', weight: '', workCost: '', discount: '', images: [] } }
+
+        window.openProductModal = function(id = null) {
+            editLang = 'uk'; editVar = 'base';
+            if(id) {
+                actProd = JSON.parse(JSON.stringify(products.find(p => p.id === id)));
+                if(!actProd.variations) actProd.variations = { base: { name:{uk:''}, desc:{uk:''}, images:[] } };
+                if(!actProd.blocks) actProd.blocks = [];
+                if(!actProd.sizes) actProd.sizes = [];
+            } else {
+                actProd = {
+                    id: '', sku: '', category: '', status: 'in-stock', badge: 'none', blocks: [], sizes: [], stones: '', variant: '',
+                    variations: { base: { name: {uk:'', ru:'', en:''}, desc: {uk:'', ru:'', en:''}, priceType: 'manual', price: '', weight: '', workCost: '', discount: '', images: [] } }
+                };
+            }
+
+            document.getElementById('prodModalTitle').innerText = id ? 'Редагувати товар' : 'Новий товар';
+            document.getElementById('prod-id').value = actProd.id;
+            document.getElementById('prod-sku').value = actProd.sku;
+            document.getElementById('prod-category').innerHTML = buildCategorySelectOptions(actProd.category);
+            document.getElementById('prod-status').value = actProd.status;
+            document.getElementById('prod-badge').value = actProd.badge;
+            document.getElementById('prod-variant').value = actProd.variant || '';
+            document.getElementById('prod-stones').value = actProd.stones || '';
+
+            const bCont = document.getElementById('prod-blocks-container');
+            if(bCont) {
+                bCont.innerHTML = homeBlocks.map(b => `
+                    <label class="flex items-center gap-2 text-[11px] text-white cursor-pointer bg-black/20 p-2.5 rounded border border-white/5 hover:border-[#c5a059]/50 transition-colors">
+                        <input type="checkbox" value="${b.id}" class="prod-block-cb accent-[#c5a059] w-4 h-4" ${actProd.blocks.includes(b.id) ? 'checked' : ''}>
+                        ${b.name.uk}
+                    </label>
+                `).join('');
+            }
+            renderProductEditor();
+            document.getElementById('productModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('productModal').classList.remove('opacity-0'), 10);
         };
-    }
 
-    document.getElementById('prodModalTitle').innerText = id ? 'Редагувати товар' : 'Новий товар';
-    document.getElementById('prod-id').value = actProd.id;
-    document.getElementById('prod-sku').value = actProd.sku;
-    document.getElementById('prod-status').value = actProd.status;
-    document.getElementById('prod-badge').value = actProd.badge;
-    document.getElementById('prod-variant').value = actProd.variant || '';
-    document.getElementById('prod-stones').value = actProd.stones || '';
-
-    const bCont = document.getElementById('prod-blocks-container');
-    if(bCont) {
-        bCont.innerHTML = homeBlocks.map(b => `
-            <label class="flex items-center gap-2 text-[11px] text-white cursor-pointer bg-black/20 p-2.5 rounded border border-white/5 hover:border-[#c5a059]/50 transition-colors">
-                <input type="checkbox" value="${b.id}" class="prod-block-cb accent-[#c5a059] w-4 h-4" ${actProd.blocks.includes(b.id) ? 'checked' : ''}>
-                ${b.name.uk}
-            </label>
-        `).join('');
-    }
-    
-    renderProductEditor();
-
-    // Заповнюємо категорії
-    populateCategorySelect(id ? actProd.category : '');
-
-    const modal = document.getElementById('productModal');
-    const innerPanel = modal.querySelector('.glass-panel'); // Внутрішня панель для мобільної анімації
-    
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        if (innerPanel) innerPanel.classList.remove('translate-y-full'); // Забираємо зсув вниз на телефонах
-    }, 10);
-};
-
-
-
-        
-
-        window.closeProductModal = function() {
-    const modal = document.getElementById('productModal');
-    const innerPanel = modal.querySelector('.glass-panel');
-    
-    if (innerPanel) innerPanel.classList.add('translate-y-full'); // Повертаємо зсув вниз для анімації закриття
-    modal.classList.add('opacity-0');
-    setTimeout(() => modal.classList.add('hidden'), 300);
-};
-
+        window.closeProductModal = function() { 
+            document.getElementById('productModal').classList.add('opacity-0'); 
+            setTimeout(() => document.getElementById('productModal').classList.add('hidden'), 300); 
+        };
         window.switchLangTab = function(l) { editLang = l; renderProductEditor(); };
         window.switchVarTab = function(v) { editVar = v; renderProductEditor(); };
 
