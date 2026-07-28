@@ -1490,6 +1490,17 @@ select option, select optgroup {
 /**
  * Заповнює дворівневий селект категорій (Головна категорія + Підкатегорія)
  */
+// Допоміжна функція для безпечного витягування даних з site_storage (підтримка структури Supabase {key, value})
+function extractStorageValue(raw) {
+    if (!raw) return [];
+    if (typeof raw === 'object' && 'value' in raw) {
+        raw = raw.value;
+    }
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'object' && raw !== null) return Object.values(raw);
+    return [];
+}
+
 window.populateCategorySelect = function(selectedCategoryId = '') {
     try {
         const parentSelect = document.getElementById('prod-parent-category');
@@ -1498,10 +1509,10 @@ window.populateCategorySelect = function(selectedCategoryId = '') {
         if (!parentSelect || !subSelect) return;
 
         let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let categoriesTree = Array.isArray(rawTree) ? rawTree : (rawTree ? Object.values(rawTree) : []);
+        let categoriesTree = extractStorageValue(rawTree);
         
         let rawFlat = typeof API !== 'undefined' ? API.get('bv_categories_flat', []) : [];
-        let categoriesFlat = Array.isArray(rawFlat) ? rawFlat : (rawFlat ? Object.values(rawFlat) : []);
+        let categoriesFlat = extractStorageValue(rawFlat);
 
         let targetId = selectedCategoryId;
         if (typeof targetId === 'object') targetId = ''; 
@@ -1557,9 +1568,6 @@ window.populateCategorySelect = function(selectedCategoryId = '') {
     }
 };
 
-/**
- * Обробник події зміни головної категорії.
- */
 window.handleParentCategoryChange = function(preselectedSubId = '') {
     try {
         const parentSelect = document.getElementById('prod-parent-category');
@@ -1569,7 +1577,7 @@ window.handleParentCategoryChange = function(preselectedSubId = '') {
         if (!parentSelect || !subSelect || !subWrapper) return;
 
         let rawTree = typeof API !== 'undefined' ? API.get('bv_categories_tree', []) : [];
-        let categoriesTree = Array.isArray(rawTree) ? rawTree : (rawTree ? Object.values(rawTree) : []);
+        let categoriesTree = extractStorageValue(rawTree);
 
         const parentId = String(parentSelect.value || '');
         
