@@ -362,12 +362,11 @@
             <span class="truncate">Товари</span>
         </button>
 
-        <!-- 🚀 Новый пункт для генерации и выгрузки фида Google Merchant -->
-        <button onclick="switchTab('feed')" id="tab-feed" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            <span class="truncate">Google Feed</span>
-        </button>
-        
+        <!-- 🚀 Пункт для генерації та вигрузки фіду Google Merchant -->
+<button onclick="switchTab('feed')" id="tab-feed" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
+    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+    <span class="truncate">Google Feed</span>
+</button>
         <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-gray-200 text-sm">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             <span class="truncate">Категорії</span>
@@ -652,7 +651,7 @@
     <!-- МОДАЛЬНЫЕ ОКНА -->
 
     <!-- МОДАЛКА: ТОВАР -->
-    <d<div id="productModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-all duration-300 p-0 sm:p-4">
+    <div id="productModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-all duration-300 p-0 sm:p-4">
     <div class="glass-panel bg-[#121216] w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] flex flex-col relative rounded-t-3xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30 overflow-hidden shadow-2xl transform transition-transform translate-y-full sm:translate-y-0">
         
         <!-- Верхняя ручка для мобильных (Pull indicator) и шапка -->
@@ -2962,6 +2961,83 @@ function copyImagesToAllVariations() {
     }
     
     alert('Изображения успешно скопированы на все размеры!');
+}
+
+
+function generateGoogleFeed() {
+    // Отримуємо базовий URL (або поточний хост за замовчуванням)
+    const baseUrlInput = document.getElementById('feed-base-url').value.trim();
+    const baseUrl = baseUrlInput || window.location.origin;
+    const currency = document.getElementById('feed-currency').value;
+    
+    // Припускаємо, що масив товарів зберігається у змінній products (або адаптуйте під ваше сховище, напр. localStorage)
+    const allProducts = window.products || JSON.parse(localStorage.getItem('bv_products') || '[]');
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">\n`;
+    xml += `  <channel>\n`;
+    xml += `    <title>BV Jewelry Feed</title>\n`;
+    xml += `    <link>${baseUrl}</link>\n`;
+    xml += `    <description>Google Merchant Catalog Feed for BV Jewelry</description>\n`;
+
+    allProducts.forEach(item => {
+        const itemId = item.id || item.sku || Math.random().toString(36).substring(2, 9);
+        const title = escapeXml(item.title || item.name || 'Ювелірний виріб');
+        const description = escapeXml(item.description || item.title || 'Ексклюзивні ювелірні прикраси');
+        const link = `${baseUrl}/product.html?id=${itemId}`;
+        const imageLink = item.image || item.photo || '';
+        const price = `${parseFloat(item.price || 0).toFixed(2)} ${currency}`;
+        const availability = (item.inStock !== false) ? 'in_stock' : 'out_of_stock';
+        const category = escapeXml(item.category || 'Apparel & Accessories > Jewelry');
+
+        xml += `    <item>\n`;
+        xml += `      <g:id>${itemId}</g:id>\n`;
+        xml += `      <g:title>${title}</g:title>\n`;
+        xml += `      <g:description>${description}</g:description>\n`;
+        xml += `      <g:link>${link}</g:link>\n`;
+        xml += `      <g:image_link>${imageLink}</g:image_link>\n`;
+        xml += `      <g:brand>BV Jewelry</g:brand>\n`;
+        xml += `      <g:condition>new</g:condition>\n`;
+        xml += `      <g:availability>${availability}</g:availability>\n`;
+        xml += `      <g:price>${price}</g:price>\n`;
+        xml += `      <g:product_type>${category}</g:product_type>\n`;
+        xml += `    </item>\n`;
+    });
+
+    xml += `  </channel>\n`;
+    xml += `</rss>`;
+
+    // Виводимо у textarea для попереднього перегляду
+    document.getElementById('feed-preview').value = xml;
+    document.getElementById('feed-stats').innerText = `Всього товарів у фіді: ${allProducts.length}`;
+
+    // Автоматичне створення та завантаження файлу
+    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'google-merchant-feed.xml';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (typeof showToast === 'function') {
+        showToast('Фід успішно згенеровано та завантажено!');
+    }
+}
+
+// Допоміжна функція для екранування спецсимволів XML
+function escapeXml(unsafe) {
+    return unsafe.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
 }
     </script>
 </body>
