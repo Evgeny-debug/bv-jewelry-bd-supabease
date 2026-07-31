@@ -358,60 +358,78 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
-                if (!sb) {
-                    alert('Помилка: База даних ще не завантажилася. Зачекайте секунду і спробуйте знову.');
-                    return;
-                }
-
-                const name = document.getElementById('orderName').value.trim();
-                const phone = document.getElementById('orderPhone').value.trim();
-                const email = document.getElementById('orderEmail').value.trim();
-                const deliveryType = document.getElementById('deliveryMethod').value;
-                const comment = document.getElementById('orderComment').value.trim();
-
-                if (!name) { alert('Введіть ваше ім\'я та прізвище'); return; }
-                if (!phone) { alert('Введіть номер телефону'); return; }
-                if (!email) { alert('Введіть email'); return; }
-
-                let deliveryText = '';
-                if (deliveryType === 'pickup') {
-                    deliveryText = `${name}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
-                } else {
-                    const cityName = cityInput.value.trim();
-                    const branchName = branchInput.value.trim();
-                    if (!cityName) { alert('Введіть та оберіть місто Нової Пошти з випадаючого списку'); return; }
-                    if (!branchName) { alert('Введіть та оберіть відділення Нової Пошти'); return; }
-                    deliveryText = `${name}, Нова Пошта: ${cityName}, ${branchName}`;
-                }
-
-                const cart = typeof getCart === 'function' ? getCart() : [];
-                if (cart.length === 0) {
-                    alert('Ваш кошик порожній!');
-                    return;
-                }
-
-                const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-                const paymentMethod = document.getElementById('orderPayment').value;
-
-                const orderData = {
-                    user_id: user ? user.id : null,
-                    user_email: email,
-                    phone: phone,
-                    delivery_info: deliveryText, 
-                    payment_method: paymentMethod,
-                    comment: comment,
-                    items: cart, 
-                    total_price: total,
-                    status: 'pending'
-                };
-
                 const btn = document.getElementById('submitBtn');
                 btn.innerText = 'Обробка...';
                 btn.disabled = true;
 
                 try {
+                    // Безпечне очікування ініціалізації Supabase на мобільних пристроях
+                    let sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
+                    let attempts = 0;
+                    while (!sb && attempts < 5) {
+                        await new Promise(r => setTimeout(r, 200));
+                        sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
+                        attempts++;
+                    }
+
+                    if (!sb) {
+                        throw new Error('Не вдалося підключитися до бази даних. Перевірте з\'єднання.');
+                    }
+
+                    const name = document.getElementById('orderName').value.trim();
+                    const phone = document.getElementById('orderPhone').value.trim();
+                    const email = document.getElementById('orderEmail').value.trim();
+                    const deliveryType = document.getElementById('deliveryMethod').value;
+                    const comment = document.getElementById('orderComment').value.trim();
+
+                    if (!name) { alert('Введіть ваше ім\'я та прізвище'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                    if (!phone) { alert('Введіть номер телефону'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                    if (!email) { alert('Введіть email'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+
+                    let deliveryText = '';
+                    if (deliveryType === 'pickup') {
+                        deliveryText = `${name}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
+                    } else {
+                        const cityName = cityInput.value.trim();
+                        const branchName = branchInput.value.trim();
+                        if (!cityName) { alert('Оберіть місто Нової Пошти'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                        if (!branchName) { alert('Оберіть відділення Нової Пошти'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                        deliveryText = `${name}, Нова Пошта: ${cityName}, ${branchName}`;
+                    }
+
+                    const cart = typeof getCart === 'function' ? getCart() : [];
+                    if (cart.length === 0) {
+                        alert('Ваш кошик порожній!');
+                        btn.innerText = 'Оплатити замовлення';
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                    
+                    // Безпечне отримання сесії на мобільних
+                    let currentUserId = null;
+                    try {
+                        const { data: { session } } = await sb.auth.getSession();
+                        if (session) currentUserId = session.user.id;
+                    } catch (err) {
+                        console.warn('Сесія не знайдена, відправляємо як гість');
+                    }
+
+                    const paymentMethod = document.getElementById('orderPayment').value;
+
+                    const orderData = {
+                        user_id: currentUserId,
+                        user_email: email,
+                        phone: phone,
+                        delivery_info: deliveryText, 
+                        payment_method: paymentMethod,
+                        comment: comment,
+                        items: cart, 
+                        total_price: total,
+                        status: 'pending'
+                    };
+
                     const { error } = await sb.from('orders').insert([orderData]);
                     if (error) throw error;
 
@@ -425,7 +443,8 @@
                     setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
                 } catch (err) {
-                    alert('Помилка бази даних: ' + err.message);
+                    alert('Помилка замовлення: ' + (err.message || JSON.stringify(err)));
+                    console.error('Checkout error:', err);
                     btn.innerText = 'Оплатити замовлення';
                     btn.disabled = false;
                 }
