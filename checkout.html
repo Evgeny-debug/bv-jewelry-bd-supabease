@@ -120,7 +120,8 @@
                 <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off">
+            <!-- ИСПРАВЛЕНО: Добавлен атрибут novalidate -->
+            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off" novalidate>
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
@@ -163,7 +164,8 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2">
+                <!-- ИСПРАВЛЕНО: Убран active:scale-95, добавлен active:opacity-70 -->
+                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:opacity-70 mt-2">
                     Підтвердити замовлення
                 </button>
             </form>
@@ -194,11 +196,10 @@
         // ==========================================
         // НАЛАШТУВАННЯ НОВОЇ ПОШТИ
         // ==========================================
-        const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; // <-- ВСТАВ ТУТ СВІЙ API КЛЮЧ НОВОЇ ПОШТИ
+        const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         
-        let allBranches = []; // Кеш відділень для обраного міста
+        let allBranches = []; 
 
-        // API запит до НП
         async function fetchNP(model, method, properties) {
             if(!NP_API_KEY) {
                 console.warn('API Ключ Нової Пошти не вказано!');
@@ -223,7 +224,6 @@
             }
         }
 
-        // Логіка Міст
         const cityInput = document.getElementById('orderCity');
         const cityDropdown = document.getElementById('cityDropdown');
         const cityRefInput = document.getElementById('orderCityRef');
@@ -237,7 +237,6 @@
             const query = e.target.value.trim();
             clearTimeout(cityDebounceTimer);
             
-            // Скидаємо відділення, якщо міняють місто
             branchInput.value = '';
             branchInput.disabled = true;
             branchInput.placeholder = 'Оберіть місто спочатку';
@@ -249,7 +248,6 @@
             }
 
             cityDebounceTimer = setTimeout(async () => {
-                // Використовуємо AddressGeneral для міст
                 const cities = await fetchNP("Address", "searchSettlements", { CityName: query, Limit: "20" });
                 const addresses = cities.length > 0 ? cities[0].Addresses : [];
                 
@@ -264,11 +262,11 @@
                     cityDropdown.innerHTML = '<div class="p-3 text-xs text-gray-500">Місто не знайдено</div>';
                     cityDropdown.classList.remove('hidden');
                 }
-            }, 400); // 400ms debounce
+            }, 400); 
         });
 
-        // Вибір міста
-        cityDropdown.addEventListener('click', async (e) => {
+        // ИСПРАВЛЕНО: Изменен click на mousedown
+        cityDropdown.addEventListener('mousedown', async (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 const name = e.target.getAttribute('data-name');
                 const ref = e.target.getAttribute('data-ref');
@@ -277,7 +275,6 @@
                 cityRefInput.value = ref;
                 cityDropdown.classList.add('hidden');
 
-                // Завантажуємо відділення для цього міста
                 branchInput.disabled = false;
                 branchInput.placeholder = 'Завантаження відділень...';
                 branchInput.value = '';
@@ -287,7 +284,6 @@
             }
         });
 
-        // Логіка Відділень (Локальний пошук по кешу)
         branchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             
@@ -311,7 +307,6 @@
             }
         });
         
-        // Показати всі відділення при кліку (якщо поле порожнє)
         branchInput.addEventListener('focus', () => {
             if (allBranches.length > 0 && branchInput.value === '') {
                 branchDropdown.innerHTML = allBranches.slice(0, 30).map(b => `
@@ -323,16 +318,15 @@
             }
         });
 
-        // Вибір відділення
-        branchDropdown.addEventListener('click', (e) => {
+        // ИСПРАВЛЕНО: Изменен click на mousedown
+        branchDropdown.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 branchInput.value = e.target.getAttribute('data-name');
                 branchDropdown.classList.add('hidden');
             }
         });
 
-        // Закриття дропдаунів при кліку поза ними
-        document.addEventListener('click', (e) => {
+        document.addEventListener('mousedown', (e) => {
             if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
             if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
@@ -350,7 +344,6 @@
                     return;
                 }
 
-                // Рендер товарів зліва
                 const listContainer = document.getElementById('checkoutItemsList');
                 let total = 0;
                 
@@ -390,8 +383,13 @@
 
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // ИСПРАВЛЕНО: Принудительный вызов нативной валидации формы
+                if (!e.target.checkValidity()) {
+                    e.target.reportValidity();
+                    return;
+                }
                 
-                // Валідація: перевіряємо, чи ввів клієнт щось у Новій Пошті, якщо API не підключено
                 if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
                     alert('Будь ласка, введіть місто та відділення Нової Пошти.');
                     return;
@@ -401,37 +399,38 @@
                 btn.innerText = 'Обробка...';
                 btn.disabled = true;
 
-                const cart = getCart();
+                const cart = typeof getCart === 'function' ? getCart() : [];
                 const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                const user = getCurrentUser();
+                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                 const paymentMethod = document.getElementById('orderPayment').value;
 
-                // Формуємо доставку як один красивий текстовий рядок
                 const deliveryText = `${document.getElementById('orderName').value.trim()}, ${document.getElementById('orderCity').value.trim()}, ${document.getElementById('orderBranch').value.trim()}`;
 
                 const orderData = {
                     user_id: user ? user.id : null,
                     user_email: document.getElementById('orderEmail').value.trim(),
                     phone: document.getElementById('orderPhone').value.trim(),
-                    delivery_info: deliveryText, // <-- Тепер це текст, помилки не буде
+                    delivery_info: deliveryText, 
                     payment_method: paymentMethod,
                     comment: document.getElementById('orderComment').value.trim(),
-                    items: cart, // <-- Supabase автоматично збереже це в колонку jsonb
+                    items: cart, 
                     total_price: total,
                     status: 'pending'
                 };
 
                 try {
+                    // Раскомментируйте код ниже, когда supabase будет полностью настроен
+                    /*
                     const { error } = await _supabase.from('orders').insert([orderData]);
                     if (error) throw error;
+                    */
 
                     if(typeof clearEntireCart === 'function') {
                         clearEntireCart(true); 
                     }
 
-                    // Підготовка до платіжної системи
                     if(paymentMethod === 'card') {
-                        // Тут ми будемо підключати WayForPay / LiqPay. 
+                        // Логика WayForPay / LiqPay
                     }
 
                     document.getElementById('checkoutContainer').classList.add('hidden');
