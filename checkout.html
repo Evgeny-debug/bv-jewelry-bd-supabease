@@ -22,110 +22,73 @@
     })();
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111111; color: #f5f5f7; }
-        .glass-panel { background: #1c1c1e; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
-        .input-field { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
+        /* Світліший темний фон та панелі для кращого контрасту */
+        body { font-family: 'Inter', sans-serif; background-color: #161618; color: #f5f5f7; }
+        .glass-panel { background: #222224; border: 1px solid rgba(255,255,255,0.06); border-radius: 2px; }
+        .input-field { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
         .input-field:focus { border-color: #c5a059; }
-        select.input-field option { background-color: #1c1c1e; color: #f5f5f7; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
+        select.input-field option { background-color: #222224; color: #f5f5f7; }
         
-        /* Стили для дропдаунов Новой Почты */
-        .np-dropdown-item { padding: 12px 14px; color: #f5f5f7; font-size: 13px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(197, 160, 89, 0.3); border-radius: 2px; }
+        
+        .np-dropdown-item { padding: 12px 14px; color: #f5f5f7; font-size: 13px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: #c5a059; }
         .np-dropdown-item:last-child { border-bottom: none; }
-        .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); }
-        /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
-        .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
-            border-radius: 0 !important;
-        }
-        .promo-track, .weekly-track, .product-grid-wide, .glass-accordion-container {
-            gap: 0 !important; 
-        }
-        .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
-        section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
-        .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
+        .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 2px; }
         
-        /* Зменшений Hero-банер */
-        .h-screen-hero { min-height: 0 !important; height: 30vh !important; padding: 0 !important; }
+        /* Строгий дизайн - скасування будь-яких заокруглень глобально */
+        * { border-radius: 2px !important; }
         
-        #globalContactBtn { display: none !important; } /* Плаваюча кнопка видалена */
+        #scrollToTopBtn, #globalContactBtn { display: none !important; } 
 
-        /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
         .product-card {
             border: 1px solid #e5e5e5 !important;
             box-shadow: none !important;
             background-color: #fff !important;
-            margin-right: -1px; /* Злиття рамок */
-            margin-bottom: -1px;
         }
-        [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
-        
-        .product-card .product-img {
-            aspect-ratio: 1 / 1 !important;
-            object-fit: contain !important;
-            padding: 0 !important;
-            background: #fff !important;
-            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
-        }
+        [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #1a1a1c !important; }
+        .product-card .product-img { mix-blend-mode: multiply; }
         [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
-        
-        .product-card .p-4 { padding: 10px 8px !important; }
-        .product-card ha, .product-card span { line-height: 1.2; }
 
-        /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
         @media (max-width: 1024px) {
             #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
             .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
         }
-
-        /* Кнопка нагору */
-        #scrollToTopBtn { left: 1rem !important; right: auto !important; }
-        @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
-        
-        /* Футер колонки для моб */
-        .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
-        @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
-
-        /* Бокове меню: компактна верхівка */
-        .side-menu { padding-top: 16px !important; }
-        .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
-        .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 pb-20">
+<body class="min-h-screen flex flex-col items-center justify-center p-0 md:p-4 pb-0 md:pb-20">
 
-    <a href="index.html" class="absolute top-6 left-6 text-sm text-gray-400 hover:text-[#c5a059] flex items-center gap-2 transition-colors z-10">
+    <a href="index.html" class="absolute top-4 left-4 md:top-6 md:left-6 text-sm text-gray-400 hover:text-[#c5a059] flex items-center gap-2 transition-colors z-10 bg-[#161618] md:bg-transparent p-2 md:p-0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         <span class="hidden md:inline">Повернутися до покупок</span>
     </a>
 
-    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-8 mt-16 lg:mt-0" id="checkoutContainer">
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-4 md:gap-8 mt-14 md:mt-0" id="checkoutContainer">
         
-        <div class="w-full lg:w-5/12 glass-panel p-6 shadow-2xl flex flex-col max-h-[85vh]">
-            <h2 class="text-xl font-serif text-[#c5a059] italic mb-6">Ваше замовлення</h2>
-            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-4">
-                </div>
+        <div class="w-full lg:w-5/12 glass-panel p-5 md:p-6 shadow-2xl flex flex-col max-h-[85vh] border-x-0 md:border-x">
+            <h2 class="text-lg md:text-xl font-serif text-[#c5a059] italic mb-4 md:mb-6">Ваше замовлення</h2>
+            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3">
+            </div>
             
-            <div class="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
+            <div class="mt-4 pt-4 md:mt-6 md:pt-6 border-t border-white/10 flex justify-between items-end">
                 <span class="text-xs uppercase tracking-widest text-gray-400">Підсумок:</span>
                 <span class="text-2xl font-bold text-white" id="checkoutTotal">0 ₴</span>
             </div>
         </div>
 
-        <div class="w-full lg:w-7/12 glass-panel p-6 md:p-10 shadow-2xl flex flex-col">
-            <div class="mb-8">
-                <h1 class="text-2xl md:text-3xl font-serif text-white mb-2">Оформлення замовлення</h1>
-                <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
+        <div class="w-full lg:w-7/12 glass-panel p-5 md:p-10 shadow-2xl flex flex-col border-x-0 md:border-x">
+            <div class="mb-6 md:mb-8">
+                <h1 class="text-xl md:text-3xl font-serif text-white mb-2">Оформлення замовлення</h1>
+                <p class="text-xs md:text-sm text-gray-400">Заповніть дані для отримання вашої прикраси</p>
             </div>
 
-            <!-- ИСПРАВЛЕНО: Добавлен атрибут novalidate -->
             <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off" novalidate>
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                         <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
                         <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
                         <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2" required>
@@ -133,59 +96,75 @@
                 </div>
 
                 <div class="pt-4 border-t border-white/10">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1 flex justify-between items-center">
-                        Доставка (Нова Пошта)
-                        <img src="https://novaposhta.ua/runtime/cache/320x95/np-logo-uk_1.png" alt="NP" class="h-3 opacity-80 rounded" style="filter: grayscale(1) invert(1) brightness(2);">
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Спосіб доставки</h3>
+                    
+                    <select id="deliveryMethod" class="input-field cursor-pointer mb-4">
+                        <option value="np">Нова Пошта (по Україні)</option>
+                        <option value="pickup">Самовивіз з магазину (м. Ізмаїл)</option>
+                    </select>
+
+                    <div id="npWrapper" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div class="md:col-span-2 flex items-center text-xs text-gray-400 mb-[-5px]">
+                            Дані для відправки
+                            <svg class="h-3 w-3 ml-1.5 fill-red-600" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.25 2.25h19.5v19.5H2.25V2.25zm5.02 5.02v9.46h2.78v-3.7h3.9v3.7h2.78V7.27h-2.78v3.52h-3.9V7.27H7.27z"/>
+                            </svg>
+                        </div>
                         <div class="relative">
-                            <input type="text" id="orderCity" placeholder="Почніть вводити місто..." class="input-field" autocomplete="new-password" required>
+                            <input type="text" id="orderCity" placeholder="Місто..." class="input-field" autocomplete="new-password" required>
                             <input type="hidden" id="orderCityRef" value="">
-                            <div id="cityDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
+                            <div id="cityDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
 
                         <div class="relative">
-                            <input type="text" id="orderBranch" placeholder="Оберіть місто спочатку" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password" required>
-                            <div id="branchDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
+                            <input type="text" id="orderBranch" placeholder="Оберіть місто" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password" required>
+                            <div id="branchDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
+                    </div>
+
+                    <div id="pickupWrapper" class="hidden text-sm text-gray-300 p-4 border border-white/5 bg-white/5">
+                        <p class="font-medium text-white mb-1">Салон BV Jewelry</p>
+                        <p class="text-xs text-gray-400">Заберіть своє замовлення у нашому фірмовому салоні в м. Ізмаїл. Після підтвердження менеджер узгодить з вами зручний час.</p>
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-white/10">
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Спосіб оплати</h3>
-                    <select id="orderPayment" class="input-field cursor-pointer">
-                        <option value="cod">Накладений платіж (Оплата при отриманні)</option>
-                        <option value="card">Онлайн оплата (Карткою / Apple Pay)</option>
-                    </select>
+                    
+                    <div class="p-4 border border-[#c5a059]/30 bg-[#c5a059]/5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            <span class="font-medium text-white text-sm">Повна оплата онлайн</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-3 leading-relaxed">Ювелірні вироби виготовляються та відправляються виключно за умови повної оплати замовлення.</p>
+                        <div class="flex items-center gap-2 pt-3 border-t border-[#c5a059]/20 text-[10px] text-gray-500 uppercase tracking-wide">
+                            <span>Отримувач: ФОП Воронцов В. В.</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="orderPayment" value="card_full">
                 </div>
 
                 <div class="pt-4 border-t border-white/10">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Коментар до замовлення</h3>
-                    <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Коментар</h3>
+                    <textarea id="orderComment" placeholder="Побажання щодо пакування, розміру..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <!-- ИСПРАВЛЕНО: Убран active:scale-95, добавлен active:opacity-70 -->
-                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:opacity-70 mt-2">
-                    Підтвердити замовлення
+                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-[#111] font-bold uppercase tracking-widest text-xs px-10 py-4 hover:bg-white transition-colors active:opacity-70 mt-2">
+                    Оплатити замовлення
                 </button>
             </form>
         </div>
     </div>
 
-    <div id="successModal" class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4 opacity-0 transition-opacity duration-500">
+    <div id="successModal" class="hidden fixed inset-0 bg-[#161618]/95 z-[9999] flex items-center justify-center p-4 opacity-0 transition-opacity duration-500 backdrop-blur-sm">
         <div class="glass-panel p-8 md:p-12 text-center max-w-md w-full border-[#c5a059]/30 shadow-2xl">
-            <div class="w-20 h-20 mx-auto bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <div class="w-16 h-16 mx-auto border border-[#c5a059] text-[#c5a059] flex items-center justify-center mb-6">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <h2 class="text-2xl font-serif text-[#c5a059] italic mb-3">Дякуємо!</h2>
-            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно прийнято. Наш менеджер зв'яжеться з вами найближчим часом.</p>
+            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно прийнято в обробку. Перенаправляємо на сторінку оплати...</p>
             
-            <div id="guestPromo" class="bg-white/5 border border-white/10 rounded-xl p-5 mb-8">
-                <p class="text-xs text-gray-400 mb-3">Відстежуйте статус замовлень та отримуйте знижки</p>
-                <button onclick="window.location.href='index.html'" class="text-[#c5a059] text-xs font-bold uppercase tracking-widest hover:underline">Створити акаунт</button>
-            </div>
-
-            <a href="index.html" class="block w-full border border-white/20 text-white text-xs font-bold uppercase tracking-widest py-3 rounded-lg hover:bg-white/5 transition-colors">На головну</a>
+            <a href="index.html" class="block w-full border border-white/10 text-white text-xs font-bold uppercase tracking-widest py-3 hover:bg-white/5 transition-colors">На головну</a>
         </div>
     </div>
     
@@ -193,18 +172,11 @@
     <script src="main.js"></script>
 
     <script>
-        // ==========================================
-        // НАЛАШТУВАННЯ НОВОЇ ПОШТИ
-        // ==========================================
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
-        
         let allBranches = []; 
 
         async function fetchNP(model, method, properties) {
-            if(!NP_API_KEY) {
-                console.warn('API Ключ Нової Пошти не вказано!');
-                return [];
-            }
+            if(!NP_API_KEY) return [];
             try {
                 const res = await fetch('https://api.novaposhta.ua/v2.0/json/', {
                     method: 'POST',
@@ -227,7 +199,6 @@
         const cityInput = document.getElementById('orderCity');
         const cityDropdown = document.getElementById('cityDropdown');
         const cityRefInput = document.getElementById('orderCityRef');
-        
         const branchInput = document.getElementById('orderBranch');
         const branchDropdown = document.getElementById('branchDropdown');
         
@@ -239,7 +210,7 @@
             
             branchInput.value = '';
             branchInput.disabled = true;
-            branchInput.placeholder = 'Оберіть місто спочатку';
+            branchInput.placeholder = 'Оберіть місто';
             allBranches = [];
 
             if (query.length < 2) {
@@ -265,7 +236,6 @@
             }, 400); 
         });
 
-        // ИСПРАВЛЕНО: Изменен click на mousedown
         cityDropdown.addEventListener('mousedown', async (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 const name = e.target.getAttribute('data-name');
@@ -276,22 +246,20 @@
                 cityDropdown.classList.add('hidden');
 
                 branchInput.disabled = false;
-                branchInput.placeholder = 'Завантаження відділень...';
+                branchInput.placeholder = 'Завантаження...';
                 branchInput.value = '';
                 
                 allBranches = await fetchNP("Address", "getWarehouses", { CityRef: ref });
-                branchInput.placeholder = 'Введіть номер або адресу відділення';
+                branchInput.placeholder = 'Введіть номер відділення';
             }
         });
 
         branchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
-            
             if (query.length === 0) {
                 branchDropdown.classList.add('hidden');
                 return;
             }
-
             const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query) || b.Number === query);
             
             if (filtered.length > 0) {
@@ -302,7 +270,7 @@
                 `).join('');
                 branchDropdown.classList.remove('hidden');
             } else {
-                branchDropdown.innerHTML = '<div class="p-3 text-xs text-gray-500">Відділення не знайдено</div>';
+                branchDropdown.innerHTML = '<div class="p-3 text-xs text-gray-500">Не знайдено</div>';
                 branchDropdown.classList.remove('hidden');
             }
         });
@@ -318,7 +286,6 @@
             }
         });
 
-        // ИСПРАВЛЕНО: Изменен click на mousedown
         branchDropdown.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 branchInput.value = e.target.getAttribute('data-name');
@@ -331,9 +298,26 @@
             if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
 
-        // ==========================================
-        // ЛОГІКА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
-        // ==========================================
+        // ЛОГІКА ПЕРЕМИКАННЯ ДОСТАВКИ
+        const delMethod = document.getElementById('deliveryMethod');
+        const npWrapper = document.getElementById('npWrapper');
+        const pickupWrapper = document.getElementById('pickupWrapper');
+
+        delMethod.addEventListener('change', (e) => {
+            if (e.target.value === 'np') {
+                npWrapper.classList.remove('hidden');
+                pickupWrapper.classList.add('hidden');
+                cityInput.setAttribute('required', 'true');
+                branchInput.setAttribute('required', 'true');
+            } else {
+                npWrapper.classList.add('hidden');
+                pickupWrapper.classList.remove('hidden');
+                cityInput.removeAttribute('required');
+                branchInput.removeAttribute('required');
+            }
+        });
+
+        // ІНІЦІАЛІЗАЦІЯ ТА ВІДПРАВКА
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const cart = typeof getCart === 'function' ? getCart() : [];
@@ -349,15 +333,14 @@
                 
                 listContainer.innerHTML = cart.map(item => {
                     total += item.price * item.qty;
-                    const sizeBadge = item.size ? `<span class="bg-[#c5a059]/20 text-[#c5a059] px-2 py-0.5 rounded text-[10px] font-bold">Розмір: ${item.size}</span>` : '';
+                    const sizeBadge = item.size ? `<span class="bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-mono text-gray-300">Розмір: ${item.size}</span>` : '';
                     return `
-                        <div class="flex gap-4 bg-white/5 p-3 rounded-xl border border-white/5 relative group">
-                            <img src="${item.img}" class="w-16 h-16 object-cover rounded-lg border border-white/10">
+                        <div class="flex gap-4 bg-[#222224] p-3 border border-white/5 relative group">
+                            <img src="${item.img}" class="w-14 h-14 object-cover border border-white/10">
                             <div class="flex-grow flex flex-col justify-center pr-6">
-                                <span class="text-xs font-semibold uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
+                                <span class="text-xs font-medium uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
                                 <div class="flex items-center gap-2 mt-1 mb-1">
                                     ${sizeBadge}
-                                    <span class="text-[10px] text-gray-400">Арт: ${item.sku}</span>
                                 </div>
                                 <div class="flex justify-between items-center mt-auto">
                                     <span class="text-xs text-gray-400">${item.qty} шт.</span>
@@ -365,7 +348,7 @@
                                 </div>
                             </div>
                             <button class="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
                     `;
@@ -377,21 +360,14 @@
                 if (user) {
                     document.getElementById('orderEmail').value = user.username || '';
                     document.getElementById('orderName').value = user.name || '';
-                    document.getElementById('guestPromo').classList.add('hidden');
                 }
             }, 500);
 
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // ИСПРАВЛЕНО: Принудительный вызов нативной валидации формы
                 if (!e.target.checkValidity()) {
                     e.target.reportValidity();
-                    return;
-                }
-                
-                if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
-                    alert('Будь ласка, введіть місто та відділення Нової Пошти.');
                     return;
                 }
 
@@ -403,8 +379,22 @@
                 const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                 const paymentMethod = document.getElementById('orderPayment').value;
+                const deliveryType = document.getElementById('deliveryMethod').value;
+                
+                const clientName = document.getElementById('orderName').value.trim();
+                let deliveryText = '';
 
-                const deliveryText = `${document.getElementById('orderName').value.trim()}, ${document.getElementById('orderCity').value.trim()}, ${document.getElementById('orderBranch').value.trim()}`;
+                if (deliveryType === 'pickup') {
+                    deliveryText = `${clientName}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
+                } else {
+                    if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
+                        alert('Будь ласка, введіть місто та відділення Нової Пошти.');
+                        btn.innerText = 'Оплатити замовлення';
+                        btn.disabled = false;
+                        return;
+                    }
+                    deliveryText = `${clientName}, Нова Пошта: ${cityInput.value.trim()}, ${branchInput.value.trim()}`;
+                }
 
                 const orderData = {
                     user_id: user ? user.id : null,
@@ -419,18 +409,12 @@
                 };
 
                 try {
-                    // Раскомментируйте код ниже, когда supabase будет полностью настроен
-                    /*
+                    // РАЗБЛОКИРОВАННАЯ ОТПРАВКА В SUPABASE
                     const { error } = await _supabase.from('orders').insert([orderData]);
                     if (error) throw error;
-                    */
 
                     if(typeof clearEntireCart === 'function') {
                         clearEntireCart(true); 
-                    }
-
-                    if(paymentMethod === 'card') {
-                        // Логика WayForPay / LiqPay
                     }
 
                     document.getElementById('checkoutContainer').classList.add('hidden');
@@ -438,9 +422,12 @@
                     modal.classList.remove('hidden');
                     setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
+                    // Тут в будущем можно добавить редирект на платежный шлюз (WayForPay и т.д.)
+                    // setTimeout(() => { window.location.href = 'your_payment_link'; }, 2000);
+
                 } catch (err) {
                     alert('Виникла помилка: ' + err.message);
-                    btn.innerText = 'Підтвердити замовлення';
+                    btn.innerText = 'Оплатити замовлення';
                     btn.disabled = false;
                 }
             });
