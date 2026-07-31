@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="uk" class="dark">
 <head>
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="MyWebSite" />
-<link rel="manifest" href="/site.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Оформлення замовлення | BV Jewelry</title>
@@ -408,18 +406,17 @@
                 const user = getCurrentUser();
                 const paymentMethod = document.getElementById('orderPayment').value;
 
+                // Формуємо доставку як один красивий текстовий рядок
+                const deliveryText = `${document.getElementById('orderName').value.trim()}, ${document.getElementById('orderCity').value.trim()}, ${document.getElementById('orderBranch').value.trim()}`;
+
                 const orderData = {
                     user_id: user ? user.id : null,
                     user_email: document.getElementById('orderEmail').value.trim(),
                     phone: document.getElementById('orderPhone').value.trim(),
-                    delivery_info: {
-                        name: document.getElementById('orderName').value.trim(),
-                        city: document.getElementById('orderCity').value.trim(),
-                        branch: document.getElementById('orderBranch').value.trim()
-                    },
+                    delivery_info: deliveryText, // <-- Тепер це текст, помилки не буде
                     payment_method: paymentMethod,
                     comment: document.getElementById('orderComment').value.trim(),
-                    items: cart,
+                    items: cart, // <-- Supabase автоматично збереже це в колонку jsonb
                     total_price: total,
                     status: 'pending'
                 };
