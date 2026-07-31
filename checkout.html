@@ -22,7 +22,6 @@
     })();
     </script>
     <style>
-        /* Світліший темний фон та панелі для кращого контрасту */
         body { font-family: 'Inter', sans-serif; background-color: #161618; color: #f5f5f7; }
         .glass-panel { background: #222224; border: 1px solid rgba(255,255,255,0.06); border-radius: 2px; }
         .input-field { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
@@ -38,7 +37,6 @@
         .np-dropdown-item:last-child { border-bottom: none; }
         .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 2px; }
         
-        /* Строгий дизайн - скасування будь-яких заокруглень глобально */
         * { border-radius: 2px !important; }
         
         #scrollToTopBtn, #globalContactBtn { display: none !important; } 
@@ -236,10 +234,12 @@
             }, 400); 
         });
 
-        cityDropdown.addEventListener('mousedown', async (e) => {
-            if (e.target.classList.contains('np-dropdown-item')) {
-                const name = e.target.getAttribute('data-name');
-                const ref = e.target.getAttribute('data-ref');
+        // ВИПРАВЛЕНО НА CLICK (працює і на ПК, і тапом на мобільних)
+        cityDropdown.addEventListener('click', async (e) => {
+            const item = e.target.closest('.np-dropdown-item');
+            if (item) {
+                const name = item.getAttribute('data-name');
+                const ref = item.getAttribute('data-ref');
                 
                 cityInput.value = name;
                 cityRefInput.value = ref;
@@ -286,14 +286,16 @@
             }
         });
 
-        branchDropdown.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('np-dropdown-item')) {
-                branchInput.value = e.target.getAttribute('data-name');
+        // ВИПРАВЛЕНО НА CLICK для відділень
+        branchDropdown.addEventListener('click', (e) => {
+            const item = e.target.closest('.np-dropdown-item');
+            if (item) {
+                branchInput.value = item.getAttribute('data-name');
                 branchDropdown.classList.add('hidden');
             }
         });
 
-        document.addEventListener('mousedown', (e) => {
+        document.addEventListener('click', (e) => {
             if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
             if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
@@ -364,9 +366,10 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Захист від затримки завантаження бази даних на мобільних
-                if (typeof _supabase === 'undefined' || !_supabase) {
-                    alert('Помилка завантаження: базу даних ще не ініційовано. Спробуйте оновити сторінку.');
+                // Безпечна перевірка supabase через window
+                const sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
+                if (!sb) {
+                    alert('Помилка завантаження: базу даних ще не ініційовано. Оновіть сторінку.');
                     return;
                 }
 
@@ -391,7 +394,7 @@
                 if (deliveryType === 'pickup') {
                     deliveryText = `${clientName}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
                 } else {
-                    if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
+                    if(!cityInput.value.trim() || !branchInput.value.trim()) {
                         alert('Будь ласка, введіть місто та відділення Нової Пошти.');
                         btn.innerText = 'Оплатити замовлення';
                         btn.disabled = false;
@@ -413,7 +416,7 @@
                 };
 
                 try {
-                    const { error } = await _supabase.from('orders').insert([orderData]);
+                    const { error } = await sb.from('orders').insert([orderData]);
                     if (error) throw error;
 
                     if(typeof clearEntireCart === 'function') {
