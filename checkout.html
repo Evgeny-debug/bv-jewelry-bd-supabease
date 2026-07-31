@@ -387,12 +387,12 @@
                 btn.disabled = true;
 
                 try {
-                    // Більш надійна перевірка наявності клієнта Supabase на мобільних пристроях
-                    let sb = window.supabase || window._supabase;
+                    // Шукаємо саме ініціалізоване підключення, а не саму бібліотеку
+                    let sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
                     let attempts = 0;
                     while (!sb && attempts < 10) {
                         await new Promise(r => setTimeout(r, 200));
-                        sb = window.supabase || window._supabase;
+                        sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
                         attempts++;
                     }
 
