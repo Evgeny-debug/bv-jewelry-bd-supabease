@@ -298,7 +298,6 @@
             if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
 
-        // ЛОГІКА ПЕРЕМИКАННЯ ДОСТАВКИ
         const delMethod = document.getElementById('deliveryMethod');
         const npWrapper = document.getElementById('npWrapper');
         const pickupWrapper = document.getElementById('pickupWrapper');
@@ -317,7 +316,6 @@
             }
         });
 
-        // ІНІЦІАЛІЗАЦІЯ ТА ВІДПРАВКА
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const cart = typeof getCart === 'function' ? getCart() : [];
@@ -366,6 +364,12 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                // Захист від затримки завантаження бази даних на мобільних
+                if (typeof _supabase === 'undefined' || !_supabase) {
+                    alert('Помилка завантаження: базу даних ще не ініційовано. Спробуйте оновити сторінку.');
+                    return;
+                }
+
                 if (!e.target.checkValidity()) {
                     e.target.reportValidity();
                     return;
@@ -409,7 +413,6 @@
                 };
 
                 try {
-                    // РАЗБЛОКИРОВАННАЯ ОТПРАВКА В SUPABASE
                     const { error } = await _supabase.from('orders').insert([orderData]);
                     if (error) throw error;
 
@@ -422,11 +425,8 @@
                     modal.classList.remove('hidden');
                     setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
-                    // Тут в будущем можно добавить редирект на платежный шлюз (WayForPay и т.д.)
-                    // setTimeout(() => { window.location.href = 'your_payment_link'; }, 2000);
-
                 } catch (err) {
-                    alert('Виникла помилка: ' + err.message);
+                    alert('Помилка відправки замовлення: ' + err.message);
                     btn.innerText = 'Оплатити замовлення';
                     btn.disabled = false;
                 }
