@@ -26,6 +26,7 @@
         .glass-panel { background: #222224; border: 1px solid rgba(255,255,255,0.06); border-radius: 2px; }
         .input-field { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; padding: 14px; color: white; outline: none; transition: border-color 0.3s; font-size: 14px; }
         .input-field:focus { border-color: #c5a059; }
+        .input-field[readonly] { opacity: 0.5; cursor: not-allowed; }
         select.input-field option { background-color: #222224; color: #f5f5f7; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -33,7 +34,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(197, 160, 89, 0.3); border-radius: 2px; }
         
         .np-dropdown-item { padding: 12px 14px; color: #f5f5f7; font-size: 13px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: #c5a059; }
+        .np-dropdown-item:hover, .np-dropdown-item:active { background: rgba(197, 160, 89, 0.1); color: #c5a059; }
         .np-dropdown-item:last-child { border-bottom: none; }
         .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 2px; }
         
@@ -89,7 +90,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                         <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field">
                         <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field">
-                        <input type="text" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2">
+                        <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2">
                     </div>
                 </div>
 
@@ -109,13 +110,13 @@
                             </svg>
                         </div>
                         <div class="relative">
-                            <input type="text" id="orderCity" placeholder="Місто..." class="input-field" autocomplete="new-password">
+                            <input type="text" id="orderCity" placeholder="Місто..." class="input-field" autocomplete="off">
                             <input type="hidden" id="orderCityRef" value="">
                             <div id="cityDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
 
                         <div class="relative">
-                            <input type="text" id="orderBranch" placeholder="Оберіть місто" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password">
+                            <input type="text" id="orderBranch" placeholder="Спочатку оберіть місто" class="input-field" readonly autocomplete="off">
                             <div id="branchDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
                     </div>
@@ -147,6 +148,9 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування, розміру..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
+                <!-- Блок для виведення помилок замість alert() -->
+                <div id="errorBox" class="hidden p-3 text-xs text-red-400 bg-red-900/20 border border-red-500/30 rounded-sm"></div>
+
                 <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-[#111] font-bold uppercase tracking-widest text-xs px-10 py-4 hover:bg-white transition-colors active:opacity-70 mt-2">
                     Оплатити замовлення
                 </button>
@@ -172,6 +176,20 @@
     <script>
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = []; 
+
+        // Функція для показу помилок без блокування інтерфейсу
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.innerText = message;
+            errorBox.classList.remove('hidden');
+            setTimeout(() => {
+                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.add('hidden');
+        }
 
         async function fetchNP(model, method, properties) {
             if(!NP_API_KEY) return [];
@@ -207,8 +225,8 @@
             clearTimeout(cityDebounceTimer);
             
             branchInput.value = '';
-            branchInput.disabled = true;
-            branchInput.placeholder = 'Оберіть місто';
+            branchInput.setAttribute('readonly', 'true');
+            branchInput.placeholder = 'Спочатку оберіть місто';
             allBranches = [];
 
             if (query.length < 2) {
@@ -234,9 +252,11 @@
             }, 400); 
         });
 
-        cityDropdown.addEventListener('click', async (e) => {
+        // Використовуємо mousedown для кращого відгуку на телефонах до того як input втратить фокус
+        cityDropdown.addEventListener('mousedown', async (e) => {
             const item = e.target.closest('.np-dropdown-item');
             if (item) {
+                e.preventDefault(); // Запобігає втраті фокусу інпутом
                 const name = item.getAttribute('data-name');
                 const ref = item.getAttribute('data-ref');
                 
@@ -244,16 +264,18 @@
                 cityRefInput.value = ref;
                 cityDropdown.classList.add('hidden');
 
-                branchInput.disabled = false;
+                branchInput.removeAttribute('readonly');
                 branchInput.placeholder = 'Завантаження...';
                 branchInput.value = '';
                 
                 allBranches = await fetchNP("Address", "getWarehouses", { CityRef: ref });
-                branchInput.placeholder = 'Введіть номер відділення';
+                branchInput.placeholder = 'Введіть номер відділення або адресу';
             }
         });
 
         branchInput.addEventListener('input', (e) => {
+            if(branchInput.hasAttribute('readonly')) return;
+            
             const query = e.target.value.toLowerCase().trim();
             if (query.length === 0) {
                 branchDropdown.classList.add('hidden');
@@ -263,7 +285,7 @@
             
             if (filtered.length > 0) {
                 branchDropdown.innerHTML = filtered.slice(0, 30).map(b => `
-                    <div class="np-dropdown-item" data-name="${b.Description}">
+                    <div class="np-dropdown-item" data-name="${b.Description.replace(/"/g, '&quot;')}">
                         ${b.Description}
                     </div>
                 `).join('');
@@ -277,7 +299,7 @@
         branchInput.addEventListener('focus', () => {
             if (allBranches.length > 0 && branchInput.value === '') {
                 branchDropdown.innerHTML = allBranches.slice(0, 30).map(b => `
-                    <div class="np-dropdown-item" data-name="${b.Description}">
+                    <div class="np-dropdown-item" data-name="${b.Description.replace(/"/g, '&quot;')}">
                         ${b.Description}
                     </div>
                 `).join('');
@@ -285,17 +307,18 @@
             }
         });
 
-        branchDropdown.addEventListener('click', (e) => {
+        branchDropdown.addEventListener('mousedown', (e) => {
             const item = e.target.closest('.np-dropdown-item');
             if (item) {
+                e.preventDefault();
                 branchInput.value = item.getAttribute('data-name');
                 branchDropdown.classList.add('hidden');
             }
         });
 
         document.addEventListener('click', (e) => {
-            if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
-            if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
+            if (!cityInput.contains(e.target) && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
+            if (!branchInput.contains(e.target) && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
 
         const delMethod = document.getElementById('deliveryMethod');
@@ -357,23 +380,24 @@
 
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                hideError();
 
                 const btn = document.getElementById('submitBtn');
                 btn.innerText = 'Обробка...';
                 btn.disabled = true;
 
                 try {
-                    // Безпечне очікування ініціалізації Supabase на мобільних пристроях
-                    let sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
+                    // Більш надійна перевірка наявності клієнта Supabase на мобільних пристроях
+                    let sb = window.supabase || window._supabase;
                     let attempts = 0;
-                    while (!sb && attempts < 5) {
+                    while (!sb && attempts < 10) {
                         await new Promise(r => setTimeout(r, 200));
-                        sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
+                        sb = window.supabase || window._supabase;
                         attempts++;
                     }
 
                     if (!sb) {
-                        throw new Error('Не вдалося підключитися до бази даних. Перевірте з\'єднання.');
+                        throw new Error('Не вдалося підключитися до бази даних. Оновіть сторінку та спробуйте ще раз.');
                     }
 
                     const name = document.getElementById('orderName').value.trim();
@@ -382,9 +406,9 @@
                     const deliveryType = document.getElementById('deliveryMethod').value;
                     const comment = document.getElementById('orderComment').value.trim();
 
-                    if (!name) { alert('Введіть ваше ім\'я та прізвище'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
-                    if (!phone) { alert('Введіть номер телефону'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
-                    if (!email) { alert('Введіть email'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                    if (!name) { showError('Будь ласка, введіть ваше ім\'я та прізвище'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                    if (!phone) { showError('Будь ласка, введіть номер телефону'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                    if (!email) { showError('Будь ласка, введіть email'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
 
                     let deliveryText = '';
                     if (deliveryType === 'pickup') {
@@ -392,14 +416,14 @@
                     } else {
                         const cityName = cityInput.value.trim();
                         const branchName = branchInput.value.trim();
-                        if (!cityName) { alert('Оберіть місто Нової Пошти'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
-                        if (!branchName) { alert('Оберіть відділення Нової Пошти'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                        if (!cityName) { showError('Будь ласка, оберіть місто доставки'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
+                        if (!branchName) { showError('Будь ласка, оберіть відділення Нової Пошти'); btn.innerText = 'Оплатити замовлення'; btn.disabled = false; return; }
                         deliveryText = `${name}, Нова Пошта: ${cityName}, ${branchName}`;
                     }
 
                     const cart = typeof getCart === 'function' ? getCart() : [];
                     if (cart.length === 0) {
-                        alert('Ваш кошик порожній!');
+                        showError('Ваш кошик порожній!');
                         btn.innerText = 'Оплатити замовлення';
                         btn.disabled = false;
                         return;
@@ -407,7 +431,6 @@
 
                     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                     
-                    // Безпечне отримання сесії на мобільних
                     let currentUserId = null;
                     try {
                         const { data: { session } } = await sb.auth.getSession();
@@ -443,7 +466,7 @@
                     setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
                 } catch (err) {
-                    alert('Помилка замовлення: ' + (err.message || JSON.stringify(err)));
+                    showError('Помилка при оформленні: ' + (err.message || 'Спробуйте пізніше.'));
                     console.error('Checkout error:', err);
                     btn.innerText = 'Оплатити замовлення';
                     btn.disabled = false;
