@@ -82,14 +82,14 @@
                 <p class="text-xs md:text-sm text-gray-400">Заповніть дані для отримання вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off" novalidate>
+            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off">
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                        <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
-                        <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
-                        <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2" required>
+                        <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field">
+                        <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field">
+                        <input type="text" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2">
                     </div>
                 </div>
 
@@ -109,13 +109,13 @@
                             </svg>
                         </div>
                         <div class="relative">
-                            <input type="text" id="orderCity" placeholder="Місто..." class="input-field" autocomplete="new-password" required>
+                            <input type="text" id="orderCity" placeholder="Місто..." class="input-field" autocomplete="new-password">
                             <input type="hidden" id="orderCityRef" value="">
                             <div id="cityDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
 
                         <div class="relative">
-                            <input type="text" id="orderBranch" placeholder="Оберіть місто" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password" required>
+                            <input type="text" id="orderBranch" placeholder="Оберіть місто" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password">
                             <div id="branchDropdown" class="absolute w-full mt-1 bg-[#222224] np-dropdown shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <h2 class="text-2xl font-serif text-[#c5a059] italic mb-3">Дякуємо!</h2>
-            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно прийнято в обробку. Перенаправляємо на сторінку оплати...</p>
+            <p class="text-sm text-gray-300 mb-8 leading-relaxed">Ваше замовлення успішно оформлено! Наш менеджер зв'яжеться з вами найближчим часом для підтвердження.</p>
             
             <a href="index.html" class="block w-full border border-white/10 text-white text-xs font-bold uppercase tracking-widest py-3 hover:bg-white/5 transition-colors">На головну</a>
         </div>
@@ -234,7 +234,6 @@
             }, 400); 
         });
 
-        // ВИПРАВЛЕНО НА CLICK (працює і на ПК, і тапом на мобільних)
         cityDropdown.addEventListener('click', async (e) => {
             const item = e.target.closest('.np-dropdown-item');
             if (item) {
@@ -286,7 +285,6 @@
             }
         });
 
-        // ВИПРАВЛЕНО НА CLICK для відділень
         branchDropdown.addEventListener('click', (e) => {
             const item = e.target.closest('.np-dropdown-item');
             if (item) {
@@ -308,13 +306,9 @@
             if (e.target.value === 'np') {
                 npWrapper.classList.remove('hidden');
                 pickupWrapper.classList.add('hidden');
-                cityInput.setAttribute('required', 'true');
-                branchInput.setAttribute('required', 'true');
             } else {
                 npWrapper.classList.add('hidden');
                 pickupWrapper.classList.remove('hidden');
-                cityInput.removeAttribute('required');
-                branchInput.removeAttribute('required');
             }
         });
 
@@ -323,9 +317,7 @@
                 const cart = typeof getCart === 'function' ? getCart() : [];
                 
                 if (cart.length === 0) {
-                    alert('Ваш кошик порожній!');
-                    window.location.href = 'index.html';
-                    return;
+                    console.warn('Кошик порожній або не завантажився');
                 }
 
                 const listContainer = document.getElementById('checkoutItemsList');
@@ -347,7 +339,7 @@
                                     <span class="text-sm font-bold text-[#c5a059]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
                                 </div>
                             </div>
-                            <button class="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
+                            <button type="button" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
@@ -366,60 +358,64 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Безпечна перевірка supabase через window
                 const sb = window._supabase || (typeof _supabase !== 'undefined' ? _supabase : null);
                 if (!sb) {
-                    alert('Помилка завантаження: базу даних ще не ініційовано. Оновіть сторінку.');
+                    alert('Помилка: База даних ще не завантажилася. Зачекайте секунду і спробуйте знову.');
                     return;
                 }
 
-                if (!e.target.checkValidity()) {
-                    e.target.reportValidity();
-                    return;
-                }
+                const name = document.getElementById('orderName').value.trim();
+                const phone = document.getElementById('orderPhone').value.trim();
+                const email = document.getElementById('orderEmail').value.trim();
+                const deliveryType = document.getElementById('deliveryMethod').value;
+                const comment = document.getElementById('orderComment').value.trim();
 
-                const btn = document.getElementById('submitBtn');
-                btn.innerText = 'Обробка...';
-                btn.disabled = true;
+                if (!name) { alert('Введіть ваше ім\'я та прізвище'); return; }
+                if (!phone) { alert('Введіть номер телефону'); return; }
+                if (!email) { alert('Введіть email'); return; }
+
+                let deliveryText = '';
+                if (deliveryType === 'pickup') {
+                    deliveryText = `${name}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
+                } else {
+                    const cityName = cityInput.value.trim();
+                    const branchName = branchInput.value.trim();
+                    if (!cityName) { alert('Введіть та оберіть місто Нової Пошти з випадаючого списку'); return; }
+                    if (!branchName) { alert('Введіть та оберіть відділення Нової Пошти'); return; }
+                    deliveryText = `${name}, Нова Пошта: ${cityName}, ${branchName}`;
+                }
 
                 const cart = typeof getCart === 'function' ? getCart() : [];
+                if (cart.length === 0) {
+                    alert('Ваш кошик порожній!');
+                    return;
+                }
+
                 const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                 const paymentMethod = document.getElementById('orderPayment').value;
-                const deliveryType = document.getElementById('deliveryMethod').value;
-                
-                const clientName = document.getElementById('orderName').value.trim();
-                let deliveryText = '';
-
-                if (deliveryType === 'pickup') {
-                    deliveryText = `${clientName}, Самовивіз: м. Ізмаїл, салон BV Jewelry`;
-                } else {
-                    if(!cityInput.value.trim() || !branchInput.value.trim()) {
-                        alert('Будь ласка, введіть місто та відділення Нової Пошти.');
-                        btn.innerText = 'Оплатити замовлення';
-                        btn.disabled = false;
-                        return;
-                    }
-                    deliveryText = `${clientName}, Нова Пошта: ${cityInput.value.trim()}, ${branchInput.value.trim()}`;
-                }
 
                 const orderData = {
                     user_id: user ? user.id : null,
-                    user_email: document.getElementById('orderEmail').value.trim(),
-                    phone: document.getElementById('orderPhone').value.trim(),
+                    user_email: email,
+                    phone: phone,
                     delivery_info: deliveryText, 
                     payment_method: paymentMethod,
-                    comment: document.getElementById('orderComment').value.trim(),
+                    comment: comment,
                     items: cart, 
                     total_price: total,
                     status: 'pending'
                 };
 
+                const btn = document.getElementById('submitBtn');
+                btn.innerText = 'Обробка...';
+                btn.disabled = true;
+
                 try {
                     const { error } = await sb.from('orders').insert([orderData]);
                     if (error) throw error;
 
-                    if(typeof clearEntireCart === 'function') {
+                    if (typeof clearEntireCart === 'function') {
                         clearEntireCart(true); 
                     }
 
@@ -429,7 +425,7 @@
                     setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
                 } catch (err) {
-                    alert('Помилка відправки замовлення: ' + err.message);
+                    alert('Помилка бази даних: ' + err.message);
                     btn.innerText = 'Оплатити замовлення';
                     btn.disabled = false;
                 }
