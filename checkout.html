@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="uk" data-theme="light">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+    
+    <title>Оформлення замовлення | BV Jewelry</title>
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Оформлення замовлення | BV Jewelry</title>
+
+    <!-- Шрифти основного сайту -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-    
+
     <script>
         (function() {
             try {
@@ -24,7 +32,7 @@
     </script>
     
     <style>
-        /* Глобальная авто-тема и строгий дизайн */
+        /* Стилі форми чекауту */
         :root {
             --bg-main: #ffffff;
             --text-main: #1a1a1a;
@@ -42,23 +50,16 @@
             --input-border: rgba(255, 255, 255, 0.15);
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-main); 
-            color: var(--text-main); 
-            transition: background-color 0.3s, color 0.3s;
-        }
-
         /* Ультракомпактный премиальный Glassmorphism */
         .glass-panel { 
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border); 
-            border-radius: 0 !important; /* Строгий дизайн, без скруглений */
+            border-radius: 0 !important;
         }
 
-        /* Стиль инпутов под ювелирный бутик ("Золотой Век") */
+        /* Стиль инпутов */
         .input-field { 
             width: 100%; 
             background: transparent; 
@@ -94,64 +95,93 @@
         }
         .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: var(--gold-muted); }
         
-        /* Кнопки и общие элементы */
-        button, a, .product-card { border-radius: 0 !important; }
         .z-gold-btn {
             background-color: transparent;
             border: 1px solid var(--gold-muted);
             color: var(--gold-muted);
             transition: all 0.3s;
+            border-radius: 0 !important;
         }
         .z-gold-btn:hover {
             background-color: var(--gold-muted);
             color: #fff;
         }
         [data-theme="dark"] .z-gold-btn:hover { color: #000; }
-
-        /* Нижний бар для мобильных */
-        .mobile-bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--bg-main);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            padding-bottom: env(safe-area-inset-bottom, 10px);
-            z-index: 1000;
-        }
-        @media (min-width: 768px) { .mobile-bottom-nav { display: none; } }
-        .bottom-nav-item { color: var(--text-main); opacity: 0.7; }
-        .bottom-nav-item.active { opacity: 1; color: var(--gold-muted); }
-        .bottom-nav-item svg { width: 22px; height: 22px; fill: currentColor; }
-
     </style>
 </head>
-<body class="min-h-screen flex flex-col pt-6 md:pt-12 pb-24">
+<body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0 min-h-screen flex flex-col">
 
-    <!-- Кнопка назад -->
-    <div class="max-w-5xl w-full mx-auto px-4 mb-4">
-        <a href="index.html" class="text-xs uppercase tracking-widest text-gray-500 hover:text-[var(--gold-muted)] flex items-center gap-2 transition-colors w-fit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Повернутися
-        </a>
-    </div>
+    <!-- Оверлеї для хедера -->
+    <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
+    <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
+
+    <!-- Основний Хедер -->
+    <header id="header">
+        <div class="header-left">
+            <button class="mobile-only p-2 cursor-pointer text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            
+            <nav class="nav-left desktop-only">
+                <a href="index.html" data-i18n="m1" class="nav-link hover:text-[var(--gold-muted)] transition-colors active">Головна</a>
+                <div class="catalog-dropdown-wrapper group">
+                    <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='catalog.html'">
+                        <span data-i18n="m2">Каталог</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                </div>
+                <a href="gallery.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_gallery">Галерея</a>
+                <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
+                <a href="exclusive.html" class="exclusive-nav-btn" data-i18n="m_atelier">Ексклюзив</a>
+            </nav>
+        </div>
+
+        <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
+
+        <div class="header-right">
+            <a href="tel:+380634540901" class="header-phone-link desktop-only hover:text-[var(--gold-muted)] transition-colors">
+                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <span class="header-phone-text font-medium tracking-wide phone-num">+38 063 45 40 901</span>
+            </a>
+            
+            <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
+            
+            <div class="dropdown-wrapper desktop-only group">
+                <button class="icon-btn" id="headerProfileBtn" onclick="window.smartProfileClick()">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
+            </div>
+            
+            <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
+            </button>
+            <button onclick="toggleCart()" class="icon-btn desktop-only">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="cart-badge">0</span>
+            </button>
+        </div>
+    </header>
 
     <!-- Основной контейнер чекаута -->
-    <main class="w-full max-w-5xl mx-auto px-4 flex flex-col lg:flex-row gap-6 md:gap-10 flex-grow" id="checkoutContainer">
+    <main class="w-full max-w-[1440px] mx-auto px-4 md:px-8 pt-8 pb-12 flex flex-col lg:flex-row gap-6 md:gap-10 flex-grow" id="checkoutContainer">
         
         <!-- Левая колонка: Форма заказа -->
         <div class="w-full lg:w-7/12 flex flex-col">
             <div class="mb-6">
-                <h1 class="text-2xl font-medium tracking-wide uppercase mb-1" style="font-family: 'Cormorant Garamond', serif;">Оформлення замовлення</h1>
-                <p class="text-xs text-gray-500">Заповніть дані для доставки вашої прикраси</p>
+                <a href="index.html" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--gold-muted)] flex items-center gap-2 transition-colors w-fit mb-4">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Повернутися до покупок
+                </a>
+                <h1 class="text-2xl md:text-3xl font-medium tracking-wide text-[var(--text-main)] uppercase mb-1" style="font-family: 'Cormorant Garamond', serif;">Оформлення замовлення</h1>
+                <p class="text-xs text-[var(--text-muted)]">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-5 glass-panel p-5 md:p-8" autocomplete="off">
+            <form id="checkoutForm" class="flex flex-col gap-6 glass-panel p-6 md:p-8" autocomplete="off">
                 
                 <div>
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3">Контактні дані</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4">Контактні дані</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
                         <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
                         <input type="email" id="orderEmail" placeholder="Email (для чеку)" class="input-field md:col-span-2" required>
@@ -159,11 +189,11 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3 flex justify-between items-center">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4 flex justify-between items-center">
                         Доставка
-                        <span class="text-[9px] text-gray-500">НОВА ПОШТА</span>
+                        <span class="text-[9px] text-[var(--text-muted)]">НОВА ПОШТА</span>
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="relative">
                             <input type="text" id="orderCity" placeholder="Місто доставки..." class="input-field" autocomplete="new-password" required>
                             <input type="hidden" id="orderCityRef" value="">
@@ -178,7 +208,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3">Оплата</h3>
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4">Оплата</h3>
                     <select id="orderPayment" class="input-field cursor-pointer">
                         <option value="cod">Накладений платіж (при отриманні)</option>
                         <option value="card">Онлайн оплата (Картка / Apple Pay)</option>
@@ -196,45 +226,82 @@
         </div>
 
         <!-- Правая колонка: Корзина -->
-        <div class="w-full lg:w-5/12 glass-panel p-5 md:p-8 flex flex-col h-fit sticky top-10">
-            <h2 class="text-lg font-medium tracking-wide uppercase mb-4" style="font-family: 'Cormorant Garamond', serif;">Ваше замовлення</h2>
-            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col gap-3 max-h-[400px]">
+        <div class="w-full lg:w-5/12 glass-panel p-6 md:p-8 flex flex-col h-fit lg:sticky lg:top-24 mt-6 lg:mt-0">
+            <h2 class="text-xl font-medium tracking-wide uppercase mb-6" style="font-family: 'Cormorant Garamond', serif;">Ваше замовлення</h2>
+            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col gap-4 max-h-[400px]">
                 <!-- Сюди рендеряться товари JS-скриптом -->
             </div>
             
-            <div class="mt-5 pt-5 border-t border-[var(--glass-border)] flex justify-between items-end">
-                <span class="text-[10px] uppercase tracking-widest text-gray-500">Підсумок:</span>
-                <span class="text-xl font-bold" id="checkoutTotal">0 ₴</span>
+            <div class="mt-6 pt-6 border-t border-[var(--glass-border)] flex justify-between items-end">
+                <span class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Підсумок:</span>
+                <span class="text-2xl font-bold text-[var(--gold-muted)]" id="checkoutTotal">0 ₴</span>
             </div>
         </div>
     </main>
 
-    <!-- Подвал (Footer) -->
-    <footer class="w-full border-t border-[var(--glass-border)] mt-auto pt-8 pb-10 px-4 text-center">
-        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-2xl font-serif tracking-widest">BV<span class="text-sm">jewelry</span></div>
-            <div class="flex gap-4 text-[10px] uppercase tracking-widest text-gray-500">
-                <a href="#" class="hover:text-[var(--gold-muted)]">Умови</a>
-                <a href="#" class="hover:text-[var(--gold-muted)]">Доставка</a>
-                <a href="#" class="hover:text-[var(--gold-muted)]">Контакти</a>
+    <!-- Основний Футер -->
+    <footer id="footer" class="pt-12 pb-10 px-4 md:px-6 bg-[var(--bg-card)] border-t border-[var(--border)] mt-auto relative z-10 text-[var(--text-main)] font-sans antialiased">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-8 flex flex-col items-center md:items-start">
+                <div class="bv-logo relative !static !transform-none !items-start !opacity-100 flex items-baseline gap-1">
+                    <span class="!text-3xl font-bold tracking-tight text-[var(--text-main)]">BV</span>
+                    <span class="!text-[10px] mt-1 font-['Montserrat'] font-bold uppercase tracking-widest text-[var(--gold-muted,#C5A059)]">jewelry</span>
+                </div>
+                <p class="text-[12px] text-[var(--text-muted)] font-light mt-3 text-center md:text-left max-w-sm tracking-wide" data-i18n="footer_desc">
+                    Формуємо сімейні цінності у дорогоцінних металах з 1984 року.
+                </p>
             </div>
-            <p class="text-[10px] text-gray-500">© 2026 BV Jewelry. Всі права захищені.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 mb-12 border-t border-[var(--border)] pt-8">
+                <div class="flex flex-col items-start">
+                    <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4 pb-2 border-b border-[var(--border)] w-full" data-i18n="footer_col_buyers">Покупцям</h4>
+                    <a href="info.html?p=terms" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_delivery">Доставка та оплата</a>
+                    <a href="info.html?p=warranty" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_warranty">Гарантія</a>
+                    <a href="services.html" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_services">Послуги та Прайс</a>
+                </div>
+            </div>
+
+            <div class="pt-6 pb-6 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="text-[13px] text-[var(--text-muted)] tracking-wide font-light text-center md:text-left">
+                    &copy; 2026 BV Jewelry
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-center gap-6">
+                    <div class="flex items-center gap-2">
+                        <img src="https://icon.horse/icon/visa.com" alt="Visa" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/mastercard.com" alt="Mastercard" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/apple.com" alt="Apple Pay" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-[var(--border)] text-center">
+                <div style="transform: scale(0.80); display: inline-block;" class="uppercase tracking-widest opacity-25 hover:opacity-80 transition-opacity font-light text-[var(--text-muted)]">
+                    <span><span data-i18n="footer_dev">Розроблено:</span> <a href="#" target="_blank" class="text-[var(--text-main)] font-semibold hover:underline">EVS.PRO</a></span>
+                </div>
+            </div>
         </div>
     </footer>
 
     <!-- Мобильный нижний бар -->
     <nav class="mobile-bottom-nav">
         <button onclick="window.location.href='index.html'" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2v-8h-4.5a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5H21v9a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V9H3z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span data-i18n="m1">Головна</span>
         </button>
         <button onclick="window.location.href='catalog.html'" class="bottom-nav-item">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="m2">Каталог</span>
         </button>
-        <button class="bottom-nav-item active">
-            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        <button onclick="window.toggleCart();" class="bottom-nav-item active">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
+            <span data-i18n="cart_title">Кошик</span>
         </button>
         <button onclick="window.smartProfileClick()" class="bottom-nav-item">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span data-i18n="m_profile">Профіль</span>
         </button>
     </nav>
 
@@ -246,14 +313,14 @@
             </div>
             <h2 class="text-xl font-serif text-[var(--gold-muted)] mb-2">Дякуємо!</h2>
             <p class="text-xs text-gray-400 mb-6">Ваше замовлення успішно прийнято. Менеджер зв'яжеться з вами.</p>
-            <a href="index.html" class="block w-full z-gold-btn text-[10px] font-bold uppercase tracking-widest py-3">На головну</a>
+            <a href="index.html" class="block w-full z-gold-btn text-[10px] font-bold uppercase tracking-widest py-3 text-center">На головну</a>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
-    <!-- Логика Новой Почты и корзины оставлена без изменений из твоего оригинала -->
+    <!-- Логика чекауту -->
     <script>
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = []; 
@@ -307,7 +374,7 @@
                     `).join('');
                     cityDropdown.classList.remove('hidden');
                 } else {
-                    cityDropdown.innerHTML = '<div class="p-2 text-[10px] text-gray-500">Місто не знайдено</div>';
+                    cityDropdown.innerHTML = '<div class="p-2 text-[10px] text-[var(--text-muted)]">Місто не знайдено</div>';
                     cityDropdown.classList.remove('hidden');
                 }
             }, 400); 
@@ -342,7 +409,7 @@
                 `).join('');
                 branchDropdown.classList.remove('hidden');
             } else {
-                branchDropdown.innerHTML = '<div class="p-2 text-[10px] text-gray-500">Не знайдено</div>';
+                branchDropdown.innerHTML = '<div class="p-2 text-[10px] text-[var(--text-muted)]">Не знайдено</div>';
                 branchDropdown.classList.remove('hidden');
             }
         });
@@ -382,19 +449,19 @@
                 
                 listContainer.innerHTML = cart.map(item => {
                     total += item.price * item.qty;
-                    const sizeBadge = item.size ? `<span class="text-[9px] text-[var(--gold-muted)] block mt-0.5">Розмір: ${item.size}</span>` : '';
+                    const sizeBadge = item.size ? `<span class="text-[10px] text-[var(--gold-muted)] block mt-0.5 font-medium">Розмір: ${item.size}</span>` : '';
                     return `
-                        <div class="flex gap-3 relative group pb-2 border-b border-[var(--glass-border)] last:border-0">
-                            <img src="${item.img}" class="w-14 h-14 object-cover border border-[var(--glass-border)]">
+                        <div class="flex gap-4 relative group pb-3 border-b border-[var(--glass-border)] last:border-0">
+                            <img src="${item.img}" class="w-16 h-16 object-cover border border-[var(--glass-border)]">
                             <div class="flex-grow flex flex-col justify-center">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
+                                <span class="text-[12px] font-semibold uppercase tracking-wide leading-tight line-clamp-1 text-[var(--text-main)]">${item.title}</span>
                                 ${sizeBadge}
-                                <div class="flex justify-between items-center mt-1">
-                                    <span class="text-[10px] opacity-60">${item.qty} шт.</span>
-                                    <span class="text-[11px] font-bold text-[var(--gold-muted)]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-[11px] text-[var(--text-muted)]">${item.qty} шт.</span>
+                                    <span class="text-[13px] font-bold text-[var(--text-main)]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
                                 </div>
                             </div>
-                            <button class="absolute top-0 right-0 opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
+                            <button type="button" class="absolute top-0 right-0 opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity p-1" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
