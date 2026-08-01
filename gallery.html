@@ -9,16 +9,7 @@
 <link rel="manifest" href="/site.webmanifest" />
     
      <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.jivosite.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https: wss:; img-src 'self' data: https: http: https://*.jivosite.com; frame-src https://*.jivosite.com https://*.jivosite.ru;">
-<script>
-    function jivo_onLoadCallback() {
-        // Смещаем кнопку JivoChat выше, чтобы она не перекрывалась другими элементами
-        // (задаем отступ снизу, например, на уровень вашей старой кнопки)
-        window.jivo_api.setCustomPosition({
-            bottom: '140px', // подберите точное значение под ваш дизайн (аналог bottom-36 / bottom-40)
-            right: '24px'    // отступ справа
-        });
-    }
-</script>
+<script src="js/pages/shared/jivo-callback.js"></script>
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
     <meta charset="UTF-8">
@@ -26,15 +17,7 @@
     <title>Галерея робіт | BV Jewelry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-<script>
-         (function() {
-        try {
-            const saved = localStorage.getItem('theme');
-            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {}
-    })();
-    </script>
+<script src="js/pages/shared/early-theme.js"></script>
     <style>
         
         /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
@@ -167,7 +150,7 @@
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link js-site-tg mobile-only p-2 cursor-pointer text-[var(--text-main)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
             
@@ -283,23 +266,23 @@
             <div class="mb-6 p-5 bg-[var(--bg-lighter,rgba(255,255,255,0.02))] rounded-lg border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1 font-medium" data-i18n="footer_phone_title">Контактний телефон</span>
-                    <a href="tel:+380634540901" class="text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
+                    <a href="tel:+380634540901" class="js-site-phone text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
                     <span class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_phone_sub">Згідно з тарифами вашого оператора</span>
                 </div>
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2 font-medium" data-i18n="footer_socials_title">Ми в соцмережах</span>
                     <div class="flex items-center gap-3">
-                        <a href="#" target="_blank" aria-label="Instagram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="#" target="_blank" aria-label="Instagram" class="inst-link js-site-inst w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                         </a>
-                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="tg-link js-site-tg w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="footerAddressesBlock" class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
                     <span id="dot-torgova" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
                     <a href="https://maps.app.goo.gl/LU3oA3oRLAcrrrZf6" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_1">
@@ -368,242 +351,11 @@
 
 
 <!-- Скрипт індикатора робочого часу -->
-<script>
-(function() {
-    try {
-        const now = new Date();
-        const kyivTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Kyiv' }));
-        const currentHour = kyivTime.getHours() + kyivTime.getMinutes() / 60;
-
-        // Торгова, 68: 08:00 – 17:00
-        const isTorgovaOpen = currentHour >= 8 && currentHour < 17;
-        const dotTorgova = document.getElementById('dot-torgova');
-        if (dotTorgova && isTorgovaOpen) {
-            dotTorgova.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-
-        // Покровська, 57: 09:00 – 17:00
-        const isPokrovskaOpen = currentHour >= 9 && currentHour < 17;
-        const dotPokrovska = document.getElementById('dot-pokrovska');
-        if (dotPokrovska && isPokrovskaOpen) {
-            dotPokrovska.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-    } catch(e) {
-        console.error("Working hours indicator error:", e);
-    }
-})();
-</script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="main.js"></script>
+        <script src="js/pages/shared/store-hours.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/pages/gallery.js"></script>
 
-    <script>
-    // Глобальний масив для зберігання завантажених фотографій
-    let allGalleryItems = [];
-    let currentCategory = 'all';
-
-    /**
-     * 1. ЗАВАНТАЖЕННЯ ДАНИХ З SUPABASE (АБО ЛОКАЛЬНОГО КЕШУ)
-     * Скрипт перевіряє як сховище site_storage, так і окрему таблицю gallery
-     */
-    async function fetchGalleryData() {
-        const container = document.getElementById('galleryGrid');
-        if (container) {
-            container.innerHTML = `
-                <div class="col-span-full flex justify-center items-center py-16">
-                    <div class="w-8 h-8 border-2 border-[var(--gold-muted)] border-t-transparent rounded-full animate-spin"></div>
-                </div>`;
-        }
-
-        try {
-            if (typeof _supabase !== 'undefined') {
-                // Спробуємо спочатку завантажити з site_storage (ключ bv_gallery)
-                const { data: storageData, error: storageError } = await _supabase
-                    .from('site_storage')
-                    .select('value')
-                    .eq('key', 'bv_gallery')
-                    .single();
-
-                if (!storageError && storageData && storageData.value && Array.isArray(storageData.value)) {
-                    allGalleryItems = storageData.value;
-                } else {
-                    // Якщо в site_storage пусто або помилка, запитуємо таблицю gallery
-                    const { data: tableData, error: tableError } = await _supabase
-                        .from('gallery')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (!tableError && tableData) {
-                        allGalleryItems = tableData;
-                    }
-                }
-
-                if (allGalleryItems.length > 0) {
-                    localStorage.setItem('bv_gallery_cache', JSON.stringify(allGalleryItems));
-                }
-            }
-            
-            // Якщо Supabase недоступний або повернув пустий масив — беремо з кешу або API
-            if (!allGalleryItems.length) {
-                const cached = localStorage.getItem('bv_gallery_cache');
-                allGalleryItems = cached ? JSON.parse(cached) : (typeof API !== 'undefined' ? API.get('bv_gallery', []) : []);
-            }
-        } catch (err) {
-            console.warn("Не вдалося завантажити з Supabase, використовуємо кеш:", err);
-            const cached = localStorage.getItem('bv_gallery_cache');
-            allGalleryItems = cached ? JSON.parse(cached) : [];
-        }
-
-        renderGallery(currentCategory);
-    }
-
-    /**
-     * 2. ВІДОБРАЖЕННЯ ФОТОГРАФІЙ НА ЕКРАНІ
-     */
-    function renderGallery(category = 'all') {
-        currentCategory = category;
-        const container = document.getElementById('galleryGrid');
-        if (!container) return;
-
-        const filteredItems = category === 'all' 
-            ? allGalleryItems 
-            : allGalleryItems.filter(item => item.category === category);
-
-        if (filteredItems.length === 0) {
-            container.innerHTML = `
-                <div class="col-span-full text-center py-16">
-                    <p class="text-[var(--text-muted)] font-serif italic text-lg">У цій категорії поки немає робіт</p>
-                </div>`;
-            return;
-        }
-
-        const currentLang = localStorage.getItem('bv_lang') || document.documentElement.lang || 'uk';
-
-        container.innerHTML = filteredItems.map(item => {
-            // Підтримка різних варіантів ключів (і для site_storage, і для таблиці gallery)
-            const imageUrl = item.img || item.image_url || item.url || item.image || '';
-            
-            let description = '';
-            if (typeof item.desc === 'object' && item.desc !== null) {
-                description = item.desc[currentLang] || item.desc.uk || '';
-            } else {
-                description = item[`desc_${currentLang}`] || item.desc_uk || item.title || '';
-            }
-
-            const categoryLabel = getCategoryName(item.category, currentLang);
-            const safeDesc = description.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
-            return `
-                <div onclick="openLightbox('${imageUrl}', '${safeDesc}')" 
-                     class="group relative overflow-hidden rounded-lg bg-[var(--bg-card)] border border-[var(--border)] transition-all duration-300 hover:border-[var(--gold-muted)] hover:shadow-xl flex flex-col cursor-pointer">
-                    <div class="aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5 relative">
-                        <img 
-                            src="${imageUrl}" 
-                            alt="${safeDesc}" 
-                            class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                            onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#1a1a1a';"
-                        />
-                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <svg class="w-8 h-8 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-                        </div>
-                    </div>
-                    <div class="p-3 flex flex-col justify-between flex-grow">
-                        <p class="text-xs font-light text-[var(--text-main)] tracking-wide font-['Montserrat'] line-clamp-1">
-                            ${description}
-                        </p>
-                        <div class="mt-2 pt-2 border-t border-[var(--border)]/50 flex justify-between items-center">
-                            <span class="text-[8px] uppercase tracking-widest text-[var(--gold-muted)] font-semibold">
-                                ${categoryLabel}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // Функції керування лайтбоксом
-    function openLightbox(url, caption) {
-        const modal = document.getElementById('lightboxModal');
-        if (!modal) return;
-        const img = document.getElementById('lightboxImg');
-        const cap = document.getElementById('lightboxCaption');
-        
-        img.src = url;
-        cap.textContent = caption;
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLightbox() {
-        const modal = document.getElementById('lightboxModal');
-        if (!modal) return;
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-
-    // Закриття по Esc
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeLightbox();
-    });
-
-    /**
-     * 3. ІНІЦІАЛІЗАЦІЯ КНОПОК ФІЛЬТРІВ (Всі, Каблучки, Сережки...)
-     */
-    function initGalleryFilters() {
-        const filterButtons = document.querySelectorAll('.gal-filter-btn');
-        
-        filterButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                filterButtons.forEach(b => {
-                    b.classList.remove('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-                    b.classList.add('border-[var(--border)]', 'text-[var(--text-main)]');
-                });
-
-                btn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
-                btn.classList.add('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-
-                const selectedCategory = btn.getAttribute('data-cat') || 'all';
-                renderGallery(selectedCategory);
-            });
-        });
-
-        const defaultBtn = document.querySelector('.gal-filter-btn[data-cat="all"]');
-        if (defaultBtn) {
-            defaultBtn.classList.remove('border-[var(--border)]', 'text-[var(--text-main)]');
-            defaultBtn.classList.add('bg-[var(--gold-muted)]', 'text-white', 'border-transparent', 'shadow-md');
-        }
-    }
-
-    /**
-     * 4. ДОПОМІЖНА ФУНКЦІЯ: НАЗВА КАТЕГОРІЇ ОБРАНОЮ МОВОЮ
-     */
-    function getCategoryName(category, lang = 'uk') {
-        const names = {
-            rings: { uk: 'Каблучка', en: 'Ring', ru: 'Кольцо' },
-            earrings: { uk: 'Сережки', en: 'Earrings', ru: 'Серьги' },
-            necklaces: { uk: 'Ланцюжок / Кольє', en: 'Necklace', ru: 'Цепочка / Колье' },
-            bracelets: { uk: 'Браслет', en: 'Bracelet', ru: 'Браслет' }
-        };
-        return names[category] ? (names[category][lang] || names[category]['uk']) : category;
-    }
-
-    /**
-     * 5. ЗАПУСК ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ
-     */
-    document.addEventListener('DOMContentLoaded', async () => {
-        initGalleryFilters();
-        await fetchGalleryData();
-
-        window.addEventListener('langChanged', () => {
-            renderGallery(currentCategory);
-        });
-    });
-
-    window.renderGallery = renderGallery;
-    </script>
 </body>
 </html>

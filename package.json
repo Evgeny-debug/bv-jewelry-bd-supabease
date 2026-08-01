@@ -1,0 +1,1 @@
+{"name":"bv-jewelry-bd-supabease-main","version":"1.0.0","type":"module","private":true,"description":"BV Jewelry storefront","scripts":{"sitemap":"node scripts/generate-sitemap.mjs"}}

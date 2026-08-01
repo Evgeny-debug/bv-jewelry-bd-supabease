@@ -15,16 +15,7 @@
 
     <meta name="msvalidate.01" content="E0D56BD3866F97573859425CB9A6E74A" />
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.jivosite.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https: wss:; img-src 'self' data: https: http: https://*.jivosite.com; frame-src https://*.jivosite.com https://*.jivosite.ru;">
-<script>
-    function jivo_onLoadCallback() {
-        // Смещаем кнопку JivoChat выше, чтобы она не перекрывалась другими элементами
-        // (задаем отступ снизу, например, на уровень вашей старой кнопки)
-        window.jivo_api.setCustomPosition({
-            bottom: '140px', // подберите точное значение под ваш дизайн (аналог bottom-36 / bottom-40)
-            right: '24px'    // отступ справа
-        });
-    }
-</script>
+<script src="js/pages/shared/jivo-callback.js"></script>
 
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
@@ -79,30 +70,7 @@
 }
 </script>
 
-    <script>
-(function() {
-        try {
-            const saved = localStorage.getItem('theme');
-            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {}
-    })();
-   
-
-        // Відключаємо стандартне запам'ятовування скролу браузером
-if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-}
-
-// Примусово кидаємо наверх при перезавантаженні та завантаженні
-window.addEventListener('beforeunload', () => {
-    window.scrollTo(0, 0);
-});
-
-window.addEventListener('load', () => {
-    window.scrollTo(0, 0);
-});
-    </script>
+    <script src="js/pages/shared/early-theme.js"></script>
 
 
     
@@ -229,7 +197,7 @@ html, body, *, *::before, *::after {
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link js-site-tg mobile-only p-2 cursor-pointer text-[var(--text-main)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
             
@@ -391,23 +359,23 @@ html, body, *, *::before, *::after {
             <div class="mb-6 p-5 bg-[var(--bg-lighter,rgba(255,255,255,0.02))] rounded-lg border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1 font-medium" data-i18n="footer_phone_title">Контактний телефон</span>
-                    <a href="tel:+380634540901" class="text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
+                    <a href="tel:+380634540901" class="js-site-phone text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
                     <span class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_phone_sub">Згідно з тарифами вашого оператора</span>
                 </div>
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2 font-medium" data-i18n="footer_socials_title">Ми в соцмережах</span>
                     <div class="flex items-center gap-3">
-                        <a href="#" target="_blank" aria-label="Instagram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="#" target="_blank" aria-label="Instagram" class="inst-link js-site-inst w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                         </a>
-                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="tg-link js-site-tg w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="footerAddressesBlock" class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
                     <span id="dot-torgova" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
                     <a href="https://maps.app.goo.gl/LU3oA3oRLAcrrrZf6" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_1">
@@ -475,536 +443,13 @@ html, body, *, *::before, *::after {
     </footer>
 
 <!-- Скрипт індикатора робочого часу -->
-<script>
-(function() {
-    try {
-        const now = new Date();
-        const kyivTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Kyiv' }));
-        const currentHour = kyivTime.getHours() + kyivTime.getMinutes() / 60;
-
-        // Торгова, 68: 08:00 – 17:00
-        const isTorgovaOpen = currentHour >= 8 && currentHour < 17;
-        const dotTorgova = document.getElementById('dot-torgova');
-        if (dotTorgova && isTorgovaOpen) {
-            dotTorgova.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-
-        // Покровська, 57: 09:00 – 17:00
-        const isPokrovskaOpen = currentHour >= 9 && currentHour < 17;
-        const dotPokrovska = document.getElementById('dot-pokrovska');
-        if (dotPokrovska && isPokrovskaOpen) {
-            dotPokrovska.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-    } catch(e) {
-        console.error("Working hours indicator error:", e);
-    }
-})();
-</script>
 
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="main.js"></script>
+        <script src="js/pages/shared/store-hours.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/pages/index.js"></script>
 
-    <script>// --- РЕНДЕРИНГ ГОЛОВНОГО АККОРДЕОНУ КАТЕГОРІЙ ---
-
-
-
-
-
-
-// Допоміжна рекурсивна функція збору підкатегорій
-function getAllSubCategoryIds(catId, allCategories) {
-    const children = allCategories.filter(c => c.parentId === catId);
-    let ids = children.map(c => c.id);
-    for (const child of children) {
-        ids = ids.concat(getAllSubCategoryIds(child.id, allCategories));
-    }
-    return ids;
-}
-
-
-// --- РЕНДЕРИНГ ГОРИЗОНТАЛЬНОГО СКРОЛУ КАТЕГОРІЙ З ВИЇЗДОМ ПІДКАТЕГОРІЙ ---
-async function renderHomeCategoriesScroll() {
-    const scrollContainer = document.getElementById('homeCategoriesScroll');
-    if (!scrollContainer) return;
-
-    try {
-        const { data, error } = await _supabase
-            .from('site_storage')
-            .select('value')
-            .eq('key', 'bv_categories_tree')
-            .single();
-
-        if (error || !data || !data.value) {
-            console.error('Помилка завантаження дерева категорій:', error);
-            return;
-        }
-
-        const categories = data.value;
-        if (!Array.isArray(categories)) return;
-
-        scrollContainer.innerHTML = '';
-
-        categories.forEach(category => {
-            const group = document.createElement('div');
-            group.className = 'category-group';
-
-            const mainBtn = document.createElement('button');
-            mainBtn.type = 'button';
-            mainBtn.className = 'main-category';
-            const catName = category.name?.uk || category.name || category.title || category.id;
-            mainBtn.textContent = catName;
-
-            const subcategories = category.subcategories || category.children || [];
-
-            // Клік (тап) для мобільних та сенсорних пристроїв
-            mainBtn.addEventListener('click', (e) => {
-                if (subcategories.length > 0) {
-                    document.querySelectorAll('.category-group').forEach(g => {
-                        if (g !== group) g.classList.remove('active');
-                    });
-                    group.classList.toggle('active');
-                } else {
-                    window.location.href = `catalog.html?cat=${category.id}`;
-                }
-            });
-
-            group.appendChild(mainBtn);
-
-            if (subcategories.length > 0) {
-                const subContainer = document.createElement('div');
-                subContainer.className = 'subcategories-container';
-
-                subcategories.forEach(subcat => {
-                    const subBtn = document.createElement('a');
-                    subBtn.href = `catalog.html?cat=${subcat.id}`;
-                    subBtn.className = 'sub-category';
-                    subBtn.textContent = subcat.name?.uk || subcat.name || subcat.title || subcat.id;
-                    
-                    subBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                    });
-
-                    subContainer.appendChild(subBtn);
-                });
-
-                group.appendChild(subContainer);
-            }
-
-            scrollContainer.appendChild(group);
-        });
-
-        // Плавний горизонтальний скрол колесом миші для ПК
-        scrollContainer.addEventListener('wheel', (evt) => {
-            if (evt.deltaY !== 0) {
-                evt.preventDefault();
-                scrollContainer.scrollLeft += evt.deltaY;
-            }
-        }, { passive: false });
-
-    } catch (err) {
-        console.error('Помилка рендерингу скролу категорій:', err);
-    }
-}
-
-
-// --- ЛОГІКА БАНЕРА (Fade / Автоплей) ---
-let currentSlideIndex = 0;
-let slideStartTime = Date.now();
-const SLIDE_DURATION = 10000;
-
-function showSlide(index) {
-    const container = document.getElementById('mainBannerContainer');
-    if (!container) return;
-    const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
-    if (slides.length === 0) return;
-
-    if (index >= slides.length) currentSlideIndex = 0;
-    else if (index < 0) currentSlideIndex = slides.length - 1;
-    else currentSlideIndex = index;
-
-    slides.forEach((slide, idx) => {
-        if (idx === currentSlideIndex) {
-            slide.classList.add('banner-active');
-        } else {
-            slide.classList.remove('banner-active');
-        }
-    });
-
-    const dotsContainer = document.getElementById('bannerDots');
-    if (dotsContainer) {
-        const dots = dotsContainer.querySelectorAll('.banner-dot');
-        dots.forEach((dot, idx) => {
-            if (idx === currentSlideIndex) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
-    }
-}
-
-window.scrollBanner = function(direction) {
-    const container = document.getElementById('mainBannerContainer');
-    if (!container) return;
-    const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
-    if (slides.length <= 1) return;
-
-    showSlide(currentSlideIndex + direction);
-    slideStartTime = Date.now();
-};
-
-
-
-
-
-
-window.goToSlide = function(index) {
-    showSlide(index);
-    slideStartTime = Date.now();
-};
-
-function initFadeBannerSlider() {
-    const container = document.getElementById('mainBannerContainer');
-    const dotsContainer = document.getElementById('bannerDots');
-    const timeProgress = document.getElementById('bannerTimeProgress');
-    if (!container || !dotsContainer) return;
-
-    let lastSlideCount = 0;
-
-    const updateSlidesAndDots = () => {
-        const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
-        if (slides.length === 0) return;
-
-        if (slides.length !== lastSlideCount) {
-            lastSlideCount = slides.length;
-            dotsContainer.innerHTML = '';
-            slides.forEach((_, index) => {
-                const dot = document.createElement('button');
-                dot.type = 'button';
-                dot.className = `banner-dot ${index === 0 ? 'active' : ''}`;
-                dot.onclick = () => window.goToSlide(index);
-                dotsContainer.appendChild(dot);
-            });
-            currentSlideIndex = 0;
-            showSlide(0);
-        }
-    };
-
-    function runAutoplayLoop() {
-        const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
-        
-        if (slides.length > 1) {
-            const now = Date.now();
-            const elapsed = now - slideStartTime;
-            
-            const progressPercent = Math.min((elapsed / SLIDE_DURATION) * 100, 100);
-            if (timeProgress) {
-                timeProgress.style.width = `${progressPercent}%`;
-            }
-
-            if (elapsed >= SLIDE_DURATION) {
-                showSlide(currentSlideIndex + 1);
-                slideStartTime = Date.now();
-            }
-        }
-        requestAnimationFrame(runAutoplayLoop);
-    }
-
-    window.addEventListener('resize', updateSlidesAndDots);
-
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    container.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    container.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        const swipeThreshold = 40;
-        if (touchEndX < touchStartX - swipeThreshold) {
-            showSlide(currentSlideIndex + 1);
-            slideStartTime = Date.now();
-        } else if (touchEndX > touchStartX + swipeThreshold) {
-            showSlide(currentSlideIndex - 1);
-            slideStartTime = Date.now();
-        }
-    }, { passive: true });
-
-    const observer = new MutationObserver(() => {
-        updateSlidesAndDots();
-    });
-    observer.observe(container, { childList: true, subtree: true });
-
-    updateSlidesAndDots();
-    slideStartTime = Date.now();
-    requestAnimationFrame(runAutoplayLoop);
-}
-
-
-
-
-
-// --- ЗАПУСК УСІХ СКРИПТІВ ПРИ ЗАВАНТАЖЕННІ ---
-document.addEventListener('DOMContentLoaded', () => {
-    renderHomeCategories();
-    renderHomeCategoriesScroll();
-    initFadeBannerSlider();
-
-});
-document.addEventListener("DOMContentLoaded", () => {
-        const fixGrids = () => {
-            const containers = document.querySelectorAll('#dynamicHomeBlocksContainer .grid, #glassAccordion .grid, #dynamicHomeBlocksContainer div[class*="grid-cols-"], #glassAccordion div[class*="grid-cols-"]');
-            containers.forEach(el => {
-                el.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4 w-full";
-            });
-        };
-        fixGrids();
-        // Запускаємо ще раз на випадок динамічного завантаження даних із Supabase
-        setTimeout(fixGrids, 500);
-        setTimeout(fixGrids, 1500);
-    });
-function initInfiniteHorizontalScroll() {
-    const scrollContainers = document.querySelectorAll('#dynamicHomeBlocksContainer .promo-horizontal-scroll');
-
-    scrollContainers.forEach(container => {
-        const track = container.querySelector('.promo-track');
-        if (!track || track.dataset.infiniteInitialized === "true") return;
-        
-        track.dataset.infiniteInitialized = "true";
-
-        // Очищаємо всі дочірні елементи від класів snap-* (якщо вони були згенеровані)
-        track.querySelectorAll('*').forEach(el => {
-            Array.from(el.classList).forEach(cls => {
-                if (cls.startsWith('snap-')) el.classList.remove(cls);
-            });
-        });
-
-        const originalItems = Array.from(track.children);
-        if (originalItems.length === 0) return;
-
-        // Створюємо клони для лівого та правого буфера
-        const fragmentBefore = document.createDocumentFragment();
-        const fragmentAfter = document.createDocumentFragment();
-
-        originalItems.forEach(item => {
-            fragmentBefore.appendChild(item.cloneNode(true));
-            fragmentAfter.appendChild(item.cloneNode(true));
-        });
-
-        track.insertBefore(fragmentBefore, track.firstChild);
-        track.appendChild(fragmentAfter);
-
-        // Точний розрахунок ширини 1 набору елементів враховуючи gap
-        const getSingleSetWidth = () => {
-            let totalWidth = 0;
-            const gap = parseFloat(window.getComputedStyle(track).gap) || 12;
-            for (let i = 0; i < originalItems.length; i++) {
-                totalWidth += originalItems[i].getBoundingClientRect().width + gap;
-            }
-            return totalWidth;
-        };
-
-        let setWidth = getSingleSetWidth();
-        
-        // Встановлюємо початковий скролл на центральний (оригінальний) блок
-        container.scrollLeft = setWidth;
-
-        let isTicking = false;
-
-        const handleScroll = () => {
-            if (!isTicking) {
-                window.requestAnimationFrame(() => {
-                    setWidth = getSingleSetWidth();
-                    if (setWidth <= 0) {
-                        isTicking = false;
-                        return;
-                    }
-
-                    // Якщо дійшли до лівого краю буфера — безшумно перестрибуємо в центр
-                    if (container.scrollLeft <= 10) {
-                        container.scrollLeft += setWidth;
-                    } 
-                    // Якщо дійшли до правого краю буфера — безшумно перестрибуємо в центр
-                    else if (container.scrollLeft >= setWidth * 2 - 10) {
-                        container.scrollLeft -= setWidth;
-                    }
-
-                    isTicking = false;
-                });
-                isTicking = true;
-            }
-        };
-
-        container.addEventListener('scroll', handleScroll, { passive: true });
-
-        // Перераховуємо ширину при зміні орієнтації чи розміру екрана
-        window.addEventListener('resize', () => {
-            setWidth = getSingleSetWidth();
-        }, { passive: true });
-    });
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    // Даємо невелику паузу (300мс), щоб SPA встиг згенерувати та відмалювати картки товарів у DOM
-    setTimeout(() => {
-        const slider = document.querySelector('.promo-horizontal-scroll');
-        if (slider) {
-            slider.scrollLeft = 24; // Змініть це число (в пікселях), якщо потрібно зробити край ширшим або вужчим
-        }
-    }, 300);
-});
-(function() {
-    const shiftCarousel = () => {
-        const slider = document.querySelector('.promo-horizontal-scroll');
-        if (slider && slider.children.length > 0) {
-            // Зміщуємо скрол на 18 пікселів, щоб з'явився край наступної картки
-            slider.scrollLeft = 18;
-            return true;
-        }
-        return false;
-    };
-
-    // Перевіряємо готовність елемента в циклі, оскільки контент генерується динамічно через JS
-    const interval = setInterval(() => {
-        if (shiftCarousel()) {
-            clearInterval(interval);
-        }
-    }, 50);
-
-    // Страховка на випадок затримок мережі
-    setTimeout(() => clearInterval(interval), 4000);
-})();
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.querySelector('.promo-horizontal-scroll');
-    if (!slider) return;
-
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-
-    // 1. Прокрутка колесиком мыши на ПК (конвертация вертикали в горизонталь)
-    slider.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            slider.scrollBy({
-                left: e.deltaY * 1.8,
-                behavior: 'smooth'
-            });
-        }
-    }, { passive: false });
-
-    // 2. Перетаскивание мышью (Drag-to-scroll)
-    slider.addEventListener('mousedown', (e) => {
-        isDown = true;
-        startX = e.pageX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-        slider.style.cursor = 'grabbing';
-    });
-
-    slider.addEventListener('mouseleave', () => {
-        isDown = false;
-        slider.style.cursor = 'grab';
-    });
-
-    slider.addEventListener('mouseup', () => {
-        isDown = false;
-        slider.style.cursor = 'grab';
-    });
-
-    slider.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 2; // Коэффициент скорости перемещения
-        slider.scrollLeft = scrollLeft - walk;
-    });
-
-    // 3. Бесшовное бесконечное зацикливание
-    slider.addEventListener('scroll', () => {
-        const maxScroll = slider.scrollWidth - slider.clientWidth;
-        if (maxScroll <= 0) return;
-
-        // Если доскролили до самого конца вправо, незаметно возвращаем в начало
-        if (slider.scrollLeft >= maxScroll - 2) {
-            slider.scrollLeft = 2;
-        } 
-        // Если уперлись влево, перебрасываем в конец
-        else if (slider.scrollLeft <= 0) {
-            slider.scrollLeft = maxScroll - 2;
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.querySelector('.promo-horizontal-scroll');
-    if (!slider) return;
-
-    // 1. Конвертация колесика мыши в горизонтальный скролл на ПК
-    slider.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            slider.scrollBy({
-                left: e.deltaY * 1.8,
-                behavior: 'smooth'
-            });
-        }
-    }, { passive: false });
-
-    // 2. Бесшовное кольцевое зацикливание при скролле
-    slider.addEventListener('scroll', () => {
-        const maxScroll = slider.scrollWidth - slider.clientWidth;
-        if (maxScroll <= 0) return;
-
-        if (slider.scrollLeft >= maxScroll - 2) {
-            slider.scrollLeft = 2;
-        } else if (slider.scrollLeft <= 0) {
-            slider.scrollLeft = maxScroll - 2;
-        }
-    });
-
-    // 3. Управление кнопками .btn-cross (правая и левая стрелки)
-    const nextBtn = document.querySelector('.btn-cross.right-2, .btn-cross[class*="right-"]');
-    const prevBtn = document.querySelector('.btn-cross.left-2, .btn-cross[class*="left-"]');
-
-    const getScrollStep = () => {
-        const firstCard = slider.querySelector('.product-card, > *');
-        return firstCard ? firstCard.offsetWidth + 16 : 300; // Ширина карточки + отступ
-    };
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            const step = getScrollStep();
-            const maxScroll = slider.scrollWidth - slider.clientWidth;
-            
-            // Если дошли до конца, циклично перескакиваем в начало
-            if (slider.scrollLeft + step >= maxScroll - 10) {
-                slider.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                slider.scrollBy({ left: step, behavior: 'smooth' });
-            }
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            const step = getScrollStep();
-            
-            // Если находимся в начале, циклично перескакиваем в конец
-            if (slider.scrollLeft <= 10) {
-                slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
-            } else {
-                slider.scrollBy({ left: -step, behavior: 'smooth' });
-            }
-        });
-    }
-});
-    </script>
 
     
 
@@ -1040,27 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
-<script>
-    const styleJivoWidget = () => {
-        if (window.jivo_api && typeof window.jivo_api.setCustomPosition === 'function') {
-            // Перемещаем кнопку ниже (примерно в два раза ближе к низу экрана)
-            window.jivo_api.setCustomPosition({
-                bottom: '27vh', // Опустили ниже (было 55vh)
-                right: '15px'
-            });
-            window.jivo_api.show();
-        }
-
-        // Управляем размером и прозрачностью кнопки
-        const jivoElement = document.querySelector('.__jivoMobileButton') || document.querySelector('jdiv[class*="jivo_"]');
-        if (jivoElement) {
-            jivoElement.style.setProperty('width', '60px', 'important');
-            jivoElement.style.setProperty('height', '60px', 'important');
-            jivoElement.style.setProperty('opacity', '1', 'important'); 
-        }
-    };
-
-    const jivoInterval = setInterval(styleJivoWidget, 200);
-</script>
+<script src="js/pages/shared/jivo-style.js"></script>
 </body>
 </html>

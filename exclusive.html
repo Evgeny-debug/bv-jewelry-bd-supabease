@@ -12,31 +12,14 @@
     <meta name="theme-color" content="#121212">
      <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.jivosite.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https: wss:; img-src 'self' data: https: http: https://*.jivosite.com; frame-src https://*.jivosite.com https://*.jivosite.ru;">
 
-<script>
-    function jivo_onLoadCallback() {
-        // Смещаем кнопку JivoChat выше, чтобы она не перекрывалась другими элементами
-        // (задаем отступ снизу, например, на уровень вашей старой кнопки)
-        window.jivo_api.setCustomPosition({
-            bottom: '140px', // подберите точное значение под ваш дизайн (аналог bottom-36 / bottom-40)
-            right: '24px'    // отступ справа
-        });
-    }
-</script>
+<script src="js/pages/shared/jivo-callback.js"></script>
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
 
     <title>Замовити ексклюзив | BV Jewelry</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-         (function() {
-        try {
-            const saved = localStorage.getItem('theme');
-            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {}
-    })();
-    </script>
+    <script src="js/pages/shared/early-theme.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Специфічні стилі ексклюзиву */
@@ -210,7 +193,7 @@
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link js-site-tg mobile-only p-2 cursor-pointer text-[var(--text-main)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
             
@@ -395,23 +378,23 @@
             <div class="mb-6 p-5 bg-[var(--bg-lighter,rgba(255,255,255,0.02))] rounded-lg border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1 font-medium" data-i18n="footer_phone_title">Контактний телефон</span>
-                    <a href="tel:+380634540901" class="text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
+                    <a href="tel:+380634540901" class="js-site-phone text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
                     <span class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_phone_sub">Згідно з тарифами вашого оператора</span>
                 </div>
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2 font-medium" data-i18n="footer_socials_title">Ми в соцмережах</span>
                     <div class="flex items-center gap-3">
-                        <a href="#" target="_blank" aria-label="Instagram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="#" target="_blank" aria-label="Instagram" class="inst-link js-site-inst w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                         </a>
-                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="tg-link js-site-tg w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="footerAddressesBlock" class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
                     <span id="dot-torgova" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
                     <a href="https://maps.app.goo.gl/LU3oA3oRLAcrrrZf6" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_1">
@@ -480,243 +463,15 @@
 
 
 <!-- Скрипт індикатора робочого часу -->
-<script>
-(function() {
-    try {
-        const now = new Date();
-        const kyivTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Kyiv' }));
-        const currentHour = kyivTime.getHours() + kyivTime.getMinutes() / 60;
-
-        // Торгова, 68: 08:00 – 17:00
-        const isTorgovaOpen = currentHour >= 8 && currentHour < 17;
-        const dotTorgova = document.getElementById('dot-torgova');
-        if (dotTorgova && isTorgovaOpen) {
-            dotTorgova.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-
-        // Покровська, 57: 09:00 – 17:00
-        const isPokrovskaOpen = currentHour >= 9 && currentHour < 17;
-        const dotPokrovska = document.getElementById('dot-pokrovska');
-        if (dotPokrovska && isPokrovskaOpen) {
-            dotPokrovska.className = "absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-        }
-    } catch(e) {
-        console.error("Working hours indicator error:", e);
-    }
-})();
-</script>
 
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="main.js"></script>
+        <script src="js/pages/shared/store-hours.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/pages/exclusive.js"></script>
 
     <!-- Подключаем библиотеку Supabase на стороне клиента -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script>
-    // Захист від повторного оголошення змінних Supabase на сторінці
-    if (typeof window.supabaseUrl === 'undefined') {
-        window.supabaseUrl = 'https://trcjsnvcdonlzxprgdzd.supabase.co';
-    }
-    if (typeof window.supabaseKey === 'undefined') {
-        window.supabaseKey = 'sb_publishable_qSUZxk_9JV9wJNrdjAqeLA_8O_8-TVV';
-    }
-    if (typeof window.supabaseClient === 'undefined') {
-        window.supabaseClient = supabase.createClient(window.supabaseUrl, window.supabaseKey);
-    }
-
-    let selectedMaterial = '';
-
-    // Оновлення імені файлу в формі
-    window.updateFileName = function(input) {
-        const display = document.getElementById('fileNameDisplay');
-        if (display) {
-            if (input.files && input.files.length > 0) {
-                display.innerText = input.files[0].name;
-                display.classList.add('text-[var(--gold-muted)]');
-            } else {
-                display.innerText = 'Натисніть або перетягніть файл сюди';
-                display.classList.remove('text-[var(--gold-muted)]');
-            }
-        }
-    };
-
-    // Функція перемикання матеріалів
-    window.selectMaterial = function(id, btnElement) {
-        selectedMaterial = id;
-        document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('active'));
-        if (btnElement) btnElement.classList.add('active');
-    };
-
-    // Робоча функція відправки замовлення
-    window.submitExclusiveOrder = async function(event) {
-        if (event && typeof event.preventDefault === 'function') {
-            event.preventDefault();
-        }
-        
-        const form = (event && event.target) || document.getElementById('exclusiveForm');
-        const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
-        
-        const originalBtnText = submitBtn ? submitBtn.innerText : 'Відправити';
-        if (submitBtn) { 
-            submitBtn.innerText = 'Відправка...'; 
-            submitBtn.disabled = true; 
-        }
-
-        try {
-            const nameInput = document.getElementById('exc-client-name') || document.getElementById('exName');
-            const phoneInput = document.getElementById('exc-client-phone') || document.getElementById('exContact');
-            const commentInput = document.getElementById('exc-client-comment') || document.getElementById('exDesc');
-            
-            const name = nameInput ? nameInput.value.trim() : '';
-            const phone = phoneInput ? phoneInput.value.trim() : '';
-            const comment = commentInput ? commentInput.value.trim() : '';
-            const fileInput = document.getElementById('exc-file-input');
-            
-            if (!name || !phone) {
-                alert('Будь ласка, вкажіть ваше ім\'я та номер телефону!');
-                return;
-            }
-
-            let selectedPreferences = Array.from(document.querySelectorAll('.exc-pref-btn.active, input[name="exc-pref"]:checked'))
-                .map(el => el.dataset.value || el.value || el.innerText.trim());
-
-            if (selectedMaterial && !selectedPreferences.includes(selectedMaterial)) {
-                selectedPreferences.push(selectedMaterial);
-            }
-
-            // Завантаження фото в Supabase Storage (якщо є)
-            let customPhotoUrl = null;
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                const fileExt = file.name.split('.').pop();
-                const fileName = `exclusive_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-                const filePath = `exclusive_orders/${fileName}`;
-
-                const { error: uploadError } = await window.supabaseClient.storage
-                    .from('site-images')
-                    .upload(filePath, file, { cacheControl: '3600', upsert: false });
-
-                if (uploadError) {
-                    throw new Error('Помилка завантаження фото: ' + uploadError.message);
-                }
-
-                const { data: publicUrlData } = window.supabaseClient.storage
-                    .from('site-images')
-                    .getPublicUrl(filePath);
-                    
-                customPhotoUrl = publicUrlData.publicUrl;
-            }
-
-            // Формуємо загальний коментар
-            let fullComment = `Клієнт: ${name}\nТелефон: ${phone}`;
-            if (selectedPreferences.length > 0) {
-                fullComment += `\nВподобання/Матеріали: ${selectedPreferences.join(', ')}`;
-            }
-            if (comment) {
-                fullComment += `\nКоментар: ${comment}`;
-            }
-            if (customPhotoUrl) {
-                fullComment += `\nФото-референс: ${customPhotoUrl}`;
-            }
-
-            // Передаємо обов'язкове поле items, щоб задовольнити вимоги бази даних
-            const newOrder = {
-                comment: fullComment,
-                total_price: 0,
-                status: 'new',
-                items: [
-                    {
-                        title: 'Індивідуальне замовлення',
-                        preferences: selectedPreferences,
-                        photo: customPhotoUrl,
-                        client_name: name,
-                        phone: phone,
-                        note: comment
-                    }
-                ]
-            };
-
-            const { error: dbError } = await window.supabaseClient.from('orders').insert([newOrder]);
-            if (dbError) {
-                throw new Error('Помилка створення замовлення: ' + dbError.message);
-            }
-
-            alert('Ваше індивідуальне замовлення успішно прийнято! Ми зв\'яжемося з вами найближчим часом.');
-            
-            if (form) form.reset();
-            
-            selectedMaterial = '';
-            document.querySelectorAll('.exc-pref-btn.active, .choice-btn').forEach(b => b.classList.remove('active'));
-            const previewEl = document.getElementById('exc-photo-preview');
-            if (previewEl) previewEl.classList.add('hidden');
-
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
-            if (fileNameDisplay) {
-                fileNameDisplay.innerText = 'Натисніть або перетягніть файл сюди';
-                fileNameDisplay.classList.remove('text-[var(--gold-muted)]');
-            }
-
-        } catch (err) {
-            console.error(err);
-            alert('Сталася помилка: ' + err.message);
-        } finally {
-            if (submitBtn) { 
-                submitBtn.innerText = originalBtnText; 
-                submitBtn.disabled = false; 
-            }
-        }
-    };
-
-    // Ініціалізація сторінки при завантаженні DOM
-    window.addEventListener('DOMContentLoaded', () => {
-        let processData = [];
-
-        try {
-            if (typeof API !== 'undefined') {
-                processData = API.get('bv_exclusive_process', []);
-            }
-        } catch (e) {
-            console.warn("API не знайдено або не завантажилось.", e);
-        }
-
-        if (!processData || processData.length === 0) {
-            processData = [
-                {
-                    img: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80",
-                    title: "Обговорення ідеї",
-                    desc: "Ви надсилаєте ескіз, фотографію або просто описуєте прикрасу мрії своїми словами. Наш дизайнер-ювелір зв'язується з вами та затверджує всі дрібниці."
-                },
-                {
-                    img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-                    title: "Створення 3D-моделі",
-                    desc: "Ми будуємо високоточну тривимірну комп'ютерну модель виробу. Ви зможете роздивитися майбутню прикрасу до найменших деталей ще до початку її лиття."
-                },
-                {
-                    img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
-                    title: "Ювелірна магія",
-                    desc: "Втілюємо прикрасу в металі. Майстер виконує ручну доробку, акуратну закріпку коштовного каміння та бездоганне фінальне полірування."
-                }
-            ];
-        }
-
-        const processContainer = document.getElementById('processListContainer');
-        if (processContainer) {
-            processContainer.innerHTML = processData.map((step, index) => `
-                <div class="process-step flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
-                    <div class="process-img-wrap w-full md:w-1/2 order-1 overflow-hidden rounded-[32px] shadow-2xl relative aspect-[4/3] md:aspect-[4/3]">
-                        <img src="${step.img}" alt="${step.title}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                        <div class="absolute inset-0 border border-white/10 rounded-[32px] pointer-events-none"></div>
-                    </div>
-                    <div class="process-text-wrap w-full md:w-1/2 order-2 flex flex-col justify-center px-2 md:px-0">
-                        <span class="text-[10px] md:text-xs uppercase tracking-widest text-[var(--gold-muted)] font-bold mb-3 block">Етап 0${index + 1}</span>
-                        <h3 class="text-3xl md:text-4xl lg:text-5xl font-serif mb-4 md:mb-6 text-[var(--text-main)]">${step.title}</h3>
-                        <p class="text-[var(--text-muted)] font-light leading-relaxed text-sm md:text-base">${step.desc}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-    });
-</script>
 </body>
 </html>

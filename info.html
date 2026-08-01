@@ -10,16 +10,7 @@
     
      <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://*.supabase.co https://*.jivosite.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.jivosite.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://trcjsnvcdonlzxprgdzd.supabase.co https: wss:; img-src 'self' data: https: http: https://*.jivosite.com; frame-src https://*.jivosite.com https://*.jivosite.ru;">
 
-<script>
-    function jivo_onLoadCallback() {
-        // Смещаем кнопку JivoChat выше, чтобы она не перекрывалась другими элементами
-        // (задаем отступ снизу, например, на уровень вашей старой кнопки)
-        window.jivo_api.setCustomPosition({
-            bottom: '140px', // подберите точное значение под ваш дизайн (аналог bottom-36 / bottom-40)
-            right: '24px'    // отступ справа
-        });
-    }
-</script>
+<script src="js/pages/shared/jivo-callback.js"></script>
 
     <script src="//code.jivosite.com/widget/7I9hckS4NN" async></script>
     <meta charset="UTF-8">
@@ -34,15 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    (function() {
-        try {
-            const saved = localStorage.getItem('theme');
-            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        } catch (e) {}
-    })();
-</script>
+    <script src="js/pages/shared/early-theme.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -235,7 +218,7 @@
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
-            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="tg-link js-site-tg mobile-only p-2 cursor-pointer text-[var(--text-main)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </a>
             
@@ -325,6 +308,26 @@
                 <h1 id="pageTitle" class="text-4xl md:text-5xl font-serif leading-tight mb-10 text-[var(--text-main)] italic">Завантаження...</h1>
                 <div id="pageContent" class="dynamic-content">
                     </div>
+
+                <aside id="infoContactsBlock" class="mt-16 p-6 md:p-8 border border-[var(--border)] rounded-2xl bg-[var(--bg-card)] space-y-6">
+                    <h2 class="font-serif text-2xl text-[var(--gold-muted)] italic">Контакти</h2>
+                    <div>
+                        <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1">Телефон</span>
+                        <a data-site-phone href="tel:+380634540901" class="js-site-phone text-lg font-semibold text-[var(--text-main)] hover:text-[var(--gold-muted)]">+38 063 45 40 901</a>
+                    </div>
+                    <div class="flex gap-3">
+                        <a data-site-inst href="#" target="_blank" aria-label="Instagram" class="inst-link js-site-inst w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center hover:bg-[var(--gold-muted)] hover:text-[#111] transition">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a data-site-tg href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="tg-link js-site-tg w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center hover:bg-[var(--gold-muted)] hover:text-[#111] transition">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </a>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2">Адреси бутіків</span>
+                        <div data-site-addresses class="text-sm text-[var(--text-main)] space-y-1"></div>
+                    </div>
+                </aside>
             </div>
             
         </div>
@@ -374,23 +377,23 @@
             <div class="mb-6 p-5 bg-[var(--bg-lighter,rgba(255,255,255,0.02))] rounded-lg border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1 font-medium" data-i18n="footer_phone_title">Контактний телефон</span>
-                    <a href="tel:+380634540901" class="text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
+                    <a href="tel:+380634540901" class="js-site-phone text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
                     <span class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_phone_sub">Згідно з тарифами вашого оператора</span>
                 </div>
                 <div>
                     <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2 font-medium" data-i18n="footer_socials_title">Ми в соцмережах</span>
                     <div class="flex items-center gap-3">
-                        <a href="#" target="_blank" aria-label="Instagram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="#" target="_blank" aria-label="Instagram" class="inst-link js-site-inst w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                         </a>
-                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="tg-link js-site-tg w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="footerAddressesBlock" class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
                     <span id="dot-torgova" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
                     <a href="https://maps.app.goo.gl/LU3oA3oRLAcrrrZf6" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_1">
@@ -459,284 +462,8 @@
     <!-- СКРИПТ SPA ТА ПЕРЕКЛАДІВ -->
     <script src="demo-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="main.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/pages/info.js"></script>
 
-    <script>
-    const infoPagesDB = {
-        'about': {
-            uk: {
-                title: 'Історія Atelier',
-                content: `
-                    <p>Atelier BV Jewelry — це не просто бренд, це спадщина, яка передається з покоління в покоління. Ми створюємо прикраси, які стають сімейними реліквіями.</p>
-                    <h3>Наші цінності</h3>
-                    <p>Кожен виріб виготовляється вручну майстрами з багаторічним досвідом. Ми використовуємо лише сертифіковані дорогоцінні метали та каміння найвищої якості.</p>
-                    <ul>
-                        <li>Ексклюзивний дизайн та індивідуальний підхід до кожного клієнта.</li>
-                        <li>Бездоганна якість матеріалів (золото 585, 750 проби).</li>
-                        <li>Використання сучасних технологій у поєднанні з класичним ювелірним мистецтвом.</li>
-                    </ul>
-                `
-            },
-            en: {
-                title: 'Atelier History',
-                content: `
-                    <p>Atelier BV Jewelry is not just a brand, it is a heritage passed down through generations. We create jewelry that becomes family heirlooms.</p>
-                    <h3>Our Values</h3>
-                    <p>Each piece is handcrafted by artisans with years of experience. We use only certified precious metals and the highest quality gemstones.</p>
-                    <ul>
-                        <li>Exclusive design and individual approach to each client.</li>
-                        <li>Impeccable material quality (585, 750 gold standard).</li>
-                        <li>Modern technologies combined with classical jewelry craftsmanship.</li>
-                    </ul>
-                `
-            },
-            ru: {
-                title: 'История Atelier',
-                content: `
-                    <p>Atelier BV Jewelry — это не просто бренд, это наследие, передающееся из поколения в поколение. Мы создаем украшения, которые становятся семейными реликвиями.</p>
-                    <h3>Наши ценности</h3>
-                    <p>Каждое изделие изготавливается вручную мастерами с многолетним опытом. Мы используем только сертифицированные драгоценные металлы и камни высочайшего качества.</p>
-                    <ul>
-                        <li>Эксклюзивный дизайн и индивидуальный подход к каждому клиенту.</li>
-                        <li>Безупречное качество материалов (золото 585, 750 пробы).</li>
-                        <li>Использование современных технологий в сочетании с классическим ювелирным искусством.</li>
-                    </ul>
-                `
-            }
-        },
-        'warranty': {
-            uk: {
-                title: 'Гарантія на продукцію',
-                content: `
-                    <p>Усі ювелірні вироби BV Jewelry проходять контроль якості товару перед видачею клієнту. Усі дорогоцінні камені супроводжуються сертифікатами авторитетних лабораторій GIA, HRD, IGI та інших.</p>
-                    <h3>Що включає безкоштовне обслуговування</h3>
-                    <p>Гарантія та безкоштовне обслуговування включають усунення прихованих дефектів, що виникли з вини виробника.</p>
-                    <p>Для виконання гарантійного ремонту, заміни або безкоштовного обслуговування клієнту необхідно мати при собі: Товарний чек, паспорт виробу, гарантійний сертифікат. Гарантійне обслуговування здійснюється виключно за наявності чека, бірки, паспорта, сертифіката на ім'я особи, на яку було оформлено виріб.</p>
-                    <h3>Умови гарантійного обслуговування</h3>
-                    <ul>
-                        <li>Ремонт товару здійснюється протягом 10 днів з моменту прийому виробу в ремонт.</li>
-                        <li>Покупець погоджується з тим, що всі пошкодження та дефекти, які можуть бути виявлені під час ремонту, виникли до прийняття виробу в ремонт.</li>
-                        <li>При механічному пошкодженні (не гарантійний випадок) Ваш виріб може пройти платну послугу термінового ремонту і бути виданий у той самий день. З цінами на наші послуги ви можете ознайомитися в розділі "Послуги".</li>
-                    </ul>
-                    <h3>Випадки, що не покриваються гарантією</h3>
-                    <p>Гарантійні зобов'язання не поширюються на ювелірні вироби, якщо були порушені умови експлуатації, або дефекти виникли внаслідок недбалого використання чи використання не за призначенням:</p>
-                    <ul>
-                        <li>Ювелірний виріб отримав механічні пошкодження внаслідок навмисних або випадкових дій покупця.</li>
-                        <li>Виріб був відремонтований покупцем самостійно або іншим ювеліром. BV Jewelry залишає за собою право не приймати виріб, якщо при огляді будуть виявлені спроби стороннього втручання.</li>
-                        <li>Випадіння вставок каменів, перламутру, емалі; прикраси були пошкоджені внаслідок інших зовнішніх впливів: деформація, зміна розміру, чищення інструментами, не призначеними для ювелірних виробів.</li>
-                        <li>Виріб не відповідає паспорту чи сертифікату виробу (проба, іменник, вага, розмір). Невідповідність цих факторів свідчить про порушення цілісності виробу, неправильні умови експлуатації і не є гарантійним випадком.</li>
-                    </ul>
-                `
-            },
-            en: {
-                title: 'Product Warranty',
-                content: `
-                    <p>All BV Jewelry pieces undergo strict quality control before delivery to the client. All gemstones are accompanied by certificates from reputable laboratories such as GIA, HRD, IGI, and others.</p>
-                    <h3>What Free Maintenance Includes</h3>
-                    <p>Warranty and free maintenance cover the elimination of hidden defects resulting from manufacturing faults.</p>
-                    <p>To perform warranty repair, replacement, or free maintenance, the client must provide: Sales receipt, product passport, warranty certificate. Warranty service is carried out exclusively if the receipt, tag, passport, and certificate are in the name of the person for whom the item was issued.</p>
-                    <h3>Warranty Maintenance Terms</h3>
-                    <ul>
-                        <li>Product repair is carried out within 10 days from the moment of item acceptance.</li>
-                        <li>The buyer agrees that all damages and defects discovered during repair occurred prior to acceptance.</li>
-                        <li>In case of mechanical damage (non-warranty case), your item can undergo paid urgent repair service and be ready on the same day. You can view our pricing in the "Services" section.</li>
-                    </ul>
-                    <h3>Cases Not Covered by Warranty</h3>
-                    <p>Warranty obligations do not apply to jewelry if operating conditions were violated or defects arose from careless use or misuse:</p>
-                    <ul>
-                        <li>The jewelry piece received mechanical damage due to intentional or accidental actions of the buyer.</li>
-                        <li>The item was repaired independently by the buyer or another jeweler. BV Jewelry reserves the right not to accept the item if signs of external tampering are detected.</li>
-                        <li>Loss of stone inserts, mother-of-pearl, enamel; jewelry damaged due to other external impacts: deformation, resizing, cleaning with tools not intended for jewelry.</li>
-                        <li>The item does not match the passport or certificate (hallmark, maker's mark, weight, size). Non-compliance indicates a breach of integrity, improper operation, and is not a warranty case.</li>
-                    </ul>
-                `
-            },
-            ru: {
-                title: 'Гарантия на продукцию',
-                content: `
-                    <p>Все ювелирные изделия BV Jewelry проходят контроль качества товара перед выдачей клиенту. Все драгоценные камни сопровождаются сертификатами авторитетных лабораторий GIA, HRD, IGI и других.</p>
-                    <h3>Что включает бесплатное обслуживание</h3>
-                    <p>Гарантия и бесплатное обслуживание включают устранение скрытых дефектов, возникших по вине производителя.</p>
-                    <p>Для выполнения гарантийного ремонта, замены или бесплатного обслуживания клиенту необходимо иметь при себе: Товарный чек, паспорт изделия, гарантийный сертификат. Гарантийное обслуживание осуществляется исключительно при наличии чека, бирки, паспорта, сертификата на имя лица, на которое было оформлено изделие.</p>
-                    <h3>Условия гарантийного обслуживания</h3>
-                    <ul>
-                        <li>Ремонт товара осуществляется в течение 10 дней с момента приема изделия в ремонт.</li>
-                        <li>Покупатель соглашается с тем, что все повреждения и дефекты, которые могут быть обнаружены во время ремонта, возникли до принятия изделия в ремонт.</li>
-                        <li>При механическом повреждении (не гарантийный случай) Ваше изделие может пройти платную услугу срочного ремонты и быть выдано в тот же день. С ценами на наши услуги вы можете ознакомиться в разделе "Услуги".</li>
-                    </ul>
-                    <h3>Случаи, не покрываемые гарантией</h3>
-                    <p>Гарантийные обязательства не распространяются на ювелирные изделия, если были нарушены условия эксплуатации, или дефекты возникли вследствие небрежного использования или использования не по назначению:</p>
-                    <ul>
-                        <li>Ювелирное изделие получило механические повреждения в результате умышленных или случайных действий покупателя.</li>
-                        <li>Изделие было отремонтировано покупателем самостоятельно или другим ювелиром. BV Jewelry оставляет за собой право не принимать изделие, если при осмотре будут обнаружены попытки стороннего вмешательства.</li>
-                        <li>Выпадение вставок камней, перламутра, эмали; украшения были повреждены в результате других внешних воздействий: деформация, изменение размера, чистка инструментами, не предназначенными для ювелирных изделий.</li>
-                        <li>Изделие не соответствует паспорту или сертификату изделия (проба, именник, вес, размер). Несоответствие этих факторов свидетельствует о нарушении целостности изделия, неправильных условиях эксплуатации и не является гарантийным случаем.</li>
-                    </ul>
-                `
-            }
-        },
-        'terms': {
-            uk: {
-                title: 'Оплата, виготовлення та доставка',
-                content: `
-                    <p>Кожна прикраса створюється індивідуально, з максимальною увагою до деталей та ваших побажань.</p>
-                    <h3>Етапи створення та оплата</h3>
-                    <ul>
-                        <li><b>3D-моделювання:</b> Перед початком фізичного виготовлення ми створюємо точну 3D-модель вашої майбутньої прикраси. Вона відправляється вам на затвердження, щоб ви могли детально оцінити дизайн, пропорції, посадку та фінальний вигляд виробу.</li>
-                        <li><b>Повна оплата:</b> Ми працюємо виключно за умови 100% передоплати. Процес створення прикраси у металі запускається тільки після повної оплати замовлення.</li>
-                        <li><b>Способи оплата:</b> Онлайн оплата картою (Visa, MasterCard, Apple Pay, Google Pay) або безготівковий розрахунок за реквізитами.</li>
-                    </ul>
-                    <h3>Доставка</h3>
-                    <ul>
-                        <li><b>Нова Пошта:</b> Надійна доставка у відділення або кур'єром за адресою.</li>
-                        <li><b>Самовивіз:</b> Ви можете забрати своє замовлення безпосередньо з нашого Atelier в м. Ізмаїл.</li>
-                    </ul>
-                `
-            },
-            en: {
-                title: 'Payment, Production & Shipping',
-                content: `
-                    <p>Each piece of jewelry is created individually, with maximum attention to detail and your preferences.</p>
-                    <h3>Production Stages & Payment</h3>
-                    <ul>
-                        <li><b>3D Modeling:</b> Before physical production begins, we create an accurate 3D model of your future jewelry. It is sent to you for approval so you can evaluate the design, proportions, fit, and final appearance.</li>
-                        <li><b>Full Payment:</b> We operate exclusively on a 100% prepayment basis. The metal crafting process starts only after full payment of the order.</li>
-                        <li><b>Payment Methods:</b> Online card payment (Visa, MasterCard, Apple Pay, Google Pay) or bank transfer by details.</li>
-                    </ul>
-                    <h3>Shipping</h3>
-                    <ul>
-                        <li><b>Nova Poshta:</b> Reliable delivery to a post office or by courier to your address.</li>
-                        <li><b>Pickup:</b> You can pick up your order directly from our Atelier in Izmail.</li>
-                    </ul>
-                `
-            },
-            ru: {
-                title: 'Оплата, изготовление и доставка',
-                content: `
-                    <p>Каждое украшение создается индивидуально, с максимальным вниманием к деталям и вашим пожеланиям.</p>
-                    <h3>Этапы создания и оплата</h3>
-                    <ul>
-                        <li><b>3D-моделирование:</b> Перед началом физического изготовления мы создаем точную 3D-модель будущего украшения. Она отправляется вам на утверждение, чтобы вы могли детально оценить дизайн, пропорции, посадку и финальный вид изделия.</li>
-                        <li><b>Полная оплата:</b> Мы работаем исключительно на условиях 100% предоплаты. Процесс создания украшения в металле запускается только после полной оплаты заказа.</li>
-                        <li><b>Способы оплаты:</b> Онлайн оплата картой (Visa, MasterCard, Apple Pay, Google Pay) или безналичный расчет по реквизитам.</li>
-                    </ul>
-                    <h3>Доставка</h3>
-                    <ul>
-                        <li><b>Новая Почта:</b> Надежная доставка в отделение или курьером по адресу.</li>
-                        <li><b>Самовывоз:</b> Вы можете забрать свой заказ непосредственно из нашего Atelier в г. Измаил.</li>
-                    </ul>
-                `
-            }
-        },
-        'reviews': {
-            uk: {
-                title: 'Відгуки клієнтів',
-                content: `
-                    <p>Ваша думка — найвища оцінка нашої роботи. Незабаром тут з'явиться можливість залишати та читати відгуки наших клієнтів.</p>
-                    <div class="text-center py-12 border border-dashed border-[var(--border)] rounded-2xl bg-[rgba(255,255,255,0.01)] mt-8">
-                        <button class="border border-[var(--gold-muted)] text-[var(--gold-muted)] px-8 py-3 rounded-none text-xs uppercase tracking-widest font-bold hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" data-i18n="leave_review">Залишити відгук</button>
-                    </div>
-                `
-            },
-            en: {
-                title: 'Client Reviews',
-                content: `
-                    <p>Your opinion is the highest rating of our work. Soon you will be able to leave and read reviews from our clients here.</p>
-                    <div class="text-center py-12 border border-dashed border-[var(--border)] rounded-2xl bg-[rgba(255,255,255,0.01)] mt-8">
-                        <button class="border border-[var(--gold-muted)] text-[var(--gold-muted)] px-8 py-3 rounded-none text-xs uppercase tracking-widest font-bold hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" data-i18n="leave_review">Leave a Review</button>
-                    </div>
-                `
-            },
-            ru: {
-                title: 'Отзывы клиентов',
-                content: `
-                    <p>Ваше мнение — высшая оценка нашей работы. Скоро здесь появится возможность оставлять и читать отзывы наших клиентов.</p>
-                    <div class="text-center py-12 border border-dashed border-[var(--border)] rounded-2xl bg-[rgba(255,255,255,0.01)] mt-8">
-                        <button class="border border-[var(--gold-muted)] text-[var(--gold-muted)] px-8 py-3 rounded-none text-xs uppercase tracking-widest font-bold hover:bg-[var(--gold-muted)] hover:text-[#111] transition-colors" data-i18n="leave_review">Оставить отзыв</button>
-                    </div>
-                `
-            }
-        }
-    };
-
-    window.loadPage = function(pageId) {
-        const currentLang = localStorage.getItem('app_lang') || localStorage.getItem('lang') || 'uk';
-        const pageObj = infoPagesDB[pageId] ? infoPagesDB[pageId][currentLang] : infoPagesDB['about'][currentLang];
-        
-        const titleEl = document.getElementById('pageTitle');
-        const contentEl = document.getElementById('pageContent');
-        
-        if(titleEl) titleEl.innerText = pageObj.title;
-        if(contentEl) contentEl.innerHTML = pageObj.content;
-        
-        const url = new URL(window.location);
-        url.searchParams.set('p', pageId);
-        window.history.pushState({}, '', url);
-
-        document.querySelectorAll('.info-nav-link').forEach(link => {
-            link.classList.remove('active', 'text-[var(--gold-muted)]');
-            link.classList.add('text-[var(--text-muted)]');
-            if(link.getAttribute('data-target') === pageId) {
-                link.classList.add('active', 'text-[var(--gold-muted)]');
-                link.classList.remove('text-[var(--text-muted)]');
-            }
-        });
-
-        document.querySelectorAll('.info-tab-mob').forEach(tab => {
-            tab.classList.remove('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
-            tab.classList.add('text-[var(--text-muted)]');
-            if(tab.getAttribute('data-target') === pageId) {
-                tab.classList.remove('text-[var(--text-muted)]');
-                tab.classList.add('text-[var(--gold-muted)]', 'border-b-2', 'border-[var(--gold-muted)]');
-                tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            }
-        });
-        
-        if(window.innerWidth < 1024) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    // Зберігаємо оригінальну функцію changeLang із main.js (якщо вона є), щоб не було конфліктів і циклів
-    const originalChangeLang = window.changeLang;
-
-    window.changeLang = function(lang) {
-        localStorage.setItem('app_lang', lang);
-        localStorage.setItem('lang', lang);
-        
-        const labelEl = document.getElementById('currentLangLabel');
-        if (labelEl) {
-            labelEl.innerText = lang.toUpperCase();
-        }
-
-        // Викликаємо оригінальну функцію перекладу всього сайту з main.js без перезавантаження
-        if (typeof originalChangeLang === 'function') {
-            originalChangeLang(lang);
-        }
-
-        // Оновлюємо текст інфо-сторінки під нову мову на льоту
-        const urlParams = new URLSearchParams(window.location.search);
-        const activePage = urlParams.get('p') || 'about';
-        loadPage(activePage);
-    };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const currentLang = localStorage.getItem('app_lang') || localStorage.getItem('lang') || 'uk';
-        const labelEl = document.getElementById('currentLangLabel');
-        if (labelEl) {
-            labelEl.innerText = currentLang.toUpperCase();
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const pageToLoad = urlParams.get('p') || 'about';
-        loadPage(pageToLoad);
-    });
-
-    window.addEventListener('popstate', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const pageToLoad = urlParams.get('p') || 'about';
-        loadPage(pageToLoad);
-    });
-</script>
 </body>
 </html>
