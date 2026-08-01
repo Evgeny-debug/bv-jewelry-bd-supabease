@@ -100,7 +100,37 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col pt-6 md:pt-12 pb-24">
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
+    <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
 
+    <div class="cart-drawer" id="cartDrawer" role="dialog">
+        <div class="cart-header">
+            <h2 data-i18n="cart_title">Кошик</h2>
+            <button class="cart-close" id="cartClose" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-body custom-scrollbar" id="cartBody"></div>
+        <div class="cart-footer">
+            <div class="flex justify-end mb-3">
+                <button onclick="window.clearEntireCart()" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors flex items-center gap-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> <span data-i18n="cart_clear">Очистити</span>
+                </button>
+            </div>
+            <div class="cart-subtotal">
+                <span data-i18n="cart_subtotal">Підсумок:</span>
+                <span class="cart-subtotal-val text-[var(--gold-muted)] font-bold text-xl">0 ₴</span>
+            </div>
+            <div id="checkoutBtnWrapper" class="w-full mt-4"></div>
+        </div>
+    </div>
+
+    <div class="cart-drawer" id="favDrawer" role="dialog">
+        <div class="cart-header">
+            <h2 data-i18n="fav_title">Улюблене</h2>
+            <button class="cart-close" onclick="toggleFavDrawer()">&times;</button>
+        </div>
+        <div class="cart-body custom-scrollbar" id="favBody"></div>
+    </div>
 
 <header id="header">
  
