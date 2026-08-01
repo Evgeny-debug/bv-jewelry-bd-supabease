@@ -39,7 +39,12 @@
         const itemsPerPage = 120;
 
         // --- НОВА ФУНКЦІЯ: Завантаження категорій з Supabase ---
+        let isFetchingCategories = false; // Блокування для запобігання циклу
+
         async function fetchCategoriesFromDB() {
+            if (isFetchingCategories) return resolveCategoriesTreeFromCache();
+            isFetchingCategories = true;
+
             try {
                 const db = typeof window._supabase !== 'undefined' ? window._supabase : null;
 
@@ -68,25 +73,28 @@
                 });
 
                 if (Array.isArray(flat) && flat.length) {
-                    if (typeof window.syncLocalCatalog === 'function') {
-                        window.syncLocalCatalog('bv_categories_flat', flat);
-                    } else if (window.API) {
-                        window.API.set('bv_categories_flat', flat);
-                    }
+                    // ИСПРАВЛЕНИЕ: Пишем напрямую в localStorage, чтобы не дергать window.API.set 
+                    // и не вызывать бесконечный цикл события bv:data-updated
+                    localStorage.setItem('bv_categories_flat', JSON.stringify(flat));
+                    
                     const built = typeof window.buildCategoriesTree === 'function'
                         ? window.buildCategoriesTree(flat)
                         : (typeof window.buildTree === 'function' ? window.buildTree(flat) : null);
+                        
                     if (built) {
-                        if (window.API) window.API.set('bv_categories_tree', built);
+                        localStorage.setItem('bv_categories_tree', JSON.stringify(built));
                         return built;
                     }
                 }
                 if (Array.isArray(tree) && tree.length) {
-                    if (window.API) window.API.set('bv_categories_tree', tree);
+                    // ИСПРАВЛЕНИЕ: Тихое сохранение
+                    localStorage.setItem('bv_categories_tree', JSON.stringify(tree));
                     return tree;
                 }
             } catch (err) {
                 console.warn('[DB Error] Не вдалося завантажити категорії з БД, використовуємо кеш:', err);
+            } finally {
+                isFetchingCategories = false; // Знімаємо блокування
             }
             
             return resolveCategoriesTreeFromCache();
