@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="uk" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
-    
-    <title>Оформлення замовлення | BV Jewelry</title>
-
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Шрифти основного сайту -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Оформлення замовлення | BV Jewelry</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-
+    
     <script>
         (function() {
             try {
@@ -32,7 +24,7 @@
     </script>
     
     <style>
-        /* Стилі форми чекауту */
+        /* Глобальная авто-тема и строгий дизайн */
         :root {
             --bg-main: #ffffff;
             --text-main: #1a1a1a;
@@ -50,16 +42,23 @@
             --input-border: rgba(255, 255, 255, 0.15);
         }
 
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         /* Ультракомпактный премиальный Glassmorphism */
         .glass-panel { 
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border); 
-            border-radius: 0 !important;
+            border-radius: 0 !important; /* Строгий дизайн, без скруглений */
         }
 
-        /* Стиль инпутов */
+        /* Стиль инпутов под ювелирный бутик */
         .input-field { 
             width: 100%; 
             background: transparent; 
@@ -95,29 +94,42 @@
         }
         .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: var(--gold-muted); }
         
+        /* Кнопки и общие элементы */
+        button, a, .product-card { border-radius: 0 !important; }
         .z-gold-btn {
             background-color: transparent;
             border: 1px solid var(--gold-muted);
             color: var(--gold-muted);
             transition: all 0.3s;
-            border-radius: 0 !important;
         }
         .z-gold-btn:hover {
             background-color: var(--gold-muted);
             color: #fff;
         }
         [data-theme="dark"] .z-gold-btn:hover { color: #000; }
+
+        /* Нижний бар для мобильных */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--bg-main);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+            z-index: 1000;
+        }
+        @media (min-width: 768px) { .mobile-bottom-nav { display: none; } }
+        .bottom-nav-item { color: var(--text-main); opacity: 0.7; }
+        .bottom-nav-item.active { opacity: 1; color: var(--gold-muted); }
+        .bottom-nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+
     </style>
 </head>
-<body class="mobile-padding antialiased selection:bg-[#c5a059] selection:text-white pb-[60px] md:pb-0 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pt-6 md:pt-12 pb-24">
 
-    <!-- Оверлеї для хедера -->
-    <div class="menu-overlay" id="overlay" onclick="toggleMenu()" aria-hidden="true"></div>
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
-    <div class="cart-overlay" id="favOverlay" onclick="toggleFavDrawer()" aria-hidden="true"></div>
-
-    <!-- Основний Хедер -->
-    <header id="header">
+<header id="header">
         <div class="header-left">
             <button class="mobile-only p-2 cursor-pointer text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -129,9 +141,24 @@
                     <button class="nav-link catalog-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='catalog.html'">
                         <span data-i18n="m2">Каталог</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                     </button>
+                    <div class="mega-menu zlato-style">
+                        <div class="mega-col-1 zlato-categories" id="megaCol1"></div>
+                        <div class="mega-col-2 zlato-content" id="megaCol2"></div>
+                    </div>
                 </div>
                 <a href="gallery.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_gallery">Галерея</a>
                 <a href="services.html" class="nav-link hover:text-[var(--gold-muted)] transition-colors" data-i18n="m_price">Прайс</a>
+                
+                <div class="info-dropdown-wrapper group">
+                    <button class="nav-link info-toggle flex items-center gap-1 cursor-pointer hover:text-[var(--gold-muted)] transition-colors" onclick="location.href='info.html'">
+                        <span data-i18n="m_info">info</span> 
+                    </button>
+                    <div class="mega-menu zlato-style">
+                        <div class="mega-col-1 zlato-categories" id="megaCol1"></div>
+                        <div class="mega-col-2 zlato-content" id="megaCol2"></div>
+                    </div>
+                </div>
+
                 <a href="exclusive.html" class="exclusive-nav-btn" data-i18n="m_atelier">Ексклюзив</a>
             </nav>
         </div>
@@ -139,6 +166,15 @@
         <a href="index.html" class="bv-logo"><span>BV</span><span>jewelry</span></a>
 
         <div class="header-right">
+            <a href="https://t.me/bv_jewelry_izmail" target="_blank" class="mobile-only p-2 cursor-pointer text-[var(--text-main)]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </a>
+            
+            <div class="search-box desktop-only group mr-4">
+                <input type="search" class="search-input" data-i18n-placeholder="search_ph" placeholder="Пошук..." onkeypress="if(event.key==='Enter') window.executeSearch(this.value)">
+                <svg class="search-icon group-focus-within:stroke-[var(--gold-muted)] transition-colors" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            
             <a href="tel:+380634540901" class="header-phone-link desktop-only hover:text-[var(--gold-muted)] transition-colors">
                 <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 <span class="header-phone-text font-medium tracking-wide phone-num">+38 063 45 40 901</span>
@@ -146,10 +182,20 @@
             
             <button id="themeToggle" class="icon-btn desktop-only hover:text-[var(--gold-muted)]" onclick="toggleTheme()"><svg id="themeIcon" viewBox="0 0 24 24"></svg></button>
             
+            <div class="dropdown-wrapper lang-dropdown desktop-only">
+                <button class="lang-current"><img src="" class="" id="" alt=""><span id="currentLangLabel">UA</span></button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('uk')"><img src="" class="w-5 rounded-[3px]" alt=""> UA</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('en')"><img src="" class="w-5 rounded-[3px]" alt=""> EN</button>
+                    <button class="dropdown-item w-full text-left flex items-center gap-2" onclick="changeLang('ru')"><img src="" class="w-5 rounded-[3px]" alt=""> RU</button>
+                </div>
+            </div>
+            
             <div class="dropdown-wrapper desktop-only group">
                 <button class="icon-btn" id="headerProfileBtn" onclick="window.smartProfileClick()">
                     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </button>
+                <div class="dropdown-menu" id="profileDropdownMenu"></div>
             </div>
             
             <button onclick="toggleFavDrawer()" class="icon-btn desktop-only">
@@ -161,27 +207,40 @@
                 <span class="cart-badge">0</span>
             </button>
         </div>
+        
+        <div id="mobSearchContainer" class="absolute top-[100%] left-0 w-full p-4 bg-[var(--bg-card)] border-b border-[var(--border)] shadow-xl hidden z-[4000]">
+            <div class="flex items-center bg-black/5 dark:bg-white/5 border border-[var(--border)] rounded-none px-4 py-3 focus-within:border-[var(--gold-muted)] transition-colors">
+                <input type="search" id="mobSearchOverlayInput" data-i18n-placeholder="search_mob_ph" placeholder="Пошукаємо прикрасу?..." class="w-full bg-transparent outline-none text-[var(--text-main)] text-sm font-['Inter']">
+                <button onclick="window.executeSearch(document.getElementById('mobSearchOverlayInput').value)" class="text-[var(--gold-muted)] ml-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </div>
     </header>
 
+    <!-- Кнопка назад -->
+    <div class="max-w-5xl w-full mx-auto px-4 mb-4">
+        <a href="index.html" class="text-xs uppercase tracking-widest text-gray-500 hover:text-[var(--gold-muted)] flex items-center gap-2 transition-colors w-fit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Повернутися
+        </a>
+    </div>
+
     <!-- Основной контейнер чекаута -->
-    <main class="w-full max-w-[1440px] mx-auto px-4 md:px-8 pt-8 pb-12 flex flex-col lg:flex-row gap-6 md:gap-10 flex-grow" id="checkoutContainer">
+    <main class="w-full max-w-5xl mx-auto px-4 flex flex-col lg:flex-row gap-6 md:gap-10 flex-grow" id="checkoutContainer">
         
         <!-- Левая колонка: Форма заказа -->
         <div class="w-full lg:w-7/12 flex flex-col">
             <div class="mb-6">
-                <a href="index.html" class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--gold-muted)] flex items-center gap-2 transition-colors w-fit mb-4">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    Повернутися до покупок
-                </a>
-                <h1 class="text-2xl md:text-3xl font-medium tracking-wide text-[var(--text-main)] uppercase mb-1" style="font-family: 'Cormorant Garamond', serif;">Оформлення замовлення</h1>
-                <p class="text-xs text-[var(--text-muted)]">Заповніть дані для доставки вашої прикраси</p>
+                <h1 class="text-2xl font-medium tracking-wide uppercase mb-1" style="font-family: 'Cormorant Garamond', serif;">Оформлення замовлення</h1>
+                <p class="text-xs text-gray-500">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-6 glass-panel p-6 md:p-8" autocomplete="off">
+            <form id="checkoutForm" class="flex flex-col gap-5 glass-panel p-5 md:p-8" autocomplete="off">
                 
                 <div>
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4">Контактні дані</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3">Контактні дані</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
                         <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
                         <input type="email" id="orderEmail" placeholder="Email (для чеку)" class="input-field md:col-span-2" required>
@@ -189,11 +248,11 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4 flex justify-between items-center">
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3 flex justify-between items-center">
                         Доставка
-                        <span class="text-[9px] text-[var(--text-muted)]">НОВА ПОШТА</span>
+                        <img src="https://icon.horse/icon/novaposhta.ua" alt="Нова Пошта" title="Нова Пошта" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
                             <input type="text" id="orderCity" placeholder="Місто доставки..." class="input-field" autocomplete="new-password" required>
                             <input type="hidden" id="orderCityRef" value="">
@@ -208,7 +267,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-4">Оплата</h3>
+                    <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3">Оплата</h3>
                     <select id="orderPayment" class="input-field cursor-pointer">
                         <option value="cod">Накладений платіж (при отриманні)</option>
                         <option value="card">Онлайн оплата (Картка / Apple Pay)</option>
@@ -226,22 +285,23 @@
         </div>
 
         <!-- Правая колонка: Корзина -->
-        <div class="w-full lg:w-5/12 glass-panel p-6 md:p-8 flex flex-col h-fit lg:sticky lg:top-24 mt-6 lg:mt-0">
-            <h2 class="text-xl font-medium tracking-wide uppercase mb-6" style="font-family: 'Cormorant Garamond', serif;">Ваше замовлення</h2>
-            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col gap-4 max-h-[400px]">
+        <div class="w-full lg:w-5/12 glass-panel p-5 md:p-8 flex flex-col h-fit sticky top-10">
+            <h2 class="text-lg font-medium tracking-wide uppercase mb-4" style="font-family: 'Cormorant Garamond', serif;">Ваше замовлення</h2>
+            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col gap-3 max-h-[400px]">
                 <!-- Сюди рендеряться товари JS-скриптом -->
             </div>
             
-            <div class="mt-6 pt-6 border-t border-[var(--glass-border)] flex justify-between items-end">
-                <span class="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Підсумок:</span>
-                <span class="text-2xl font-bold text-[var(--gold-muted)]" id="checkoutTotal">0 ₴</span>
+            <div class="mt-5 pt-5 border-t border-[var(--glass-border)] flex justify-between items-end">
+                <span class="text-[10px] uppercase tracking-widest text-gray-500">Підсумок:</span>
+                <span class="text-xl font-bold" id="checkoutTotal">0 ₴</span>
             </div>
         </div>
     </main>
 
-    <!-- Основний Футер -->
-    <footer id="footer" class="pt-12 pb-10 px-4 md:px-6 bg-[var(--bg-card)] border-t border-[var(--border)] mt-auto relative z-10 text-[var(--text-main)] font-sans antialiased">
+    <!-- Подвал (Footer) -->
+    <footer id="footer" class="pt-12 pb-10 px-4 md:px-6 bg-[var(--bg-card)] border-t border-[var(--border)] relative z-10 text-[var(--text-main)] font-sans antialiased">
         <div class="max-w-7xl mx-auto">
+            
             <div class="mb-8 flex flex-col items-center md:items-start">
                 <div class="bv-logo relative !static !transform-none !items-start !opacity-100 flex items-baseline gap-1">
                     <span class="!text-3xl font-bold tracking-tight text-[var(--text-main)]">BV</span>
@@ -252,12 +312,57 @@
                 </p>
             </div>
 
+            <div class="mb-6 p-5 bg-[var(--bg-lighter,rgba(255,255,255,0.02))] rounded-lg border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-1 font-medium" data-i18n="footer_phone_title">Контактний телефон</span>
+                    <a href="tel:+380634540901" class="text-[18px] md:text-[20px] text-[var(--text-main)] font-semibold transition-colors hover:text-[var(--gold-muted,#C5A059)] tracking-wide block mb-0.5">+38 063 454 09 01</a>
+                    <span class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_phone_sub">Згідно з тарифами вашого оператора</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-2 font-medium" data-i18n="footer_socials_title">Ми в соцмережах</span>
+                    <div class="flex items-center gap-3">
+                        <a href="#" target="_blank" aria-label="Instagram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a href="https://t.me/bv_jewelry_izmail" target="_blank" aria-label="Telegram" class="w-9 h-9 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[#111] hover:bg-[var(--gold-muted,#C5A059)] hover:border-[var(--gold-muted,#C5A059)] transition-all duration-300">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
+                    <span id="dot-torgova" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
+                    <a href="https://maps.app.goo.gl/LU3oA3oRLAcrrrZf6" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_1">
+                        вул. Торгова, 68, Ізмаїл 
+                    </a>
+                    <span id="status-torgova" class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_schedule_1">Пн–Нд: 08:00 – 17:00</span>
+                </div>
+
+                <div class="p-4 bg-[var(--bg-lighter,rgba(255,255,255,0.01))] rounded-lg border border-[var(--border)] relative pl-7">
+                    <span id="dot-pokrovska" class="absolute left-2.5 top-5 w-1.5 h-1.5 rounded-full bg-zinc-600 transition-colors"></span>
+                    <a href="https://maps.app.goo.gl/7ZrXtnYwY6R8cy329" target="_blank" rel="noopener noreferrer" class="text-[13px] text-[var(--text-main)] font-medium block mb-1 hover:text-[var(--gold-muted,#C5A059)] transition-colors" data-i18n="footer_address_2">
+                        вул. Покровська, 57, Ізмаїл 
+                    </a>
+                    <span id="status-pokrovska" class="text-[11px] text-[var(--text-muted)] font-light" data-i18n="footer_schedule_2">Пн–Нд: 09:00 – 17:00</span>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 mb-12 border-t border-[var(--border)] pt-8">
                 <div class="flex flex-col items-start">
                     <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4 pb-2 border-b border-[var(--border)] w-full" data-i18n="footer_col_buyers">Покупцям</h4>
                     <a href="info.html?p=terms" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_delivery">Доставка та оплата</a>
                     <a href="info.html?p=warranty" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_warranty">Гарантія</a>
                     <a href="services.html" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_link_services">Послуги та Прайс</a>
+                </div>
+
+                <div class="flex flex-col items-start">
+                    <h4 class="font-serif text-[var(--text-main)] text-sm uppercase tracking-widest mb-4 pb-2 border-b border-[var(--border)] w-full" data-i18n="footer_col_catalog">Каталог</h4>
+                    <a href="catalog.html#rings" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_cat_rings">Каблучки</a>
+                    <a href="catalog.html#earrings" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_cat_earrings">Сережки</a>
+                    <a href="catalog.html#necklaces" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_cat_chains">Ланцюжки</a>
+                    <a href="catalog.html#pendants" class="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-3 tracking-wide" data-i18n="footer_cat_pendants">Кулони та підвіски</a>
                 </div>
             </div>
 
@@ -268,24 +373,34 @@
                 
                 <div class="flex flex-wrap items-center justify-center gap-6">
                     <div class="flex items-center gap-2">
-                        <img src="https://icon.horse/icon/visa.com" alt="Visa" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
-                        <img src="https://icon.horse/icon/mastercard.com" alt="Mastercard" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
-                        <img src="https://icon.horse/icon/apple.com" alt="Apple Pay" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/visa.com" alt="Visa" title="Visa" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/mastercard.com" alt="Mastercard" title="Mastercard" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/apple.com" alt="Apple Pay" title="Apple Pay" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/google.com" alt="Google Pay" title="Google Pay" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                    </div>
+                    
+                    <span class="hidden md:block w-px h-5 bg-[var(--border)]"></span>
+                    
+                    <div class="flex items-center gap-2.5">
+                        <img src="https://icon.horse/icon/novaposhta.ua" alt="Нова Пошта" title="Нова Пошта" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/ukrposhta.ua" alt="Укрпошта" title="Укрпошта" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
+                        <img src="https://icon.horse/icon/meest.com" alt="Meest" title="Meest" class="h-6 w-6 object-contain bg-white p-0.5 rounded-sm shadow-sm cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
                     </div>
                 </div>
             </div>
 
             <div class="pt-4 border-t border-[var(--border)] text-center">
                 <div style="transform: scale(0.80); display: inline-block;" class="uppercase tracking-widest opacity-25 hover:opacity-80 transition-opacity font-light text-[var(--text-muted)]">
-                    <span><span data-i18n="footer_dev">Розроблено:</span> <a href="#" target="_blank" class="text-[var(--text-main)] font-semibold hover:underline">EVS.PRO</a></span>
+                    <span><span data-i18n="footer_dev">Розроблено:</span> <a href="https://t.me/EVSdev" target="_blank" class="text-[var(--text-main)] font-semibold hover:underline">Evgeny Sychov</a></span>
                 </div>
             </div>
+
         </div>
     </footer>
 
     <!-- Мобильный нижний бар -->
     <nav class="mobile-bottom-nav">
-        <button onclick="window.location.href='index.html'" class="bottom-nav-item">
+        <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span data-i18n="m1">Головна</span>
         </button>
@@ -293,15 +408,23 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             <span data-i18n="m2">Каталог</span>
         </button>
-        <button onclick="window.toggleCart();" class="bottom-nav-item active">
+        <button onclick="window.toggleCart();" class="bottom-nav-item">
             <div class="relative">
                 <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="cart-badge">0</span>
             </div>
             <span data-i18n="cart_title">Кошик</span>
         </button>
-        <button onclick="window.smartProfileClick()" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span data-i18n="m_profile">Профіль</span>
+        <button onclick="window.toggleFavDrawer();" class="bottom-nav-item">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
+            </div>
+            <span data-i18n="fav_title">Улюблене</span>
+        </button>
+        <button onclick="window.toggleMenu()" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <span data-i18n="m_menu">Меню</span>
         </button>
     </nav>
 
@@ -313,14 +436,13 @@
             </div>
             <h2 class="text-xl font-serif text-[var(--gold-muted)] mb-2">Дякуємо!</h2>
             <p class="text-xs text-gray-400 mb-6">Ваше замовлення успішно прийнято. Менеджер зв'яжеться з вами.</p>
-            <a href="index.html" class="block w-full z-gold-btn text-[10px] font-bold uppercase tracking-widest py-3 text-center">На головну</a>
+            <a href="index.html" class="block w-full z-gold-btn text-[10px] font-bold uppercase tracking-widest py-3">На головну</a>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
-    <!-- Логика чекауту -->
     <script>
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = []; 
@@ -343,187 +465,103 @@
             } catch (e) { return []; }
         }
 
+        // Логика автокомплита для городов Новой Почты
         const cityInput = document.getElementById('orderCity');
         const cityDropdown = document.getElementById('cityDropdown');
         const cityRefInput = document.getElementById('orderCityRef');
+        
         const branchInput = document.getElementById('orderBranch');
         const branchDropdown = document.getElementById('branchDropdown');
-        let cityDebounceTimer;
+        
+        let cityTimeout;
 
         cityInput.addEventListener('input', (e) => {
+            clearTimeout(cityTimeout);
             const query = e.target.value.trim();
-            clearTimeout(cityDebounceTimer);
             
-            branchInput.value = '';
-            branchInput.disabled = true;
-            branchInput.placeholder = 'Оберіть місто спочатку';
-            allBranches = [];
-
             if (query.length < 2) {
                 cityDropdown.classList.add('hidden');
+                branchInput.disabled = true;
+                branchInput.value = '';
                 return;
             }
 
-            cityDebounceTimer = setTimeout(async () => {
-                const cities = await fetchNP("Address", "searchSettlements", { CityName: query, Limit: "20" });
-                const addresses = cities.length > 0 ? cities[0].Addresses : [];
+            cityTimeout = setTimeout(async () => {
+                const cities = await fetchNP('Address', 'searchSettlements', { CityName: query, Limit: 10 });
+                cityDropdown.innerHTML = '';
                 
-                if (addresses.length > 0) {
-                    cityDropdown.innerHTML = addresses.map(c => `
-                        <div class="np-dropdown-item" data-ref="${c.DeliveryCity}" data-name="${c.Present}">${c.Present}</div>
-                    `).join('');
+                if (cities.length > 0 && cities[0].Addresses.length > 0) {
+                    cities[0].Addresses.forEach(city => {
+                        const div = document.createElement('div');
+                        div.className = 'np-dropdown-item';
+                        div.textContent = city.Present;
+                        div.onclick = () => {
+                            cityInput.value = city.Present;
+                            cityRefInput.value = city.DeliveryCity;
+                            cityDropdown.classList.add('hidden');
+                            branchInput.disabled = false;
+                            branchInput.value = '';
+                            loadBranches(city.DeliveryCity);
+                        };
+                        cityDropdown.appendChild(div);
+                    });
                     cityDropdown.classList.remove('hidden');
                 } else {
-                    cityDropdown.innerHTML = '<div class="p-2 text-[10px] text-[var(--text-muted)]">Місто не знайдено</div>';
-                    cityDropdown.classList.remove('hidden');
+                    cityDropdown.classList.add('hidden');
                 }
-            }, 400); 
+            }, 400);
         });
 
-        cityDropdown.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('np-dropdown-item')) {
-                cityInput.value = e.target.getAttribute('data-name');
-                cityRefInput.value = e.target.getAttribute('data-ref');
-                cityDropdown.classList.add('hidden');
+        // Загрузка отделений по CityRef
+        async function loadBranches(cityRef) {
+            branchDropdown.innerHTML = '<div class="np-dropdown-item text-gray-500">Завантаження...</div>';
+            branchDropdown.classList.remove('hidden');
+            allBranches = await fetchNP('Address', 'getWarehouses', { CityRef: cityRef });
+            renderBranches(allBranches);
+        }
 
-                branchInput.disabled = false;
-                branchInput.placeholder = 'Завантаження...';
-                branchInput.value = '';
-                
-                allBranches = await fetchNP("Address", "getWarehouses", { CityRef: cityRefInput.value });
-                branchInput.placeholder = 'Введіть номер відділення';
-            }
-        });
-
-        branchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (query.length === 0) {
+        // Рендер отделений и фильтрация
+        function renderBranches(branches) {
+            branchDropdown.innerHTML = '';
+            if (branches.length === 0) {
                 branchDropdown.classList.add('hidden');
                 return;
             }
-            const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query) || b.Number === query);
-            
-            if (filtered.length > 0) {
-                branchDropdown.innerHTML = filtered.slice(0, 30).map(b => `
-                    <div class="np-dropdown-item" data-name="${b.Description}">${b.Description}</div>
-                `).join('');
-                branchDropdown.classList.remove('hidden');
-            } else {
-                branchDropdown.innerHTML = '<div class="p-2 text-[10px] text-[var(--text-muted)]">Не знайдено</div>';
-                branchDropdown.classList.remove('hidden');
-            }
-        });
-        
-        branchInput.addEventListener('focus', () => {
-            if (allBranches.length > 0 && branchInput.value === '') {
-                branchDropdown.innerHTML = allBranches.slice(0, 30).map(b => `
-                    <div class="np-dropdown-item" data-name="${b.Description}">${b.Description}</div>
-                `).join('');
-                branchDropdown.classList.remove('hidden');
-            }
+            branches.forEach(branch => {
+                const div = document.createElement('div');
+                div.className = 'np-dropdown-item';
+                div.textContent = branch.Description;
+                div.onclick = () => {
+                    branchInput.value = branch.Description;
+                    branchDropdown.classList.add('hidden');
+                };
+                branchDropdown.appendChild(div);
+            });
+            branchDropdown.classList.remove('hidden');
+        }
+
+        branchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query));
+            renderBranches(filtered);
         });
 
-        branchDropdown.addEventListener('click', (e) => {
-            if (e.target.classList.contains('np-dropdown-item')) {
-                branchInput.value = e.target.getAttribute('data-name');
+        // Закрытие дропдаунов по клику вне
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('#cityDropdown') && e.target !== cityInput) {
+                cityDropdown.classList.add('hidden');
+            }
+            if(!e.target.closest('#branchDropdown') && e.target !== branchInput) {
                 branchDropdown.classList.add('hidden');
             }
         });
 
-        document.addEventListener('click', (e) => {
-            if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
-            if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const cart = typeof getCart === 'function' ? getCart() : [];
-                if (cart.length === 0) {
-                    alert('Ваш кошик порожній!');
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                const listContainer = document.getElementById('checkoutItemsList');
-                let total = 0;
-                
-                listContainer.innerHTML = cart.map(item => {
-                    total += item.price * item.qty;
-                    const sizeBadge = item.size ? `<span class="text-[10px] text-[var(--gold-muted)] block mt-0.5 font-medium">Розмір: ${item.size}</span>` : '';
-                    return `
-                        <div class="flex gap-4 relative group pb-3 border-b border-[var(--glass-border)] last:border-0">
-                            <img src="${item.img}" class="w-16 h-16 object-cover border border-[var(--glass-border)]">
-                            <div class="flex-grow flex flex-col justify-center">
-                                <span class="text-[12px] font-semibold uppercase tracking-wide leading-tight line-clamp-1 text-[var(--text-main)]">${item.title}</span>
-                                ${sizeBadge}
-                                <div class="flex justify-between items-center mt-2">
-                                    <span class="text-[11px] text-[var(--text-muted)]">${item.qty} шт.</span>
-                                    <span class="text-[13px] font-bold text-[var(--text-main)]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
-                                </div>
-                            </div>
-                            <button type="button" class="absolute top-0 right-0 opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity p-1" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-                    `;
-                }).join('');
-
-                document.getElementById('checkoutTotal').innerText = new Intl.NumberFormat('uk-UA').format(total) + ' ₴';
-
-                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-                if (user) {
-                    document.getElementById('orderEmail').value = user.username || '';
-                    document.getElementById('orderName').value = user.name || '';
-                }
-            }, 500);
-
-            document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
-                    alert('Будь ласка, введіть місто та відділення Нової Пошти.');
-                    return;
-                }
-
-                const btn = document.getElementById('submitBtn');
-                btn.innerText = 'Обробка...';
-                btn.disabled = true;
-
-                const cart = getCart();
-                const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                const user = getCurrentUser();
-                const paymentMethod = document.getElementById('orderPayment').value;
-                const deliveryText = `${document.getElementById('orderName').value.trim()}, ${document.getElementById('orderCity').value.trim()}, ${document.getElementById('orderBranch').value.trim()}`;
-
-                const orderData = {
-                    user_id: user ? user.id : null,
-                    user_email: document.getElementById('orderEmail').value.trim(),
-                    phone: document.getElementById('orderPhone').value.trim(),
-                    delivery_info: deliveryText, 
-                    payment_method: paymentMethod,
-                    comment: document.getElementById('orderComment').value.trim(),
-                    items: cart, 
-                    total_price: total,
-                    status: 'pending'
-                };
-
-                try {
-                    const { error } = await _supabase.from('orders').insert([orderData]);
-                    if (error) throw error;
-
-                    if(typeof clearEntireCart === 'function') { clearEntireCart(true); }
-
-                    document.getElementById('checkoutContainer').classList.add('hidden');
-                    const modal = document.getElementById('successModal');
-                    modal.classList.remove('hidden');
-                    setTimeout(() => modal.classList.remove('opacity-0'), 50);
-
-                } catch (err) {
-                    alert('Виникла помилка: ' + err.message);
-                    btn.innerText = 'Підтвердити замовлення';
-                    btn.disabled = false;
-                }
-            });
+        // Демонстрация отправки формы
+        document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const modal = document.getElementById('successModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 50);
         });
     </script>
 </body>
