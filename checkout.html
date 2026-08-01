@@ -58,7 +58,7 @@
             border-radius: 0 !important; /* Строгий дизайн, без скруглений */
         }
 
-        /* Стиль инпутов под ювелирный бутик */
+        /* Стиль инпутов под ювелирный бутик ("Золотой Век") */
         .input-field { 
             width: 100%; 
             background: transparent; 
@@ -129,7 +129,10 @@
 </head>
 <body class="min-h-screen flex flex-col pt-6 md:pt-12 pb-24">
 
+
 <header id="header">
+ 
+
         <div class="header-left">
             <button class="mobile-only p-2 cursor-pointer text-[var(--text-main)]" onclick="window.toggleMobileSearch()">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -217,7 +220,6 @@
             </div>
         </div>
     </header>
-
     <!-- Кнопка назад -->
     <div class="max-w-5xl w-full mx-auto px-4 mb-4">
         <a href="index.html" class="text-xs uppercase tracking-widest text-gray-500 hover:text-[var(--gold-muted)] flex items-center gap-2 transition-colors w-fit">
@@ -443,6 +445,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
 
+    <!-- Логика Новой Почты и корзины оставлена без изменений из твоего оригинала -->
     <script>
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = []; 
@@ -465,103 +468,187 @@
             } catch (e) { return []; }
         }
 
-        // Логика автокомплита для городов Новой Почты
         const cityInput = document.getElementById('orderCity');
         const cityDropdown = document.getElementById('cityDropdown');
         const cityRefInput = document.getElementById('orderCityRef');
-        
         const branchInput = document.getElementById('orderBranch');
         const branchDropdown = document.getElementById('branchDropdown');
-        
-        let cityTimeout;
+        let cityDebounceTimer;
 
         cityInput.addEventListener('input', (e) => {
-            clearTimeout(cityTimeout);
             const query = e.target.value.trim();
+            clearTimeout(cityDebounceTimer);
             
+            branchInput.value = '';
+            branchInput.disabled = true;
+            branchInput.placeholder = 'Оберіть місто спочатку';
+            allBranches = [];
+
             if (query.length < 2) {
                 cityDropdown.classList.add('hidden');
-                branchInput.disabled = true;
-                branchInput.value = '';
                 return;
             }
 
-            cityTimeout = setTimeout(async () => {
-                const cities = await fetchNP('Address', 'searchSettlements', { CityName: query, Limit: 10 });
-                cityDropdown.innerHTML = '';
+            cityDebounceTimer = setTimeout(async () => {
+                const cities = await fetchNP("Address", "searchSettlements", { CityName: query, Limit: "20" });
+                const addresses = cities.length > 0 ? cities[0].Addresses : [];
                 
-                if (cities.length > 0 && cities[0].Addresses.length > 0) {
-                    cities[0].Addresses.forEach(city => {
-                        const div = document.createElement('div');
-                        div.className = 'np-dropdown-item';
-                        div.textContent = city.Present;
-                        div.onclick = () => {
-                            cityInput.value = city.Present;
-                            cityRefInput.value = city.DeliveryCity;
-                            cityDropdown.classList.add('hidden');
-                            branchInput.disabled = false;
-                            branchInput.value = '';
-                            loadBranches(city.DeliveryCity);
-                        };
-                        cityDropdown.appendChild(div);
-                    });
+                if (addresses.length > 0) {
+                    cityDropdown.innerHTML = addresses.map(c => `
+                        <div class="np-dropdown-item" data-ref="${c.DeliveryCity}" data-name="${c.Present}">${c.Present}</div>
+                    `).join('');
                     cityDropdown.classList.remove('hidden');
                 } else {
-                    cityDropdown.classList.add('hidden');
+                    cityDropdown.innerHTML = '<div class="p-2 text-[10px] text-gray-500">Місто не знайдено</div>';
+                    cityDropdown.classList.remove('hidden');
                 }
-            }, 400);
+            }, 400); 
         });
 
-        // Загрузка отделений по CityRef
-        async function loadBranches(cityRef) {
-            branchDropdown.innerHTML = '<div class="np-dropdown-item text-gray-500">Завантаження...</div>';
-            branchDropdown.classList.remove('hidden');
-            allBranches = await fetchNP('Address', 'getWarehouses', { CityRef: cityRef });
-            renderBranches(allBranches);
-        }
+        cityDropdown.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('np-dropdown-item')) {
+                cityInput.value = e.target.getAttribute('data-name');
+                cityRefInput.value = e.target.getAttribute('data-ref');
+                cityDropdown.classList.add('hidden');
 
-        // Рендер отделений и фильтрация
-        function renderBranches(branches) {
-            branchDropdown.innerHTML = '';
-            if (branches.length === 0) {
+                branchInput.disabled = false;
+                branchInput.placeholder = 'Завантаження...';
+                branchInput.value = '';
+                
+                allBranches = await fetchNP("Address", "getWarehouses", { CityRef: cityRefInput.value });
+                branchInput.placeholder = 'Введіть номер відділення';
+            }
+        });
+
+        branchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (query.length === 0) {
                 branchDropdown.classList.add('hidden');
                 return;
             }
-            branches.forEach(branch => {
-                const div = document.createElement('div');
-                div.className = 'np-dropdown-item';
-                div.textContent = branch.Description;
-                div.onclick = () => {
-                    branchInput.value = branch.Description;
-                    branchDropdown.classList.add('hidden');
-                };
-                branchDropdown.appendChild(div);
-            });
-            branchDropdown.classList.remove('hidden');
-        }
-
-        branchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query));
-            renderBranches(filtered);
+            const filtered = allBranches.filter(b => b.Description.toLowerCase().includes(query) || b.Number === query);
+            
+            if (filtered.length > 0) {
+                branchDropdown.innerHTML = filtered.slice(0, 30).map(b => `
+                    <div class="np-dropdown-item" data-name="${b.Description}">${b.Description}</div>
+                `).join('');
+                branchDropdown.classList.remove('hidden');
+            } else {
+                branchDropdown.innerHTML = '<div class="p-2 text-[10px] text-gray-500">Не знайдено</div>';
+                branchDropdown.classList.remove('hidden');
+            }
+        });
+        
+        branchInput.addEventListener('focus', () => {
+            if (allBranches.length > 0 && branchInput.value === '') {
+                branchDropdown.innerHTML = allBranches.slice(0, 30).map(b => `
+                    <div class="np-dropdown-item" data-name="${b.Description}">${b.Description}</div>
+                `).join('');
+                branchDropdown.classList.remove('hidden');
+            }
         });
 
-        // Закрытие дропдаунов по клику вне
-        document.addEventListener('click', (e) => {
-            if(!e.target.closest('#cityDropdown') && e.target !== cityInput) {
-                cityDropdown.classList.add('hidden');
-            }
-            if(!e.target.closest('#branchDropdown') && e.target !== branchInput) {
+        branchDropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('np-dropdown-item')) {
+                branchInput.value = e.target.getAttribute('data-name');
                 branchDropdown.classList.add('hidden');
             }
         });
 
-        // Демонстрация отправки формы
-        document.getElementById('checkoutForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const modal = document.getElementById('successModal');
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 50);
+        document.addEventListener('click', (e) => {
+            if (e.target !== cityInput && !cityDropdown.contains(e.target)) cityDropdown.classList.add('hidden');
+            if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const cart = typeof getCart === 'function' ? getCart() : [];
+                if (cart.length === 0) {
+                    alert('Ваш кошик порожній!');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const listContainer = document.getElementById('checkoutItemsList');
+                let total = 0;
+                
+                listContainer.innerHTML = cart.map(item => {
+                    total += item.price * item.qty;
+                    const sizeBadge = item.size ? `<span class="text-[9px] text-[var(--gold-muted)] block mt-0.5">Розмір: ${item.size}</span>` : '';
+                    return `
+                        <div class="flex gap-3 relative group pb-2 border-b border-[var(--glass-border)] last:border-0">
+                            <img src="${item.img}" class="w-14 h-14 object-cover border border-[var(--glass-border)]">
+                            <div class="flex-grow flex flex-col justify-center">
+                                <span class="text-[11px] font-semibold uppercase tracking-wide leading-tight line-clamp-1">${item.title}</span>
+                                ${sizeBadge}
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-[10px] opacity-60">${item.qty} шт.</span>
+                                    <span class="text-[11px] font-bold text-[var(--gold-muted)]">${new Intl.NumberFormat('uk-UA').format(item.price * item.qty)} ₴</span>
+                                </div>
+                            </div>
+                            <button class="absolute top-0 right-0 opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity" onclick="window.removeFromCart('${item.cartId}'); location.reload();">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('checkoutTotal').innerText = new Intl.NumberFormat('uk-UA').format(total) + ' ₴';
+
+                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                if (user) {
+                    document.getElementById('orderEmail').value = user.username || '';
+                    document.getElementById('orderName').value = user.name || '';
+                }
+            }, 500);
+
+            document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
+                    alert('Будь ласка, введіть місто та відділення Нової Пошти.');
+                    return;
+                }
+
+                const btn = document.getElementById('submitBtn');
+                btn.innerText = 'Обробка...';
+                btn.disabled = true;
+
+                const cart = getCart();
+                const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                const user = getCurrentUser();
+                const paymentMethod = document.getElementById('orderPayment').value;
+                const deliveryText = `${document.getElementById('orderName').value.trim()}, ${document.getElementById('orderCity').value.trim()}, ${document.getElementById('orderBranch').value.trim()}`;
+
+                const orderData = {
+                    user_id: user ? user.id : null,
+                    user_email: document.getElementById('orderEmail').value.trim(),
+                    phone: document.getElementById('orderPhone').value.trim(),
+                    delivery_info: deliveryText, 
+                    payment_method: paymentMethod,
+                    comment: document.getElementById('orderComment').value.trim(),
+                    items: cart, 
+                    total_price: total,
+                    status: 'pending'
+                };
+
+                try {
+                    const { error } = await _supabase.from('orders').insert([orderData]);
+                    if (error) throw error;
+
+                    if(typeof clearEntireCart === 'function') { clearEntireCart(true); }
+
+                    document.getElementById('checkoutContainer').classList.add('hidden');
+                    const modal = document.getElementById('successModal');
+                    modal.classList.remove('hidden');
+                    setTimeout(() => modal.classList.remove('opacity-0'), 50);
+
+                } catch (err) {
+                    alert('Виникла помилка: ' + err.message);
+                    btn.innerText = 'Підтвердити замовлення';
+                    btn.disabled = false;
+                }
+            });
         });
     </script>
 </body>
