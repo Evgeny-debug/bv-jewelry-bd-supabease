@@ -109,7 +109,6 @@
                 <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <!-- Використовуємо звичайний div замість form, щоб мобільні браузери не блокували кнопку валідацією -->
             <div id="checkoutForm" class="flex flex-col gap-6">
                 
                 <div>
@@ -153,7 +152,8 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <button type="button" id="submitBtn" onclick="forceSubmitOrder()" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2 cursor-pointer">
+                <!-- Кнопка з прямим викликом тесту та функції -->
+                <button type="button" id="submitBtn" onclick="alert('Клік пройшов успішно!'); forceSubmitOrder();" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2 cursor-pointer">
                     Підтвердити замовлення
                 </button>
             </div>
@@ -361,7 +361,6 @@
             }, 500);
         });
 
-        // Пряма функція сабміту по кнопці без перешкод від мобільних браузерів
         async function forceSubmitOrder() {
             const btn = document.getElementById('submitBtn');
             
