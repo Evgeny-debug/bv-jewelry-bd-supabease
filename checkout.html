@@ -109,14 +109,15 @@
                 <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <form id="checkoutForm" class="flex flex-col gap-6" autocomplete="off">
+            <!-- Використовуємо звичайний div замість form, щоб мобільні браузери не блокували кнопку валідацією -->
+            <div id="checkoutForm" class="flex flex-col gap-6">
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field" required>
-                        <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field" required>
-                        <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2" required>
+                        <input type="text" id="orderName" placeholder="Ваше Ім'я та Прізвище" class="input-field">
+                        <input type="tel" id="orderPhone" placeholder="+38 (000) 000-00-00" class="input-field">
+                        <input type="email" id="orderEmail" placeholder="Email (для чеку та відстеження)" class="input-field md:col-span-2">
                     </div>
                 </div>
 
@@ -127,13 +128,13 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
-                            <input type="text" id="orderCity" placeholder="Почніть вводити місто..." class="input-field" autocomplete="new-password" required>
+                            <input type="text" id="orderCity" placeholder="Почніть вводити місто..." class="input-field" autocomplete="off">
                             <input type="hidden" id="orderCityRef" value="">
                             <div id="cityDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
 
                         <div class="relative">
-                            <input type="text" id="orderBranch" placeholder="Оберіть місто спочатку" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="new-password" required>
+                            <input type="text" id="orderBranch" placeholder="Оберіть місто спочатку" class="input-field disabled:opacity-40 disabled:cursor-not-allowed" disabled autocomplete="off">
                             <div id="branchDropdown" class="absolute w-full mt-1 bg-[#1c1c1e] np-dropdown rounded-lg shadow-2xl z-50 hidden max-h-48 overflow-y-auto custom-scrollbar"></div>
                         </div>
                     </div>
@@ -152,10 +153,10 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2">
+                <button type="button" id="submitBtn" onclick="forceSubmitOrder()" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2 cursor-pointer">
                     Підтвердити замовлення
                 </button>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -180,12 +181,10 @@
     <script src="main.js"></script>
 
     <script>
-        // Ініціалізація Supabase (використовуються твої ключі із загального контуру проєкту або змінні з main.js)
-        const SUPABASE_URL = window.SUPABASE_URL || 'ТВОЙ_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'ТВОЙ_SUPABASE_ANON_KEY';
+        const SUPABASE_URL = window.SUPABASE_URL || '';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
         
-        // Якщо клієнт вже оголошений у main.js, беремо його, якщо ні — ініціалізуємо безпечно
-        const activeSupabase = window._supabase || (window.supabase && SUPABASE_URL !== 'ТВОЙ_SUPABASE_URL' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+        const activeSupabase = window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
 
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = [];
@@ -360,60 +359,76 @@
                     document.getElementById('guestPromo').classList.add('hidden');
                 }
             }, 500);
-
-            document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const btn = document.getElementById('submitBtn');
-                btn.innerText = 'Обробка...';
-                btn.disabled = true;
-
-                const cart = typeof getCart === 'function' ? getCart() : [];
-                const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-                const paymentMethod = document.getElementById('orderPayment').value;
-                const telegramChatId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
-
-                const orderData = {
-                    user_id: user ? user.id : null,
-                    chat_id: telegramChatId ? String(telegramChatId) : null,
-                    user_email: document.getElementById('orderEmail').value.trim(),
-                    phone: document.getElementById('orderPhone').value.trim(),
-                    delivery_info: {
-                        name: document.getElementById('orderName').value.trim(),
-                        city: document.getElementById('orderCity').value.trim(),
-                        branch: document.getElementById('orderBranch').value.trim()
-                    },
-                    payment_method: paymentMethod,
-                    comment: document.getElementById('orderComment').value.trim(),
-                    items: cart,
-                    total_price: total,
-                    status: 'pending'
-                };
-
-                try {
-                    const client = activeSupabase || window._supabase;
-                    if (!client) throw new Error("Помилка підключення до бази даних (Supabase не ініціалізовано)");
-
-                    const { error } = await client.from('orders').insert([orderData]);
-                    if (error) throw error;
-
-                    if(typeof clearEntireCart === 'function') {
-                        clearEntireCart(true); 
-                    }
-
-                    document.getElementById('checkoutContainer').classList.add('hidden');
-                    const modal = document.getElementById('successModal');
-                    modal.classList.remove('hidden');
-                    setTimeout(() => modal.classList.remove('opacity-0'), 50);
-
-                } catch (err) {
-                    alert('Виникла помилка: ' + err.message);
-                    btn.innerText = 'Підтвердити замовлення';
-                    btn.disabled = false;
-                }
-            });
         });
+
+        // Пряма функція сабміту по кнопці без перешкод від мобільних браузерів
+        async function forceSubmitOrder() {
+            const btn = document.getElementById('submitBtn');
+            
+            const name = document.getElementById('orderName').value.trim();
+            const phone = document.getElementById('orderPhone').value.trim();
+            const city = document.getElementById('orderCity').value.trim();
+            const branch = document.getElementById('orderBranch').value.trim();
+
+            if (!name || !phone || !city || !branch) {
+                alert('Будь ласка, заповніть обовʼязкові поля: Імʼя, Телефон, Місто та Відділення.');
+                return;
+            }
+
+            btn.innerText = 'Обробка...';
+            btn.disabled = true;
+
+            const cart = typeof getCart === 'function' ? getCart() : [];
+            if (cart.length === 0) {
+                alert('Ваш кошик порожній!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            const paymentMethod = document.getElementById('orderPayment').value;
+            const telegramChatId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
+
+            const orderData = {
+                user_id: user ? user.id : null,
+                chat_id: telegramChatId ? String(telegramChatId) : null,
+                user_email: document.getElementById('orderEmail').value.trim() || 'no-email@bv.com',
+                phone: phone,
+                delivery_info: {
+                    name: name,
+                    city: city,
+                    branch: branch
+                },
+                payment_method: paymentMethod,
+                comment: document.getElementById('orderComment').value.trim(),
+                items: cart,
+                total_price: total,
+                status: 'pending'
+            };
+
+            try {
+                const client = activeSupabase || window._supabase;
+                if (!client) throw new Error("Не знайдено підключення до бази даних Supabase");
+
+                const { error } = await client.from('orders').insert([orderData]);
+                if (error) throw error;
+
+                if (typeof clearEntireCart === 'function') {
+                    clearEntireCart(true); 
+                }
+
+                document.getElementById('checkoutContainer').classList.add('hidden');
+                const modal = document.getElementById('successModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 50);
+
+            } catch (err) {
+                alert('Помилка замовлення: ' + err.message);
+                btn.innerText = 'Підтвердити замовлення';
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
