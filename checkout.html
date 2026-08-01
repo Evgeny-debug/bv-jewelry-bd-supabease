@@ -109,7 +109,7 @@
                 <p class="text-sm text-gray-400">Заповніть дані для доставки вашої прикраси</p>
             </div>
 
-            <div id="checkoutForm" class="flex flex-col gap-6">
+            <div id="checkoutForm" class="flex flex-col gap-6 relative z-30">
                 
                 <div>
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[#c5a059] mb-3 ml-1">Контактні дані</h3>
@@ -152,10 +152,12 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <!-- Кнопка з прямим викликом тесту та функції -->
-                <button type="button" id="submitBtn" onclick="alert('Клік пройшов успішно!'); forceSubmitOrder();" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-4 rounded-lg hover:opacity-90 transition-all active:scale-95 mt-2 cursor-pointer">
-                    Підтвердити замовлення
-                </button>
+                <!-- Кнопка з максимальним індексом шару для 100% клікабельності -->
+                <div class="relative z-50 pt-2">
+                    <button type="button" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-5 rounded-lg hover:opacity-90 transition-all active:scale-95 cursor-pointer shadow-2xl">
+                        Підтвердити замовлення
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -359,75 +361,75 @@
                     document.getElementById('guestPromo').classList.add('hidden');
                 }
             }, 500);
-        });
 
-        async function forceSubmitOrder() {
+            // Найнадійніший обробник кліку/дотику для мобільних пристроїв через pointerdown
             const btn = document.getElementById('submitBtn');
-            
-            const name = document.getElementById('orderName').value.trim();
-            const phone = document.getElementById('orderPhone').value.trim();
-            const city = document.getElementById('orderCity').value.trim();
-            const branch = document.getElementById('orderBranch').value.trim();
+            if (btn) {
+                btn.addEventListener('pointerdown', async (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('orderName').value.trim();
+                    const phone = document.getElementById('orderPhone').value.trim();
+                    const city = document.getElementById('orderCity').value.trim();
+                    const branch = document.getElementById('orderBranch').value.trim();
 
-            if (!name || !phone || !city || !branch) {
-                alert('Будь ласка, заповніть обовʼязкові поля: Імʼя, Телефон, Місто та Відділення.');
-                return;
+                    if (!name || !phone || !city || !branch) {
+                        alert('Будь ласка, заповніть обовʼязкові поля: Імʼя, Телефон, Місто та Відділення.');
+                        return;
+                    }
+
+                    btn.innerText = 'Обробка...';
+                    btn.disabled = true;
+
+                    const cart = typeof getCart === 'function' ? getCart() : [];
+                    if (cart.length === 0) {
+                        alert('Ваш кошик порожній!');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                    const paymentMethod = document.getElementById('orderPayment').value;
+                    const telegramChatId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
+
+                    const orderData = {
+                        user_id: user ? user.id : null,
+                        chat_id: telegramChatId ? String(telegramChatId) : null,
+                        user_email: document.getElementById('orderEmail').value.trim() || 'no-email@bv.com',
+                        phone: phone,
+                        delivery_info: { name, city, branch },
+                        payment_method: paymentMethod,
+                        comment: document.getElementById('orderComment').value.trim(),
+                        items: cart,
+                        total_price: total,
+                        status: 'pending'
+                    };
+
+                    try {
+                        const client = activeSupabase || window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+                        if (!client) throw new Error("Не знайдено підключення до бази даних");
+
+                        const { error } = await client.from('orders').insert([orderData]);
+                        if (error) throw error;
+
+                        if (typeof clearEntireCart === 'function') {
+                            clearEntireCart(true); 
+                        }
+
+                        document.getElementById('checkoutContainer').classList.add('hidden');
+                        const modal = document.getElementById('successModal');
+                        modal.classList.remove('hidden');
+                        setTimeout(() => modal.classList.remove('opacity-0'), 50);
+
+                    } catch (err) {
+                        alert('Помилка замовлення: ' + err.message);
+                        btn.innerText = 'Підтвердити замовлення';
+                        btn.disabled = false;
+                    }
+                });
             }
-
-            btn.innerText = 'Обробка...';
-            btn.disabled = true;
-
-            const cart = typeof getCart === 'function' ? getCart() : [];
-            if (cart.length === 0) {
-                alert('Ваш кошик порожній!');
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-            const paymentMethod = document.getElementById('orderPayment').value;
-            const telegramChatId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
-
-            const orderData = {
-                user_id: user ? user.id : null,
-                chat_id: telegramChatId ? String(telegramChatId) : null,
-                user_email: document.getElementById('orderEmail').value.trim() || 'no-email@bv.com',
-                phone: phone,
-                delivery_info: {
-                    name: name,
-                    city: city,
-                    branch: branch
-                },
-                payment_method: paymentMethod,
-                comment: document.getElementById('orderComment').value.trim(),
-                items: cart,
-                total_price: total,
-                status: 'pending'
-            };
-
-            try {
-                const client = activeSupabase || window._supabase;
-                if (!client) throw new Error("Не знайдено підключення до бази даних Supabase");
-
-                const { error } = await client.from('orders').insert([orderData]);
-                if (error) throw error;
-
-                if (typeof clearEntireCart === 'function') {
-                    clearEntireCart(true); 
-                }
-
-                document.getElementById('checkoutContainer').classList.add('hidden');
-                const modal = document.getElementById('successModal');
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0'), 50);
-
-            } catch (err) {
-                alert('Помилка замовлення: ' + err.message);
-                btn.innerText = 'Підтвердити замовлення';
-                btn.disabled = false;
-            }
-        }
+        });
     </script>
 </body>
 </html>
