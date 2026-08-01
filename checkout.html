@@ -32,12 +32,11 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
         
-        /* Стили для дропдаунов Новой Почты */
         .np-dropdown-item { padding: 12px 14px; color: #f5f5f7; font-size: 13px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: #c5a059; }
         .np-dropdown-item:last-child { border-bottom: none; }
         .np-dropdown { border: 1px solid rgba(197, 160, 89, 0.3); }
-        /* --- СТРОГИЙ ДИЗАЙН: Жодних скруглень та відступів --- */
+
         .banner-slider-container, .banner-slide, .product-card, .glass-panel-item, a.relative.block {
             border-radius: 0 !important;
         }
@@ -47,18 +46,14 @@
         .promo-carousel-container { padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
         section { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 0 !important; }
         .mb-8.md\:mb-16, .mb-8.md\:mb-12, .mb-6 { margin-bottom: 8px !important; }
-        
-        /* Зменшений Hero-банер */
         .h-screen-hero { min-height: 0 !important; height: 30vh !important; padding: 0 !important; }
-        
-        #globalContactBtn { display: none !important; } /* Плаваюча кнопка видалена */
+        #globalContactBtn { display: none !important; }
 
-        /* --- КАРТКИ ТОВАРІВ (Строга сітка, білий фон, видалення сірого) --- */
         .product-card {
             border: 1px solid #e5e5e5 !important;
             box-shadow: none !important;
             background-color: #fff !important;
-            margin-right: -1px; /* Злиття рамок */
+            margin-right: -1px;
             margin-bottom: -1px;
         }
         [data-theme="dark"] .product-card { border-color: #333 !important; background-color: #121212 !important; }
@@ -68,28 +63,22 @@
             object-fit: contain !important;
             padding: 0 !important;
             background: #fff !important;
-            mix-blend-mode: multiply; /* МАГІЯ: Видаляє світло-сірий фон з фото */
+            mix-blend-mode: multiply;
         }
         [data-theme="dark"] .product-card .product-img { mix-blend-mode: normal; background: transparent !important; }
-        
         .product-card .p-4 { padding: 10px 8px !important; }
-        .product-card ha, .product-card span { line-height: 1.2; }
 
-        /* --- ШАПКА (Мобільна: Лого по центру, Пошук зліва, Чат справа) --- */
         @media (max-width: 1024px) {
             #header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
             .bv-logo { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
         }
 
-        /* Кнопка нагору */
         #scrollToTopBtn { left: 1rem !important; right: auto !important; }
         @media(min-width: 768px) { #scrollToTopBtn { left: auto !important; right: 2.5rem !important; } }
         
-        /* Футер колонки для моб */
         .footer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; text-align: left; }
         @media(min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* Бокове меню: компактна верхівка */
         .side-menu { padding-top: 16px !important; }
         .mob-menu-title { padding: 12px 0 !important; font-size: 14px !important; font-weight: 600 !important; border-bottom: 1px solid var(--border) !important; }
         .mob-tag, .sub-cat-link { padding: 10px 0 !important; font-size: 13px !important; }
@@ -106,8 +95,7 @@
         
         <div class="w-full lg:w-5/12 glass-panel p-6 shadow-2xl flex flex-col max-h-[85vh]">
             <h2 class="text-xl font-serif text-[#c5a059] italic mb-6">Ваше замовлення</h2>
-            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-4">
-                </div>
+            <div id="checkoutItemsList" class="flex-grow overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-4"></div>
             
             <div class="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
                 <span class="text-xs uppercase tracking-widest text-gray-400">Підсумок:</span>
@@ -192,19 +180,18 @@
     <script src="main.js"></script>
 
     <script>
-        // ==========================================
-        // НАЛАШТУВАННЯ НОВОЇ ПОШТИ
-        // ==========================================
-        const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
+        // Ініціалізація Supabase (використовуються твої ключі із загального контуру проєкту або змінні з main.js)
+        const SUPABASE_URL = window.SUPABASE_URL || 'ТВОЙ_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'ТВОЙ_SUPABASE_ANON_KEY';
         
-        let allBranches = []; // Кеш відділень для обраного міста
+        // Якщо клієнт вже оголошений у main.js, беремо його, якщо ні — ініціалізуємо безпечно
+        const activeSupabase = window._supabase || (window.supabase && SUPABASE_URL !== 'ТВОЙ_SUPABASE_URL' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
 
-        // API запит до НП
+        const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
+        let allBranches = [];
+
         async function fetchNP(model, method, properties) {
-            if(!NP_API_KEY) {
-                console.warn('API Ключ Нової Пошти не вказано!');
-                return [];
-            }
+            if(!NP_API_KEY) return [];
             try {
                 const res = await fetch('https://api.novaposhta.ua/v2.0/json/', {
                     method: 'POST',
@@ -224,11 +211,9 @@
             }
         }
 
-        // Логіка Міст
         const cityInput = document.getElementById('orderCity');
         const cityDropdown = document.getElementById('cityDropdown');
         const cityRefInput = document.getElementById('orderCityRef');
-        
         const branchInput = document.getElementById('orderBranch');
         const branchDropdown = document.getElementById('branchDropdown');
         
@@ -266,7 +251,6 @@
             }, 400);
         });
 
-        // Вибір міста
         cityDropdown.addEventListener('click', async (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 const name = e.target.getAttribute('data-name');
@@ -285,10 +269,8 @@
             }
         });
 
-        // Логіка Відділень
         branchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
-            
             if (query.length === 0) {
                 branchDropdown.classList.add('hidden');
                 return;
@@ -320,7 +302,6 @@
             }
         });
 
-        // Вибір відділення
         branchDropdown.addEventListener('click', (e) => {
             if (e.target.classList.contains('np-dropdown-item')) {
                 branchInput.value = e.target.getAttribute('data-name');
@@ -333,9 +314,6 @@
             if (e.target !== branchInput && !branchDropdown.contains(e.target)) branchDropdown.classList.add('hidden');
         });
 
-        // ==========================================
-        // ЛОГІКА ОФОРМЛЕННЯ ЗАМОВЛЕННЯ
-        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 const cart = typeof getCart === 'function' ? getCart() : [];
@@ -386,21 +364,14 @@
             document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                if(!NP_API_KEY && (!cityInput.value.trim() || !branchInput.value.trim())) {
-                    alert('Будь ласка, введіть місто та відділення Нової Пошти.');
-                    return;
-                }
-
                 const btn = document.getElementById('submitBtn');
                 btn.innerText = 'Обробка...';
                 btn.disabled = true;
 
-                const cart = getCart();
+                const cart = typeof getCart === 'function' ? getCart() : [];
                 const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                const user = getCurrentUser();
+                const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
                 const paymentMethod = document.getElementById('orderPayment').value;
-
-                // Отримуємо chat_id з Telegram Web App, якщо він є
                 const telegramChatId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || null;
 
                 const orderData = {
@@ -415,21 +386,20 @@
                     },
                     payment_method: paymentMethod,
                     comment: document.getElementById('orderComment').value.trim(),
-                    items: cart, // Зберігається як JSON/JSONB масив у базі
+                    items: cart,
                     total_price: total,
                     status: 'pending'
                 };
 
                 try {
-                    const { error } = await _supabase.from('orders').insert([orderData]);
+                    const client = activeSupabase || window._supabase;
+                    if (!client) throw new Error("Помилка підключення до бази даних (Supabase не ініціалізовано)");
+
+                    const { error } = await client.from('orders').insert([orderData]);
                     if (error) throw error;
 
                     if(typeof clearEntireCart === 'function') {
                         clearEntireCart(true); 
-                    }
-
-                    if(paymentMethod === 'card') {
-                        // Тут інтеграція платіжної системи (WayForPay / LiqPay)
                     }
 
                     document.getElementById('checkoutContainer').classList.add('hidden');
