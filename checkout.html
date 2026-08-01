@@ -207,7 +207,6 @@
                 const data = await res.json();
                 return data.success ? data.data : [];
             } catch (e) {
-                console.error('Помилка NP API:', e);
                 return [];
             }
         }
@@ -362,29 +361,29 @@
                 }
             }, 500);
 
-            // Найнадійніший обробник кліку/дотику для мобільних пристроїв через pointerdown
+            // ДІАГНОСТИЧНИЙ ОБРОБНИК З АЛЕРТАМИ НА КОЖНОМУ КРОЦІ
             const btn = document.getElementById('submitBtn');
             if (btn) {
                 btn.addEventListener('pointerdown', async (e) => {
                     e.preventDefault();
-                    
+                    alert('1. Клік зафіксовано!');
+
                     const name = document.getElementById('orderName').value.trim();
                     const phone = document.getElementById('orderPhone').value.trim();
                     const city = document.getElementById('orderCity').value.trim();
                     const branch = document.getElementById('orderBranch').value.trim();
 
                     if (!name || !phone || !city || !branch) {
-                        alert('Будь ласка, заповніть обовʼязкові поля: Імʼя, Телефон, Місто та Відділення.');
+                        alert('Заповніть обовʼязкові поля!');
                         return;
                     }
-
-                    btn.innerText = 'Обробка...';
-                    btn.disabled = true;
+                    alert('2. Поля валідні.');
 
                     const cart = typeof getCart === 'function' ? getCart() : [];
+                    alert('3. Кошик отримано, товарів: ' + cart.length);
+                    
                     if (cart.length === 0) {
-                        alert('Ваш кошик порожній!');
-                        window.location.href = 'index.html';
+                        alert('Помилка: кошик порожній!');
                         return;
                     }
 
@@ -408,10 +407,13 @@
 
                     try {
                         const client = activeSupabase || window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
-                        if (!client) throw new Error("Не знайдено підключення до бази даних");
-
+                        if (!client) throw new Error("Клієнт Supabase не ініціалізовано");
+                        
+                        alert('4. Надсилаємо в Supabase...');
                         const { error } = await client.from('orders').insert([orderData]);
                         if (error) throw error;
+
+                        alert('5. Успіх! Замовлення в базі.');
 
                         if (typeof clearEntireCart === 'function') {
                             clearEntireCart(true); 
@@ -423,7 +425,7 @@
                         setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
                     } catch (err) {
-                        alert('Помилка замовлення: ' + err.message);
+                        alert('ПОМИЛКА БАЗИ: ' + err.message);
                         btn.innerText = 'Підтвердити замовлення';
                         btn.disabled = false;
                     }
