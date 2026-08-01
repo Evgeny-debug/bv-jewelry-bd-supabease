@@ -94,7 +94,8 @@
         }
         .np-dropdown-item:hover { background: rgba(197, 160, 89, 0.1); color: var(--gold-muted); }
         
-        /*  */
+        /* Кнопки и общие элементы */
+        
 
     </style>
 </head>
@@ -198,7 +199,36 @@
             Повернутися
         </a>
     </div>
-
+<nav class="side-menu" id="sideMenu"></nav>
+<!-- Мобильный нижний бар -->
+    <nav class="mobile-bottom-nav">
+        <button onclick="window.location.href='index.html'" class="bottom-nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span data-i18n="m1">Головна</span>
+        </button>
+        <button onclick="window.location.href='catalog.html'" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="m2">Каталог</span>
+        </button>
+        <button onclick="window.toggleCart();" class="bottom-nav-item">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="cart-badge">0</span>
+            </div>
+            <span data-i18n="cart_title">Кошик</span>
+        </button>
+        <button onclick="window.toggleFavDrawer();" class="bottom-nav-item">
+            <div class="relative">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="cart-badge fav-badge" style="background: var(--danger);">0</span>
+            </div>
+            <span data-i18n="fav_title">Улюблене</span>
+        </button>
+        <button onclick="window.toggleMenu()" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <span data-i18n="m_menu">Меню</span>
+        </button>
+    </nav>
     <!-- Основной контейнер чекаута -->
     <main class="w-full max-w-5xl mx-auto px-4 flex flex-col lg:flex-row gap-6 md:gap-10 flex-grow" id="checkoutContainer">
         
@@ -242,8 +272,8 @@
                 <div class="pt-2">
                     <h3 class="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-muted)] mb-3">Оплата</h3>
                     <select id="orderPayment" class="input-field cursor-pointer">
-                        <option value="cod">Накладений платіж (при отриманні)</option>
-                        <option value="card">Онлайн оплата (Картка / Apple Pay)</option>
+                        <option value="cod">Самовивіз iз магазину</option>
+                        <option value="card">Перекази за реквізитами (ФОП Воронцов В.В.)</option>
                     </select>
                 </div>
 
