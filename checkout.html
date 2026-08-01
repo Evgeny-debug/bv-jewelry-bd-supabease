@@ -152,7 +152,7 @@
                     <textarea id="orderComment" placeholder="Побажання щодо пакування тощо..." class="input-field h-16 resize-none"></textarea>
                 </div>
 
-                <!-- Кнопка з максимальним індексом шару для 100% клікабельності -->
+                <!-- Кнопка оформлення замовлення -->
                 <div class="relative z-50 pt-2">
                     <button type="button" id="submitBtn" class="w-full bg-[#c5a059] text-black font-bold uppercase tracking-widest text-xs px-10 py-5 rounded-lg hover:opacity-90 transition-all active:scale-95 cursor-pointer shadow-2xl">
                         Підтвердити замовлення
@@ -319,7 +319,6 @@
                 const cart = typeof getCart === 'function' ? getCart() : [];
                 
                 if (cart.length === 0) {
-                    alert('Ваш кошик порожній!');
                     window.location.href = 'index.html';
                     return;
                 }
@@ -361,12 +360,12 @@
                 }
             }, 500);
 
-            // ДІАГНОСТИЧНИЙ ОБРОБНИК З АЛЕРТАМИ НА КОЖНОМУ КРОЦІ
+            // ДІАГНОСТИКА ЧЕРЕЗ ТЕКСТ НА КНОПЦІ
             const btn = document.getElementById('submitBtn');
             if (btn) {
                 btn.addEventListener('pointerdown', async (e) => {
                     e.preventDefault();
-                    alert('1. Клік зафіксовано!');
+                    btn.innerText = '[1] Клік зафіксовано!';
 
                     const name = document.getElementById('orderName').value.trim();
                     const phone = document.getElementById('orderPhone').value.trim();
@@ -374,18 +373,19 @@
                     const branch = document.getElementById('orderBranch').value.trim();
 
                     if (!name || !phone || !city || !branch) {
-                        alert('Заповніть обовʼязкові поля!');
+                        btn.innerText = 'Заповніть обовʼязкові поля!';
+                        setTimeout(() => btn.innerText = 'Підтвердити замовлення', 2500);
                         return;
                     }
-                    alert('2. Поля валідні.');
+                    btn.innerText = '[2] Поля валідні. Збираємо кошик...';
 
                     const cart = typeof getCart === 'function' ? getCart() : [];
-                    alert('3. Кошик отримано, товарів: ' + cart.length);
                     
                     if (cart.length === 0) {
-                        alert('Помилка: кошик порожній!');
+                        btn.innerText = 'Помилка: кошик порожній!';
                         return;
                     }
+                    btn.innerText = '[3] Кошик є (' + cart.length + '). Запит в базу...';
 
                     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                     const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -409,11 +409,10 @@
                         const client = activeSupabase || window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
                         if (!client) throw new Error("Клієнт Supabase не ініціалізовано");
                         
-                        alert('4. Надсилаємо в Supabase...');
                         const { error } = await client.from('orders').insert([orderData]);
                         if (error) throw error;
 
-                        alert('5. Успіх! Замовлення в базі.');
+                        btn.innerText = '[5] Успіх! Замовлення створено!';
 
                         if (typeof clearEntireCart === 'function') {
                             clearEntireCart(true); 
@@ -425,9 +424,9 @@
                         setTimeout(() => modal.classList.remove('opacity-0'), 50);
 
                     } catch (err) {
-                        alert('ПОМИЛКА БАЗИ: ' + err.message);
-                        btn.innerText = 'Підтвердити замовлення';
-                        btn.disabled = false;
+                        console.error("Supabase Error:", err);
+                        btn.style.color = '#ff4d4d';
+                        btn.innerText = 'ПОМИЛКА: ' + err.message;
                     }
                 });
             }
