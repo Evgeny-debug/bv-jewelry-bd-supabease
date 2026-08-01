@@ -183,11 +183,6 @@
     <script src="main.js"></script>
 
     <script>
-        const SUPABASE_URL = window.SUPABASE_URL || '';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-        
-        const activeSupabase = window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
-
         const NP_API_KEY = 'ea3e6549afc2be5909102726eeafd052'; 
         let allBranches = [];
 
@@ -360,12 +355,12 @@
                 }
             }, 500);
 
-            // ДІАГНОСТИКА ЧЕРЕЗ ТЕКСТ НА КНОПЦІ
+            // КЛІК З АВТОМАТИЧНИМ ОТРИМАННЯМ/СТВОРЕННЯМ КЛІЄНТА SUPABASE НА ЛЬОТУ
             const btn = document.getElementById('submitBtn');
             if (btn) {
                 btn.addEventListener('pointerdown', async (e) => {
                     e.preventDefault();
-                    btn.innerText = '[1] Клік зафіксовано!';
+                    btn.innerText = 'Обробка замовлення...';
 
                     const name = document.getElementById('orderName').value.trim();
                     const phone = document.getElementById('orderPhone').value.trim();
@@ -377,15 +372,12 @@
                         setTimeout(() => btn.innerText = 'Підтвердити замовлення', 2500);
                         return;
                     }
-                    btn.innerText = '[2] Поля валідні. Збираємо кошик...';
 
                     const cart = typeof getCart === 'function' ? getCart() : [];
-                    
                     if (cart.length === 0) {
                         btn.innerText = 'Помилка: кошик порожній!';
                         return;
                     }
-                    btn.innerText = '[3] Кошик є (' + cart.length + '). Запит в базу...';
 
                     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                     const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -406,13 +398,22 @@
                     };
 
                     try {
-                        const client = activeSupabase || window._supabase || (window.supabase && SUPABASE_URL ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
-                        if (!client) throw new Error("Клієнт Supabase не ініціалізовано");
+                        let client = window._supabase || window.supabaseClient;
+                        
+                        if (!client && window.supabase && typeof window.supabase.createClient === 'function') {
+                            const url = window.SUPABASE_URL || 'https://jtwlqplndbvyknuqjovw.supabase.co';
+                            const key = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+                            client = window.supabase.createClient(url, key);
+                        }
+
+                        if (!client) {
+                            throw new Error("Не вдалося знайти клієнт бази даних у головному скрипті");
+                        }
                         
                         const { error } = await client.from('orders').insert([orderData]);
                         if (error) throw error;
 
-                        btn.innerText = '[5] Успіх! Замовлення створено!';
+                        btn.innerText = 'Успіх!';
 
                         if (typeof clearEntireCart === 'function') {
                             clearEntireCart(true); 
