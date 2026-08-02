@@ -254,9 +254,24 @@ html, body, *, *::before, *::after {
     <main class="pt-0 md:pt-0 pb-20 px-2 sm:px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
       
     <!-- Компактний H1 із золотим акцентом -->
-<h1 class="text-xl md:text-2xl font-medium tracking-wide text-center text-[#1a1a1a] dark:text-[#e8e2d5] mb-2" style="font-family: 'Cormorant Garamond', serif;">
-    Вишукані ювелірні прикраси
-</h1>
+<div class="w-full py-8 md:py-12 flex flex-col items-center justify-center px-4 overflow-hidden">
+  <div class="group flex flex-col items-center text-center cursor-pointer">
+    
+    <!-- Подпись в стиле вашей дизайн-системы -->
+    <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-3 transition-colors duration-500" data-i18n="cta_subtitle">
+      Відкрийте світ виняткового блиску
+    </span>
+    
+    <!-- Основной заголовок с вашим адаптивным шрифтом в одну строку -->
+    <h2 class="hero-title text-[var(--text-main)] uppercase tracking-[0.12em] whitespace-nowrap text-[3.8vw] sm:text-lg md:text-2xl lg:text-3xl transition-colors duration-500 group-hover:opacity-80" data-i18n="cta_title">
+      Оберіть свою унікальну прикрасу
+    </h2>
+    
+    <!-- Фирменная линия-разделитель -->
+    <div class="w-16 group-hover:w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--gold-muted)] to-transparent transition-all duration-500 ease-out mt-3 opacity-60"></div>
+
+  </div>
+</div>
     
     
         <section class="max-w-[1920px] mx-auto px-0 md:px-8 relative group overflow-hidden mb-6" id="promo-banner-top">
