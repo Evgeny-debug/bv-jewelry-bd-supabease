@@ -167,6 +167,24 @@ function showSlide(index) {
             }
         });
     }
+
+    // 👇 ЖЕСТКАЯ ПРИВЯЗКА HREF КНОПКИ К ТЕКУЩЕМУ СЛАЙДУ
+    const currentSlide = slides[currentSlideIndex];
+    const visualBtn = document.getElementById('bannerVisualBtn');
+    
+    if (visualBtn && currentSlide) {
+        // Ищем реальную ссылку в текущем слайде
+        let realLink = '#';
+        if (currentSlide.tagName === 'A') {
+            realLink = currentSlide.href;
+        } else {
+            const innerLink = currentSlide.querySelector('a');
+            if (innerLink) realLink = innerLink.href;
+        }
+        
+        // Меняем href у самой кнопки
+        visualBtn.href = realLink;
+    }
 }
 
 window.scrollBanner = function(direction) {
@@ -536,3 +554,11 @@ window.initFadeBannerSlider = initFadeBannerSlider;
 window.initInfiniteHorizontalScroll = initInfiniteHorizontalScroll;
 window.renderHomeCategoriesScroll = renderHomeCategoriesScroll;
 window.showSlide = showSlide;
+
+
+
+
+
+
+
+

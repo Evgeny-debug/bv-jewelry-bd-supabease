@@ -68,6 +68,9 @@
     ]
   }
 }
+
+
+
 </script>
 
     <script src="js/pages/shared/early-theme.js"></script>
@@ -120,6 +123,7 @@ html, body, *, *::before, *::after {
 .promo-horizontal-scroll::-webkit-scrollbar {
     display: none !important;
 }
+
 
 </style>
 
@@ -253,12 +257,11 @@ html, body, *, *::before, *::after {
 
     <main class="pt-0 md:pt-0 pb-20 px-2 sm:px-4 md:px-8 w-full max-w-[1440px] mx-auto min-h-screen">
       
-    <!-- Компактний H1 із золотим акцентом -->
-<div class="w-full py-8 md:py-12 flex flex-col items-center justify-center px-4 overflow-hidden">
+    <div class="w-full py-3 md:py-5 flex flex-col items-center justify-center px-4 overflow-hidden">
   <div class="group flex flex-col items-center text-center cursor-pointer">
     
     <!-- Подпись в стиле вашей дизайн-системы -->
-    <span class="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-3 transition-colors duration-500" data-i18n="cta_subtitle">
+    <span class="text-[8px] md:text-[13px] uppercase tracking-[0.4em] text-[var(--gold-muted)] font-semibold block mb-3 transition-colors duration-500" data-i18n="cta_subtitle">
       Відкрийте світ виняткового блиску
     </span>
     
@@ -275,22 +278,50 @@ html, body, *, *::before, *::after {
     
     
         <section class="max-w-[1920px] mx-auto px-0 md:px-8 relative group overflow-hidden mb-6" id="promo-banner-top">
-            <button type="button" onclick="window.scrollBanner(-1)" class="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
-            <div id="mainBannerContainer" class="banner-fade-container relative min-h-[150px] md:min-h-[400px] w-full overflow-hidden rounded-none">
-                <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
-            </div>
-            <button type="button" onclick="window.scrollBanner(1)" class="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
-            <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
-                <div class="w-32 md:w-48 h-[2px] bg-white/30 overflow-hidden shadow-sm">
-                    <div id="bannerTimeProgress" class="h-full bg-[var(--gold-muted)] w-0 transition-all duration-75"></div>
-                </div>
-                <div class="flex justify-center items-center gap-3" id="bannerDots"></div>
-            </div>
-        </section>
+    <!-- Кнопка «Назад» -->
+    <button type="button" onclick="window.scrollBanner(-1)" class="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+
+    <!-- Контейнер баннеров -->
+    <div id="mainBannerContainer" class="banner-fade-container relative min-h-[150px] md:min-h-[400px] w-full overflow-hidden rounded-none">
+        <div class="w-full h-full bg-gray-200/10 animate-pulse rounded-none"></div>
+    </div>
+
+    <!-- Кнопка «Вперед» -->
+    <button type="button" onclick="window.scrollBanner(1)" class="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 z-40 w-10 h-10 bg-black/40 hover:bg-[var(--gold-muted)] text-white hover:text-black flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+
+    <!-- Прогресс и точки -->
+    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2.5 pointer-events-auto">
+        <div class="w-32 md:w-48 h-[2px] bg-white/30 overflow-hidden shadow-sm">
+            <div id="bannerTimeProgress" class="h-full bg-[var(--gold-muted)] w-0 transition-all duration-75"></div>
+        </div>
+        <div class="flex justify-center items-center gap-3" id="bannerDots"></div>
+    </div>
+
+   <!-- 👇 ПРОЗРАЧНАЯ И СТРОГО ЗАКРЕПЛЕННАЯ ВНУТРИ БАННЕРА КНОПКА -->
+    <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 z-30">
+        <a id="bannerVisualBtn" href="#" 
+           class="px-3.5 py-1.5 md:px-5 md:py-2.5 
+                  rounded-lg 
+                  bg-black/30 dark:bg-white/15 
+                  backdrop-blur-md 
+                  border border-white/25 dark:border-white/15
+                  text-white 
+                  font-sans text-[10px] md:text-xs 
+                  uppercase tracking-[0.2em] 
+                  shadow-lg 
+                  flex items-center justify-center 
+                  transition-all duration-300 
+                  hover:bg-black/50 dark:hover:bg-white/30 
+                  hover:border-white/40 
+                  hover:scale-[1.03]">
+            Перейти
+        </a>
+    </div>
+</section>
 
         <section id="heroBannerSection" class="max-w-[1920px] mx-auto px-0 md:px-8 mb-6">
             <a href="exclusive.html" class="relative block w-full h-[120px] md:h-[400px] overflow-hidden group border-y border-[var(--border)] rounded-none">
@@ -501,5 +532,30 @@ html, body, *, *::before, *::after {
 </div>
 
 <script src="js/pages/shared/jivo-style.js"></script>
+<script>
+    
+   document.addEventListener('DOMContentLoaded', () => {
+    const visualBtn = document.getElementById('bannerVisualBtn');
+    if (visualBtn) {
+        visualBtn.addEventListener('click', () => {
+            const targetUrl = visualBtn.dataset.href;
+            if (targetUrl && targetUrl !== '#') {
+                window.location.href = targetUrl;
+            } else {
+                // Если ссылки нет, пробуем кликнуть по текущему активному слайду напрямую
+                const container = document.getElementById('mainBannerContainer');
+                if (container) {
+                    const slides = Array.from(container.children).filter(el => !el.classList.contains('animate-pulse'));
+                    const activeSlide = slides[currentSlideIndex];
+                    if (activeSlide) {
+                        const link = activeSlide.tagName === 'A' ? activeSlide : activeSlide.querySelector('a');
+                        if (link) link.click();
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
