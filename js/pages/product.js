@@ -326,7 +326,7 @@ let currentGalleryIndex = 0;
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
                 
-                const buyText = typeof i18n !== 'undefined' && i18n[currentLang] ? i18n[currentLang].btn_buy : 'Купити';
+                const buyText = typeof i18n !== 'Купити' && i18n[currentLang] ? i18n[currentLang].btn_buy : 'Купити';
                 btn.innerHTML = `<span class="uppercase font-bold tracking-widest text-[11px]">${buyText} за ${formatPrice(currentPrice)}</span>`;
                 
                 btn.onclick = () => {
