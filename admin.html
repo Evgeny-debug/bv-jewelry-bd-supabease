@@ -761,16 +761,21 @@ select option, select optgroup {
 
                 <!-- Оновлений блок вибору категорії (2 рівні) -->
                 <div class="relative">
-                    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label>
-                    <div class="relative">
-                        <select id="prod-category" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8" required>
-                            <option value="" disabled selected>Оберіть категорію...</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                    </div>
-                </div>
+    <label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Категорія *</label>
+    <div class="relative">
+        <select id="gal-category" class="input-field text-xs bg-[#1a1a1f] text-white border border-[#c5a059]/30 focus:border-[#c5a059] rounded-lg p-2.5 w-full appearance-none cursor-pointer outline-none transition pr-8" required>
+            <option value="" disabled selected>Оберіть категорію...</option>
+            <option value="rings">Каблучки</option>
+            <option value="earrings">Сережки</option>
+            <option value="necklaces">Кольє</option>
+            <option value="bracelets">Браслети</option>
+            <option value="crosses">Хрестики</option>
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#c5a059]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+    </div>
+</div>
 
                 <!-- Статус -->
                 <div class="relative">
