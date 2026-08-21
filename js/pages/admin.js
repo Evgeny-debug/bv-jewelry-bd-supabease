@@ -1816,13 +1816,35 @@ window.saveSiteSettings = async function() {
         
         // 1. Зберігаємо налаштування сайту (Supabase + localStorage + BroadcastChannel)
         await saveToCloudStorage('bv_settings', siteSettings);
+
+        // 2. Масово перераховуємо всі авто-товари за новим курсом
+        await recalculateAutoProducts();
+
+        if (typeof showNotification === 'function') {
+            showNotification('Налаштування збережено! Ціни авто-товарів оновлено.');
+        } else {
+            alert('Налаштування збережено! Ціни авто-товарів оновлено.');
+        }
+    } catch (err) {
+        console.error('Помилка збереження налаштувань:', err);
+        alert('Помилка: ' + err.message);
+    } finally {
+        if (btn) { btn.innerText = 'Зберегти налаштування'; btn.disabled = false; }
+    }
+};
+
+        document.getElementById('btnSaveSettings')?.addEventListener('click', saveSiteSettings);
+
+        // ==========================================
+// ГАЛЕРЕЯ РОБІТ (Адмін-панель)
+// ==========================================
+
 async function loadAdminCategorySelect() {
     const select = document.getElementById('gal-category');
     if (!select) return;
 
     if (typeof categories !== 'undefined' && Array.isArray(categories) && categories.length > 0) {
-        // Використовуємо ту саму логіку побудови селекту, що і для інших розділів адмінки
-        let html = '';
+        let html = '<option value="" disabled selected>Оберіть категорію...</option>';
         categories.forEach(c => {
             const nameUk = (c.name && typeof c.name === 'object') ? (c.name.uk || c.id) : (c.name || c.id);
             html += `<option value="${c.id}">${nameUk} (${c.id})</option>`;
@@ -1831,7 +1853,6 @@ async function loadAdminCategorySelect() {
         return;
     }
 
-    // Якщо раптом глобальний масив порожній
     select.innerHTML = '<option value="">Категорії відсутні</option>';
 }
 
@@ -1839,7 +1860,6 @@ window.renderGalleryAdmin = function() {
     const cont = document.getElementById('galleryAdminList');
     if (!cont) return;
     
-    // Використовуємо глобальний масив allGalleryItems
     if (typeof allGalleryItems === 'undefined' || !allGalleryItems || allGalleryItems.length === 0) {
         cont.innerHTML = '<div class="col-span-full text-center text-gray-500 text-xs py-8">У галереї ще немає фотографій.</div>';
         return;
@@ -1872,7 +1892,6 @@ window.openGalleryModal = async function(idx = null) {
         preview.src = '';
     }
     
-    // Оновлюємо список категорій перед відкриттям модалки
     await loadAdminCategorySelect();
     
     if (idx !== null && typeof allGalleryItems !== 'undefined' && allGalleryItems[idx]) {
@@ -1881,7 +1900,7 @@ window.openGalleryModal = async function(idx = null) {
 
         document.getElementById('gal-id').value = idx;
         document.getElementById('gal-img').value = imageUrl;
-        document.getElementById('gal-category').value = item.category || 'rings';
+        document.getElementById('gal-category').value = item.category || '';
         
         const descObj = (typeof item.desc === 'object' && item.desc !== null) ? item.desc : {};
         document.getElementById('gal-desc-uk').value = descObj.uk || (typeof item.desc === 'string' ? item.desc : '') || '';
@@ -1920,6 +1939,7 @@ window.saveGalleryItem = async function() {
     const descEn = document.getElementById('gal-desc-en').value.trim();
     
     if (!imgVal) return alert('Будь ласка, завантажте або вкажіть посилання на фотографію!');
+    if (!catVal) return alert('Будь ласка, оберіть категорію!');
     
     const itemData = {
         img: imgVal,
@@ -1934,7 +1954,6 @@ window.saveGalleryItem = async function() {
 
     if (idVal !== '') {
         const index = parseInt(idVal);
-        // Зберігаємо старий created_at, якщо він був
         if (allGalleryItems[index] && allGalleryItems[index].created_at) {
             itemData.created_at = allGalleryItems[index].created_at;
         }
