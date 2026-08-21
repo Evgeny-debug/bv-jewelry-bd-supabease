@@ -172,59 +172,70 @@
         // ЗАВАНТАЖЕННЯ ДАНИХ
         // ==========================================
         async function loadAllData() {
-            const { data: ords } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
-            if(ords) ordersList = ords;
-            renderOrders(ordersList);
+    const { data: ords } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if(ords) ordersList = ords;
+    renderOrders(ordersList);
 
-            const { data: prods } = await _supabase.from('products').select('*');
-            if(prods) { products = prods.map(migrateProductToNewFormat); }
-            filteredProducts = [...products];
-            
-            const { data: storage } = await _supabase.from('site_storage').select('*');
-            if(storage) {
-                storage.forEach(item => {
-                    if (item.key === 'bv_categories_flat') categories = item.value; 
-                    if (item.key === 'bv_settings') siteSettings = item.value;
-                    if (item.key === 'bv_home_blocks') homeBlocks = item.value;
-                    if (item.key === 'bv_pages_content') pagesContentDB = item.value;
-                    if (item.key === 'bv_price_list') priceListDB = item.value;
-                    if (item.key === 'bv_exclusive_process') exclusiveProcess = item.value || [];
-                    if (item.key === 'bv_exclusive_materials') exclusiveMaterials = item.value || [];
-                    if (item.key === 'bv_banners') banners = item.value || []; 
-                    if (item.key === 'bv_gallery') galleryItems = item.value || []; 
-                });
-            }
+    const { data: prods } = await _supabase.from('products').select('*');
+    if(prods) { products = prods.map(migrateProductToNewFormat); }
+    filteredProducts = [...products];
+    
+    const { data: storage } = await _supabase.from('site_storage').select('*');
+    if(storage) {
+        storage.forEach(item => {
+            if (item.key === 'bv_categories_flat') categories = item.value; 
+            if (item.key === 'bv_settings') siteSettings = item.value;
+            if (item.key === 'bv_home_blocks') homeBlocks = item.value;
+            if (item.key === 'bv_pages_content') pagesContentDB = item.value;
+            if (item.key === 'bv_price_list') priceListDB = item.value;
+            if (item.key === 'bv_exclusive_process') exclusiveProcess = item.value || [];
+            if (item.key === 'bv_exclusive_materials') exclusiveMaterials = item.value || [];
+            if (item.key === 'bv_banners') banners = item.value || []; 
+            // Строку с bv_gallery отсюда удалили
+        });
+    }
 
-            if(categories.length === 0) {
-                const oldTree = storage?.find(i => i.key === 'bv_categories_tree')?.value || [];
-                categories = flattenOldTree(oldTree);
-                await saveToCloudStorage('bv_categories_flat', categories);
-            }
+    if(categories.length === 0) {
+        const oldTree = storage?.find(i => i.key === 'bv_categories_tree')?.value || [];
+        categories = flattenOldTree(oldTree);
+        await saveToCloudStorage('bv_categories_flat', categories);
+    }
 
-            
+    // НОВОЕ: Загружаем галерею напрямую из таблицы gallery
+    const { data: galData } = await _supabase.from('gallery').select('*').order('created_at', { ascending: false });
+    if (galData) {
+        galleryItems = galData.map(item => ({
+            id: item.id,
+            img: item.image_url,
+            category: item.category,
+            desc: { uk: item.desc_uk, ru: item.desc_ru, en: item.desc_en }
+        }));
+    } else {
+        galleryItems = [];
+    }
 
-            renderProducts();
-            renderCategoriesAdmin();
-            renderBlocksAdmin();
-            renderBannersAdmin();
-            renderExclusiveProcessAdmin();
-            renderExclusiveMaterialsAdmin();
-            populateSettings();
-            renderGalleryAdmin();
-            renderPriceBuilder();
-            
-            const priceEditor = document.getElementById('price-json-editor');
-            if(priceEditor) priceEditor.value = JSON.stringify(priceListDB, null, 4);
+    renderProducts();
+    renderCategoriesAdmin();
+    renderBlocksAdmin();
+    renderBannersAdmin();
+    renderExclusiveProcessAdmin();
+    renderExclusiveMaterialsAdmin();
+    populateSettings();
+    renderGalleryAdmin();
+    renderPriceBuilder();
+    
+    const priceEditor = document.getElementById('price-json-editor');
+    if(priceEditor) priceEditor.value = JSON.stringify(priceListDB, null, 4);
 
-            // Keep storefront localStorage aligned after admin boot
-            syncProductsToStorefront();
-            if (categories && categories.length) {
-                syncLocalCatalog('bv_categories_flat', categories);
-            }
-            if (siteSettings && Object.keys(siteSettings).length) {
-                syncLocalCatalog('bv_settings', siteSettings);
-            }
-        }
+    // Keep storefront localStorage aligned after admin boot
+    syncProductsToStorefront();
+    if (categories && categories.length) {
+        syncLocalCatalog('bv_categories_flat', categories);
+    }
+    if (siteSettings && Object.keys(siteSettings).length) {
+        syncLocalCatalog('bv_settings', siteSettings);
+    }
+}
 
         // ==========================================
         // НАВІГАЦІЯ ТА ВКЛАДКИ
@@ -1838,92 +1849,145 @@ window.saveSiteSettings = async function() {
         // ==========================================
         // ГАЛЕРЕЯ РОБІТ
         // ==========================================
-        window.renderGalleryAdmin = function() {
-            const cont = document.getElementById('galleryAdminList');
-            if (!cont) return;
-            if (!galleryItems || galleryItems.length === 0) {
-                cont.innerHTML = '<div class="col-span-full text-center text-gray-500 text-xs py-8">У галереї ще немає фотографій.</div>';
-                return;
-            }
-            cont.innerHTML = galleryItems.map((item, idx) => `
-                <div class="bg-white/5 p-2 rounded-xl border border-white/10 flex flex-col justify-between group relative overflow-hidden">
-                    <div class="relative aspect-square rounded-lg overflow-hidden mb-2 bg-black/40">
-                        <img src="${item.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <span class="absolute top-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-[#c5a059] text-[9px] uppercase font-bold rounded">${item.category || 'Загальне'}</span>
-                    </div>
-                    <div class="text-[11px] text-gray-300 truncate mb-2 font-medium">${item.desc?.uk || item.desc || ''}</div>
-                    <div class="flex gap-1.5 border-t border-white/10 pt-2">
-                        <button onclick="openGalleryModal(${idx})" class="flex-1 btn-secondary text-[10px] py-1">Ред</button>
-                        <button onclick="deleteGalleryItem(${idx})" class="flex-1 btn-danger text-[10px] py-1 font-bold">Видал</button>
-                    </div>
-                </div>
-            `).join('');
-        };
+        = function() {
+    const cont = document.getElementById('galleryAdminList');
+    if (!cont) return;
+    if (!galleryItems || galleryItems.length === 0) {
+        cont.innerHTML = '<div class="col-span-full text-center text-gray-500 text-xs py-8">У галереї ще немає фотографій.</div>';
+        return;
+    }
+    
+    // Зверни увагу: прибрали аргумент idx з map() 
+    cont.innerHTML = galleryItems.map((item) => `
+        <div class="bg-white/5 p-2 rounded-xl border border-white/10 flex flex-col justify-between group relative overflow-hidden">
+            <div class="relative aspect-square rounded-lg overflow-hidden mb-2 bg-black/40">
+                <img src="${item.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <span class="absolute top-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-[#c5a059] text-[9px] uppercase font-bold rounded">${item.category || 'Загальне'}</span>
+            </div>
+            <div class="text-[11px] text-gray-300 truncate mb-2 font-medium">${item.desc?.uk || item.desc || ''}</div>
+            <div class="flex gap-1.5 border-t border-white/10 pt-2">
+                <!-- Змінено: передаємо '${item.id}' в одинарних лапках, бо це текстовий UUID -->
+                <button onclick="openGalleryModal('${item.id}')" class="flex-1 btn-secondary text-[10px] py-1">Ред</button>
+                <button onclick="deleteGalleryItem('${item.id}')" class="flex-1 btn-danger text-[10px] py-1 font-bold">Видал</button>
+            </div>
+        </div>
+    `).join('');
+};
 
-        window.openGalleryModal = function(idx = null) {
-            document.getElementById('galleryForm').reset();
-            const preview = document.getElementById('galPreview');
-            preview.classList.add('hidden');
-            preview.src = '';
+        window.openGalleryModal = function(id = null) {
+    document.getElementById('galleryForm').reset();
+    const preview = document.getElementById('galPreview');
+    preview.classList.add('hidden');
+    preview.src = '';
+    
+    if (id !== null) {
+        // Шукаємо фотографію в масиві за її унікальним ID
+        const item = galleryItems.find(i => String(i.id) === String(id));
+        
+        if (item) {
+            document.getElementById('gal-id').value = item.id;
+            document.getElementById('gal-img').value = item.img || '';
+            document.getElementById('gal-category').value = item.category || 'rings';
+            document.getElementById('gal-desc-uk').value = item.desc?.uk || (typeof item.desc === 'string' ? item.desc : '') || '';
+            document.getElementById('gal-desc-ru').value = item.desc?.ru || (typeof item.desc === 'string' ? item.desc : '') || '';
+            document.getElementById('gal-desc-en').value = item.desc?.en || (typeof item.desc === 'string' ? item.desc : '') || '';
             
-            if (idx !== null) {
-                const item = galleryItems[idx];
-                document.getElementById('gal-id').value = idx;
-                document.getElementById('gal-img').value = item.img || '';
-                document.getElementById('gal-category').value = item.category || 'rings';
-                document.getElementById('gal-desc-uk').value = item.desc?.uk || (typeof item.desc === 'string' ? item.desc : '') || '';
-                document.getElementById('gal-desc-ru').value = item.desc?.ru || (typeof item.desc === 'string' ? item.desc : '') || '';
-                document.getElementById('gal-desc-en').value = item.desc?.en || (typeof item.desc === 'string' ? item.desc : '') || '';
-                if (item.img) { preview.src = item.img; preview.classList.remove('hidden'); }
-            } else {
-                document.getElementById('gal-id').value = '';
-                document.getElementById('gal-img').value = '';
+            if (item.img) { 
+                preview.src = item.img; 
+                preview.classList.remove('hidden'); 
             }
-            document.getElementById('galleryModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('galleryModal').classList.remove('opacity-0'), 10);
-        };
+        }
+    } else {
+        document.getElementById('gal-id').value = '';
+        document.getElementById('gal-img').value = '';
+    }
+    
+    document.getElementById('galleryModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('galleryModal').classList.remove('opacity-0'), 10);
+};
 
         window.closeGalleryModal = function() {
             document.getElementById('galleryModal').classList.add('opacity-0');
             setTimeout(() => document.getElementById('galleryModal').classList.add('hidden'), 300);
         };
 
-        window.saveGalleryItem = async function() {
-            const idVal = document.getElementById('gal-id').value;
-            const imgVal = document.getElementById('gal-img').value;
-            const catVal = document.getElementById('gal-category').value;
-            const descUk = document.getElementById('gal-desc-uk').value.trim();
-            const descRu = document.getElementById('gal-desc-ru').value.trim();
-            const descEn = document.getElementById('gal-desc-en').value.trim();
+       window.saveGalleryItem = async function() {
+    const idVal = document.getElementById('gal-id').value;
+    const imgVal = document.getElementById('gal-img').value;
+    const catVal = document.getElementById('gal-category').value;
+    const descUk = document.getElementById('gal-desc-uk').value.trim();
+    const descRu = document.getElementById('gal-desc-ru').value.trim();
+    const descEn = document.getElementById('gal-desc-en').value.trim();
+    
+    if (!imgVal) return alert('Будь ласка, завантажте фотографію!');
+    
+    // Формируем объект данных в соответствии с колонками твоей таблицы gallery
+    const dbPayload = {
+        image_url: imgVal,
+        category: catVal,
+        desc_uk: descUk,
+        desc_ru: descRu,
+        desc_en: descEn,
+        // is_published: true, // раскомментируй, если в базе есть колонка публикации
+        updated_at: new Date().toISOString()
+    };
+    
+    if (idVal !== '') {
+        // Оновлюємо існуючий запис по його унікальному ID
+        const { error } = await window._supabase
+            .from('gallery')
+            .update(dbPayload)
+            .eq('id', idVal);
             
-            if (!imgVal) return alert('Будь ласка, завантажте фотографію!');
+        if (error) return alert('Помилка оновлення: ' + error.message);
+    } else {
+        // Додаємо новий запис (Supabase сам згенерує ID)
+        const { error } = await window._supabase
+            .from('gallery')
+            .insert([dbPayload]);
             
-            const itemData = {
-                img: imgVal,
-                category: catVal,
-                desc: { uk: descUk, ru: descRu, en: descEn }
-            };
-            
-            if (idVal !== '') {
-                galleryItems[parseInt(idVal)] = itemData;
-            } else {
-                galleryItems.unshift(itemData);
-            }
-            
-            await saveToCloudStorage('bv_gallery', galleryItems);
-            renderGalleryAdmin();
-            closeGalleryModal();
-            showNotification('Фото збережено в Галерею!');
-        };
+        if (error) return alert('Помилка збереження: ' + error.message);
+    }
+    
+    // Після збереження перезапрошуємо актуальні дані з бази, щоб отримати нові ID
+    const { data: galData, error: fetchError } = await window._supabase
+        .from('gallery')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+    if (galData && !fetchError) {
+        galleryItems = galData.map(item => ({
+            id: item.id,
+            img: item.image_url,
+            category: item.category,
+            desc: { uk: item.desc_uk, ru: item.desc_ru, en: item.desc_en }
+        }));
+    }
+    
+    renderGalleryAdmin();
+    closeGalleryModal();
+    showNotification('Фото збережено в Галерею!');
+};
 
-        window.deleteGalleryItem = async function(idx) {
-            if (confirm('Видалити це фото з Галереї?')) {
-                galleryItems.splice(idx, 1);
-                await saveToCloudStorage('bv_gallery', galleryItems);
-                renderGalleryAdmin();
-                showNotification('Фотографію видалено');
-            }
-        };
+        window.deleteGalleryItem = async function(id) {
+    if (confirm('Видалити це фото з Галереї?')) {
+        // Видаляємо безпосередньо з таблиці gallery в Supabase
+        const { error } = await window._supabase
+            .from('gallery')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            return alert('Помилка видалення: ' + error.message);
+        }
+
+        // Очищаємо елемент з локального масиву для миттєвого оновлення інтерфейсу
+        galleryItems = galleryItems.filter(item => String(item.id) !== String(id));
+        
+        renderGalleryAdmin();
+        showNotification('Фотографію видалено');
+    }
+};
 
         // ==========================================
         // ВИХІД З СИСТЕМИ
