@@ -1836,94 +1836,180 @@ window.saveSiteSettings = async function() {
         document.getElementById('btnSaveSettings')?.addEventListener('click', saveSiteSettings);
 
         // ==========================================
-        // ГАЛЕРЕЯ РОБІТ
-        // ==========================================
-        window.renderGalleryAdmin = function() {
-            const cont = document.getElementById('galleryAdminList');
-            if (!cont) return;
-            if (!galleryItems || galleryItems.length === 0) {
-                cont.innerHTML = '<div class="col-span-full text-center text-gray-500 text-xs py-8">У галереї ще немає фотографій.</div>';
+// ГАЛЕРЕЯ РОБІТ (Адмін-панель)
+// ==========================================
+
+// Функція завантаження категорій у випадаючий список модального вікна
+async function loadAdminCategorySelect() {
+    const select = document.getElementById('gal-category');
+    if (!select) return;
+
+    try {
+        if (typeof window._supabase !== 'undefined') {
+            const { data, error } = await window._supabase
+                .from('categories')
+                .select('*')
+                .order('id', { ascending: true });
+
+            if (!error && data && data.length > 0) {
+                select.innerHTML = data.map(cat => `
+                    <option value="${cat.id}">${cat.name_uk || cat.id}</option>
+                `).join('');
                 return;
             }
-            cont.innerHTML = galleryItems.map((item, idx) => `
-                <div class="bg-white/5 p-2 rounded-xl border border-white/10 flex flex-col justify-between group relative overflow-hidden">
-                    <div class="relative aspect-square rounded-lg overflow-hidden mb-2 bg-black/40">
-                        <img src="${item.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <span class="absolute top-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-[#c5a059] text-[9px] uppercase font-bold rounded">${item.category || 'Загальне'}</span>
-                    </div>
-                    <div class="text-[11px] text-gray-300 truncate mb-2 font-medium">${item.desc?.uk || item.desc || ''}</div>
-                    <div class="flex gap-1.5 border-t border-white/10 pt-2">
-                        <button onclick="openGalleryModal(${idx})" class="flex-1 btn-secondary text-[10px] py-1">Ред</button>
-                        <button onclick="deleteGalleryItem(${idx})" class="flex-1 btn-danger text-[10px] py-1 font-bold">Видал</button>
-                    </div>
-                </div>
-            `).join('');
-        };
+        }
+    } catch (err) {
+        console.warn('Не вдалося завантажити категорії для селекту, використовуємо фолбек:', err);
+    }
 
-        window.openGalleryModal = function(idx = null) {
-            document.getElementById('galleryForm').reset();
-            const preview = document.getElementById('galPreview');
-            preview.classList.add('hidden');
-            preview.src = '';
+    // Запасний варіант, якщо Supabase недоступний
+    select.innerHTML = `
+        <option value="rings">Каблучка</option>
+        <option value="earrings">Сережки</option>
+        <option value="necklaces">Ланцюжок / Кольє</option>
+        <option value="bracelets">Браслет</option>
+    `;
+}
+
+window.renderGalleryAdmin = function() {
+    const cont = document.getElementById('galleryAdminList');
+    if (!cont) return;
+    
+    // Використовуємо глобальний масив allGalleryItems
+    if (typeof allGalleryItems === 'undefined' || !allGalleryItems || allGalleryItems.length === 0) {
+        cont.innerHTML = '<div class="col-span-full text-center text-gray-500 text-xs py-8">У галереї ще немає фотографій.</div>';
+        return;
+    }
+
+    cont.innerHTML = allGalleryItems.map((item, idx) => `
+        <div class="bg-white/5 p-2 rounded-xl border border-white/10 flex flex-col justify-between group relative overflow-hidden">
+            <div class="relative aspect-square rounded-lg overflow-hidden mb-2 bg-black/40">
+                <img src="${item.img || item.image_url || item.url || item.image || ''}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <span class="absolute top-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-[#c5a059] text-[9px] uppercase font-bold rounded">${item.category || 'Загальне'}</span>
+            </div>
+            <div class="text-[11px] text-gray-300 truncate mb-2 font-medium">
+                ${(typeof item.desc === 'object' && item.desc !== null) ? (item.desc.uk || '') : (item.desc || item.title || '')}
+            </div>
+            <div class="flex gap-1.5 border-t border-white/10 pt-2">
+                <button onclick="openGalleryModal(${idx})" class="flex-1 btn-secondary text-[10px] py-1">Ред</button>
+                <button onclick="deleteGalleryItem(${idx})" class="flex-1 btn-danger text-[10px] py-1 font-bold">Видал</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.openGalleryModal = async function(idx = null) {
+    const form = document.getElementById('galleryForm');
+    if (form) form.reset();
+
+    const preview = document.getElementById('galPreview');
+    if (preview) {
+        preview.classList.add('hidden');
+        preview.src = '';
+    }
+    
+    // Оновлюємо список категорій перед відкриттям модалки
+    await loadAdminCategorySelect();
+    
+    if (idx !== null && typeof allGalleryItems !== 'undefined' && allGalleryItems[idx]) {
+        const item = allGalleryItems[idx];
+        const imageUrl = item.img || item.image_url || item.url || item.image || '';
+
+        document.getElementById('gal-id').value = idx;
+        document.getElementById('gal-img').value = imageUrl;
+        document.getElementById('gal-category').value = item.category || 'rings';
+        
+        const descObj = (typeof item.desc === 'object' && item.desc !== null) ? item.desc : {};
+        document.getElementById('gal-desc-uk').value = descObj.uk || (typeof item.desc === 'string' ? item.desc : '') || '';
+        document.getElementById('gal-desc-ru').value = descObj.ru || '';
+        document.getElementById('gal-desc-en').value = descObj.en || '';
+
+        if (imageUrl && preview) { 
+            preview.src = imageUrl; 
+            preview.classList.remove('hidden'); 
+        }
+    } else {
+        document.getElementById('gal-id').value = '';
+        document.getElementById('gal-img').value = '';
+    }
+
+    const modal = document.getElementById('galleryModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+};
+
+window.closeGalleryModal = function() {
+    const modal = document.getElementById('galleryModal');
+    if (!modal) return;
+    modal.classList.add('opacity-0');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+};
+
+window.saveGalleryItem = async function() {
+    const idVal = document.getElementById('gal-id').value;
+    const imgVal = document.getElementById('gal-img').value.trim();
+    const catVal = document.getElementById('gal-category').value;
+    const descUk = document.getElementById('gal-desc-uk').value.trim();
+    const descRu = document.getElementById('gal-desc-ru').value.trim();
+    const descEn = document.getElementById('gal-desc-en').value.trim();
+    
+    if (!imgVal) return alert('Будь ласка, завантажте або вкажіть посилання на фотографію!');
+    
+    const itemData = {
+        img: imgVal,
+        category: catVal,
+        desc: { uk: descUk, ru: descRu, en: descEn },
+        created_at: new Date().toISOString()
+    };
+    
+    if (typeof allGalleryItems === 'undefined') {
+        window.allGalleryItems = [];
+    }
+
+    if (idVal !== '') {
+        const index = parseInt(idVal);
+        // Зберігаємо старий created_at, якщо він був
+        if (allGalleryItems[index] && allGalleryItems[index].created_at) {
+            itemData.created_at = allGalleryItems[index].created_at;
+        }
+        allGalleryItems[index] = itemData;
+    } else {
+        allGalleryItems.unshift(itemData);
+    }
+    
+    if (typeof saveToCloudStorage === 'function') {
+        await saveToCloudStorage('bv_gallery', allGalleryItems);
+    } else {
+        localStorage.setItem('bv_gallery_cache', JSON.stringify(allGalleryItems));
+    }
+
+    renderGalleryAdmin();
+    closeGalleryModal();
+    if (typeof showNotification === 'function') {
+        showNotification('Фото збережено в Галерею!');
+    }
+};
+
+window.deleteGalleryItem = async function(idx) {
+    if (confirm('Видалити це фото з Галереї?')) {
+        if (typeof allGalleryItems !== 'undefined') {
+            allGalleryItems.splice(idx, 1);
             
-            if (idx !== null) {
-                const item = galleryItems[idx];
-                document.getElementById('gal-id').value = idx;
-                document.getElementById('gal-img').value = item.img || '';
-                document.getElementById('gal-category').value = item.category || 'rings';
-                document.getElementById('gal-desc-uk').value = item.desc?.uk || (typeof item.desc === 'string' ? item.desc : '') || '';
-                document.getElementById('gal-desc-ru').value = item.desc?.ru || (typeof item.desc === 'string' ? item.desc : '') || '';
-                document.getElementById('gal-desc-en').value = item.desc?.en || (typeof item.desc === 'string' ? item.desc : '') || '';
-                if (item.img) { preview.src = item.img; preview.classList.remove('hidden'); }
+            if (typeof saveToCloudStorage === 'function') {
+                await saveToCloudStorage('bv_gallery', allGalleryItems);
             } else {
-                document.getElementById('gal-id').value = '';
-                document.getElementById('gal-img').value = '';
+                localStorage.setItem('bv_gallery_cache', JSON.stringify(allGalleryItems));
             }
-            document.getElementById('galleryModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('galleryModal').classList.remove('opacity-0'), 10);
-        };
 
-        window.closeGalleryModal = function() {
-            document.getElementById('galleryModal').classList.add('opacity-0');
-            setTimeout(() => document.getElementById('galleryModal').classList.add('hidden'), 300);
-        };
-
-        window.saveGalleryItem = async function() {
-            const idVal = document.getElementById('gal-id').value;
-            const imgVal = document.getElementById('gal-img').value;
-            const catVal = document.getElementById('gal-category').value;
-            const descUk = document.getElementById('gal-desc-uk').value.trim();
-            const descRu = document.getElementById('gal-desc-ru').value.trim();
-            const descEn = document.getElementById('gal-desc-en').value.trim();
-            
-            if (!imgVal) return alert('Будь ласка, завантажте фотографію!');
-            
-            const itemData = {
-                img: imgVal,
-                category: catVal,
-                desc: { uk: descUk, ru: descRu, en: descEn }
-            };
-            
-            if (idVal !== '') {
-                galleryItems[parseInt(idVal)] = itemData;
-            } else {
-                galleryItems.unshift(itemData);
-            }
-            
-            await saveToCloudStorage('bv_gallery', galleryItems);
             renderGalleryAdmin();
-            closeGalleryModal();
-            showNotification('Фото збережено в Галерею!');
-        };
-
-        window.deleteGalleryItem = async function(idx) {
-            if (confirm('Видалити це фото з Галереї?')) {
-                galleryItems.splice(idx, 1);
-                await saveToCloudStorage('bv_gallery', galleryItems);
-                renderGalleryAdmin();
+            if (typeof showNotification === 'function') {
                 showNotification('Фотографію видалено');
             }
-        };
+        }
+    }
+};
 
         // ==========================================
         // ВИХІД З СИСТЕМИ
