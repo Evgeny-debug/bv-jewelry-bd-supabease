@@ -1849,7 +1849,7 @@ window.saveSiteSettings = async function() {
         // ==========================================
         // ГАЛЕРЕЯ РОБІТ
         // ==========================================
-        = function() {
+        window.renderGalleryAdmin = function() {
     const cont = document.getElementById('galleryAdminList');
     if (!cont) return;
     if (!galleryItems || galleryItems.length === 0) {
