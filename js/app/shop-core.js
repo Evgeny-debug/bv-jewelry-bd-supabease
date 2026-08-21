@@ -173,6 +173,8 @@ window.i18n = {
         badge_exclusive: "Ексклюзив",
         out_stock: "Немає",
         pokupka: "Купити",
+        btn_buy: "Купити",
+        btn_buy_prefix: "за",
         footer_desc: "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
         footer_phone_title: "Контактний телефон",
         footer_phone_sub: "Згідно з тарифами вашого оператора",
@@ -192,7 +194,8 @@ window.i18n = {
         footer_cat_pendants: "Кулони та підвіски",
         footer_dev: "Розроблено:"
     },
-    ua: { m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
+    ua: { 
+        m1: "Головна", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Ексклюзив", m_info: "info", m_menu: "Меню",
         search_ph: "Пошук...", search_mob_ph: "Пошукаємо прикрасу?...",
         cart_title: "Кошик", cart_subtotal: "Підсумок:", cart_clear: "Очистити",
         fav_title: "Улюблене",
@@ -204,6 +207,8 @@ window.i18n = {
         badge_exclusive: "Ексклюзив",
         out_stock: "Немає",
         pokupka: "Купити",
+        btn_buy: "Купити",
+        btn_buy_prefix: "за",
         footer_desc: "Формуємо сімейні цінності у дорогоцінних металах з 1984 року.",
         footer_phone_title: "Контактний телефон",
         footer_phone_sub: "Згідно з тарифами вашого оператора",
@@ -221,7 +226,8 @@ window.i18n = {
         footer_cat_earrings: "Сережки",
         footer_cat_chains: "Ланцюжки",
         footer_cat_pendants: "Кулони та підвіски",
-        footer_dev: "Розроблено:" }, // Дублює uk для повної сумісності з 'ua' у сховищі
+        footer_dev: "Розроблено:" 
+    },
     ru: { 
         m1: "Главная", m2: "Каталог", m_gallery: "Галерея", m_price: "Прайс", m_atelier: "Эксклюзив", m_info: "info", m_menu: "Меню",
         search_ph: "Поиск...", search_mob_ph: "Поищем украшение?...",
@@ -234,6 +240,8 @@ window.i18n = {
         badge_new: "Новинка",
         badge_exclusive: "Эксклюзив",
         out_stock: "Нет",
+        btn_buy: "Купить",
+        btn_buy_prefix: "за",
         footer_desc: "Формируем семейные ценности в драгоценных металлах с 1984 года.",
         footer_phone_title: "Контактный телефон",
         footer_phone_sub: "Согласно тарифам вашего оператора",
@@ -265,6 +273,8 @@ window.i18n = {
         badge_new: "New",
         badge_exclusive: "Exclusive",
         out_stock: "Out of stock",
+        btn_buy: "Buy",
+        btn_buy_prefix: "for",
         footer_desc: "Shaping family values in precious metals since 1984.",
         footer_phone_title: "Contact Phone",
         footer_phone_sub: "According to your operator's tariffs",
