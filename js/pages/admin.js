@@ -2565,3 +2565,4 @@ window.copyFeedUrl = copyFeedUrl;
 window.generateGoogleFeed = generateGoogleFeed;
 window.generateAndUploadSitemap = generateAndUploadSitemap;
 window.copySitemapUrl = copySitemapUrl;
+}
