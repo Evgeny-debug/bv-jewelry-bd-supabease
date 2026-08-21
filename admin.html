@@ -861,32 +861,37 @@ select option, select optgroup {
     </div>
 </div>
 
-    <!-- МОДАЛКА: ГАЛЕРЕЯ -->
-    <div id="galleryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
-        <div class="glass-panel bg-[#121216] p-6 w-full max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30">
-            <h3 class="text-base font-serif text-[#c5a059] font-bold mb-4">Фото в Галерею</h3>
-            <form id="galleryForm" onsubmit="event.preventDefault(); saveGalleryItem();" class="space-y-3">
-                <input type="hidden" id="gal-id"><input type="hidden" id="gal-img">
-                <div>
-                    <input type="file" accept="image/*" class="input-field file-input text-xs" onchange="handleImageUpload(event, 'galPreview', 'gal-img')">
-                    <img id="galPreview" class="w-full h-36 object-cover mt-2 hidden rounded-lg border border-white/10">
-                </div>
-                <div>
-                    <label class="text-[10px] uppercase text-gray-400 block mb-1 font-semibold">Категорія</label>
-                    <select id="gal-category" class="input-field text-xs" required>
-                        <option value="" disabled selected>Оберіть категорію...</option>
-                    </select>
-                </div>
-                <input type="text" id="gal-desc-uk" class="input-field text-xs" placeholder="Опис UA" required>
-                <input type="text" id="gal-desc-ru" class="input-field text-xs" placeholder="Опис RU" required>
-                <input type="text" id="gal-desc-en" class="input-field text-xs" placeholder="Опис EN" required>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeGalleryModal()" class="flex-1 btn-secondary text-xs py-2.5">Скасувати</button>
-                    <button type="submit" class="flex-1 btn-primary text-xs py-2.5 font-bold">Зберегти</button>
-                </div>
-            </form>
-        </div>
+   <!-- МОДАЛКА: ГАЛЕРЕЯ -->
+<div id="galleryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
+    <div class="glass-panel bg-[#121216] p-6 w-full max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-[#c5a059]/30">
+        <h3 class="text-base font-serif text-[#c5a059] font-bold mb-4">Фото в Галерею</h3>
+        <form id="galleryForm" onsubmit="event.preventDefault(); saveGalleryItem();" class="space-y-3">
+            <input type="hidden" id="gal-id"><input type="hidden" id="gal-img">
+            <div>
+                <input type="file" accept="image/*" class="input-field file-input text-xs" onchange="handleImageUpload(event, 'galPreview', 'gal-img')">
+                <img id="galPreview" class="w-full h-36 object-cover mt-2 hidden rounded-lg border border-white/10">
+            </div>
+            <div>
+                <label class="text-[10px] uppercase text-gray-400 block mb-1 font-semibold">Категорія</label>
+                <select id="gal-category" class="input-field text-xs" required>
+                    <option value="" disabled selected>Оберіть категорію...</option>
+                    <option value="rings">Каблучки</option>
+                    <option value="earrings">Сережки</option>
+                    <option value="necklaces">Кольє</option>
+                    <option value="bracelets">Браслети</option>
+                    <option value="crosses">Хрестики</option>
+                </select>
+            </div>
+            <input type="text" id="gal-desc-uk" class="input-field text-xs" placeholder="Опис UA" required>
+            <input type="text" id="gal-desc-ru" class="input-field text-xs" placeholder="Опис RU" required>
+            <input type="text" id="gal-desc-en" class="input-field text-xs" placeholder="Опис EN" required>
+            <div class="flex gap-2 pt-2">
+                <button type="button" onclick="closeGalleryModal()" class="flex-1 btn-secondary text-xs py-2.5">Скасувати</button>
+                <button type="submit" class="flex-1 btn-primary text-xs py-2.5 font-bold">Зберегти</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- МОДАЛКА: КАТЕГОРИИ -->
     <div id="categoryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity p-0 sm:p-4">
