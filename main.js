@@ -3793,3 +3793,62 @@ document.addEventListener("DOMContentLoaded", () => {
     sanitizeUndefined();
     setInterval(sanitizeUndefined, 500);
 });
+
+
+
+
+///gelery
+window.renderFavDrawer = function() {
+    // Приводим все ID к строке для безопасного сравнения
+    let favsIds = getFavs().map(String); 
+    const allProducts = API.get('bv_products', []);
+    const favBody = document.getElementById('favBody');
+    const favBadges = document.querySelectorAll('.fav-badge');
+    
+    // Обновляем бейджи количества
+    favBadges.forEach(b => {
+        b.innerText = favsIds.length;
+        b.style.display = favsIds.length > 0 ? 'flex' : 'none';
+    });
+    
+    if (!favBody) return;
+
+    // Если список пуст
+    if (favsIds.length === 0) {
+        const lang = API.get('bv_lang', 'uk');
+        const emptyText = (typeof window.i18n !== 'undefined' && window.i18n[lang] && window.i18n[lang].fav_empty) 
+            ? window.i18n[lang].fav_empty 
+            : "Список порожній";
+        favBody.innerHTML = `<div class="text-center text-[var(--text-muted)] mt-10">${emptyText}</div>`;
+        return;
+    }
+
+    // Завершение твоей оборванной строки:
+    const favProducts = allProducts.filter(p => favsIds.includes(String(p.id)));
+    
+    favBody.innerHTML = '';
+    favProducts.forEach(prod => {
+        // Защита от undefined в строках
+        const title = window.getLoc(prod.name) || 'Прикраса';
+        const price = typeof formatterPrice !== 'undefined' ? formatterPrice.format(prod.price || 0) : (prod.price || 0);
+        const img = (prod.images && prod.images.length > 0) ? prod.images[0] : '';
+        const safeId = escapeHtml(String(prod.id));
+        const safeTitle = escapeHtml(title);
+        
+        favBody.insertAdjacentHTML('beforeend', `
+            <div class="cart-item flex gap-4 p-3 border border-[var(--border)] rounded-none mb-3 relative transition-all duration-300 hover:border-[var(--gold-muted)]/40">
+                <img src="${img}" class="w-20 h-20 object-cover border border-[var(--border)] rounded-none mix-blend-multiply" alt="img">
+                <div class="flex-grow flex flex-col justify-center pr-6">
+                    <span class="text-sm font-semibold uppercase tracking-wide leading-tight line-clamp-2">${safeTitle}</span>
+                    <span class="text-sm font-bold text-[var(--gold-muted)] mt-2">${price} ₴</span>
+                </div>
+                <button class="cart-item-remove absolute top-3 right-3 text-[var(--text-muted)] hover:text-[var(--danger)] btn-cross" onclick="window.toggleFav('${safeId}')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <button class="absolute bottom-3 right-3 text-[var(--gold-muted)] hover:opacity-80" onclick="window.addToCart('${safeId}', '${safeTitle}', '', ${prod.price || 0}, '${img}')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </button>
+            </div>
+        `);
+    });
+};
