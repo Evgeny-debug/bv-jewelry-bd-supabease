@@ -1816,59 +1816,23 @@ window.saveSiteSettings = async function() {
         
         // 1. Зберігаємо налаштування сайту (Supabase + localStorage + BroadcastChannel)
         await saveToCloudStorage('bv_settings', siteSettings);
-
-        // 2. Масово перераховуємо всі авто-товари за новим курсом
-        await recalculateAutoProducts();
-
-        if (typeof showNotification === 'function') {
-            showNotification('Налаштування збережено! Ціни авто-товарів оновлено.');
-        } else {
-            alert('Налаштування збережено! Ціни авто-товарів оновлено.');
-        }
-    } catch (err) {
-        console.error('Помилка збереження налаштувань:', err);
-        alert('Помилка: ' + err.message);
-    } finally {
-        if (btn) { btn.innerText = 'Зберегти налаштування'; btn.disabled = false; }
-    }
-};
-
-        document.getElementById('btnSaveSettings')?.addEventListener('click', saveSiteSettings);
-
-        // ==========================================
-// ГАЛЕРЕЯ РОБІТ (Адмін-панель)
-// ==========================================
-
-// Функція завантаження категорій у випадаючий список модального вікна
 async function loadAdminCategorySelect() {
     const select = document.getElementById('gal-category');
     if (!select) return;
 
-    try {
-        if (typeof window._supabase !== 'undefined') {
-            const { data, error } = await window._supabase
-                .from('categories')
-                .select('*')
-                .order('id', { ascending: true });
-
-            if (!error && data && data.length > 0) {
-                select.innerHTML = data.map(cat => `
-                    <option value="${cat.id}">${cat.name_uk || cat.id}</option>
-                `).join('');
-                return;
-            }
-        }
-    } catch (err) {
-        console.warn('Не вдалося завантажити категорії для селекту, використовуємо фолбек:', err);
+    if (typeof categories !== 'undefined' && Array.isArray(categories) && categories.length > 0) {
+        // Використовуємо ту саму логіку побудови селекту, що і для інших розділів адмінки
+        let html = '';
+        categories.forEach(c => {
+            const nameUk = (c.name && typeof c.name === 'object') ? (c.name.uk || c.id) : (c.name || c.id);
+            html += `<option value="${c.id}">${nameUk} (${c.id})</option>`;
+        });
+        select.innerHTML = html;
+        return;
     }
 
-    // Запасний варіант, якщо Supabase недоступний
-    select.innerHTML = `
-        <option value="rings">Каблучка</option>
-        <option value="earrings">Сережки</option>
-        <option value="necklaces">Ланцюжок / Кольє</option>
-        <option value="bracelets">Браслет</option>
-    `;
+    // Якщо раптом глобальний масив порожній
+    select.innerHTML = '<option value="">Категорії відсутні</option>';
 }
 
 window.renderGalleryAdmin = function() {
